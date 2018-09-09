@@ -8,10 +8,16 @@ import Html.Attributes exposing (style)
 main : Html msg
 main =
     code [ style "white-space" "pre" ]
-        [ init "Ecs1"
-            |> addComponent "Position" "Ecs.Components"
-            |> addComponent "Velocity" "Ecs.Components"
+        [ init "Ecs"
+            |> addComponent "Acceleration" "Ecs.Components"
+            |> addComponent "Ai" "Ecs.Components"
+            |> addComponent "Controls" "Ecs.Components"
             |> addComponent "Display" "Ecs.Components"
+            |> addComponent "Human" "Ecs.Components"
+            |> addComponent "Position" "Ecs.Components"
+            |> addComponent "Predator" "Ecs.Components"
+            |> addComponent "Prey" "Ecs.Components"
+            |> addComponent "Velocity" "Ecs.Components"
             |> build
             |> text
         ]

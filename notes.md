@@ -17,7 +17,7 @@ store entities (ids) in components (target of a hunter, parent entity in a tree)
 
 challenges
 
-- entity components can be reused/changed
+- entity components can be reused/changed (Dict implementation does not need reuse)
 - entities can be destroyed and entity ids reused
 
 solutions
@@ -30,6 +30,18 @@ related
 
 - Slime uses `uidToId` and `idToUid` dicts
 - TODO check ash
+
+### manage states
+
+Entities can have states, for instance an entity can be controlled by a human or an ai but not both. Currently this is hard to enforce.
+
+Might be nice to have a selected (processEntities) that also checks the value of a component next to the type. So we could have a component `type Player = Human | Ai`, and the `processEntities` with type `Player` and value `Human` (or `Ai`).
+
+Just checking the value may be slow. Maybe we should treat them as separate components? But then you can add them twice again.
+
+We could also have a list of excluded components, so the when you insert one type of components, another type is automatically removed. This shoud be easy to configure, ensures consistancy and should be relatively fast.
+
+But real state management manages multiple components...
 
 ## ~~Elm AST~~
 

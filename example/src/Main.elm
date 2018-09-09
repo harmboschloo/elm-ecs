@@ -1,38 +1,88 @@
 module Main exposing (main)
 
-import Ecs
+import Browser exposing (Document)
+import Browser.Events exposing (onAnimationFrameDelta, onKeyDown, onKeyUp)
+import Ecs exposing (Ecs)
+import Ecs.EntityFactory exposing (createAiPredators, createHumanPredator)
+import Ecs.Systems as Systems
+import Ecs.Systems.KeyControls as KeyControls
+    exposing
+        ( ControlChange
+        , KeyChange(..)
+        , controlDecoder
+        )
 import Html exposing (Html, text)
+import Json.Decode as Decode
 
 
-
--- COMPONENTS --
-
-
-type alias Position =
-    { x : Float
-    , y : Float
-    , rotation : Float
+type alias Model =
+    { ecs : Ecs
+    , stepCount : Int
     }
 
 
-type alias Velocity =
-    { velocityX : Float
-    , velocityY : Float
-    , angularVelocity : Float
+init : () -> ( Model, Cmd Msg )
+init _ =
+    ( { ecs =
+            Ecs.init
+                |> createHumanPredator
+                |> createAiPredators
+      , stepCount = 0
+      }
+    , Cmd.none
+    )
+
+
+type Msg
+    = AnimationFrameStarted Float
+    | KeyChanged ControlChange
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        AnimationFrameStarted deltaTimeMillis ->
+            let
+                deltaTime =
+                    min (deltaTimeMillis / 1000) (1.0 / 30.0)
+            in
+            ( { model
+                | ecs = Systems.update deltaTime model.ecs
+                , stepCount = model.stepCount + 1
+              }
+            , Cmd.none
+            )
+
+        KeyChanged controlChange ->
+            ( { model | ecs = KeyControls.update controlChange model.ecs }
+            , Cmd.none
+            )
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ onAnimationFrameDelta AnimationFrameStarted
+        , onKeyUp (controlDecoder KeyUp |> Decode.map KeyChanged)
+        , onKeyDown (controlDecoder KeyDown |> Decode.map KeyChanged)
+        ]
+
+
+view : Model -> Document Msg
+view model =
+    { title = "Ecs Example"
+    , body =
+        [ text <| "stepCount: " ++ String.fromInt model.stepCount
+        , Systems.view model.ecs
+        ]
     }
 
 
-type alias Display =
-    { color : String
-    }
-
-
-
--- SYSTEMS --
--- updateMove : Float -> EntityId -> PositionComponent -> VelocityComponent -> Delta X
--- MAIN --
-
-
-main : Html msg
+main : Program () Model Msg
 main =
-    text "Hello ECS"
+    Browser.document
+        { init = init
+        , update = update
+        , subscriptions = subscriptions
+        , view = view
+        }

@@ -72,15 +72,17 @@ buildExports model =
                         :: list
                 )
                 [ "Ecs"
+                , "init"
                 , "EntityId"
                 , "createEntity"
-                , "destroyEntity"
-                , "getComponent"
-                , "init"
                 , "insertComponent"
+                , "andInsertComponent"
+                , "removeComponent"
+                , "andRemoveComponent"
+                , "removeAllComponents"
+                , "getComponent"
                 , "processEntities"
                 , "processEntities2"
-                , "removeComponent"
                 ]
                 model.components
     in
@@ -108,9 +110,9 @@ buildImports model =
             (\( moduleName, values ) ->
                 "import "
                     ++ moduleName
-                    ++ " exposing ("
-                    ++ (List.sort values |> String.join ", ")
-                    ++ ")"
+                    ++ "\n    exposing\n        ( "
+                    ++ (List.sort values |> String.join "\n        , ")
+                    ++ "\n        )"
             )
         |> String.join "\n"
 
@@ -169,8 +171,40 @@ createEntity (Ecs model) =
     )
 
 
-destroyEntity : EntityId -> Ecs -> Ecs
-destroyEntity (EntityId entityId) (Ecs model) =
+
+-- COMPONENTS --
+
+
+insertComponent : ComponentType a -> a -> EntityId -> Ecs -> Ecs
+insertComponent (ComponentType type_) component (EntityId entityId) (Ecs model) =
+    Ecs
+        (type_.setComponents
+            (Dict.insert entityId component (type_.getComponents model))
+            model
+        )
+
+
+andInsertComponent : ComponentType a -> a -> ( Ecs, EntityId ) -> ( Ecs, EntityId )
+andInsertComponent type_ component ( ecs, entityId ) =
+    ( insertComponent type_ component entityId ecs, entityId )
+
+
+removeComponent : ComponentType a -> EntityId -> Ecs -> Ecs
+removeComponent (ComponentType type_) (EntityId entityId) (Ecs model) =
+    Ecs
+        (type_.setComponents
+            (Dict.remove entityId (type_.getComponents model))
+            model
+        )
+
+
+andRemoveComponent : ComponentType a -> ( Ecs, EntityId ) -> ( Ecs, EntityId )
+andRemoveComponent type_ ( ecs, entityId ) =
+    ( removeComponent type_ entityId ecs, entityId )
+
+
+removeAllComponents : EntityId -> Ecs -> Ecs
+removeAllComponents (EntityId entityId) (Ecs model) =
     Ecs
         { model
             | """
@@ -186,28 +220,6 @@ destroyEntity (EntityId entityId) (Ecs model) =
            )
         ++ """
         }
-
-
-
--- COMPONENTS --
-
-
-insertComponent : ComponentType a -> EntityId -> a -> Ecs -> Ecs
-insertComponent (ComponentType type_) (EntityId entityId) component (Ecs model) =
-    Ecs
-        (type_.setComponents
-            (Dict.insert entityId component (type_.getComponents model))
-            model
-        )
-
-
-removeComponent : ComponentType a -> EntityId -> Ecs -> Ecs
-removeComponent (ComponentType type_) (EntityId entityId) (Ecs model) =
-    Ecs
-        (type_.setComponents
-            (Dict.remove entityId (type_.getComponents model))
-            model
-        )
 
 
 getComponent : ComponentType a -> EntityId -> Ecs -> Maybe a
