@@ -82,6 +82,7 @@ generateExports model =
                 , "init"
                 , "EntityId"
                 , "createEntity"
+                , "resetEntity"
                 , "insertComponent"
                 , "andInsertComponent"
                 , "removeComponent"
@@ -176,6 +177,11 @@ createEntity (Ecs model) =
     ( Ecs { model | numberOfEntities = model.numberOfEntities + 1 }
     , EntityId model.numberOfEntities
     )
+
+
+resetEntity : EntityId -> Ecs -> ( Ecs, EntityId )
+resetEntity entityId ecs =
+    ( removeAllComponents entityId ecs, entityId )
 
 
 
