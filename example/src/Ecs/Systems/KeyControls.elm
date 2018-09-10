@@ -1,99 +1,125 @@
 module Ecs.Systems.KeyControls exposing
-    ( ControlChange(..)
-    , KeyChange(..)
-    , controlDecoder
-    , update
+    ( KeyChange
+    , Keys
+    , initKeys
+    , keyDownDecoder
+    , keyUpDecoder
+    , updateEntities
+    , updateKeys
     )
 
 import Ecs exposing (Ecs, EntityId)
-import Ecs.Components exposing (Controls)
+import Ecs.Components exposing (Controls, KeyControlsMap, controls)
 import Html.Events
 import Json.Decode as Decode exposing (Decoder)
+import KeyCode exposing (KeyCode)
+import Set exposing (Set)
+
+
+type Keys
+    = ActiveKeys (Set KeyCode)
+
+
+initKeys : Keys
+initKeys =
+    ActiveKeys Set.empty
 
 
 type KeyChange
-    = KeyUp
-    | KeyDown
+    = KeyUp KeyCode
+    | KeyDown KeyCode
 
 
-type ControlChange
-    = ControlForward Bool
-    | ControlBack Bool
-    | ControlLeft Bool
-    | ControlRight Bool
-    | ControlInvalid
+keyUpDecoder : Decoder KeyChange
+keyUpDecoder =
+    keyDecoder KeyUp
 
 
-controlDecoder : KeyChange -> Decoder ControlChange
-controlDecoder keyChange =
+keyDownDecoder : Decoder KeyChange
+keyDownDecoder =
+    keyDecoder KeyUp
+
+
+keyDecoder : (KeyCode -> KeyChange) -> Decoder KeyChange
+keyDecoder keyChange =
     Html.Events.keyCode
-        |> Decode.map
-            (\keyCode ->
-                case keyCode of
-                    37 ->
-                        ControlLeft (keyActive keyChange)
-
-                    38 ->
-                        ControlForward (keyActive keyChange)
-
-                    39 ->
-                        ControlRight (keyActive keyChange)
-
-                    40 ->
-                        ControlBack (keyActive keyChange)
-
-                    _ ->
-                        ControlInvalid
-            )
+        |> Decode.map keyChange
 
 
-keyActive : KeyChange -> Bool
-keyActive keyChange =
-    case keyChange of
-        KeyUp ->
-            False
+updateKeys : KeyChange -> Keys -> Keys
+updateKeys keyChange (ActiveKeys activeKeys) =
+    ActiveKeys <|
+        case keyChange of
+            KeyUp keyCode ->
+                Set.remove keyCode activeKeys
 
-        KeyDown ->
-            True
-
-
-update : ControlChange -> Ecs -> Ecs
-update controlChange ecs =
-    case controlChange of
-        ControlForward active ->
-            updateControls (\control -> { control | forward = active }) ecs
-
-        ControlBack active ->
-            updateControls (\control -> { control | back = active }) ecs
-
-        ControlLeft active ->
-            updateControls (\control -> { control | left = active }) ecs
-
-        ControlRight active ->
-            updateControls (\control -> { control | right = active }) ecs
-
-        ControlInvalid ->
-            ecs
+            KeyDown keyCode ->
+                Set.insert keyCode activeKeys
 
 
-updateControls : (Controls -> Controls) -> Ecs -> Ecs
-updateControls updater ecs =
+updateEntities : Keys -> Ecs -> Ecs
+updateEntities (ActiveKeys activeKeys) ecs =
     Ecs.processEntities2
-        Ecs.human
+        Ecs.keyControlsMap
         Ecs.controls
-        (updateEntity updater)
-        ( ecs, () )
+        updateEntity
+        ( ecs, activeKeys )
         |> Tuple.first
 
 
 updateEntity :
-    (Controls -> Controls)
-    -> EntityId
-    -> b
+    EntityId
+    -> KeyControlsMap
     -> Controls
-    -> ( Ecs, a )
-    -> ( Ecs, a )
-updateEntity updater entityId _ controls ( ecs, a ) =
-    ( Ecs.insertComponent Ecs.controls (updater controls) entityId ecs
-    , a
+    -> ( Ecs, Set KeyCode )
+    -> ( Ecs, Set KeyCode )
+updateEntity entityId keyMap controls ( ecs, activeKeys ) =
+    ( Ecs.insertComponent
+        Ecs.controls
+        (updateControls keyMap activeKeys)
+        entityId
+        ecs
+    , activeKeys
     )
+
+
+updateControls : KeyControlsMap -> Set KeyCode -> Controls
+updateControls keyMap activeKeys =
+    let
+        accelerate =
+            case
+                ( Set.member keyMap.accelerate activeKeys
+                , Set.member keyMap.decelerate activeKeys
+                )
+            of
+                ( False, False ) ->
+                    0
+
+                ( True, True ) ->
+                    0
+
+                ( True, False ) ->
+                    1
+
+                ( False, True ) ->
+                    -1
+
+        rotate =
+            case
+                ( Set.member keyMap.rotateLeft activeKeys
+                , Set.member keyMap.rotateRight activeKeys
+                )
+            of
+                ( False, False ) ->
+                    0
+
+                ( True, True ) ->
+                    0
+
+                ( True, False ) ->
+                    -1
+
+                ( False, True ) ->
+                    1
+    in
+    controls accelerate rotate

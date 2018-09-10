@@ -10,6 +10,8 @@ import Ecs.Components
         , Predator
         , Prey
         , Velocity
+        , defaultControls
+        , defaultKeyControlsMap
         )
 
 
@@ -30,15 +32,15 @@ createHumanPredator : Ecs -> Ecs
 createHumanPredator =
     Ecs.createEntity
         >> insertPredatorComponents 0.5 0.25 "#00ff00"
-        >> Ecs.andInsertComponent Ecs.human ()
+        >> Ecs.andInsertComponent Ecs.keyControlsMap defaultKeyControlsMap
         >> Tuple.first
 
 
 insertPredatorComponents : Float -> Float -> String -> ( Ecs, EntityId ) -> ( Ecs, EntityId )
 insertPredatorComponents x y color =
     Ecs.andInsertComponent Ecs.position (Position x y 0)
-        >> Ecs.andInsertComponent Ecs.controls (Controls False False False False)
+        >> Ecs.andInsertComponent Ecs.controls defaultControls
         >> Ecs.andInsertComponent Ecs.acceleration (Acceleration 0 0 0)
-        >> Ecs.andInsertComponent Ecs.velocity (Velocity 0.1 0 1)
+        >> Ecs.andInsertComponent Ecs.velocity (Velocity 0 0 0)
         >> Ecs.andInsertComponent Ecs.display (Display color)
         >> Ecs.andInsertComponent Ecs.predator ()

@@ -10,7 +10,7 @@ config =
         |> addComponent "Ai" "Ecs.Components"
         |> addComponent "Controls" "Ecs.Components"
         |> addComponent "Display" "Ecs.Components"
-        |> addComponent "Human" "Ecs.Components"
+        |> addComponent "KeyControlsMap" "Ecs.Components"
         |> addComponent "Position" "Ecs.Components"
         |> addComponent "Predator" "Ecs.Components"
         |> addComponent "Prey" "Ecs.Components"

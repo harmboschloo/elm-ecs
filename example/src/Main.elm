@@ -7,9 +7,10 @@ import Ecs.EntityFactory exposing (createAiPredators, createHumanPredator)
 import Ecs.Systems as Systems
 import Ecs.Systems.KeyControls as KeyControls
     exposing
-        ( ControlChange
-        , KeyChange(..)
-        , controlDecoder
+        ( KeyChange
+        , Keys
+        , keyDownDecoder
+        , keyUpDecoder
         )
 import Html exposing (Html, text)
 import Json.Decode as Decode
@@ -17,6 +18,7 @@ import Json.Decode as Decode
 
 type alias Model =
     { ecs : Ecs
+    , keys : Keys
     , stepCount : Int
     }
 
@@ -27,6 +29,7 @@ init _ =
             Ecs.init
                 |> createHumanPredator
                 |> createAiPredators
+      , keys = KeyControls.initKeys
       , stepCount = 0
       }
     , Cmd.none
@@ -35,7 +38,7 @@ init _ =
 
 type Msg
     = AnimationFrameStarted Float
-    | KeyChanged ControlChange
+    | KeyChanged KeyChange
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -53,8 +56,8 @@ update msg model =
             , Cmd.none
             )
 
-        KeyChanged controlChange ->
-            ( { model | ecs = KeyControls.update controlChange model.ecs }
+        KeyChanged keyChange ->
+            ( { model | keys = KeyControls.updateKeys keyChange model.keys }
             , Cmd.none
             )
 
@@ -63,8 +66,8 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ onAnimationFrameDelta AnimationFrameStarted
-        , onKeyUp (controlDecoder KeyUp |> Decode.map KeyChanged)
-        , onKeyDown (controlDecoder KeyDown |> Decode.map KeyChanged)
+        , onKeyUp (Decode.map KeyChanged keyUpDecoder)
+        , onKeyDown (Decode.map KeyChanged keyDownDecoder)
         ]
 
 
