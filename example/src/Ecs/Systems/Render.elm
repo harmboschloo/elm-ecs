@@ -29,18 +29,19 @@ view ecs =
         , style "height" (round height |> px)
         , style "background-color" "#aaaaff"
         ]
-        (Ecs.processEntities2 Ecs.position Ecs.display viewEntity ( ecs, [] )
+        (( ecs, [] )
+            |> Ecs.processEntities2 Ecs.display Ecs.position viewEntity
             |> Tuple.second
         )
 
 
 viewEntity :
     EntityId
-    -> Position
     -> Display
+    -> Position
     -> ( Ecs, List (Html msg) )
     -> ( Ecs, List (Html msg) )
-viewEntity entityId position display ( ecs, elements ) =
+viewEntity entityId display position ( ecs, elements ) =
     ( ecs
     , div
         [ style "position" "absolute"

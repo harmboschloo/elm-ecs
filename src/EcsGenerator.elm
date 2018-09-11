@@ -253,8 +253,8 @@ generateEntityIterators model =
 -- ENTITY ITERATORS --
 
 
-processComponents : Dict Int a -> Int -> (a -> b) -> Maybe b
-processComponents components entityId processor =
+processNextComponent : Dict Int a -> Int -> (a -> b) -> Maybe b
+processNextComponent components entityId processor =
     Dict.get entityId components |> Maybe.map processor
 
 
@@ -331,7 +331,7 @@ processEntities"""
                 |> List.drop 2
                 |> List.map
                     (\i ->
-                        "|> Maybe.andThen (processComponents components"
+                        "|> Maybe.andThen (processNextComponent components"
                             ++ i
                             ++ " entityId)\n                "
                     )

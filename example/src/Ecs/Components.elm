@@ -1,15 +1,14 @@
 module Ecs.Components exposing
-    ( Acceleration
-    , Ai
+    ( Ai
     , Controls
     , Display
     , KeyControlsMap
+    , Motion
     , Position
     , Predator
     , Prey
     , Velocity
     , controls
-    , defaultAcceleration
     , defaultControls
     , defaultKeyControlsMap
     , defaultPosition
@@ -50,18 +49,11 @@ defaultVelocity =
     }
 
 
-type alias Acceleration =
-    { accelerationX : Float
-    , accelerationY : Float
-    , angularAcceleration : Float
-    }
-
-
-defaultAcceleration : Acceleration
-defaultAcceleration =
-    { accelerationX = 0
-    , accelerationY = 0
-    , angularAcceleration = 0
+type alias Motion =
+    { maxAcceleration : Float
+    , maxDeceleration : Float
+    , maxAngularAcceleration : Float
+    , maxAngularVelocity : Float
     }
 
 

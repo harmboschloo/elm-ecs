@@ -37,7 +37,7 @@ keyUpDecoder =
 
 keyDownDecoder : Decoder KeyChange
 keyDownDecoder =
-    keyDecoder KeyUp
+    keyDecoder KeyDown
 
 
 keyDecoder : (KeyCode -> KeyChange) -> Decoder KeyChange
@@ -59,11 +59,8 @@ updateKeys keyChange (ActiveKeys activeKeys) =
 
 updateEntities : Keys -> Ecs -> Ecs
 updateEntities (ActiveKeys activeKeys) ecs =
-    Ecs.processEntities2
-        Ecs.keyControlsMap
-        Ecs.controls
-        updateEntity
-        ( ecs, activeKeys )
+    ( ecs, activeKeys )
+        |> Ecs.processEntities2 Ecs.keyControlsMap Ecs.controls updateEntity
         |> Tuple.first
 
 

@@ -3,9 +3,9 @@ module Ecs.EntityFactory exposing (createAiPredators, createHumanPredator)
 import Ecs exposing (Ecs, EntityId)
 import Ecs.Components
     exposing
-        ( Acceleration
-        , Controls
+        ( Controls
         , Display
+        , Motion
         , Position
         , Predator
         , Prey
@@ -13,6 +13,15 @@ import Ecs.Components
         , defaultControls
         , defaultKeyControlsMap
         )
+
+
+predatorMotion : Motion
+predatorMotion =
+    { maxAcceleration = 1
+    , maxDeceleration = 0.5
+    , maxAngularAcceleration = 5
+    , maxAngularVelocity = 20
+    }
 
 
 createAiPredators : Ecs -> Ecs
@@ -40,7 +49,7 @@ insertPredatorComponents : Float -> Float -> String -> ( Ecs, EntityId ) -> ( Ec
 insertPredatorComponents x y color =
     Ecs.andInsertComponent Ecs.position (Position x y 0)
         >> Ecs.andInsertComponent Ecs.controls defaultControls
-        >> Ecs.andInsertComponent Ecs.acceleration (Acceleration 0 0 0)
+        >> Ecs.andInsertComponent Ecs.motion predatorMotion
         >> Ecs.andInsertComponent Ecs.velocity (Velocity 0 0 0)
         >> Ecs.andInsertComponent Ecs.display (Display color)
         >> Ecs.andInsertComponent Ecs.predator ()

@@ -2,7 +2,7 @@ const { writeFileSync } = require("fs");
 const { execSync } = require("child_process");
 
 const workerInputPath = "./src/EcsGenerator/Worker.elm";
-const workerOutputPath = "./src-generated/ecsBuilder.js";
+const workerOutputPath = "./src-generated/ecsGenerator.js";
 const ecsOutputPath = "./src-generated/Ecs.elm";
 
 console.log("generating ecs");

@@ -4,6 +4,7 @@ module KeyCode exposing
     , arrowLeft
     , arrowRight
     , arrowUp
+    , esc
     )
 
 
@@ -11,21 +12,26 @@ type alias KeyCode =
     Int
 
 
-arrowUp : KeyCode
-arrowUp =
-    37
-
-
-arrowDown : KeyCode
-arrowDown =
-    38
+esc : KeyCode
+esc =
+    27
 
 
 arrowLeft : KeyCode
 arrowLeft =
-    39
+    37
+
+
+arrowUp : KeyCode
+arrowUp =
+    38
 
 
 arrowRight : KeyCode
 arrowRight =
+    39
+
+
+arrowDown : KeyCode
+arrowDown =
     40

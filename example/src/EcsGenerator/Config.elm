@@ -6,7 +6,6 @@ import EcsGenerator exposing (Config, addComponent, init)
 config : Config
 config =
     init "Ecs"
-        |> addComponent "Acceleration" "Ecs.Components"
         |> addComponent "Ai" "Ecs.Components"
         |> addComponent "Controls" "Ecs.Components"
         |> addComponent "Display" "Ecs.Components"
@@ -14,4 +13,5 @@ config =
         |> addComponent "Position" "Ecs.Components"
         |> addComponent "Predator" "Ecs.Components"
         |> addComponent "Prey" "Ecs.Components"
+        |> addComponent "Motion" "Ecs.Components"
         |> addComponent "Velocity" "Ecs.Components"
