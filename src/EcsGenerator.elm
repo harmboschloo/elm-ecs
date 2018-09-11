@@ -64,35 +64,41 @@ module """ ++ model.moduleName ++ """ exposing
 
 """ ++ generateApi model ++ """
 
-""" ++ generateComponents model ++ """
-"""
+""" ++ generateEntityIterators model ++ """
+
+""" ++ generateComponentTypes model
 
 
 generateExports : Model -> String
 generateExports model =
     let
         exports =
-            List.foldl
-                (\component list ->
-                    (component.typeName ++ "Type")
-                        :: firstToLower component.typeName
-                        :: list
-                )
-                [ "Ecs"
-                , "init"
-                , "EntityId"
-                , "createEntity"
-                , "resetEntity"
-                , "insertComponent"
-                , "andInsertComponent"
-                , "removeComponent"
-                , "andRemoveComponent"
-                , "removeAllComponents"
-                , "getComponent"
-                , "processEntities"
-                , "processEntities2"
-                ]
-                model.components
+            [ "Ecs"
+            , "init"
+            , "EntityId"
+            , "createEntity"
+            , "resetEntity"
+            , "insertComponent"
+            , "andInsertComponent"
+            , "removeComponent"
+            , "andRemoveComponent"
+            , "removeAllComponents"
+            , "getComponent"
+            , "processEntities"
+            ]
+                ++ List.foldl
+                    (\component list ->
+                        (component.typeName ++ "Type")
+                            :: firstToLower component.typeName
+                            :: list
+                    )
+                    []
+                    model.components
+                ++ (List.length model.components
+                        |> List.range 2
+                        |> List.map String.fromInt
+                        |> List.map (\i -> "processEntities" ++ i)
+                   )
     in
     "    ( " ++ (exports |> List.sort |> String.join "\n    , ") ++ "\n    )"
 
@@ -238,10 +244,18 @@ removeAllComponents (EntityId entityId) (Ecs model) =
 getComponent : ComponentType a -> EntityId -> Ecs -> Maybe a
 getComponent (ComponentType { getComponents }) (EntityId entityId) (Ecs model) =
     Dict.get entityId (getComponents model)
+"""
 
 
+generateEntityIterators : Model -> String
+generateEntityIterators model =
+    """
+-- ENTITY ITERATORS --
 
--- SYSTEMS --
+
+processComponents : Dict Int a -> Int -> (a -> b) -> Maybe b
+processComponents components entityId processor =
+    Dict.get entityId components |> Maybe.map processor
 
 
 processEntities :
@@ -255,39 +269,86 @@ processEntities (ComponentType type_) processor ( Ecs model, x ) =
         ( Ecs model, x )
         (type_.getComponents model)
 
+"""
+        ++ (List.length model.components
+                |> List.range 2
+                |> List.map generateEntityIterator
+                |> String.join "\n"
+           )
 
-processEntities2 :
-    ComponentType a
-    -> ComponentType b
-    -> (EntityId -> a -> b -> ( Ecs, x ) -> ( Ecs, x ))
-    -> ( Ecs, x )
-    -> ( Ecs, x )
-processEntities2 (ComponentType typeA) (ComponentType typeB) processor ( Ecs model, x ) =
+
+generateEntityIterator : Int -> String
+generateEntityIterator n =
     let
-        componentsA =
-            typeA.getComponents model
-
-        componentsB =
-            typeB.getComponents model
+        range =
+            List.range 1 n
+                |> List.map String.fromInt
+    in
+    """
+processEntities"""
+        ++ String.fromInt n
+        ++ """ :
+    """
+        ++ (range
+                |> List.map (\i -> "ComponentType c" ++ i)
+                |> String.join "\n   -> "
+           )
+        ++ """
+    -> (EntityId -> """
+        ++ (range |> List.map (\i -> "c" ++ i) |> String.join " -> ")
+        ++ """ -> ( Ecs, x ) -> ( Ecs, x ))
+    -> ( Ecs, x )
+    -> ( Ecs, x )
+processEntities"""
+        ++ String.fromInt n
+        ++ " "
+        ++ (range
+                |> List.map (\i -> "(ComponentType type" ++ i ++ ")")
+                |> String.join " "
+           )
+        ++ """ processor ( Ecs model, x ) =
+    let
+        """
+        ++ (range
+                |> List.map
+                    (\i ->
+                        "components"
+                            ++ i
+                            ++ " =\n            type"
+                            ++ i
+                            ++ ".getComponents model"
+                    )
+                |> String.join "\n\n        "
+           )
+        ++ """
     in
     Dict.foldl
-        (\\entityId componentA data ->
-            case Dict.get entityId componentsB of
-                Nothing ->
-                    data
-
-                Just componentB ->
-                    processor (EntityId entityId) componentA componentB data
+        (\\entityId component1 result ->
+            Dict.get entityId components2
+                |> Maybe.map (processor (EntityId entityId) component1)
+                """
+        ++ (range
+                |> List.drop 2
+                |> List.map
+                    (\i ->
+                        "|> Maybe.andThen (processComponents components"
+                            ++ i
+                            ++ " entityId)\n                "
+                    )
+                |> String.join ""
+           )
+        ++ """|> Maybe.map ((|>) result)
+                |> Maybe.withDefault result
         )
         ( Ecs model, x )
-        componentsA
+        components1
 """
 
 
-generateComponents : Model -> String
-generateComponents model =
+generateComponentTypes : Model -> String
+generateComponentTypes model =
     """
--- COMPONENT Types --
+-- COMPONENT TYPES --
 
 
 type ComponentType a
@@ -296,11 +357,11 @@ type ComponentType a
         , setComponents : Dict Int a -> Model -> Model
         }
 
-""" ++ (List.map generateComponent model.components |> String.join "\n")
+""" ++ (List.map generateComponentType model.components |> String.join "\n")
 
 
-generateComponent : Component -> String
-generateComponent { typeName } =
+generateComponentType : Component -> String
+generateComponentType { typeName } =
     """
 type alias """ ++ typeName ++ """Type =
     ComponentType """ ++ typeName ++ """
