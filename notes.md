@@ -8,6 +8,8 @@
 - https://github.com/w0rm/elm-mogee/blob/master/src/Components/Components.elm
 - https://github.com/w0rm/elm-mogee/blob/master/src/Systems/Systems.elm
 
+- https://gpfault.net/posts/webgl2-particles.txt.html
+
 ## Ideas/Issues
 
 - getComponents2/3/4 -> Maybe.map2/3/4 or similar

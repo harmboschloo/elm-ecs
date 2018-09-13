@@ -7,6 +7,7 @@ module Ecs.Components exposing
     , Position
     , Predator
     , Prey
+    , Sprite
     , Velocity
     , controls
     , defaultControls
@@ -17,6 +18,7 @@ module Ecs.Components exposing
 
 import Clamped exposing (Clamped)
 import KeyCode exposing (KeyCode)
+import WebGL.Texture exposing (Texture)
 
 
 type alias Position =
@@ -59,6 +61,17 @@ type alias Motion =
 
 type alias Display =
     { color : String
+    }
+
+
+type alias Sprite =
+    { texture : Texture
+    , x : Float
+    , y : Float
+    , width : Float
+    , height : Float
+    , offsetX : Float
+    , offsetY : Float
     }
 
 

@@ -14,4 +14,5 @@ config =
         |> addComponent "Predator" "Ecs.Components"
         |> addComponent "Prey" "Ecs.Components"
         |> addComponent "Motion" "Ecs.Components"
+        |> addComponent "Sprite" "Ecs.Components"
         |> addComponent "Velocity" "Ecs.Components"
