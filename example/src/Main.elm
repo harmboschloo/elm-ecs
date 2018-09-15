@@ -39,6 +39,7 @@ type alias Model =
     { spritesheet : Spritesheet
     , ecs : Ecs
     , keys : Keys
+    , deltaTime : Float
     , stepCount : Int
     , running : Bool
     }
@@ -57,8 +58,10 @@ initModel spritesheet =
     , ecs =
         Ecs.init
             |> Entities.createHumanPredator spritesheet
-            |> Entities.createAiPredators spritesheet
+
+    -- |> Entities.createAiPredators spritesheet
     , keys = KeyControls.initKeys
+    , deltaTime = 0
     , stepCount = 0
     , running = True
     }
@@ -108,6 +111,7 @@ updateInternal msg model =
             in
             ( { model
                 | ecs = Systems.update model.keys deltaTime model.ecs
+                , deltaTime = deltaTime
                 , stepCount = model.stepCount + 1
               }
             , Cmd.none
@@ -193,7 +197,12 @@ viewError error =
 
 viewOk : Model -> List (Html Msg)
 viewOk model =
-    [ text <| "stepCount: " ++ String.fromInt model.stepCount
+    [ text <|
+        "stepCount: "
+            ++ String.fromInt model.stepCount
+            ++ " ( "
+            ++ String.fromFloat model.deltaTime
+            ++ ")"
     , text <|
         if model.running then
             " running"

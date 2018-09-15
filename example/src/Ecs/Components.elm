@@ -70,8 +70,8 @@ type alias Sprite =
     , y : Float
     , width : Float
     , height : Float
-    , offsetX : Float
-    , offsetY : Float
+    , pivotX : Float
+    , pivotY : Float
     }
 
 

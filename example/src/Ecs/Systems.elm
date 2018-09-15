@@ -12,8 +12,8 @@ import Html exposing (Html)
 update : Keys -> Float -> Ecs -> Ecs
 update keys deltaTime ecs =
     ecs
-        |> KeyControls.updateEntities keys
-        |> MotionControl.update deltaTime
+        -- |> KeyControls.updateEntities keys
+        -- |> MotionControl.update deltaTime
         |> Movement.update deltaTime
 
 

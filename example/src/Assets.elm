@@ -22,6 +22,8 @@ loadSpritesheet msg =
         { defaultOptions
             | magnify = Texture.nearest
             , minify = Texture.nearest
+            , horizontalWrap = Texture.clampToEdge
+            , verticalWrap = Texture.clampToEdge
             , flipY = False
         }
         spritesheetSrc
@@ -36,8 +38,8 @@ initSpritesheet texture =
         , y = 377
         , width = 99
         , height = 75
-        , offsetX = 99 / 2
-        , offsetY = 75 * 2 / 3
+        , pivotX = 0.5
+        , pivotY = 0.6
         }
     , playerShip2Orange =
         { texture = texture
@@ -45,7 +47,7 @@ initSpritesheet texture =
         , y = 716
         , width = 112
         , height = 75
-        , offsetX = 112 / 2
-        , offsetY = 75 * 2 / 3
+        , pivotX = 0.5
+        , pivotY = 0.6
         }
     }

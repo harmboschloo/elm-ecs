@@ -22,7 +22,7 @@ createHumanPredator spritesheet =
     Ecs.createEntity
         >> insertPredatorComponents
             spritesheet.playerShip1Green
-            500
+            250
             250
             "#00ff00"
         >> Ecs.andInsertComponent Ecs.keyControlsMap defaultKeyControlsMap
@@ -52,7 +52,7 @@ insertPredatorComponents sprite x y color =
         >> Ecs.andInsertComponent Ecs.position (Position x y 0)
         >> Ecs.andInsertComponent Ecs.controls defaultControls
         >> Ecs.andInsertComponent Ecs.motion predatorMotion
-        >> Ecs.andInsertComponent Ecs.velocity (Velocity 0 0 0)
+        >> Ecs.andInsertComponent Ecs.velocity (Velocity 0 0 (pi / 2))
         >> Ecs.andInsertComponent Ecs.display (Display color)
         >> Ecs.andInsertComponent Ecs.predator ()
 

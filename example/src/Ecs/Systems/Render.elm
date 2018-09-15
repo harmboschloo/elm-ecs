@@ -1,8 +1,8 @@
 module Ecs.Systems.Render exposing (view)
 
 import Ecs exposing (Ecs, EntityId)
-import Ecs.Components exposing (Display, Position, Sprite)
-import Html exposing (Html, div)
+import Ecs.Components exposing (Position, Sprite)
+import Html exposing (Html)
 import Html.Attributes as Attributes exposing (style)
 import Math.Matrix4 as Mat4 exposing (Mat4, makeOrtho2D)
 import Math.Vector2 exposing (Vec2, vec2)
@@ -13,39 +13,26 @@ import WebGL.Texture as Texture exposing (Texture)
 
 width : Int
 width =
-    250
+    500
 
 
 height : Int
 height =
-    250
+    500
 
 
-px : Int -> String
-px value =
-    String.fromInt value ++ "px"
+camera : Mat4
+camera =
+    makeOrtho2D 0 (toFloat width) 0 (toFloat height)
 
 
 view : Ecs -> Html msg
 view ecs =
-    div []
-        [ viewWebGL ecs
-        , viewHtml ecs
-        ]
-
-
-
--- WEBGL --
-
-
-viewWebGL : Ecs -> Html msg
-viewWebGL ecs =
     WebGL.toHtml
         [ Attributes.width width
         , Attributes.height height
         , style "display" "block"
-
-        -- , style "background-color" "#aaffaa"
+        , style "background-color" "#aaffaa"
         ]
         (( ecs, [] )
             |> Ecs.processEntities2 Ecs.sprite Ecs.position viewEntity
@@ -70,15 +57,11 @@ viewEntity entityId sprite position ( ecs, elements ) =
         fragmentShader
         squareMesh
         { transform =
-            Mat4.makeTranslate3 0.5 0.5 0
-                |> Mat4.rotate 0 (vec3 0 0 1)
-                |> Mat4.translate3 -0.5 -0.75 0
-                |> Mat4.mul ortho2D
-
-        -- Mat4.makeTranslate3 position.x position.y 0
-        --     |> Mat4.rotate position.angle (vec3 0 0 1)
-        --     |> Mat4.translate3 -sprite.offsetX -sprite.offsetY 0
-        --     |> Mat4.mul ortho2D
+            Mat4.makeRotate position.angle (vec3 0 0 1)
+                |> Mat4.scale3 sprite.width sprite.height 1
+                |> Mat4.translate3 -sprite.pivotX -sprite.pivotY 0
+                |> Mat4.mul (Mat4.makeTranslate3 position.x position.y 0)
+                |> Mat4.mul camera
         , subTextureOffset =
             vec2
                 (sprite.x / toFloat textureWidth)
@@ -93,13 +76,8 @@ viewEntity entityId sprite position ( ecs, elements ) =
     )
 
 
-ortho2D : Mat4
-ortho2D =
-    makeOrtho2D 0 1 0 1
 
-
-
--- WEBGL MESHES --
+-- MESHES --
 
 
 squareMesh : Mesh Attributes
@@ -116,7 +94,7 @@ face a b c d =
 
 
 
--- WEBGL SHADERS
+--  SHADERS
 
 
 type alias Attributes =
@@ -168,42 +146,3 @@ fragmentShader =
         }
 
     |]
-
-
-
--- HTML --
-
-
-viewHtml : Ecs -> Html msg
-viewHtml ecs =
-    div
-        [ style "position" "relative"
-        , style "width" (px width)
-        , style "height" (px height)
-        , style "background-color" "#aaaaff"
-        ]
-        (( ecs, [] )
-            |> Ecs.processEntities2 Ecs.display Ecs.position viewHtmlEntity
-            |> Tuple.second
-        )
-
-
-viewHtmlEntity :
-    EntityId
-    -> Display
-    -> Position
-    -> ( Ecs, List (Html msg) )
-    -> ( Ecs, List (Html msg) )
-viewHtmlEntity entityId display position ( ecs, elements ) =
-    ( ecs
-    , div
-        [ style "position" "absolute"
-        , style "width" "10px"
-        , style "height" "10px"
-        , style "left" (position.x / 4 - 5 |> round |> px)
-        , style "top" (position.y / 4 - 5 |> round |> px)
-        , style "background-color" display.color
-        ]
-        []
-        :: elements
-    )
