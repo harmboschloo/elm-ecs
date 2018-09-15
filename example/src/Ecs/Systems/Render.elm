@@ -143,6 +143,7 @@ fragmentShader =
 
         void main () {
           gl_FragColor = texture2D(texture, textureCoordinate);
+          if (gl_FragColor.a == 0.0) discard;
         }
 
     |]

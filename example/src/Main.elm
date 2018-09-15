@@ -58,8 +58,7 @@ initModel spritesheet =
     , ecs =
         Ecs.init
             |> Entities.createHumanPredator spritesheet
-
-    -- |> Entities.createAiPredators spritesheet
+            |> Entities.createAiPredators spritesheet
     , keys = KeyControls.initKeys
     , deltaTime = 0
     , stepCount = 0

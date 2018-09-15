@@ -37,8 +37,8 @@ createAiPredators spritesheet ecs =
                 Ecs.createEntity
                     >> insertPredatorComponents
                         spritesheet.playerShip2Orange
-                        (toFloat value * 100.0)
-                        500
+                        (toFloat value * 50.0)
+                        125
                         "#ff0000"
                     >> Ecs.andInsertComponent Ecs.ai ()
                     >> Tuple.first
