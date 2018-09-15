@@ -21,8 +21,8 @@ height =
     500
 
 
-camera : Mat4
-camera =
+cameraTransform : Mat4
+cameraTransform =
     makeOrtho2D 0 (toFloat width) 0 (toFloat height)
 
 
@@ -48,8 +48,22 @@ viewEntity :
     -> ( Ecs, List WebGL.Entity )
 viewEntity entityId sprite position ( ecs, elements ) =
     let
+        spriteTransform =
+            Mat4.makeScale3 sprite.width sprite.height 1
+                |> Mat4.translate3 -sprite.pivotX -sprite.pivotY 0
+
+        positionTransform =
+            Mat4.makeTranslate3 position.x position.y 0
+                |> Mat4.rotate position.angle (vec3 0 0 1)
+
         ( textureWidth, textureHeight ) =
             Texture.size sprite.texture
+
+        texelWidth =
+            1 / toFloat textureWidth
+
+        texelHeight =
+            1 / toFloat textureHeight
     in
     ( ecs
     , WebGL.entity
@@ -57,19 +71,17 @@ viewEntity entityId sprite position ( ecs, elements ) =
         fragmentShader
         squareMesh
         { transform =
-            Mat4.makeRotate position.angle (vec3 0 0 1)
-                |> Mat4.scale3 sprite.width sprite.height 1
-                |> Mat4.translate3 -sprite.pivotX -sprite.pivotY 0
-                |> Mat4.mul (Mat4.makeTranslate3 position.x position.y 0)
-                |> Mat4.mul camera
+            spriteTransform
+                |> Mat4.mul positionTransform
+                |> Mat4.mul cameraTransform
         , subTextureOffset =
             vec2
-                (sprite.x / toFloat textureWidth)
-                (sprite.y / toFloat textureHeight)
+                ((sprite.x / toFloat textureWidth) + (texelWidth / 2))
+                ((sprite.y / toFloat textureHeight) + (texelHeight / 2))
         , subTextureSize =
             vec2
-                (sprite.width / toFloat textureWidth)
-                (sprite.height / toFloat textureHeight)
+                ((sprite.width / toFloat textureWidth) - texelWidth)
+                ((sprite.height / toFloat textureHeight) - texelHeight)
         , texture = sprite.texture
         }
         :: elements

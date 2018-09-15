@@ -16,6 +16,7 @@ webgl
 - https://package.elm-lang.org/packages/elm-explorations/webgl/latest/
 - http://www.lighthouse3d.com/tutorials/glsl-tutorial/spaces-and-matrices/
 - http://www.lighthouse3d.com/tutorials/glsl-tutorial/texture-coordinates/
+- https://webglfundamentals.org/webgl/lessons/webgl-shaders-and-glsl.html
 - https://gpfault.net/posts/webgl2-particles.txt.html
 
 more ecs
@@ -27,6 +28,10 @@ more ecs
 - https://www.reddit.com/r/elm/comments/68qiig/slime_ecs_for_elm/
 - http://www.html5gamedevs.com/topic/26508-entity-component-system-and-functional-programming/
 - https://hackernoon.com/when-not-to-use-ecs-48362c71cf47
+
+misc
+
+- https://gamedev.stackexchange.com/questions/46963/how-to-avoid-texture-bleeding-in-a-texture-atlas
 
 ## Ideas/Issues
 
