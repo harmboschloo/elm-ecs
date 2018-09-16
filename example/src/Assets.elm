@@ -27,12 +27,11 @@ spritesheetSrc =
     "/assets/spaceshooter/sheet.png"
 
 
-load : (Result Error Assets -> msg) -> Cmd msg
-load msg =
+load : Task Error Assets
+load =
     Task.map2 Assets
         loadBackground
         loadSpritesheet
-        |> Task.attempt msg
 
 
 loadBackground : Task Error Texture

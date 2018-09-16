@@ -2,11 +2,13 @@ module Main exposing (main)
 
 import Assets exposing (Assets)
 import Browser exposing (Document)
+import Browser.Dom exposing (Viewport, getViewport)
 import Browser.Events
     exposing
         ( onAnimationFrameDelta
         , onKeyDown
         , onKeyUp
+        , onResize
         )
 import Ecs exposing (Ecs)
 import Ecs.Entities as Entities
@@ -18,10 +20,13 @@ import Ecs.Systems.KeyControls as KeyControls
         , keyDownDecoder
         , keyUpDecoder
         )
-import Html exposing (Html, text)
+import Ecs.Systems.Render exposing (Scene)
+import Html exposing (Html, div, text)
+import Html.Attributes exposing (style)
 import Html.Events
 import Json.Decode as Decode
 import KeyCode exposing (KeyCode)
+import Task
 import WebGL.Texture as Texture exposing (Error)
 
 
@@ -37,6 +42,7 @@ type InitState
 
 type alias Model =
     { ecs : Ecs
+    , scene : Scene
     , keys : Keys
     , deltaTime : Float
     , stepCount : Int
@@ -44,16 +50,26 @@ type alias Model =
     }
 
 
+type alias InitData =
+    { assets : Assets
+    , viewport : Viewport
+    }
+
+
 init : () -> ( InitState, Cmd Msg )
 init _ =
     ( InitPending
-    , Assets.load AssetsReceived
+    , Task.map2 InitData
+        Assets.load
+        getViewport
+        |> Task.attempt InitReceived
     )
 
 
-initModel : Assets -> Model
-initModel assets =
+initModel : InitData -> Model
+initModel { assets, viewport } =
     { ecs = Entities.init assets Ecs.init
+    , scene = viewport.scene
     , keys = KeyControls.initKeys
     , deltaTime = 0
     , stepCount = 0
@@ -66,8 +82,9 @@ initModel assets =
 
 
 type Msg
-    = AssetsReceived (Result Error Assets)
+    = InitReceived (Result Error InitData)
     | AnimationFrameStarted Float
+    | WindowSizeChanged Int Int
     | KeyChanged KeyChange
     | KeyReleased KeyCode
 
@@ -75,11 +92,11 @@ type Msg
 update : Msg -> InitState -> ( InitState, Cmd Msg )
 update msg state =
     case ( state, msg ) of
-        ( InitPending, AssetsReceived (Err error) ) ->
+        ( InitPending, InitReceived (Err error) ) ->
             ( InitError error, Cmd.none )
 
-        ( InitPending, AssetsReceived (Ok assets) ) ->
-            ( InitOk (initModel assets), Cmd.none )
+        ( InitPending, InitReceived (Ok data) ) ->
+            ( InitOk (initModel data), Cmd.none )
 
         ( InitError error, _ ) ->
             ( state, Cmd.none )
@@ -95,7 +112,7 @@ update msg state =
 updateInternal : Msg -> Model -> ( Model, Cmd Msg )
 updateInternal msg model =
     case msg of
-        AssetsReceived _ ->
+        InitReceived _ ->
             ( model, Cmd.none )
 
         AnimationFrameStarted deltaTimeMillis ->
@@ -107,6 +124,16 @@ updateInternal msg model =
                 | ecs = Systems.update model.keys deltaTime model.ecs
                 , deltaTime = deltaTime
                 , stepCount = model.stepCount + 1
+              }
+            , Cmd.none
+            )
+
+        WindowSizeChanged width height ->
+            ( { model
+                | scene =
+                    { width = toFloat width
+                    , height = toFloat height
+                    }
               }
             , Cmd.none
             )
@@ -137,6 +164,7 @@ subscriptions state =
             if model.running then
                 Sub.batch
                     [ onAnimationFrameDelta AnimationFrameStarted
+                    , onResize WindowSizeChanged
                     , onKeyUp (Decode.map KeyChanged keyUpDecoder)
                     , onKeyDown (Decode.map KeyChanged keyDownDecoder)
                     , keyUpSubscription
@@ -191,19 +219,29 @@ viewError error =
 
 viewOk : Model -> List (Html Msg)
 viewOk model =
-    [ text <|
-        "stepCount: "
-            ++ String.fromInt model.stepCount
-            ++ " ( "
-            ++ String.fromFloat model.deltaTime
-            ++ ")"
-    , text <|
-        if model.running then
-            " running"
+    [ div
+        [ style "color" "#fff"
+        , style "position" "absolute"
+        , style "top" "0"
+        , style "bottom" "0"
+        , style "left" "0"
+        , style "right" "0"
+        , style "overflow" "hidden"
+        ]
+        [ text <|
+            "stepCount: "
+                ++ String.fromInt model.stepCount
+                ++ " ( "
+                ++ String.fromFloat model.deltaTime
+                ++ ")"
+        , text <|
+            if model.running then
+                " running"
 
-        else
-            " paused"
-    , Systems.view model.ecs
+            else
+                " paused"
+        , Systems.view model.scene model.ecs
+        ]
     ]
 
 

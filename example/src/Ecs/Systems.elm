@@ -5,7 +5,7 @@ import Ecs.Components exposing (Position, Velocity)
 import Ecs.Systems.KeyControls as KeyControls exposing (Keys)
 import Ecs.Systems.MotionControl as MotionControl
 import Ecs.Systems.Movement as Movement
-import Ecs.Systems.Render as Render
+import Ecs.Systems.Render as Render exposing (Scene)
 import Html exposing (Html)
 
 
@@ -17,6 +17,6 @@ update keys deltaTime ecs =
         |> Movement.update deltaTime
 
 
-view : Ecs -> Html msg
+view : Scene -> Ecs -> Html msg
 view =
     Render.view

@@ -1,9 +1,9 @@
-module Ecs.Systems.Render exposing (view)
+module Ecs.Systems.Render exposing (Scene, view)
 
 import Ecs exposing (Ecs, EntityId)
 import Ecs.Components exposing (Background, Position, Sprite)
 import Html exposing (Html)
-import Html.Attributes as Attributes exposing (style)
+import Html.Attributes exposing (height, style, width)
 import Math.Matrix4 as Mat4 exposing (Mat4, makeOrtho2D)
 import Math.Vector2 exposing (Vec2, vec2)
 import Math.Vector3 exposing (Vec3, vec3)
@@ -11,42 +11,58 @@ import WebGL exposing (Mesh, Shader)
 import WebGL.Texture as Texture exposing (Texture)
 
 
-width : Int
-width =
-    500
+type alias Scene =
+    { width : Float
+    , height : Float
+    }
 
 
-height : Int
-height =
-    500
-
-
-cameraTransform : Mat4
-cameraTransform =
-    makeOrtho2D 0 (toFloat width) 0 (toFloat height)
-
-
-view : Ecs -> Html msg
-view ecs =
+view : Scene -> Ecs -> Html msg
+view scene ecs =
+    let
+        gameScene =
+            { width = scene.width * 2
+            , height = scene.height * 2
+            }
+    in
     WebGL.toHtml
-        [ Attributes.width width
-        , Attributes.height height
+        [ width (ceiling scene.width)
+        , height (ceiling scene.height)
         , style "display" "block"
-        , style "background-color" "#aaffaa"
+        , style "position" "absolute"
+        , style "top" "0"
+        , style "left" "0"
+        , style "z-index" "-1"
         ]
-        (( ecs, [] )
-            |> Ecs.processEntities Ecs.background renderBackground
-            |> Ecs.processEntities2 Ecs.sprite Ecs.position renderSprite
-            |> Tuple.second
-        )
+        (renderEntities gameScene (getCameraTransform gameScene) ecs)
+
+
+getCameraTransform : Scene -> Mat4
+getCameraTransform scene =
+    makeOrtho2D 0 scene.width 0 scene.height
+
+
+renderEntities : Scene -> Mat4 -> Ecs -> List WebGL.Entity
+renderEntities scene cameraTransform ecs =
+    ( ecs, [] )
+        |> Ecs.processEntities
+            Ecs.background
+            (renderBackground scene cameraTransform)
+        |> Ecs.processEntities2
+            Ecs.sprite
+            Ecs.position
+            (renderSprite cameraTransform)
+        |> Tuple.second
 
 
 renderBackground :
-    EntityId
+    Scene
+    -> Mat4
+    -> EntityId
     -> Background
     -> ( Ecs, List WebGL.Entity )
     -> ( Ecs, List WebGL.Entity )
-renderBackground entityId background ( ecs, elements ) =
+renderBackground scene cameraTransform entityId background ( ecs, elements ) =
     let
         ( textureWidth, textureHeight ) =
             Texture.size background.texture
@@ -59,12 +75,12 @@ renderBackground entityId background ( ecs, elements ) =
         { transform =
             Mat4.mul
                 cameraTransform
-                (Mat4.makeScale3 (toFloat width) (toFloat height) 1)
+                (Mat4.makeScale3 scene.width scene.height 1)
         , textureOffset = vec2 0 0
         , textureSize =
             vec2
-                (toFloat width / toFloat textureWidth)
-                (toFloat height / toFloat textureHeight)
+                (scene.width / toFloat textureWidth)
+                (scene.height / toFloat textureHeight)
         , texture = background.texture
         }
         :: elements
@@ -72,12 +88,13 @@ renderBackground entityId background ( ecs, elements ) =
 
 
 renderSprite :
-    EntityId
+    Mat4
+    -> EntityId
     -> Sprite
     -> Position
     -> ( Ecs, List WebGL.Entity )
     -> ( Ecs, List WebGL.Entity )
-renderSprite entityId sprite position ( ecs, elements ) =
+renderSprite cameraTransform entityId sprite position ( ecs, elements ) =
     let
         spriteTransform =
             Mat4.makeScale3 sprite.width sprite.height 1
