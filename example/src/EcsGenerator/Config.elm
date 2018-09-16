@@ -7,8 +7,8 @@ config : Config
 config =
     init "Ecs"
         |> addComponent "Ai" "Ecs.Components"
+        |> addComponent "Background" "Ecs.Components"
         |> addComponent "Controls" "Ecs.Components"
-        |> addComponent "Display" "Ecs.Components"
         |> addComponent "KeyControlsMap" "Ecs.Components"
         |> addComponent "Position" "Ecs.Components"
         |> addComponent "Predator" "Ecs.Components"

@@ -1,11 +1,11 @@
-module Ecs.Entities exposing (createAiPredators, createHumanPredator)
+module Ecs.Entities exposing (createAiPredators, createBackground, createHumanPredator, init)
 
-import Assets exposing (Spritesheet)
+import Assets exposing (Assets, Spritesheet)
 import Ecs exposing (Ecs, EntityId)
 import Ecs.Components
     exposing
-        ( Controls
-        , Display
+        ( Background
+        , Controls
         , Motion
         , Position
         , Predator
@@ -15,6 +15,21 @@ import Ecs.Components
         , defaultControls
         , defaultKeyControlsMap
         )
+import WebGL.Texture exposing (Texture)
+
+
+init : Assets -> Ecs -> Ecs
+init assets =
+    createBackground assets.background
+        >> createHumanPredator assets.spritesheet
+        >> createAiPredators assets.spritesheet
+
+
+createBackground : Texture -> Ecs -> Ecs
+createBackground texture =
+    Ecs.createEntity
+        >> Ecs.andInsertComponent Ecs.background (Background texture)
+        >> Tuple.first
 
 
 createHumanPredator : Spritesheet -> Ecs -> Ecs
@@ -53,7 +68,6 @@ insertPredatorComponents sprite x y color =
         >> Ecs.andInsertComponent Ecs.controls defaultControls
         >> Ecs.andInsertComponent Ecs.motion predatorMotion
         >> Ecs.andInsertComponent Ecs.velocity (Velocity 0 0 (pi / 2))
-        >> Ecs.andInsertComponent Ecs.display (Display color)
         >> Ecs.andInsertComponent Ecs.predator ()
 
 

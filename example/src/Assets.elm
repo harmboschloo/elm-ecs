@@ -1,8 +1,14 @@
-module Assets exposing (Spritesheet, loadSpritesheet)
+module Assets exposing (Assets, Spritesheet, load)
 
 import Ecs.Components exposing (Sprite)
-import Task
+import Task exposing (Task)
 import WebGL.Texture as Texture exposing (Error, Texture, defaultOptions)
+
+
+type alias Assets =
+    { background : Texture
+    , spritesheet : Spritesheet
+    }
 
 
 type alias Spritesheet =
@@ -11,13 +17,37 @@ type alias Spritesheet =
     }
 
 
+backgroundSrc : String
+backgroundSrc =
+    "/assets/spaceshooter/darkPurple.png"
+
+
 spritesheetSrc : String
 spritesheetSrc =
     "/assets/spaceshooter/sheet.png"
 
 
-loadSpritesheet : (Result Error Spritesheet -> msg) -> Cmd msg
-loadSpritesheet msg =
+load : (Result Error Assets -> msg) -> Cmd msg
+load msg =
+    Task.map2 Assets
+        loadBackground
+        loadSpritesheet
+        |> Task.attempt msg
+
+
+loadBackground : Task Error Texture
+loadBackground =
+    Texture.loadWith
+        { defaultOptions
+            | magnify = Texture.nearest
+            , minify = Texture.nearest
+            , flipY = False
+        }
+        backgroundSrc
+
+
+loadSpritesheet : Task Error Spritesheet
+loadSpritesheet =
     Texture.loadWith
         { defaultOptions
             | magnify = Texture.nearest
@@ -27,7 +57,7 @@ loadSpritesheet msg =
             , flipY = False
         }
         spritesheetSrc
-        |> Task.attempt (Result.map initSpritesheet >> msg)
+        |> Task.map initSpritesheet
 
 
 initSpritesheet : Texture -> Spritesheet

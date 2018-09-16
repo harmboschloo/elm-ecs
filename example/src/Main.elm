@@ -1,6 +1,6 @@
 module Main exposing (main)
 
-import Assets exposing (Spritesheet)
+import Assets exposing (Assets)
 import Browser exposing (Document)
 import Browser.Events
     exposing
@@ -36,8 +36,7 @@ type InitState
 
 
 type alias Model =
-    { spritesheet : Spritesheet
-    , ecs : Ecs
+    { ecs : Ecs
     , keys : Keys
     , deltaTime : Float
     , stepCount : Int
@@ -48,17 +47,13 @@ type alias Model =
 init : () -> ( InitState, Cmd Msg )
 init _ =
     ( InitPending
-    , Assets.loadSpritesheet SpritesheetReceived
+    , Assets.load AssetsReceived
     )
 
 
-initModel : Spritesheet -> Model
-initModel spritesheet =
-    { spritesheet = spritesheet
-    , ecs =
-        Ecs.init
-            |> Entities.createHumanPredator spritesheet
-            |> Entities.createAiPredators spritesheet
+initModel : Assets -> Model
+initModel assets =
+    { ecs = Entities.init assets Ecs.init
     , keys = KeyControls.initKeys
     , deltaTime = 0
     , stepCount = 0
@@ -71,7 +66,7 @@ initModel spritesheet =
 
 
 type Msg
-    = SpritesheetReceived (Result Error Spritesheet)
+    = AssetsReceived (Result Error Assets)
     | AnimationFrameStarted Float
     | KeyChanged KeyChange
     | KeyReleased KeyCode
@@ -80,11 +75,11 @@ type Msg
 update : Msg -> InitState -> ( InitState, Cmd Msg )
 update msg state =
     case ( state, msg ) of
-        ( InitPending, SpritesheetReceived (Err error) ) ->
+        ( InitPending, AssetsReceived (Err error) ) ->
             ( InitError error, Cmd.none )
 
-        ( InitPending, SpritesheetReceived (Ok spritesheet) ) ->
-            ( InitOk (initModel spritesheet), Cmd.none )
+        ( InitPending, AssetsReceived (Ok assets) ) ->
+            ( InitOk (initModel assets), Cmd.none )
 
         ( InitError error, _ ) ->
             ( state, Cmd.none )
@@ -100,7 +95,7 @@ update msg state =
 updateInternal : Msg -> Model -> ( Model, Cmd Msg )
 updateInternal msg model =
     case msg of
-        SpritesheetReceived _ ->
+        AssetsReceived _ ->
             ( model, Cmd.none )
 
         AnimationFrameStarted deltaTimeMillis ->

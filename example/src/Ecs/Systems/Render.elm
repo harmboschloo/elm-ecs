@@ -1,7 +1,7 @@
 module Ecs.Systems.Render exposing (view)
 
 import Ecs exposing (Ecs, EntityId)
-import Ecs.Components exposing (Position, Sprite)
+import Ecs.Components exposing (Background, Position, Sprite)
 import Html exposing (Html)
 import Html.Attributes as Attributes exposing (style)
 import Math.Matrix4 as Mat4 exposing (Mat4, makeOrtho2D)
@@ -35,18 +35,49 @@ view ecs =
         , style "background-color" "#aaffaa"
         ]
         (( ecs, [] )
-            |> Ecs.processEntities2 Ecs.sprite Ecs.position viewEntity
+            |> Ecs.processEntities Ecs.background renderBackground
+            |> Ecs.processEntities2 Ecs.sprite Ecs.position renderSprite
             |> Tuple.second
         )
 
 
-viewEntity :
+renderBackground :
+    EntityId
+    -> Background
+    -> ( Ecs, List WebGL.Entity )
+    -> ( Ecs, List WebGL.Entity )
+renderBackground entityId background ( ecs, elements ) =
+    let
+        ( textureWidth, textureHeight ) =
+            Texture.size background.texture
+    in
+    ( ecs
+    , WebGL.entity
+        texturedVertexShader
+        texturedFragmentShader
+        squareMesh
+        { transform =
+            Mat4.mul
+                cameraTransform
+                (Mat4.makeScale3 (toFloat width) (toFloat height) 1)
+        , textureOffset = vec2 0 0
+        , textureSize =
+            vec2
+                (toFloat width / toFloat textureWidth)
+                (toFloat height / toFloat textureHeight)
+        , texture = background.texture
+        }
+        :: elements
+    )
+
+
+renderSprite :
     EntityId
     -> Sprite
     -> Position
     -> ( Ecs, List WebGL.Entity )
     -> ( Ecs, List WebGL.Entity )
-viewEntity entityId sprite position ( ecs, elements ) =
+renderSprite entityId sprite position ( ecs, elements ) =
     let
         spriteTransform =
             Mat4.makeScale3 sprite.width sprite.height 1
@@ -67,18 +98,18 @@ viewEntity entityId sprite position ( ecs, elements ) =
     in
     ( ecs
     , WebGL.entity
-        vertexShader
-        fragmentShader
+        texturedVertexShader
+        texturedFragmentShader
         squareMesh
         { transform =
             spriteTransform
                 |> Mat4.mul positionTransform
                 |> Mat4.mul cameraTransform
-        , subTextureOffset =
+        , textureOffset =
             vec2
                 ((sprite.x / toFloat textureWidth) + (texelWidth / 2))
                 ((sprite.y / toFloat textureHeight) + (texelHeight / 2))
-        , subTextureSize =
+        , textureSize =
             vec2
                 ((sprite.width / toFloat textureWidth) - texelWidth)
                 ((sprite.height / toFloat textureHeight) - texelHeight)
@@ -114,39 +145,39 @@ type alias Attributes =
     }
 
 
-type alias Uniforms =
+type alias TexturedUniforms =
     { transform : Mat4
-    , subTextureOffset : Vec2
-    , subTextureSize : Vec2
+    , textureOffset : Vec2
+    , textureSize : Vec2
     , texture : Texture
     }
 
 
-type alias Varyings =
+type alias TexturedVaryings =
     { textureCoordinate : Vec2
     }
 
 
-vertexShader : Shader Attributes Uniforms Varyings
-vertexShader =
+texturedVertexShader : Shader Attributes TexturedUniforms TexturedVaryings
+texturedVertexShader =
     [glsl|
 
         attribute vec2 vertexPosition;
         uniform mat4 transform;
-        uniform vec2 subTextureOffset;
-        uniform vec2 subTextureSize;
+        uniform vec2 textureOffset;
+        uniform vec2 textureSize;
         varying vec2 textureCoordinate;
 
         void main () {
           gl_Position = transform * vec4(vertexPosition, 0, 1.0);
-          textureCoordinate = subTextureOffset + vertexPosition * subTextureSize;
+          textureCoordinate = textureOffset + vertexPosition * textureSize;
         }
 
     |]
 
 
-fragmentShader : Shader {} { u | texture : Texture } Varyings
-fragmentShader =
+texturedFragmentShader : Shader {} { u | texture : Texture } TexturedVaryings
+texturedFragmentShader =
     [glsl|
 
         precision mediump float;

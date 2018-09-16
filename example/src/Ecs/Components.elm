@@ -1,7 +1,7 @@
 module Ecs.Components exposing
     ( Ai
+    , Background
     , Controls
-    , Display
     , KeyControlsMap
     , Motion
     , Position
@@ -59,8 +59,8 @@ type alias Motion =
     }
 
 
-type alias Display =
-    { color : String
+type alias Background =
+    { texture : Texture
     }
 
 
