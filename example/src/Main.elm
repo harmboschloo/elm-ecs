@@ -20,7 +20,6 @@ import Ecs.Systems.KeyControls as KeyControls
         , keyDownDecoder
         , keyUpDecoder
         )
-import Ecs.Systems.Render exposing (Scene)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (style)
 import Html.Events
@@ -28,6 +27,7 @@ import Json.Decode as Decode
 import KeyCode exposing (KeyCode)
 import Task
 import WebGL.Texture as Texture exposing (Error)
+import World exposing (World)
 
 
 
@@ -42,7 +42,10 @@ type InitState
 
 type alias Model =
     { ecs : Ecs
-    , scene : Scene
+    , screen :
+        { width : Int
+        , height : Int
+        }
     , keys : Keys
     , deltaTime : Float
     , stepCount : Int
@@ -69,11 +72,21 @@ init _ =
 initModel : InitData -> Model
 initModel { assets, viewport } =
     { ecs = Entities.init assets Ecs.init
-    , scene = viewport.scene
+    , screen =
+        { width = round viewport.scene.width
+        , height = round viewport.scene.height
+        }
     , keys = KeyControls.initKeys
     , deltaTime = 0
     , stepCount = 0
     , running = True
+    }
+
+
+getWorld : Model -> World
+getWorld model =
+    { width = 2 * toFloat model.screen.width
+    , height = 2 * toFloat model.screen.height
     }
 
 
@@ -130,9 +143,9 @@ updateInternal msg model =
 
         WindowSizeChanged width height ->
             ( { model
-                | scene =
-                    { width = toFloat width
-                    , height = toFloat height
+                | screen =
+                    { width = width
+                    , height = height
                     }
               }
             , Cmd.none
@@ -240,7 +253,19 @@ viewOk model =
 
             else
                 " paused"
-        , Systems.view model.scene model.ecs
+        , div
+            [ style "position" "absolute"
+            , style "top" "0"
+            , style "left" "0"
+            , style "z-index" "-1"
+            ]
+            [ Systems.view
+                { width = model.screen.width
+                , height = model.screen.height
+                , world = getWorld model
+                , ecs = model.ecs
+                }
+            ]
         ]
     ]
 
