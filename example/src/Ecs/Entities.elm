@@ -1,11 +1,10 @@
-module Ecs.Entities exposing (createAiPredators, createBackground, createHumanPredator, init)
+module Ecs.Entities exposing (init)
 
 import Assets exposing (Assets, Spritesheet)
 import Ecs exposing (Ecs, EntityId)
 import Ecs.Components
     exposing
-        ( Background
-        , Controls
+        ( Controls
         , Motion
         , Position
         , Predator
@@ -16,53 +15,50 @@ import Ecs.Components
         , defaultKeyControlsMap
         )
 import WebGL.Texture exposing (Texture)
+import World exposing (World)
 
 
-init : Assets -> Ecs -> Ecs
-init assets =
-    createBackground assets.background
-        >> createHumanPredator assets.spritesheet
-        >> createAiPredators assets.spritesheet
+init : Assets -> World -> Ecs
+init assets world =
+    Ecs.init
+        |> createHumanPredator assets.spritesheet world
+        |> createAiPredators assets.spritesheet world
 
 
-createBackground : Texture -> Ecs -> Ecs
-createBackground texture =
-    Ecs.createEntity
-        >> Ecs.andInsertComponent Ecs.background (Background texture)
-        >> Tuple.first
-
-
-createHumanPredator : Spritesheet -> Ecs -> Ecs
-createHumanPredator spritesheet =
+createHumanPredator : Spritesheet -> World -> Ecs -> Ecs
+createHumanPredator spritesheet world =
     Ecs.createEntity
         >> insertPredatorComponents
             spritesheet.playerShip1Green
-            250
-            250
-            "#00ff00"
+            (world.width / 2)
+            (world.height / 2)
         >> Ecs.andInsertComponent Ecs.keyControlsMap defaultKeyControlsMap
         >> Tuple.first
 
 
-createAiPredators : Spritesheet -> Ecs -> Ecs
-createAiPredators spritesheet ecs =
+createAiPredators : Spritesheet -> World -> Ecs -> Ecs
+createAiPredators spritesheet world ecs =
     List.range 1 9
         |> List.foldl
             (\value ->
                 Ecs.createEntity
                     >> insertPredatorComponents
                         spritesheet.playerShip2Orange
-                        (toFloat value * 50.0)
-                        125
-                        "#ff0000"
+                        (toFloat value / 10 * world.width)
+                        (world.height / 4)
                     >> Ecs.andInsertComponent Ecs.ai ()
                     >> Tuple.first
             )
             ecs
 
 
-insertPredatorComponents : Sprite -> Float -> Float -> String -> ( Ecs, EntityId ) -> ( Ecs, EntityId )
-insertPredatorComponents sprite x y color =
+insertPredatorComponents :
+    Sprite
+    -> Float
+    -> Float
+    -> ( Ecs, EntityId )
+    -> ( Ecs, EntityId )
+insertPredatorComponents sprite x y =
     Ecs.andInsertComponent Ecs.sprite sprite
         >> Ecs.andInsertComponent Ecs.position (Position x y 0)
         >> Ecs.andInsertComponent Ecs.controls defaultControls

@@ -1,7 +1,7 @@
 module Ecs.Systems.Render exposing (Config, view)
 
 import Ecs exposing (Ecs, EntityId)
-import Ecs.Components exposing (Background, Position, Sprite)
+import Ecs.Components exposing (Position, Sprite)
 import Html exposing (Html)
 import Html.Attributes exposing (height, style, width)
 import Math.Matrix4 as Mat4 exposing (Mat4, makeOrtho2D)
@@ -9,6 +9,7 @@ import Math.Vector2 exposing (Vec2, vec2)
 import Math.Vector3 exposing (Vec3, vec3)
 import WebGL exposing (Mesh, Shader)
 import WebGL.Texture as Texture exposing (Texture)
+import World exposing (World)
 
 
 type alias Config =
@@ -17,6 +18,7 @@ type alias Config =
     , world :
         { width : Float
         , height : Float
+        , background : Texture
         }
     , ecs : Ecs
     }
@@ -38,10 +40,11 @@ getCameraTransform { world } =
 
 renderEntities : Config -> Mat4 -> List WebGL.Entity
 renderEntities config cameraTransform =
-    ( config.ecs, [] )
-        |> Ecs.processEntities
-            Ecs.background
-            (renderBackground config cameraTransform)
+    let
+        entities =
+            [ renderBackground config.world cameraTransform ]
+    in
+    ( config.ecs, entities )
         |> Ecs.processEntities2
             Ecs.sprite
             Ecs.position
@@ -49,20 +52,13 @@ renderEntities config cameraTransform =
         |> Tuple.second
 
 
-renderBackground :
-    Config
-    -> Mat4
-    -> EntityId
-    -> Background
-    -> ( Ecs, List WebGL.Entity )
-    -> ( Ecs, List WebGL.Entity )
-renderBackground { world } cameraTransform entityId background ( ecs, elements ) =
+renderBackground : World -> Mat4 -> WebGL.Entity
+renderBackground world cameraTransform =
     let
         ( textureWidth, textureHeight ) =
-            Texture.size background.texture
+            Texture.size world.background
     in
-    ( ecs
-    , WebGL.entity
+    WebGL.entity
         texturedVertexShader
         texturedFragmentShader
         squareMesh
@@ -75,10 +71,8 @@ renderBackground { world } cameraTransform entityId background ( ecs, elements )
             vec2
                 (world.width / toFloat textureWidth)
                 (world.height / toFloat textureHeight)
-        , texture = background.texture
+        , texture = world.background
         }
-        :: elements
-    )
 
 
 renderSprite :

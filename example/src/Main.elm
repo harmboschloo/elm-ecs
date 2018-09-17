@@ -41,15 +41,19 @@ type InitState
 
 
 type alias Model =
-    { ecs : Ecs
-    , screen :
-        { width : Int
-        , height : Int
-        }
+    { assets : Assets
+    , ecs : Ecs
+    , screen : Screen
     , keys : Keys
     , deltaTime : Float
     , stepCount : Int
     , running : Bool
+    }
+
+
+type alias Screen =
+    { width : Int
+    , height : Int
     }
 
 
@@ -71,11 +75,18 @@ init _ =
 
 initModel : InitData -> Model
 initModel { assets, viewport } =
-    { ecs = Entities.init assets Ecs.init
-    , screen =
-        { width = round viewport.scene.width
-        , height = round viewport.scene.height
-        }
+    let
+        screen =
+            { width = round viewport.viewport.width
+            , height = round viewport.viewport.height
+            }
+
+        world =
+            getWorld assets screen
+    in
+    { assets = assets
+    , ecs = Entities.init assets world
+    , screen = screen
     , keys = KeyControls.initKeys
     , deltaTime = 0
     , stepCount = 0
@@ -83,10 +94,11 @@ initModel { assets, viewport } =
     }
 
 
-getWorld : Model -> World
-getWorld model =
-    { width = 2 * toFloat model.screen.width
-    , height = 2 * toFloat model.screen.height
+getWorld : Assets -> Screen -> World
+getWorld assets screen =
+    { width = 2 * toFloat screen.width
+    , height = 2 * toFloat screen.height
+    , background = assets.background
     }
 
 
@@ -262,7 +274,7 @@ viewOk model =
             [ Systems.view
                 { width = model.screen.width
                 , height = model.screen.height
-                , world = getWorld model
+                , world = getWorld model.assets model.screen
                 , ecs = model.ecs
                 }
             ]

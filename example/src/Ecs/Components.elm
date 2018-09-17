@@ -1,6 +1,5 @@
 module Ecs.Components exposing
     ( Ai
-    , Background
     , Controls
     , KeyControlsMap
     , Motion
@@ -56,11 +55,6 @@ type alias Motion =
     , maxDeceleration : Float
     , maxAngularAcceleration : Float
     , maxAngularVelocity : Float
-    }
-
-
-type alias Background =
-    { texture : Texture
     }
 
 
