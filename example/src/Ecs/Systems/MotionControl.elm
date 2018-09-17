@@ -47,7 +47,7 @@ applyControls controls motion velocity position deltaTime =
                 motion.maxDeceleration
 
         acceleration =
-            accelerateControls * maxAcceleration * deltaTime
+            accelerateControls * maxAcceleration
 
         rotateControls =
             Clamped.get controls.rotate
@@ -59,15 +59,25 @@ applyControls controls motion velocity position deltaTime =
             clamp
                 -motion.maxAngularAcceleration
                 motion.maxAngularAcceleration
-                (targetAngularVelocity - velocity.angularVelocity / deltaTime)
+                ((targetAngularVelocity - velocity.angularVelocity) / deltaTime)
 
-        angularVelocity =
+        uncheckedAngularVelocity =
             clamp
                 -motion.maxAngularVelocity
                 motion.maxAngularVelocity
-                (velocity.angularVelocity + angularAcceleration)
+                (velocity.angularVelocity + angularAcceleration * deltaTime)
+
+        angularVelocity =
+            if uncheckedAngularVelocity < 0 && velocity.angularVelocity > 0 then
+                0
+
+            else if uncheckedAngularVelocity > 0 && velocity.angularVelocity < 0 then
+                0
+
+            else
+                uncheckedAngularVelocity
     in
-    { velocityX = velocity.velocityX + acceleration * cos position.angle
-    , velocityY = velocity.velocityY + acceleration * sin position.angle
+    { velocityX = velocity.velocityX + acceleration * cos position.angle * deltaTime
+    , velocityY = velocity.velocityY + acceleration * sin position.angle * deltaTime
     , angularVelocity = angularVelocity
     }

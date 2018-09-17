@@ -114,9 +114,9 @@ updateControls keyMap activeKeys =
                     0
 
                 ( True, False ) ->
-                    -1
+                    1
 
                 ( False, True ) ->
-                    1
+                    -1
     in
     controls accelerate rotate

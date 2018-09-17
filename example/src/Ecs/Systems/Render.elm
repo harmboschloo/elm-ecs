@@ -90,7 +90,7 @@ renderSprite cameraTransform entityId sprite position ( ecs, elements ) =
 
         positionTransform =
             Mat4.makeTranslate3 position.x position.y 0
-                |> Mat4.rotate position.angle (vec3 0 0 1)
+                |> Mat4.rotate (position.angle + pi / 2) (vec3 0 0 1)
 
         ( textureWidth, textureHeight ) =
             Texture.size sprite.texture

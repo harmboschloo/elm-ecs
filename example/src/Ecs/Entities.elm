@@ -63,14 +63,14 @@ insertPredatorComponents sprite x y =
         >> Ecs.andInsertComponent Ecs.position (Position x y 0)
         >> Ecs.andInsertComponent Ecs.controls defaultControls
         >> Ecs.andInsertComponent Ecs.motion predatorMotion
-        >> Ecs.andInsertComponent Ecs.velocity (Velocity 0 0 (pi / 2))
+        >> Ecs.andInsertComponent Ecs.velocity (Velocity 0 0 6)
         >> Ecs.andInsertComponent Ecs.predator ()
 
 
 predatorMotion : Motion
 predatorMotion =
-    { maxAcceleration = 50
-    , maxDeceleration = 25
-    , maxAngularAcceleration = 20
-    , maxAngularVelocity = 50
+    { maxAcceleration = 400
+    , maxDeceleration = 200
+    , maxAngularAcceleration = 12
+    , maxAngularVelocity = 6
     }
