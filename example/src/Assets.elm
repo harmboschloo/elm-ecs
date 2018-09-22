@@ -51,8 +51,6 @@ loadSpritesheet =
         { defaultOptions
             | magnify = Texture.nearest
             , minify = Texture.nearest
-            , horizontalWrap = Texture.clampToEdge
-            , verticalWrap = Texture.clampToEdge
             , flipY = False
         }
         spritesheetSrc

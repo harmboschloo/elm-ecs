@@ -15,18 +15,17 @@ import World exposing (World)
 type alias Config =
     { width : Int
     , height : Int
-    , world :
-        { width : Float
-        , height : Float
-        , background : Texture
-        }
+    , world : World
     , ecs : Ecs
     }
 
 
 view : Config -> Html msg
 view config =
-    WebGL.toHtml
+    WebGL.toHtmlWith
+        [ WebGL.antialias
+        , WebGL.depth 1
+        ]
         [ width config.width
         , height config.height
         ]
