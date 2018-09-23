@@ -13,8 +13,10 @@
             "elm/json": "1.0.0",
             "elm/random": "1.0.0",
             "elm/time": "1.0.0",
+            "elm-community/easing-functions": "2.0.0",
             "elm-explorations/linear-algebra": "1.0.3",
-            "elm-explorations/webgl": "1.0.1"
+            "elm-explorations/webgl": "1.0.1",
+            "mgold/elm-animation": "2.0.0"
         },
         "indirect": {
             "elm/url": "1.0.0",

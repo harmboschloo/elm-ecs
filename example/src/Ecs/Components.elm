@@ -3,9 +3,12 @@ module Ecs.Components exposing
     , Collectable
     , Collector
     , Controls
+    , Destroy
     , KeyControlsMap
     , Motion
     , Position
+    , Scale
+    , ScaleAnimation
     , Sprite
     , Velocity
     , controls
@@ -15,6 +18,7 @@ module Ecs.Components exposing
     , defaultVelocity
     )
 
+import Animation exposing (Animation)
 import Clamped exposing (Clamped)
 import KeyCode exposing (KeyCode)
 import WebGL.Texture exposing (Texture)
@@ -58,17 +62,6 @@ type alias Motion =
     }
 
 
-type alias Sprite =
-    { texture : Texture
-    , x : Float
-    , y : Float
-    , width : Float
-    , height : Float
-    , pivotX : Float
-    , pivotY : Float
-    }
-
-
 type alias Controls =
     { accelerate : Clamped Float
     , rotate : Clamped Float
@@ -105,6 +98,30 @@ defaultKeyControlsMap =
 
 type alias Ai =
     ()
+
+
+type alias Sprite =
+    { texture : Texture
+    , x : Float
+    , y : Float
+    , width : Float
+    , height : Float
+    , pivotX : Float
+    , pivotY : Float
+    }
+
+
+type alias Scale =
+    Float
+
+
+type alias ScaleAnimation =
+    Animation
+
+
+type alias Destroy =
+    { time : Float
+    }
 
 
 type alias Collector =

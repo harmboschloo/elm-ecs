@@ -116,9 +116,18 @@ renderSprite cameraTransform entityId sprite position ( ecs, elements ) =
             Mat4.makeScale3 sprite.width sprite.height 1
                 |> Mat4.translate3 -sprite.pivotX -sprite.pivotY 0
 
-        positionTransform =
+        scalekMat =
+            case Ecs.getComponent entityId Ecs.scale ecs of
+                Nothing ->
+                    identity
+
+                Just scale ->
+                    Mat4.scale3 scale scale 1
+
+        worldTransform =
             Mat4.makeTranslate3 position.x position.y 0
                 |> Mat4.rotate (position.angle + pi / 2) (vec3 0 0 1)
+                |> scalekMat
 
         ( textureWidth, textureHeight ) =
             Texture.size sprite.texture
@@ -136,7 +145,7 @@ renderSprite cameraTransform entityId sprite position ( ecs, elements ) =
         squareMesh
         { transform =
             spriteTransform
-                |> Mat4.mul positionTransform
+                |> Mat4.mul worldTransform
                 |> Mat4.mul cameraTransform
         , textureOffset =
             vec2

@@ -37,6 +37,7 @@ type alias Context =
     , activeKeys : Set KeyCode
     , screen : Screen
     , world : World
+    , time : Float
     , deltaTime : Float
     , stepCount : Int
     , running : Bool
@@ -62,6 +63,7 @@ init assets seed screen =
     , activeKeys = Set.empty
     , screen = screen
     , world = getWorld screen
+    , time = 0
     , deltaTime = 0
     , stepCount = 0
     , running = True
@@ -100,8 +102,13 @@ update : Msg -> Context -> ( Context, OutMsg )
 update msg context =
     case msg of
         AnimationFrameStarted deltaTimeMillis ->
+            let
+                deltaTime =
+                    min (deltaTimeMillis / 1000) maxDeltaTime
+            in
             ( { context
-                | deltaTime = min (deltaTimeMillis / 1000) maxDeltaTime
+                | time = context.time + deltaTime
+                , deltaTime = deltaTime
                 , stepCount = context.stepCount + 1
               }
             , DeltaTimeUpdated

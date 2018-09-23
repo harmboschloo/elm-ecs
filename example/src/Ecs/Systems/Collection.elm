@@ -1,9 +1,10 @@
 module Ecs.Systems.Collection exposing (update)
 
+import Animation
+import Ease
 import Ecs exposing (Ecs, EntityId)
-import Ecs.Components exposing (Collectable, Collector, Position)
+import Ecs.Components exposing (Collectable, Collector, Position, Scale, Velocity)
 import Ecs.Context exposing (Context)
-import Ecs.Entities exposing (createCollectableWithId)
 
 
 type alias CollectableEntity =
@@ -52,9 +53,22 @@ checkCollection collectable entityId collector position ( ecs, context ) =
             collector.radius * collector.radius
     in
     if distanceSquared < radiusSquared then
-        createCollectableWithId
-            collectable.id
-            ( Ecs.resetEntity collectable.id ecs, context )
+        ( ecs
+            |> Ecs.removeComponent collectable.id Ecs.collectable
+            |> Ecs.insertComponent collectable.id Ecs.velocity (Velocity 0 0 (2 * pi))
+            |> Ecs.insertComponent collectable.id Ecs.scale 1
+            |> Ecs.insertComponent
+                collectable.id
+                Ecs.scaleAnimation
+                (Animation.animation context.time
+                    |> Animation.from 1
+                    |> Animation.to 0
+                    |> Animation.duration 1
+                    |> Animation.ease Ease.inBack
+                )
+            |> Ecs.insertComponent collectable.id Ecs.destroy { time = context.time + 1 }
+        , context
+        )
 
     else
         ( ecs, context )
