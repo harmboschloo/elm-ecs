@@ -25,7 +25,7 @@ type alias Model =
 
 
 type alias Component =
-    { typeName : String, moduleName : String }
+    { moduleName : String, typeName : String }
 
 
 init : String -> Config
@@ -37,12 +37,12 @@ init moduleName =
 
 
 addComponent : String -> String -> Config -> Config
-addComponent typeName moduleName (Config config) =
+addComponent moduleName typeName (Config config) =
     Config
         { config
             | components =
-                { typeName = typeName
-                , moduleName = moduleName
+                { moduleName = moduleName
+                , typeName = typeName
                 }
                     :: config.components
         }
