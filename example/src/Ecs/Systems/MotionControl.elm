@@ -3,18 +3,17 @@ module Ecs.Systems.MotionControl exposing (update)
 import Clamped
 import Ecs exposing (Ecs, EntityId)
 import Ecs.Components exposing (Controls, Motion, Position, Velocity)
+import Ecs.Context exposing (Context)
 
 
-update : Float -> Ecs -> Ecs
-update deltaTime ecs =
-    ( ecs, deltaTime )
-        |> Ecs.processEntities4
-            Ecs.controls
-            Ecs.motion
-            Ecs.velocity
-            Ecs.position
-            updateEntity
-        |> Tuple.first
+update : ( Ecs, Context ) -> ( Ecs, Context )
+update =
+    Ecs.processEntities4
+        Ecs.controls
+        Ecs.motion
+        Ecs.velocity
+        Ecs.position
+        updateEntity
 
 
 updateEntity :
@@ -23,14 +22,16 @@ updateEntity :
     -> Motion
     -> Velocity
     -> Position
-    -> ( Ecs, Float )
-    -> ( Ecs, Float )
-updateEntity entityId controls motion velocity position ( ecs, deltaTime ) =
-    let
-        newVelocity =
-            applyControls controls motion velocity position deltaTime
-    in
-    ( Ecs.insertComponent Ecs.velocity newVelocity entityId ecs, deltaTime )
+    -> ( Ecs, Context )
+    -> ( Ecs, Context )
+updateEntity entityId controls motion velocity position ( ecs, context ) =
+    ( Ecs.insertComponent
+        Ecs.velocity
+        (applyControls controls motion velocity position context.deltaTime)
+        entityId
+        ecs
+    , context
+    )
 
 
 applyControls : Controls -> Motion -> Velocity -> Position -> Float -> Velocity

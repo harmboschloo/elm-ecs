@@ -7,7 +7,7 @@ import WebGL.Texture as Texture exposing (Error, Texture, defaultOptions)
 
 type alias Assets =
     { background : Texture
-    , spritesheet : Spritesheet
+    , sprites : Spritesheet
     }
 
 

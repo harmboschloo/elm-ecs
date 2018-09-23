@@ -1,49 +1,75 @@
-module Ecs.Systems.Render exposing (Config, view)
+module Ecs.Systems.Render exposing (view)
 
 import Ecs exposing (Ecs, EntityId)
 import Ecs.Components exposing (Position, Sprite)
-import Html exposing (Html)
+import Ecs.Context exposing (Context)
+import Html exposing (Html, div, text)
 import Html.Attributes exposing (height, style, width)
 import Math.Matrix4 as Mat4 exposing (Mat4, makeOrtho2D)
 import Math.Vector2 exposing (Vec2, vec2)
 import Math.Vector3 exposing (Vec3, vec3)
 import WebGL exposing (Mesh, Shader)
 import WebGL.Texture as Texture exposing (Texture)
-import World exposing (World)
 
 
-type alias Config =
-    { width : Int
-    , height : Int
-    , world : World
-    , ecs : Ecs
-    }
+view : Context -> Ecs -> Html msg
+view context ecs =
+    div
+        [ style "color" "#fff"
+        , style "position" "absolute"
+        , style "top" "0"
+        , style "bottom" "0"
+        , style "left" "0"
+        , style "right" "0"
+        , style "overflow" "hidden"
+        ]
+        [ text <|
+            "stepCount: "
+                ++ String.fromInt context.stepCount
+                ++ " ( "
+                ++ String.fromFloat context.deltaTime
+                ++ ")"
+        , text <|
+            if context.running then
+                " running"
+
+            else
+                " paused"
+        , div
+            [ style "position" "absolute"
+            , style "top" "0"
+            , style "left" "0"
+            , style "z-index" "-1"
+            ]
+            [ viewWebGL context ecs
+            ]
+        ]
 
 
-view : Config -> Html msg
-view config =
+viewWebGL : Context -> Ecs -> Html msg
+viewWebGL context ecs =
     WebGL.toHtmlWith
         [ WebGL.antialias
         , WebGL.depth 1
         ]
-        [ width config.width
-        , height config.height
+        [ width context.screen.width
+        , height context.screen.height
         ]
-        (renderEntities config (getCameraTransform config))
+        (renderEntities context ecs (getCameraTransform context))
 
 
-getCameraTransform : Config -> Mat4
+getCameraTransform : Context -> Mat4
 getCameraTransform { world } =
     makeOrtho2D 0 world.width 0 world.height
 
 
-renderEntities : Config -> Mat4 -> List WebGL.Entity
-renderEntities config cameraTransform =
+renderEntities : Context -> Ecs -> Mat4 -> List WebGL.Entity
+renderEntities context ecs cameraTransform =
     let
         entities =
-            [ renderBackground config.world cameraTransform ]
+            [ renderBackground context cameraTransform ]
     in
-    ( config.ecs, entities )
+    ( ecs, entities )
         |> Ecs.processEntities2
             Ecs.sprite
             Ecs.position
@@ -51,11 +77,14 @@ renderEntities config cameraTransform =
         |> Tuple.second
 
 
-renderBackground : World -> Mat4 -> WebGL.Entity
-renderBackground world cameraTransform =
+renderBackground : Context -> Mat4 -> WebGL.Entity
+renderBackground context cameraTransform =
     let
+        { width, height } =
+            context.world
+
         ( textureWidth, textureHeight ) =
-            Texture.size world.background
+            Texture.size context.assets.background
     in
     WebGL.entity
         texturedVertexShader
@@ -64,13 +93,13 @@ renderBackground world cameraTransform =
         { transform =
             Mat4.mul
                 cameraTransform
-                (Mat4.makeScale3 world.width world.height 1)
+                (Mat4.makeScale3 width height 1)
         , textureOffset = vec2 0 0
         , textureSize =
             vec2
-                (world.width / toFloat textureWidth)
-                (world.height / toFloat textureHeight)
-        , texture = world.background
+                (width / toFloat textureWidth)
+                (height / toFloat textureHeight)
+        , texture = context.assets.background
         }
 
 

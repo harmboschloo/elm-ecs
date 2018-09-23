@@ -3,31 +3,15 @@ module Main exposing (main)
 import Assets exposing (Assets)
 import Browser exposing (Document)
 import Browser.Dom exposing (Viewport, getViewport)
-import Browser.Events
-    exposing
-        ( onAnimationFrameDelta
-        , onKeyDown
-        , onKeyUp
-        , onResize
-        )
 import Ecs exposing (Ecs)
+import Ecs.Context as Context exposing (Context)
 import Ecs.Entities as Entities
 import Ecs.Systems as Systems
-import Ecs.Systems.KeyControls as KeyControls
-    exposing
-        ( KeyChange
-        , Keys
-        , keyDownDecoder
-        , keyUpDecoder
-        )
-import Html exposing (Html, div, text)
-import Html.Attributes exposing (style)
-import Html.Events
-import Json.Decode as Decode
-import KeyCode exposing (KeyCode)
+import Html exposing (Html, text)
+import Random
 import Task
+import Time exposing (Posix, posixToMillis)
 import WebGL.Texture as Texture exposing (Error)
-import World exposing (World)
 
 
 
@@ -42,12 +26,8 @@ type InitState
 
 type alias Model =
     { assets : Assets
+    , context : Context
     , ecs : Ecs
-    , screen : Screen
-    , keys : Keys
-    , deltaTime : Float
-    , stepCount : Int
-    , running : Bool
     }
 
 
@@ -59,6 +39,7 @@ type alias Screen =
 
 type alias InitData =
     { assets : Assets
+    , posix : Posix
     , viewport : Viewport
     }
 
@@ -66,39 +47,31 @@ type alias InitData =
 init : () -> ( InitState, Cmd Msg )
 init _ =
     ( InitPending
-    , Task.map2 InitData
+    , Task.map3 InitData
         Assets.load
+        Time.now
         getViewport
         |> Task.attempt InitReceived
     )
 
 
 initModel : InitData -> Model
-initModel { assets, viewport } =
+initModel { assets, posix, viewport } =
     let
         screen =
             { width = round viewport.viewport.width
             , height = round viewport.viewport.height
             }
 
-        world =
-            getWorld assets screen
+        seed =
+            Random.initialSeed (posixToMillis posix)
+
+        ( ecs, context ) =
+            Entities.init (Context.init assets seed screen)
     in
     { assets = assets
-    , ecs = Entities.init assets world
-    , screen = screen
-    , keys = KeyControls.initKeys
-    , deltaTime = 0
-    , stepCount = 0
-    , running = True
-    }
-
-
-getWorld : Assets -> Screen -> World
-getWorld assets screen =
-    { width = 2 * toFloat screen.width
-    , height = 2 * toFloat screen.height
-    , background = assets.background
+    , context = context
+    , ecs = ecs
     }
 
 
@@ -108,10 +81,7 @@ getWorld assets screen =
 
 type Msg
     = InitReceived (Result Error InitData)
-    | AnimationFrameStarted Float
-    | WindowSizeChanged Int Int
-    | KeyChanged KeyChange
-    | KeyReleased KeyCode
+    | ContextMsg Context.Msg
 
 
 update : Msg -> InitState -> ( InitState, Cmd Msg )
@@ -126,56 +96,30 @@ update msg state =
         ( InitError error, _ ) ->
             ( state, Cmd.none )
 
-        ( InitOk model, _ ) ->
-            updateInternal msg model
-                |> Tuple.mapFirst InitOk
+        ( InitOk model, ContextMsg contextMsg ) ->
+            let
+                ( context, outMsg ) =
+                    Context.update contextMsg model.context
+            in
+            case outMsg of
+                Context.None ->
+                    ( InitOk { model | context = context }, Cmd.none )
+
+                Context.DeltaTimeUpdated ->
+                    let
+                        ( ecs, updatedContext ) =
+                            Systems.update context model.ecs
+                    in
+                    ( InitOk
+                        { model
+                            | context = updatedContext
+                            , ecs = ecs
+                        }
+                    , Cmd.none
+                    )
 
         _ ->
             ( state, Cmd.none )
-
-
-updateInternal : Msg -> Model -> ( Model, Cmd Msg )
-updateInternal msg model =
-    case msg of
-        InitReceived _ ->
-            ( model, Cmd.none )
-
-        AnimationFrameStarted deltaTimeMillis ->
-            let
-                deltaTime =
-                    min (deltaTimeMillis / 1000) (1.0 / 30.0)
-            in
-            ( { model
-                | ecs = Systems.update model.keys deltaTime model.ecs
-                , deltaTime = deltaTime
-                , stepCount = model.stepCount + 1
-              }
-            , Cmd.none
-            )
-
-        WindowSizeChanged width height ->
-            ( { model
-                | screen =
-                    { width = width
-                    , height = height
-                    }
-              }
-            , Cmd.none
-            )
-
-        KeyChanged keyChange ->
-            ( { model | keys = KeyControls.updateKeys keyChange model.keys }
-            , Cmd.none
-            )
-
-        KeyReleased keyCode ->
-            if keyCode == KeyCode.esc then
-                ( { model | running = not model.running }
-                , Cmd.none
-                )
-
-            else
-                ( model, Cmd.none )
 
 
 
@@ -186,25 +130,10 @@ subscriptions : InitState -> Sub Msg
 subscriptions state =
     case state of
         InitOk model ->
-            if model.running then
-                Sub.batch
-                    [ onAnimationFrameDelta AnimationFrameStarted
-                    , onResize WindowSizeChanged
-                    , onKeyUp (Decode.map KeyChanged keyUpDecoder)
-                    , onKeyDown (Decode.map KeyChanged keyDownDecoder)
-                    , keyUpSubscription
-                    ]
-
-            else
-                keyUpSubscription
+            Sub.map ContextMsg (Context.subscriptions model.context)
 
         _ ->
             Sub.none
-
-
-keyUpSubscription : Sub Msg
-keyUpSubscription =
-    onKeyUp (Decode.map KeyReleased Html.Events.keyCode)
 
 
 
@@ -244,42 +173,7 @@ viewError error =
 
 viewOk : Model -> List (Html Msg)
 viewOk model =
-    [ div
-        [ style "color" "#fff"
-        , style "position" "absolute"
-        , style "top" "0"
-        , style "bottom" "0"
-        , style "left" "0"
-        , style "right" "0"
-        , style "overflow" "hidden"
-        ]
-        [ text <|
-            "stepCount: "
-                ++ String.fromInt model.stepCount
-                ++ " ( "
-                ++ String.fromFloat model.deltaTime
-                ++ ")"
-        , text <|
-            if model.running then
-                " running"
-
-            else
-                " paused"
-        , div
-            [ style "position" "absolute"
-            , style "top" "0"
-            , style "left" "0"
-            , style "z-index" "-1"
-            ]
-            [ Systems.view
-                { width = model.screen.width
-                , height = model.screen.height
-                , world = getWorld model.assets model.screen
-                , ecs = model.ecs
-                }
-            ]
-        ]
-    ]
+    [ Systems.view model.context model.ecs ]
 
 
 

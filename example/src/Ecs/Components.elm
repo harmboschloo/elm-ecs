@@ -1,11 +1,10 @@
 module Ecs.Components exposing
     ( Ai
+    , Collector
     , Controls
     , KeyControlsMap
     , Motion
     , Position
-    , Predator
-    , Prey
     , Sprite
     , Velocity
     , controls
@@ -107,9 +106,5 @@ type alias Ai =
     ()
 
 
-type alias Predator =
-    ()
-
-
-type alias Prey =
+type alias Collector =
     ()

@@ -1,82 +1,30 @@
-module Ecs.Systems.KeyControls exposing
-    ( KeyChange
-    , Keys
-    , initKeys
-    , keyDownDecoder
-    , keyUpDecoder
-    , updateEntities
-    , updateKeys
-    )
+module Ecs.Systems.KeyControls exposing (update)
 
 import Ecs exposing (Ecs, EntityId)
 import Ecs.Components exposing (Controls, KeyControlsMap, controls)
-import Html.Events
-import Json.Decode as Decode exposing (Decoder)
+import Ecs.Context exposing (Context)
 import KeyCode exposing (KeyCode)
 import Set exposing (Set)
 
 
-type Keys
-    = ActiveKeys (Set KeyCode)
-
-
-initKeys : Keys
-initKeys =
-    ActiveKeys Set.empty
-
-
-type KeyChange
-    = KeyUp KeyCode
-    | KeyDown KeyCode
-
-
-keyUpDecoder : Decoder KeyChange
-keyUpDecoder =
-    keyDecoder KeyUp
-
-
-keyDownDecoder : Decoder KeyChange
-keyDownDecoder =
-    keyDecoder KeyDown
-
-
-keyDecoder : (KeyCode -> KeyChange) -> Decoder KeyChange
-keyDecoder keyChange =
-    Html.Events.keyCode
-        |> Decode.map keyChange
-
-
-updateKeys : KeyChange -> Keys -> Keys
-updateKeys keyChange (ActiveKeys activeKeys) =
-    ActiveKeys <|
-        case keyChange of
-            KeyUp keyCode ->
-                Set.remove keyCode activeKeys
-
-            KeyDown keyCode ->
-                Set.insert keyCode activeKeys
-
-
-updateEntities : Keys -> Ecs -> Ecs
-updateEntities (ActiveKeys activeKeys) ecs =
-    ( ecs, activeKeys )
-        |> Ecs.processEntities2 Ecs.keyControlsMap Ecs.controls updateEntity
-        |> Tuple.first
+update : ( Ecs, Context ) -> ( Ecs, Context )
+update =
+    Ecs.processEntities2 Ecs.keyControlsMap Ecs.controls updateEntity
 
 
 updateEntity :
     EntityId
     -> KeyControlsMap
     -> Controls
-    -> ( Ecs, Set KeyCode )
-    -> ( Ecs, Set KeyCode )
-updateEntity entityId keyMap controls ( ecs, activeKeys ) =
+    -> ( Ecs, Context )
+    -> ( Ecs, Context )
+updateEntity entityId keyMap controls ( ecs, context ) =
     ( Ecs.insertComponent
         Ecs.controls
-        (updateControls keyMap activeKeys)
+        (updateControls keyMap context.activeKeys)
         entityId
         ecs
-    , activeKeys
+    , context
     )
 
 

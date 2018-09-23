@@ -7,68 +7,96 @@ import Ecs.Components
         ( Controls
         , Motion
         , Position
-        , Predator
-        , Prey
         , Sprite
         , Velocity
         , defaultControls
         , defaultKeyControlsMap
         )
+import Ecs.Context as Context exposing (Context)
+import Random exposing (Generator)
+import Utils exposing (times)
 import WebGL.Texture exposing (Texture)
-import World exposing (World)
 
 
-init : Assets -> World -> Ecs
-init assets world =
-    Ecs.init
-        |> createHumanPredator assets.spritesheet world
-        |> createAiPredators assets.spritesheet world
+init : Context -> ( Ecs, Context )
+init context =
+    ( Ecs.init, context )
+        |> createPlayerCollector
+        |> times 10 createAiCollector
 
 
-createHumanPredator : Spritesheet -> World -> Ecs -> Ecs
-createHumanPredator spritesheet world =
-    Ecs.createEntity
-        >> insertPredatorComponents
-            spritesheet.playerShip1Green
-            (world.width / 2)
-            (world.height / 2)
-        >> Ecs.andInsertComponent Ecs.keyControlsMap defaultKeyControlsMap
-        >> Tuple.first
+createPlayerCollector : ( Ecs, Context ) -> ( Ecs, Context )
+createPlayerCollector ( ecs, context ) =
+    let
+        ( ecs2, entityId ) =
+            Ecs.createEntity ecs
+
+        ( angle, context2 ) =
+            Context.randomStep randomAngleGenerator context
+
+        ( ecs3, _ ) =
+            ( ecs2, entityId )
+                |> insertCollectorComponents
+                    context2.assets.sprites.playerShip1Green
+                    { x = context.world.width / 2
+                    , y = context.world.height / 2
+                    , angle = angle
+                    }
+                |> Ecs.andInsertComponent
+                    Ecs.keyControlsMap
+                    defaultKeyControlsMap
+    in
+    ( ecs3, context2 )
 
 
-createAiPredators : Spritesheet -> World -> Ecs -> Ecs
-createAiPredators spritesheet world ecs =
-    List.range 1 9
-        |> List.foldl
-            (\value ->
-                Ecs.createEntity
-                    >> insertPredatorComponents
-                        spritesheet.playerShip2Orange
-                        (toFloat value / 10 * world.width)
-                        (world.height / 4)
-                    >> Ecs.andInsertComponent Ecs.ai ()
-                    >> Tuple.first
-            )
-            ecs
+randomPositionGenerator : Context -> Generator Position
+randomPositionGenerator context =
+    Random.map3 Position
+        (Random.float 0 context.world.width)
+        (Random.float 0 context.world.height)
+        randomAngleGenerator
 
 
-insertPredatorComponents :
+randomAngleGenerator : Generator Float
+randomAngleGenerator =
+    Random.float 0 (2 * pi)
+
+
+createAiCollector : ( Ecs, Context ) -> ( Ecs, Context )
+createAiCollector ( ecs, context ) =
+    let
+        ( ecs2, entityId ) =
+            Ecs.createEntity ecs
+
+        ( position, context2 ) =
+            Context.randomStep (randomPositionGenerator context) context
+
+        ( ecs3, _ ) =
+            ( ecs2, entityId )
+                |> insertCollectorComponents
+                    context2.assets.sprites.playerShip2Orange
+                    position
+                |> Ecs.andInsertComponent Ecs.ai ()
+    in
+    ( ecs3, context2 )
+
+
+insertCollectorComponents :
     Sprite
-    -> Float
-    -> Float
+    -> Position
     -> ( Ecs, EntityId )
     -> ( Ecs, EntityId )
-insertPredatorComponents sprite x y =
+insertCollectorComponents sprite position =
     Ecs.andInsertComponent Ecs.sprite sprite
-        >> Ecs.andInsertComponent Ecs.position (Position x y 0)
+        >> Ecs.andInsertComponent Ecs.position position
         >> Ecs.andInsertComponent Ecs.controls defaultControls
-        >> Ecs.andInsertComponent Ecs.motion predatorMotion
-        >> Ecs.andInsertComponent Ecs.velocity (Velocity 0 0 6)
-        >> Ecs.andInsertComponent Ecs.predator ()
+        >> Ecs.andInsertComponent Ecs.motion shipMotion
+        >> Ecs.andInsertComponent Ecs.velocity (Velocity 0 0 0)
+        >> Ecs.andInsertComponent Ecs.collector ()
 
 
-predatorMotion : Motion
-predatorMotion =
+shipMotion : Motion
+shipMotion =
     { maxAcceleration = 400
     , maxDeceleration = 200
     , maxAngularAcceleration = 12

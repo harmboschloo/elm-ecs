@@ -1,22 +1,22 @@
 module Ecs.Systems exposing (update, view)
 
 import Ecs exposing (Ecs, EntityId)
-import Ecs.Components exposing (Position, Velocity)
-import Ecs.Systems.KeyControls as KeyControls exposing (Keys)
+import Ecs.Context exposing (Context)
+import Ecs.Systems.KeyControls as KeyControls
 import Ecs.Systems.MotionControl as MotionControl
 import Ecs.Systems.Movement as Movement
 import Ecs.Systems.Render as Render
 import Html exposing (Html)
 
 
-update : Keys -> Float -> Ecs -> Ecs
-update keys deltaTime ecs =
-    ecs
-        |> KeyControls.updateEntities keys
-        |> MotionControl.update deltaTime
-        |> Movement.update deltaTime
+update : Context -> Ecs -> ( Ecs, Context )
+update context ecs =
+    ( ecs, context )
+        |> KeyControls.update
+        |> MotionControl.update
+        |> Movement.update
 
 
-view : Render.Config -> Html msg
+view : Context -> Ecs -> Html msg
 view =
     Render.view
