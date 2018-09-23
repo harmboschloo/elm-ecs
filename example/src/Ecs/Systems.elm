@@ -6,6 +6,7 @@ import Ecs.Systems.KeyControls as KeyControls
 import Ecs.Systems.MotionControl as MotionControl
 import Ecs.Systems.Movement as Movement
 import Ecs.Systems.Render as Render
+import Ecs.Systems.Collection as Collection
 import Html exposing (Html)
 
 
@@ -15,6 +16,7 @@ update context ecs =
         |> KeyControls.update
         |> MotionControl.update
         |> Movement.update
+        |> Collection.update
 
 
 view : Context -> Ecs -> Html msg

@@ -108,7 +108,7 @@ type alias Ai =
 
 
 type alias Collector =
-    ()
+    { radius : Float }
 
 
 type alias Collectable =

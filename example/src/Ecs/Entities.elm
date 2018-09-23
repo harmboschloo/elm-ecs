@@ -1,10 +1,11 @@
-module Ecs.Entities exposing (init)
+module Ecs.Entities exposing (createCollectableWithId, init)
 
 import Assets exposing (Assets, Spritesheet)
 import Ecs exposing (Ecs, EntityId)
 import Ecs.Components
     exposing
-        ( Controls
+        ( Collector
+        , Controls
         , Motion
         , Position
         , Sprite
@@ -21,7 +22,7 @@ import WebGL.Texture exposing (Texture)
 init : Context -> ( Ecs, Context )
 init context =
     ( Ecs.init, context )
-        |> times 20 (createCollectable context.assets.sprites.collectable)
+        |> times 30 createCollectable
         |> times 10 createAiCollector
         |> createPlayerCollector
 
@@ -92,7 +93,7 @@ insertCollectorComponents entityId sprite position =
         >> Ecs.insertComponent entityId Ecs.controls defaultControls
         >> Ecs.insertComponent entityId Ecs.motion shipMotion
         >> Ecs.insertComponent entityId Ecs.velocity (Velocity 0 0 0)
-        >> Ecs.insertComponent entityId Ecs.collector ()
+        >> Ecs.insertComponent entityId Ecs.collector (Collector 30)
 
 
 shipMotion : Motion
@@ -104,20 +105,26 @@ shipMotion =
     }
 
 
-createCollectable : Sprite -> ( Ecs, Context ) -> ( Ecs, Context )
-createCollectable sprite ( ecs, context ) =
+createCollectable : ( Ecs, Context ) -> ( Ecs, Context )
+createCollectable ( ecs, context ) =
     let
         ( ecs2, entityId ) =
             Ecs.createEntity ecs
+    in
+    createCollectableWithId entityId ( ecs2, context )
 
+
+createCollectableWithId : EntityId -> ( Ecs, Context ) -> ( Ecs, Context )
+createCollectableWithId entityId ( ecs, context ) =
+    let
         ( position, context2 ) =
             Context.randomStep (randomPositionGenerator context) context
 
-        ecs3 =
-            ecs2
-                |> Ecs.insertComponent entityId Ecs.sprite sprite
+        ecs2 =
+            ecs
+                |> Ecs.insertComponent entityId Ecs.sprite context.assets.sprites.collectable
                 |> Ecs.insertComponent entityId Ecs.position position
                 |> Ecs.insertComponent entityId Ecs.velocity (Velocity 0 0 (pi / 4))
                 |> Ecs.insertComponent entityId Ecs.collectable ()
     in
-    ( ecs3, context2 )
+    ( ecs2, context2 )
