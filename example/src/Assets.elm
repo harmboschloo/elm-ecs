@@ -12,8 +12,9 @@ type alias Assets =
 
 
 type alias Spritesheet =
-    { playerShip1Green : Sprite
-    , playerShip2Orange : Sprite
+    { playerShip : Sprite
+    , aiShip : Sprite
+    , collectable : Sprite
     }
 
 
@@ -59,7 +60,8 @@ loadSpritesheet =
 
 initSpritesheet : Texture -> Spritesheet
 initSpritesheet texture =
-    { playerShip1Green =
+    { --playerShip1Green
+      playerShip =
         { texture = texture
         , x = 237
         , y = 377
@@ -68,7 +70,8 @@ initSpritesheet texture =
         , pivotX = 0.5
         , pivotY = 0.6
         }
-    , playerShip2Orange =
+    , -- playerShip2Orange
+      aiShip =
         { texture = texture
         , x = 112
         , y = 716
@@ -76,5 +79,15 @@ initSpritesheet texture =
         , height = 75
         , pivotX = 0.5
         , pivotY = 0.6
+        }
+    , -- star_gold
+      collectable =
+        { texture = texture
+        , x = 778
+        , y = 557
+        , width = 31
+        , height = 30
+        , pivotX = 0.5
+        , pivotY = 0.5
         }
     }

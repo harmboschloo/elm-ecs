@@ -1,5 +1,6 @@
 module Ecs.Components exposing
     ( Ai
+    , Collectable
     , Collector
     , Controls
     , KeyControlsMap
@@ -107,4 +108,8 @@ type alias Ai =
 
 
 type alias Collector =
+    ()
+
+
+type alias Collectable =
     ()

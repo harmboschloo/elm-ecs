@@ -21,8 +21,9 @@ import WebGL.Texture exposing (Texture)
 init : Context -> ( Ecs, Context )
 init context =
     ( Ecs.init, context )
-        |> createPlayerCollector
+        |> times 20 (createCollectable context.assets.sprites.collectable)
         |> times 10 createAiCollector
+        |> createPlayerCollector
 
 
 createPlayerCollector : ( Ecs, Context ) -> ( Ecs, Context )
@@ -38,7 +39,7 @@ createPlayerCollector ( ecs, context ) =
             ecs2
                 |> insertCollectorComponents
                     entityId
-                    context2.assets.sprites.playerShip1Green
+                    context2.assets.sprites.playerShip
                     { x = context.world.width / 2
                     , y = context.world.height / 2
                     , angle = angle
@@ -77,7 +78,7 @@ createAiCollector ( ecs, context ) =
             ecs2
                 |> insertCollectorComponents
                     entityId
-                    context2.assets.sprites.playerShip2Orange
+                    context2.assets.sprites.aiShip
                     position
                 |> Ecs.insertComponent entityId Ecs.ai ()
     in
@@ -101,3 +102,22 @@ shipMotion =
     , maxAngularAcceleration = 12
     , maxAngularVelocity = 6
     }
+
+
+createCollectable : Sprite -> ( Ecs, Context ) -> ( Ecs, Context )
+createCollectable sprite ( ecs, context ) =
+    let
+        ( ecs2, entityId ) =
+            Ecs.createEntity ecs
+
+        ( position, context2 ) =
+            Context.randomStep (randomPositionGenerator context) context
+
+        ecs3 =
+            ecs2
+                |> Ecs.insertComponent entityId Ecs.sprite sprite
+                |> Ecs.insertComponent entityId Ecs.position position
+                |> Ecs.insertComponent entityId Ecs.velocity (Velocity 0 0 (pi / 4))
+                |> Ecs.insertComponent entityId Ecs.collectable ()
+    in
+    ( ecs3, context2 )
