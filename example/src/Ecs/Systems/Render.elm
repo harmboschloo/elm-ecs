@@ -70,7 +70,7 @@ renderEntities context ecs cameraTransform =
             [ renderBackground context cameraTransform ]
     in
     ( ecs, entities )
-        |> Ecs.processEntities2
+        |> Ecs.iterateEntities2
             Ecs.sprite
             Ecs.position
             (renderSprite cameraTransform)

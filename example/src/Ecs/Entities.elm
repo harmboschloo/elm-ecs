@@ -34,15 +34,17 @@ createPlayerCollector ( ecs, context ) =
         ( angle, context2 ) =
             Context.randomStep randomAngleGenerator context
 
-        ( ecs3, _ ) =
-            ( ecs2, entityId )
+        ecs3 =
+            ecs2
                 |> insertCollectorComponents
+                    entityId
                     context2.assets.sprites.playerShip1Green
                     { x = context.world.width / 2
                     , y = context.world.height / 2
                     , angle = angle
                     }
-                |> Ecs.andInsertComponent
+                |> Ecs.insertComponent
+                    entityId
                     Ecs.keyControlsMap
                     defaultKeyControlsMap
     in
@@ -71,28 +73,25 @@ createAiCollector ( ecs, context ) =
         ( position, context2 ) =
             Context.randomStep (randomPositionGenerator context) context
 
-        ( ecs3, _ ) =
-            ( ecs2, entityId )
+        ecs3 =
+            ecs2
                 |> insertCollectorComponents
+                    entityId
                     context2.assets.sprites.playerShip2Orange
                     position
-                |> Ecs.andInsertComponent Ecs.ai ()
+                |> Ecs.insertComponent entityId Ecs.ai ()
     in
     ( ecs3, context2 )
 
 
-insertCollectorComponents :
-    Sprite
-    -> Position
-    -> ( Ecs, EntityId )
-    -> ( Ecs, EntityId )
-insertCollectorComponents sprite position =
-    Ecs.andInsertComponent Ecs.sprite sprite
-        >> Ecs.andInsertComponent Ecs.position position
-        >> Ecs.andInsertComponent Ecs.controls defaultControls
-        >> Ecs.andInsertComponent Ecs.motion shipMotion
-        >> Ecs.andInsertComponent Ecs.velocity (Velocity 0 0 0)
-        >> Ecs.andInsertComponent Ecs.collector ()
+insertCollectorComponents : EntityId -> Sprite -> Position -> Ecs -> Ecs
+insertCollectorComponents entityId sprite position =
+    Ecs.insertComponent entityId Ecs.sprite sprite
+        >> Ecs.insertComponent entityId Ecs.position position
+        >> Ecs.insertComponent entityId Ecs.controls defaultControls
+        >> Ecs.insertComponent entityId Ecs.motion shipMotion
+        >> Ecs.insertComponent entityId Ecs.velocity (Velocity 0 0 0)
+        >> Ecs.insertComponent entityId Ecs.collector ()
 
 
 shipMotion : Motion

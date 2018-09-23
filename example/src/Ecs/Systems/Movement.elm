@@ -7,7 +7,7 @@ import Ecs.Context exposing (Context)
 
 update : ( Ecs, Context ) -> ( Ecs, Context )
 update =
-    Ecs.processEntities2 Ecs.velocity Ecs.position updateEntity
+    Ecs.iterateEntities2 Ecs.velocity Ecs.position updateEntity
 
 
 updateEntity :
@@ -18,12 +18,12 @@ updateEntity :
     -> ( Ecs, Context )
 updateEntity entityId velocity position ( ecs, { deltaTime } as context ) =
     ( Ecs.insertComponent
+        entityId
         Ecs.position
         { x = position.x + velocity.velocityX * deltaTime
         , y = position.y + velocity.velocityY * deltaTime
         , angle = position.angle + velocity.angularVelocity * deltaTime
         }
-        entityId
         ecs
     , context
     )

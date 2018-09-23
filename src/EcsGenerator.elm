@@ -79,12 +79,10 @@ generateExports model =
             , "createEntity"
             , "resetEntity"
             , "insertComponent"
-            , "andInsertComponent"
             , "removeComponent"
-            , "andRemoveComponent"
             , "removeAllComponents"
             , "getComponent"
-            , "processEntities"
+            , "iterateEntities"
             ]
                 ++ List.foldl
                     (\component list ->
@@ -97,7 +95,7 @@ generateExports model =
                 ++ (List.length model.components
                         |> List.range 2
                         |> List.map String.fromInt
-                        |> List.map (\i -> "processEntities" ++ i)
+                        |> List.map (\i -> "iterateEntities" ++ i)
                    )
     in
     "    ( " ++ (exports |> List.sort |> String.join "\n    , ") ++ "\n    )"
@@ -185,17 +183,17 @@ createEntity (Ecs model) =
     )
 
 
-resetEntity : EntityId -> Ecs -> ( Ecs, EntityId )
-resetEntity entityId ecs =
-    ( removeAllComponents entityId ecs, entityId )
+resetEntity : EntityId -> Ecs -> Ecs
+resetEntity =
+    removeAllComponents
 
 
 
 -- COMPONENTS --
 
 
-insertComponent : ComponentType a -> a -> EntityId -> Ecs -> Ecs
-insertComponent (ComponentType type_) component (EntityId entityId) (Ecs model) =
+insertComponent : EntityId -> ComponentType a -> a -> Ecs -> Ecs
+insertComponent (EntityId entityId) (ComponentType type_) component (Ecs model) =
     Ecs
         (type_.setComponents
             (Dict.insert entityId component (type_.getComponents model))
@@ -203,23 +201,13 @@ insertComponent (ComponentType type_) component (EntityId entityId) (Ecs model) 
         )
 
 
-andInsertComponent : ComponentType a -> a -> ( Ecs, EntityId ) -> ( Ecs, EntityId )
-andInsertComponent type_ component ( ecs, entityId ) =
-    ( insertComponent type_ component entityId ecs, entityId )
-
-
-removeComponent : ComponentType a -> EntityId -> Ecs -> Ecs
-removeComponent (ComponentType type_) (EntityId entityId) (Ecs model) =
+removeComponent : EntityId -> ComponentType a -> Ecs -> Ecs
+removeComponent (EntityId entityId) (ComponentType type_) (Ecs model) =
     Ecs
         (type_.setComponents
             (Dict.remove entityId (type_.getComponents model))
             model
         )
-
-
-andRemoveComponent : ComponentType a -> ( Ecs, EntityId ) -> ( Ecs, EntityId )
-andRemoveComponent type_ ( ecs, entityId ) =
-    ( removeComponent type_ entityId ecs, entityId )
 
 
 removeAllComponents : EntityId -> Ecs -> Ecs
@@ -241,8 +229,8 @@ removeAllComponents (EntityId entityId) (Ecs model) =
         }
 
 
-getComponent : ComponentType a -> EntityId -> Ecs -> Maybe a
-getComponent (ComponentType { getComponents }) (EntityId entityId) (Ecs model) =
+getComponent : EntityId -> ComponentType a -> Ecs -> Maybe a
+getComponent (EntityId entityId) (ComponentType { getComponents }) (Ecs model) =
     Dict.get entityId (getComponents model)
 """
 
@@ -253,19 +241,19 @@ generateEntityIterators model =
 -- ENTITY ITERATORS --
 
 
-processNextComponent : Dict Int a -> Int -> (a -> b) -> Maybe b
-processNextComponent components entityId processor =
-    Dict.get entityId components |> Maybe.map processor
+nextComponent : Dict Int a -> Int -> (a -> b) -> Maybe b
+nextComponent components entityId callback =
+    Dict.get entityId components |> Maybe.map callback
 
 
-processEntities :
+iterateEntities :
     ComponentType a
     -> (EntityId -> a -> ( Ecs, x ) -> ( Ecs, x ))
     -> ( Ecs, x )
     -> ( Ecs, x )
-processEntities (ComponentType type_) processor ( Ecs model, x ) =
+iterateEntities (ComponentType type_) callback ( Ecs model, x ) =
     Dict.foldl
-        (EntityId >> processor)
+        (EntityId >> callback)
         ( Ecs model, x )
         (type_.getComponents model)
 
@@ -285,7 +273,7 @@ generateEntityIterator n =
                 |> List.map String.fromInt
     in
     """
-processEntities"""
+iterateEntities"""
         ++ String.fromInt n
         ++ """ :
     """
@@ -299,14 +287,14 @@ processEntities"""
         ++ """ -> ( Ecs, x ) -> ( Ecs, x ))
     -> ( Ecs, x )
     -> ( Ecs, x )
-processEntities"""
+iterateEntities"""
         ++ String.fromInt n
         ++ " "
         ++ (range
                 |> List.map (\i -> "(ComponentType type" ++ i ++ ")")
                 |> String.join " "
            )
-        ++ """ processor ( Ecs model, x ) =
+        ++ """ callback ( Ecs model, x ) =
     let
         """
         ++ (range
@@ -325,13 +313,13 @@ processEntities"""
     Dict.foldl
         (\\entityId component1 result ->
             Dict.get entityId components2
-                |> Maybe.map (processor (EntityId entityId) component1)
+                |> Maybe.map (callback (EntityId entityId) component1)
                 """
         ++ (range
                 |> List.drop 2
                 |> List.map
                     (\i ->
-                        "|> Maybe.andThen (processNextComponent components"
+                        "|> Maybe.andThen (nextComponent components"
                             ++ i
                             ++ " entityId)\n                "
                     )

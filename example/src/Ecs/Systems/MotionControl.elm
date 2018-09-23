@@ -8,7 +8,7 @@ import Ecs.Context exposing (Context)
 
 update : ( Ecs, Context ) -> ( Ecs, Context )
 update =
-    Ecs.processEntities4
+    Ecs.iterateEntities4
         Ecs.controls
         Ecs.motion
         Ecs.velocity
@@ -26,9 +26,9 @@ updateEntity :
     -> ( Ecs, Context )
 updateEntity entityId controls motion velocity position ( ecs, context ) =
     ( Ecs.insertComponent
+        entityId
         Ecs.velocity
         (applyControls controls motion velocity position context.deltaTime)
-        entityId
         ecs
     , context
     )
