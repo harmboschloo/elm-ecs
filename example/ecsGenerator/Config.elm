@@ -1,4 +1,4 @@
-module EcsGenerator.Config exposing (config)
+module Config exposing (config)
 
 import EcsGenerator exposing (Config, addComponent, init)
 

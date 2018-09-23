@@ -1,7 +1,7 @@
-module EcsGenerator.Viewer exposing (main)
+module Viewer exposing (main)
 
+import Config exposing (config)
 import EcsGenerator exposing (generate)
-import EcsGenerator.Config exposing (config)
 import Html exposing (Html, code, text)
 import Html.Attributes exposing (style)
 
