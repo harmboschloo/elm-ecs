@@ -1,6 +1,6 @@
 module Ecs.Systems.Collection exposing (update)
 
-import Animation
+import Data.Animation as Animation
 import Ease
 import Ecs exposing (Ecs, EntityId)
 import Ecs.Components exposing (Collectable, Collector, Position, Scale, Velocity)
@@ -60,11 +60,18 @@ checkCollection collectable entityId collector position ( ecs, context ) =
             |> Ecs.insertComponent
                 collectable.id
                 Ecs.scaleAnimation
-                (Animation.animation context.time
-                    |> Animation.from 1
-                    |> Animation.to 0
-                    |> Animation.duration 1
-                    |> Animation.ease Ease.inBack
+                (Animation.animation
+                    { startTime = context.time
+                    , duration = 0.5
+                    , from = 1
+                    , to = 1.5
+                    }
+                    |> Animation.andNext
+                        (Animation.nextAnimation
+                            { duration = 0.5
+                            , to = 0
+                            }
+                        )
                 )
             |> Ecs.insertComponent collectable.id Ecs.destroy { time = context.time + 1 }
         , context

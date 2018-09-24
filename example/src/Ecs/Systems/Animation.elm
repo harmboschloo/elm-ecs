@@ -1,6 +1,6 @@
 module Ecs.Systems.Animation exposing (update)
 
-import Animation exposing (Animation)
+import Data.Animation exposing (Animation, animate)
 import Ecs exposing (Ecs, EntityId)
 import Ecs.Components exposing (Scale, ScaleAnimation)
 import Ecs.Context exposing (Context)
@@ -21,7 +21,7 @@ updateScale entityId animation scale ( ecs, context ) =
     ( Ecs.insertComponent
         entityId
         Ecs.scale
-        (Animation.animate context.time animation)
+        (animate context.time animation)
         ecs
     , context
     )

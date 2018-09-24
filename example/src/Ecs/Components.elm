@@ -18,8 +18,8 @@ module Ecs.Components exposing
     , defaultVelocity
     )
 
-import Animation exposing (Animation)
 import Clamped exposing (Clamped)
+import Data.Animation exposing (Animation)
 import KeyCode exposing (KeyCode)
 import WebGL.Texture exposing (Texture)
 
