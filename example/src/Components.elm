@@ -10,13 +10,10 @@ module Components exposing
     , ScaleAnimation
     , Sprite
     , Velocity
-    , defaultKeyControlsMap
-    , defaultPosition
-    , defaultVelocity
     )
 
 import Data.Animation exposing (Animation)
-import Data.KeyCode as KeyCode exposing (KeyCode)
+import Data.KeyCode exposing (KeyCode)
 import WebGL.Texture exposing (Texture)
 
 
@@ -27,26 +24,10 @@ type alias Position =
     }
 
 
-defaultPosition : Position
-defaultPosition =
-    { x = 0
-    , y = 0
-    , angle = 0
-    }
-
-
 type alias Velocity =
     { velocityX : Float
     , velocityY : Float
     , angularVelocity : Float
-    }
-
-
-defaultVelocity : Velocity
-defaultVelocity =
-    { velocityX = 0
-    , velocityY = 0
-    , angularVelocity = 0
     }
 
 
@@ -58,20 +39,11 @@ type alias Motion =
     }
 
 
-
 type alias KeyControlsMap =
     { accelerate : KeyCode
     , decelerate : KeyCode
     , rotateLeft : KeyCode
     , rotateRight : KeyCode
-    }
-
-
-defaultKeyControlsMap =
-    { accelerate = KeyCode.arrowUp
-    , decelerate = KeyCode.arrowDown
-    , rotateLeft = KeyCode.arrowLeft
-    , rotateRight = KeyCode.arrowRight
     }
 
 

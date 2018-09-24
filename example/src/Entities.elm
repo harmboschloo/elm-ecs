@@ -1,4 +1,4 @@
-module Entities exposing (createCollectableWithId, init)
+module Entities exposing (init)
 
 import Assets exposing (Assets, Spritesheet)
 import Components
@@ -8,10 +8,10 @@ import Components
         , Position
         , Sprite
         , Velocity
-        , defaultKeyControlsMap
         )
 import Components.Controls exposing (controls)
 import Context exposing (Context)
+import Data.KeyCode as KeyCode
 import Ecs exposing (Ecs, EntityId)
 import Random exposing (Generator)
 import Utils exposing (times)
@@ -47,7 +47,11 @@ createPlayerCollector ( ecs, context ) =
                 |> Ecs.insertComponent
                     entityId
                     Ecs.keyControlsMap
-                    defaultKeyControlsMap
+                    { accelerate = KeyCode.arrowUp
+                    , decelerate = KeyCode.arrowDown
+                    , rotateLeft = KeyCode.arrowLeft
+                    , rotateRight = KeyCode.arrowRight
+                    }
     in
     ( ecs3, context2 )
 
