@@ -1,10 +1,10 @@
-module Ecs.Systems.Collection exposing (update)
+module Systems.Collection exposing (update)
 
+import Components exposing (Collectable, Collector, Position, Scale, Velocity)
+import Context exposing (Context)
 import Data.Animation as Animation
 import Ease
 import Ecs exposing (Ecs, EntityId)
-import Ecs.Components exposing (Collectable, Collector, Position, Scale, Velocity)
-import Ecs.Context exposing (Context)
 
 
 type alias CollectableEntity =

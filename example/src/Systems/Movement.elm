@@ -1,8 +1,8 @@
-module Ecs.Systems.Movement exposing (update)
+module Systems.Movement exposing (update)
 
+import Components exposing (Position, Velocity)
+import Context exposing (Context)
 import Ecs exposing (Ecs, EntityId)
-import Ecs.Components exposing (Position, Velocity)
-import Ecs.Context exposing (Context)
 
 
 update : ( Ecs, Context ) -> ( Ecs, Context )

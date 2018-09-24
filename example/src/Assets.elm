@@ -1,6 +1,6 @@
 module Assets exposing (Assets, Spritesheet, load)
 
-import Ecs.Components exposing (Sprite)
+import Components exposing (Sprite)
 import Task exposing (Task)
 import WebGL.Texture as Texture exposing (Error, Texture, defaultOptions)
 

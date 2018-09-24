@@ -1,8 +1,7 @@
-module Ecs.Entities exposing (createCollectableWithId, init)
+module Entities exposing (createCollectableWithId, init)
 
 import Assets exposing (Assets, Spritesheet)
-import Ecs exposing (Ecs, EntityId)
-import Ecs.Components
+import Components
     exposing
         ( Collector
         , Controls
@@ -13,7 +12,8 @@ import Ecs.Components
         , defaultControls
         , defaultKeyControlsMap
         )
-import Ecs.Context as Context exposing (Context)
+import Context exposing (Context)
+import Ecs exposing (Ecs, EntityId)
 import Random exposing (Generator)
 import Utils exposing (times)
 import WebGL.Texture exposing (Texture)

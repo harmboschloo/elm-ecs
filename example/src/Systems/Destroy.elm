@@ -1,8 +1,8 @@
-module Ecs.Systems.Destroy exposing (update)
+module Systems.Destroy exposing (update)
 
+import Components exposing (Destroy)
+import Context exposing (Context)
 import Ecs exposing (Ecs, EntityId)
-import Ecs.Components exposing (Destroy)
-import Ecs.Context exposing (Context)
 
 
 update : ( Ecs, Context ) -> ( Ecs, Context )

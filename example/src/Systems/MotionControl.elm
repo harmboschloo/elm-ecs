@@ -1,9 +1,9 @@
-module Ecs.Systems.MotionControl exposing (update)
+module Systems.MotionControl exposing (update)
 
-import Clamped
+import Components exposing (Controls, Motion, Position, Velocity)
+import Context exposing (Context)
+import Data.Clamped as Clamped
 import Ecs exposing (Ecs, EntityId)
-import Ecs.Components exposing (Controls, Motion, Position, Velocity)
-import Ecs.Context exposing (Context)
 
 
 update : ( Ecs, Context ) -> ( Ecs, Context )

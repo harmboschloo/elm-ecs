@@ -1,4 +1,4 @@
-module Clamped exposing (Clamped, get, init, set, update)
+module Data.Clamped exposing (Clamped, get, init, set, update)
 
 
 type Clamped number

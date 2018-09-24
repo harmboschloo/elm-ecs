@@ -3,12 +3,12 @@ module Main exposing (main)
 import Assets exposing (Assets)
 import Browser exposing (Document)
 import Browser.Dom exposing (Viewport, getViewport)
+import Context exposing (Context)
 import Ecs exposing (Ecs)
-import Ecs.Context as Context exposing (Context)
-import Ecs.Entities as Entities
-import Ecs.Systems as Systems
+import Entities
 import Html exposing (Html, text)
 import Random
+import Systems
 import Task
 import Time exposing (Posix, posixToMillis)
 import WebGL.Texture as Texture exposing (Error)

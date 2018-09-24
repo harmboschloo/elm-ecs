@@ -1,9 +1,9 @@
-module Ecs.Systems.Animation exposing (update)
+module Systems.Animation exposing (update)
 
+import Components exposing (Scale, ScaleAnimation)
+import Context exposing (Context)
 import Data.Animation exposing (Animation, animate)
 import Ecs exposing (Ecs, EntityId)
-import Ecs.Components exposing (Scale, ScaleAnimation)
-import Ecs.Context exposing (Context)
 
 
 update : ( Ecs, Context ) -> ( Ecs, Context )

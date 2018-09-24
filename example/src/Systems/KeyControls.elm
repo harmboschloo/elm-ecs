@@ -1,9 +1,9 @@
-module Ecs.Systems.KeyControls exposing (update)
+module Systems.KeyControls exposing (update)
 
+import Components exposing (Controls, KeyControlsMap, controls)
+import Context exposing (Context)
+import Data.KeyCode exposing (KeyCode)
 import Ecs exposing (Ecs, EntityId)
-import Ecs.Components exposing (Controls, KeyControlsMap, controls)
-import Ecs.Context exposing (Context)
-import KeyCode exposing (KeyCode)
 import Set exposing (Set)
 
 

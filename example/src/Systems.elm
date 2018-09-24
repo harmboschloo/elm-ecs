@@ -1,15 +1,15 @@
-module Ecs.Systems exposing (update, view)
+module Systems exposing (update, view)
 
+import Context exposing (Context)
 import Ecs exposing (Ecs, EntityId)
-import Ecs.Context exposing (Context)
-import Ecs.Systems.KeyControls as KeyControls
-import Ecs.Systems.MotionControl as MotionControl
-import Ecs.Systems.Movement as Movement
-import Ecs.Systems.Render as Render
-import Ecs.Systems.Collection as Collection
-import Ecs.Systems.Animation as Animation
-import Ecs.Systems.Destroy as Destroy
 import Html exposing (Html)
+import Systems.Animation as Animation
+import Systems.Collection as Collection
+import Systems.Destroy as Destroy
+import Systems.KeyControls as KeyControls
+import Systems.MotionControl as MotionControl
+import Systems.Movement as Movement
+import Systems.Render as Render
 
 
 update : Context -> Ecs -> ( Ecs, Context )

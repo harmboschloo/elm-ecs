@@ -1,4 +1,4 @@
-module KeyCode exposing
+module Data.KeyCode exposing
     ( KeyCode
     , arrowDown
     , arrowLeft

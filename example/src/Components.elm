@@ -1,4 +1,4 @@
-module Ecs.Components exposing
+module Components exposing
     ( Ai
     , Collectable
     , Collector
@@ -18,9 +18,9 @@ module Ecs.Components exposing
     , defaultVelocity
     )
 
-import Clamped exposing (Clamped)
 import Data.Animation exposing (Animation)
-import KeyCode exposing (KeyCode)
+import Data.Clamped as Clamped exposing (Clamped)
+import Data.KeyCode as KeyCode exposing (KeyCode)
 import WebGL.Texture exposing (Texture)
 
 

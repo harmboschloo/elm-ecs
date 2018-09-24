@@ -1,8 +1,8 @@
-module Ecs.Systems.Render exposing (view)
+module Systems.Render exposing (view)
 
+import Components exposing (Position, Sprite)
+import Context exposing (Context)
 import Ecs exposing (Ecs, EntityId)
-import Ecs.Components exposing (Position, Sprite)
-import Ecs.Context exposing (Context)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (height, style, width)
 import Math.Matrix4 as Mat4 exposing (Mat4, makeOrtho2D)
