@@ -2,7 +2,6 @@ module Components exposing
     ( Ai
     , Collectable
     , Collector
-    , Controls
     , Destroy
     , KeyControlsMap
     , Motion
@@ -11,15 +10,12 @@ module Components exposing
     , ScaleAnimation
     , Sprite
     , Velocity
-    , controls
-    , defaultControls
     , defaultKeyControlsMap
     , defaultPosition
     , defaultVelocity
     )
 
 import Data.Animation exposing (Animation)
-import Data.Clamped as Clamped exposing (Clamped)
 import Data.KeyCode as KeyCode exposing (KeyCode)
 import WebGL.Texture exposing (Texture)
 
@@ -61,23 +57,6 @@ type alias Motion =
     , maxAngularVelocity : Float
     }
 
-
-type alias Controls =
-    { accelerate : Clamped Float
-    , rotate : Clamped Float
-    }
-
-
-defaultControls : Controls
-defaultControls =
-    controls 0 0
-
-
-controls : Float -> Float -> Controls
-controls accelerate rotate =
-    { accelerate = Clamped.init -1 1 accelerate
-    , rotate = Clamped.init -1 1 rotate
-    }
 
 
 type alias KeyControlsMap =

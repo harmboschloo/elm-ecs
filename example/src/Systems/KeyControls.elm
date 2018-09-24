@@ -1,6 +1,7 @@
 module Systems.KeyControls exposing (update)
 
-import Components exposing (Controls, KeyControlsMap, controls)
+import Components exposing (KeyControlsMap)
+import Components.Controls exposing (Controls, controls)
 import Context exposing (Context)
 import Data.KeyCode exposing (KeyCode)
 import Ecs exposing (Ecs, EntityId)
@@ -31,7 +32,7 @@ updateEntity entityId keyMap controls ( ecs, context ) =
 updateControls : KeyControlsMap -> Set KeyCode -> Controls
 updateControls keyMap activeKeys =
     let
-        accelerate =
+        acceleration =
             case
                 ( Set.member keyMap.accelerate activeKeys
                 , Set.member keyMap.decelerate activeKeys
@@ -49,7 +50,7 @@ updateControls keyMap activeKeys =
                 ( False, True ) ->
                     -1
 
-        rotate =
+        rotation =
             case
                 ( Set.member keyMap.rotateLeft activeKeys
                 , Set.member keyMap.rotateRight activeKeys
@@ -67,4 +68,4 @@ updateControls keyMap activeKeys =
                 ( False, True ) ->
                     -1
     in
-    controls accelerate rotate
+    controls acceleration rotation

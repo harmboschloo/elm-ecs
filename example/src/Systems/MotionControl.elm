@@ -1,8 +1,8 @@
 module Systems.MotionControl exposing (update)
 
-import Components exposing (Controls, Motion, Position, Velocity)
+import Components exposing (Motion, Position, Velocity)
+import Components.Controls as Controls exposing (Controls)
 import Context exposing (Context)
-import Data.Clamped as Clamped
 import Ecs exposing (Ecs, EntityId)
 
 
@@ -37,24 +37,24 @@ updateEntity entityId controls motion velocity position ( ecs, context ) =
 applyControls : Controls -> Motion -> Velocity -> Position -> Float -> Velocity
 applyControls controls motion velocity position deltaTime =
     let
-        accelerateControls =
-            Clamped.get controls.accelerate
+        accelerationControls =
+            Controls.getAcceleration controls
 
         maxAcceleration =
-            if accelerateControls > 0 then
+            if accelerationControls > 0 then
                 motion.maxAcceleration
 
             else
                 motion.maxDeceleration
 
         acceleration =
-            accelerateControls * maxAcceleration
+            accelerationControls * maxAcceleration
 
-        rotateControls =
-            Clamped.get controls.rotate
+        rotationControls =
+            Controls.getRotation controls
 
         targetAngularVelocity =
-            rotateControls * motion.maxAngularVelocity
+            rotationControls * motion.maxAngularVelocity
 
         angularAcceleration =
             clamp

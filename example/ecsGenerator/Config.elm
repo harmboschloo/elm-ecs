@@ -9,7 +9,6 @@ config =
         |> addComponent "Components" "Ai"
         |> addComponent "Components" "Collectable"
         |> addComponent "Components" "Collector"
-        |> addComponent "Components" "Controls"
         |> addComponent "Components" "Destroy"
         |> addComponent "Components" "KeyControlsMap"
         |> addComponent "Components" "Position"
@@ -18,3 +17,4 @@ config =
         |> addComponent "Components" "ScaleAnimation"
         |> addComponent "Components" "Sprite"
         |> addComponent "Components" "Velocity"
+        |> addComponent "Components.Controls" "Controls"

@@ -4,14 +4,13 @@ import Assets exposing (Assets, Spritesheet)
 import Components
     exposing
         ( Collector
-        , Controls
         , Motion
         , Position
         , Sprite
         , Velocity
-        , defaultControls
         , defaultKeyControlsMap
         )
+import Components.Controls exposing (controls)
 import Context exposing (Context)
 import Ecs exposing (Ecs, EntityId)
 import Random exposing (Generator)
@@ -90,7 +89,7 @@ insertCollectorComponents : EntityId -> Sprite -> Position -> Ecs -> Ecs
 insertCollectorComponents entityId sprite position =
     Ecs.insertComponent entityId Ecs.sprite sprite
         >> Ecs.insertComponent entityId Ecs.position position
-        >> Ecs.insertComponent entityId Ecs.controls defaultControls
+        >> Ecs.insertComponent entityId Ecs.controls (controls 0 0)
         >> Ecs.insertComponent entityId Ecs.motion shipMotion
         >> Ecs.insertComponent entityId Ecs.velocity (Velocity 0 0 0)
         >> Ecs.insertComponent entityId Ecs.collector (Collector 30)
