@@ -2,11 +2,15 @@
 
 Generates elm code for an entity-component-system (ECS) given a list of components.
 
-See the example for usage.
-
 Experimental / work in progress.
 
-## Notes and resources
+- [live example](https://harmboschloo.github.io/elm-ecs-generator/example/build/)
+- [example code](https://github.com/harmboschloo/elm-ecs-generator/tree/master/example)
+- [example generator config](https://github.com/harmboschloo/elm-ecs-generator/blob/master/example/ecsGenerator/Config.elm)
+- [example generated ecs code](https://github.com/harmboschloo/elm-ecs-generator/blob/master/example/src-generated/Ecs.elm)
+- [example generated ecs code viewer](https://harmboschloo.github.io/elm-ecs-generator/example/ecsGenerator/build/)
+
+## Resources
 
 ecs
 
