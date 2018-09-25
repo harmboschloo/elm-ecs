@@ -2,10 +2,11 @@ const { execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
+const generatorDir = path.resolve(__dirname, "ecsGenerator");
+
 module.exports.generateEcs = callback => {
   console.log("generating ecs");
 
-  const generatorDir = path.resolve(__dirname, "ecsGenerator");
   const workerOutputPath = path.resolve(generatorDir, "build/ecsGenerator.js");
   const ecsOutputPath = path.resolve(__dirname, "src-generated/Ecs.elm");
 
@@ -24,9 +25,13 @@ module.exports.generateEcs = callback => {
   });
 };
 
+module.exports.buildEcsViewer = () => {
+  console.log("building ecs viewer");
+  elmMake("Viewer.elm", "build/index.html", generatorDir);
+};
+
 module.exports.build = () => {
-  const inputPath = path.resolve(__dirname, "src/Main.elm");
-  const outputPath = path.resolve(__dirname, "build/index.html");
+  console.log("building example");
   elmMake("src/Main.elm", "build/index.html");
 };
 
