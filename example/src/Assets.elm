@@ -20,12 +20,12 @@ type alias Spritesheet =
 
 backgroundSrc : String
 backgroundSrc =
-    "/assets/spaceshooter/darkPurple.png"
+    "../assets/spaceshooter/darkPurple.png"
 
 
 spritesheetSrc : String
 spritesheetSrc =
-    "/assets/spaceshooter/sheet.png"
+    "../assets/spaceshooter/sheet.png"
 
 
 load : Task Error Assets
