@@ -1,1 +1,1 @@
-elm make src/Main.elm --output=index.html --optimize
+elm make src/Main.elm --output=build/index.html --optimize

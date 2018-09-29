@@ -5,9 +5,8 @@ Generates elm code for an entity-component-system (ECS) given a list of componen
 Experimental / work in progress.
 
 - [live](https://harmboschloo.github.io/elm-ecs-generator/)
-
 - [example](https://harmboschloo.github.io/elm-ecs-generator/#Ecs%3BComponents%2CAi%3BComponents%2CCollectable%3BComponents%2CCollector%3BComponents%2CDestroy%3BComponents%2CKeyControlsMap%3BComponents%2CMotion%3BComponents%2CPosition%3BComponents%2CScale%3BComponents%2CScaleAnimation%3BComponents%2CSprite%3BComponents%2CVelocity%3BComponents.Controls%2CControls)
-- [example demo](https://harmboschloo.github.io/elm-ecs-generator/example/) - controls: arrow keys, esc to pause
+- [example demo](https://harmboschloo.github.io/elm-ecs-generator/example/build/) - controls: arrow keys, esc to pause
 - [example code](https://github.com/harmboschloo/elm-ecs-generator/tree/master/example)
 
 ## Resources
