@@ -22,8 +22,8 @@ module Ecs exposing
     , controls
     , createEntity
     , destroy
+    , empty
     , getComponent
-    , init
     , insertComponent
     , iterateEntities
     , iterateEntities10
@@ -78,37 +78,37 @@ type Ecs
 
 
 type alias Model =
-    { controlsComponents : Dict Int Controls
-    , velocityComponents : Dict Int Velocity
-    , spriteComponents : Dict Int Sprite
-    , scaleAnimationComponents : Dict Int ScaleAnimation
-    , scaleComponents : Dict Int Scale
+    { aiComponents : Dict Int Ai
+    , collectableComponents : Dict Int Collectable
+    , collectorComponents : Dict Int Collector
+    , destroyComponents : Dict Int Destroy
+    , keyControlsMapComponents : Dict Int KeyControlsMap
     , motionComponents : Dict Int Motion
     , positionComponents : Dict Int Position
-    , keyControlsMapComponents : Dict Int KeyControlsMap
-    , destroyComponents : Dict Int Destroy
-    , collectorComponents : Dict Int Collector
-    , collectableComponents : Dict Int Collectable
-    , aiComponents : Dict Int Ai
+    , scaleComponents : Dict Int Scale
+    , scaleAnimationComponents : Dict Int ScaleAnimation
+    , spriteComponents : Dict Int Sprite
+    , velocityComponents : Dict Int Velocity
+    , controlsComponents : Dict Int Controls
     , numberOfEntities : Int
     }
 
 
-init : Ecs
-init =
+empty : Ecs
+empty =
     Ecs
-        { controlsComponents = Dict.empty
-        , velocityComponents = Dict.empty
-        , spriteComponents = Dict.empty
-        , scaleAnimationComponents = Dict.empty
-        , scaleComponents = Dict.empty
+        { aiComponents = Dict.empty
+        , collectableComponents = Dict.empty
+        , collectorComponents = Dict.empty
+        , destroyComponents = Dict.empty
+        , keyControlsMapComponents = Dict.empty
         , motionComponents = Dict.empty
         , positionComponents = Dict.empty
-        , keyControlsMapComponents = Dict.empty
-        , destroyComponents = Dict.empty
-        , collectorComponents = Dict.empty
-        , collectableComponents = Dict.empty
-        , aiComponents = Dict.empty
+        , scaleComponents = Dict.empty
+        , scaleAnimationComponents = Dict.empty
+        , spriteComponents = Dict.empty
+        , velocityComponents = Dict.empty
+        , controlsComponents = Dict.empty
         , numberOfEntities = 0
         }
 
@@ -159,18 +159,18 @@ removeAllComponents : EntityId -> Ecs -> Ecs
 removeAllComponents (EntityId entityId) (Ecs model) =
     Ecs
         { model
-            | controlsComponents = Dict.remove entityId model.controlsComponents
-            , velocityComponents = Dict.remove entityId model.velocityComponents
-            , spriteComponents = Dict.remove entityId model.spriteComponents
-            , scaleAnimationComponents = Dict.remove entityId model.scaleAnimationComponents
-            , scaleComponents = Dict.remove entityId model.scaleComponents
+            | aiComponents = Dict.remove entityId model.aiComponents
+            , collectableComponents = Dict.remove entityId model.collectableComponents
+            , collectorComponents = Dict.remove entityId model.collectorComponents
+            , destroyComponents = Dict.remove entityId model.destroyComponents
+            , keyControlsMapComponents = Dict.remove entityId model.keyControlsMapComponents
             , motionComponents = Dict.remove entityId model.motionComponents
             , positionComponents = Dict.remove entityId model.positionComponents
-            , keyControlsMapComponents = Dict.remove entityId model.keyControlsMapComponents
-            , destroyComponents = Dict.remove entityId model.destroyComponents
-            , collectorComponents = Dict.remove entityId model.collectorComponents
-            , collectableComponents = Dict.remove entityId model.collectableComponents
-            , aiComponents = Dict.remove entityId model.aiComponents
+            , scaleComponents = Dict.remove entityId model.scaleComponents
+            , scaleAnimationComponents = Dict.remove entityId model.scaleAnimationComponents
+            , spriteComponents = Dict.remove entityId model.spriteComponents
+            , velocityComponents = Dict.remove entityId model.velocityComponents
+            , controlsComponents = Dict.remove entityId model.controlsComponents
         }
 
 
@@ -181,11 +181,6 @@ getComponent (EntityId entityId) (ComponentType { getComponents }) (Ecs model) =
 
 
 -- ENTITY ITERATORS --
-
-
-nextComponent : Dict Int a -> Int -> (a -> b) -> Maybe b
-nextComponent components entityId callback =
-    Dict.get entityId components |> Maybe.map callback
 
 
 iterateEntities :
@@ -202,7 +197,7 @@ iterateEntities (ComponentType type_) callback ( Ecs model, x ) =
 
 iterateEntities2 :
     ComponentType c1
-   -> ComponentType c2
+    -> ComponentType c2
     -> (EntityId -> c1 -> c2 -> ( Ecs, x ) -> ( Ecs, x ))
     -> ( Ecs, x )
     -> ( Ecs, x )
@@ -227,8 +222,8 @@ iterateEntities2 (ComponentType type1) (ComponentType type2) callback ( Ecs mode
 
 iterateEntities3 :
     ComponentType c1
-   -> ComponentType c2
-   -> ComponentType c3
+    -> ComponentType c2
+    -> ComponentType c3
     -> (EntityId -> c1 -> c2 -> c3 -> ( Ecs, x ) -> ( Ecs, x ))
     -> ( Ecs, x )
     -> ( Ecs, x )
@@ -257,9 +252,9 @@ iterateEntities3 (ComponentType type1) (ComponentType type2) (ComponentType type
 
 iterateEntities4 :
     ComponentType c1
-   -> ComponentType c2
-   -> ComponentType c3
-   -> ComponentType c4
+    -> ComponentType c2
+    -> ComponentType c3
+    -> ComponentType c4
     -> (EntityId -> c1 -> c2 -> c3 -> c4 -> ( Ecs, x ) -> ( Ecs, x ))
     -> ( Ecs, x )
     -> ( Ecs, x )
@@ -292,10 +287,10 @@ iterateEntities4 (ComponentType type1) (ComponentType type2) (ComponentType type
 
 iterateEntities5 :
     ComponentType c1
-   -> ComponentType c2
-   -> ComponentType c3
-   -> ComponentType c4
-   -> ComponentType c5
+    -> ComponentType c2
+    -> ComponentType c3
+    -> ComponentType c4
+    -> ComponentType c5
     -> (EntityId -> c1 -> c2 -> c3 -> c4 -> c5 -> ( Ecs, x ) -> ( Ecs, x ))
     -> ( Ecs, x )
     -> ( Ecs, x )
@@ -332,11 +327,11 @@ iterateEntities5 (ComponentType type1) (ComponentType type2) (ComponentType type
 
 iterateEntities6 :
     ComponentType c1
-   -> ComponentType c2
-   -> ComponentType c3
-   -> ComponentType c4
-   -> ComponentType c5
-   -> ComponentType c6
+    -> ComponentType c2
+    -> ComponentType c3
+    -> ComponentType c4
+    -> ComponentType c5
+    -> ComponentType c6
     -> (EntityId -> c1 -> c2 -> c3 -> c4 -> c5 -> c6 -> ( Ecs, x ) -> ( Ecs, x ))
     -> ( Ecs, x )
     -> ( Ecs, x )
@@ -377,12 +372,12 @@ iterateEntities6 (ComponentType type1) (ComponentType type2) (ComponentType type
 
 iterateEntities7 :
     ComponentType c1
-   -> ComponentType c2
-   -> ComponentType c3
-   -> ComponentType c4
-   -> ComponentType c5
-   -> ComponentType c6
-   -> ComponentType c7
+    -> ComponentType c2
+    -> ComponentType c3
+    -> ComponentType c4
+    -> ComponentType c5
+    -> ComponentType c6
+    -> ComponentType c7
     -> (EntityId -> c1 -> c2 -> c3 -> c4 -> c5 -> c6 -> c7 -> ( Ecs, x ) -> ( Ecs, x ))
     -> ( Ecs, x )
     -> ( Ecs, x )
@@ -427,13 +422,13 @@ iterateEntities7 (ComponentType type1) (ComponentType type2) (ComponentType type
 
 iterateEntities8 :
     ComponentType c1
-   -> ComponentType c2
-   -> ComponentType c3
-   -> ComponentType c4
-   -> ComponentType c5
-   -> ComponentType c6
-   -> ComponentType c7
-   -> ComponentType c8
+    -> ComponentType c2
+    -> ComponentType c3
+    -> ComponentType c4
+    -> ComponentType c5
+    -> ComponentType c6
+    -> ComponentType c7
+    -> ComponentType c8
     -> (EntityId -> c1 -> c2 -> c3 -> c4 -> c5 -> c6 -> c7 -> c8 -> ( Ecs, x ) -> ( Ecs, x ))
     -> ( Ecs, x )
     -> ( Ecs, x )
@@ -482,14 +477,14 @@ iterateEntities8 (ComponentType type1) (ComponentType type2) (ComponentType type
 
 iterateEntities9 :
     ComponentType c1
-   -> ComponentType c2
-   -> ComponentType c3
-   -> ComponentType c4
-   -> ComponentType c5
-   -> ComponentType c6
-   -> ComponentType c7
-   -> ComponentType c8
-   -> ComponentType c9
+    -> ComponentType c2
+    -> ComponentType c3
+    -> ComponentType c4
+    -> ComponentType c5
+    -> ComponentType c6
+    -> ComponentType c7
+    -> ComponentType c8
+    -> ComponentType c9
     -> (EntityId -> c1 -> c2 -> c3 -> c4 -> c5 -> c6 -> c7 -> c8 -> c9 -> ( Ecs, x ) -> ( Ecs, x ))
     -> ( Ecs, x )
     -> ( Ecs, x )
@@ -542,15 +537,15 @@ iterateEntities9 (ComponentType type1) (ComponentType type2) (ComponentType type
 
 iterateEntities10 :
     ComponentType c1
-   -> ComponentType c2
-   -> ComponentType c3
-   -> ComponentType c4
-   -> ComponentType c5
-   -> ComponentType c6
-   -> ComponentType c7
-   -> ComponentType c8
-   -> ComponentType c9
-   -> ComponentType c10
+    -> ComponentType c2
+    -> ComponentType c3
+    -> ComponentType c4
+    -> ComponentType c5
+    -> ComponentType c6
+    -> ComponentType c7
+    -> ComponentType c8
+    -> ComponentType c9
+    -> ComponentType c10
     -> (EntityId -> c1 -> c2 -> c3 -> c4 -> c5 -> c6 -> c7 -> c8 -> c9 -> c10 -> ( Ecs, x ) -> ( Ecs, x ))
     -> ( Ecs, x )
     -> ( Ecs, x )
@@ -607,16 +602,16 @@ iterateEntities10 (ComponentType type1) (ComponentType type2) (ComponentType typ
 
 iterateEntities11 :
     ComponentType c1
-   -> ComponentType c2
-   -> ComponentType c3
-   -> ComponentType c4
-   -> ComponentType c5
-   -> ComponentType c6
-   -> ComponentType c7
-   -> ComponentType c8
-   -> ComponentType c9
-   -> ComponentType c10
-   -> ComponentType c11
+    -> ComponentType c2
+    -> ComponentType c3
+    -> ComponentType c4
+    -> ComponentType c5
+    -> ComponentType c6
+    -> ComponentType c7
+    -> ComponentType c8
+    -> ComponentType c9
+    -> ComponentType c10
+    -> ComponentType c11
     -> (EntityId -> c1 -> c2 -> c3 -> c4 -> c5 -> c6 -> c7 -> c8 -> c9 -> c10 -> c11 -> ( Ecs, x ) -> ( Ecs, x ))
     -> ( Ecs, x )
     -> ( Ecs, x )
@@ -677,17 +672,17 @@ iterateEntities11 (ComponentType type1) (ComponentType type2) (ComponentType typ
 
 iterateEntities12 :
     ComponentType c1
-   -> ComponentType c2
-   -> ComponentType c3
-   -> ComponentType c4
-   -> ComponentType c5
-   -> ComponentType c6
-   -> ComponentType c7
-   -> ComponentType c8
-   -> ComponentType c9
-   -> ComponentType c10
-   -> ComponentType c11
-   -> ComponentType c12
+    -> ComponentType c2
+    -> ComponentType c3
+    -> ComponentType c4
+    -> ComponentType c5
+    -> ComponentType c6
+    -> ComponentType c7
+    -> ComponentType c8
+    -> ComponentType c9
+    -> ComponentType c10
+    -> ComponentType c11
+    -> ComponentType c12
     -> (EntityId -> c1 -> c2 -> c3 -> c4 -> c5 -> c6 -> c7 -> c8 -> c9 -> c10 -> c11 -> c12 -> ( Ecs, x ) -> ( Ecs, x ))
     -> ( Ecs, x )
     -> ( Ecs, x )
@@ -750,6 +745,11 @@ iterateEntities12 (ComponentType type1) (ComponentType type2) (ComponentType typ
         components1
 
 
+nextComponent : Dict Int a -> Int -> (a -> b) -> Maybe b
+nextComponent components entityId callback =
+    Dict.get entityId components |> Maybe.map callback
+
+
 
 -- COMPONENT TYPES --
 
@@ -761,89 +761,89 @@ type ComponentType a
         }
 
 
-type alias ControlsType =
-    ComponentType Controls
+type alias AiType =
+    ComponentType Ai
 
 
-controls : ControlsType
-controls =
+ai : AiType
+ai =
     ComponentType
-        { getComponents = .controlsComponents
-        , setComponents = setControlsComponents
+        { getComponents = .aiComponents
+        , setComponents = setAiComponents
         }
 
 
-setControlsComponents : Dict Int Controls -> Model -> Model
-setControlsComponents components model =
-    { model | controlsComponents = components }
+setAiComponents : Dict Int Ai -> Model -> Model
+setAiComponents components model =
+    { model | aiComponents = components }
 
 
-type alias VelocityType =
-    ComponentType Velocity
+type alias CollectableType =
+    ComponentType Collectable
 
 
-velocity : VelocityType
-velocity =
+collectable : CollectableType
+collectable =
     ComponentType
-        { getComponents = .velocityComponents
-        , setComponents = setVelocityComponents
+        { getComponents = .collectableComponents
+        , setComponents = setCollectableComponents
         }
 
 
-setVelocityComponents : Dict Int Velocity -> Model -> Model
-setVelocityComponents components model =
-    { model | velocityComponents = components }
+setCollectableComponents : Dict Int Collectable -> Model -> Model
+setCollectableComponents components model =
+    { model | collectableComponents = components }
 
 
-type alias SpriteType =
-    ComponentType Sprite
+type alias CollectorType =
+    ComponentType Collector
 
 
-sprite : SpriteType
-sprite =
+collector : CollectorType
+collector =
     ComponentType
-        { getComponents = .spriteComponents
-        , setComponents = setSpriteComponents
+        { getComponents = .collectorComponents
+        , setComponents = setCollectorComponents
         }
 
 
-setSpriteComponents : Dict Int Sprite -> Model -> Model
-setSpriteComponents components model =
-    { model | spriteComponents = components }
+setCollectorComponents : Dict Int Collector -> Model -> Model
+setCollectorComponents components model =
+    { model | collectorComponents = components }
 
 
-type alias ScaleAnimationType =
-    ComponentType ScaleAnimation
+type alias DestroyType =
+    ComponentType Destroy
 
 
-scaleAnimation : ScaleAnimationType
-scaleAnimation =
+destroy : DestroyType
+destroy =
     ComponentType
-        { getComponents = .scaleAnimationComponents
-        , setComponents = setScaleAnimationComponents
+        { getComponents = .destroyComponents
+        , setComponents = setDestroyComponents
         }
 
 
-setScaleAnimationComponents : Dict Int ScaleAnimation -> Model -> Model
-setScaleAnimationComponents components model =
-    { model | scaleAnimationComponents = components }
+setDestroyComponents : Dict Int Destroy -> Model -> Model
+setDestroyComponents components model =
+    { model | destroyComponents = components }
 
 
-type alias ScaleType =
-    ComponentType Scale
+type alias KeyControlsMapType =
+    ComponentType KeyControlsMap
 
 
-scale : ScaleType
-scale =
+keyControlsMap : KeyControlsMapType
+keyControlsMap =
     ComponentType
-        { getComponents = .scaleComponents
-        , setComponents = setScaleComponents
+        { getComponents = .keyControlsMapComponents
+        , setComponents = setKeyControlsMapComponents
         }
 
 
-setScaleComponents : Dict Int Scale -> Model -> Model
-setScaleComponents components model =
-    { model | scaleComponents = components }
+setKeyControlsMapComponents : Dict Int KeyControlsMap -> Model -> Model
+setKeyControlsMapComponents components model =
+    { model | keyControlsMapComponents = components }
 
 
 type alias MotionType =
@@ -880,86 +880,86 @@ setPositionComponents components model =
     { model | positionComponents = components }
 
 
-type alias KeyControlsMapType =
-    ComponentType KeyControlsMap
+type alias ScaleType =
+    ComponentType Scale
 
 
-keyControlsMap : KeyControlsMapType
-keyControlsMap =
+scale : ScaleType
+scale =
     ComponentType
-        { getComponents = .keyControlsMapComponents
-        , setComponents = setKeyControlsMapComponents
+        { getComponents = .scaleComponents
+        , setComponents = setScaleComponents
         }
 
 
-setKeyControlsMapComponents : Dict Int KeyControlsMap -> Model -> Model
-setKeyControlsMapComponents components model =
-    { model | keyControlsMapComponents = components }
+setScaleComponents : Dict Int Scale -> Model -> Model
+setScaleComponents components model =
+    { model | scaleComponents = components }
 
 
-type alias DestroyType =
-    ComponentType Destroy
+type alias ScaleAnimationType =
+    ComponentType ScaleAnimation
 
 
-destroy : DestroyType
-destroy =
+scaleAnimation : ScaleAnimationType
+scaleAnimation =
     ComponentType
-        { getComponents = .destroyComponents
-        , setComponents = setDestroyComponents
+        { getComponents = .scaleAnimationComponents
+        , setComponents = setScaleAnimationComponents
         }
 
 
-setDestroyComponents : Dict Int Destroy -> Model -> Model
-setDestroyComponents components model =
-    { model | destroyComponents = components }
+setScaleAnimationComponents : Dict Int ScaleAnimation -> Model -> Model
+setScaleAnimationComponents components model =
+    { model | scaleAnimationComponents = components }
 
 
-type alias CollectorType =
-    ComponentType Collector
+type alias SpriteType =
+    ComponentType Sprite
 
 
-collector : CollectorType
-collector =
+sprite : SpriteType
+sprite =
     ComponentType
-        { getComponents = .collectorComponents
-        , setComponents = setCollectorComponents
+        { getComponents = .spriteComponents
+        , setComponents = setSpriteComponents
         }
 
 
-setCollectorComponents : Dict Int Collector -> Model -> Model
-setCollectorComponents components model =
-    { model | collectorComponents = components }
+setSpriteComponents : Dict Int Sprite -> Model -> Model
+setSpriteComponents components model =
+    { model | spriteComponents = components }
 
 
-type alias CollectableType =
-    ComponentType Collectable
+type alias VelocityType =
+    ComponentType Velocity
 
 
-collectable : CollectableType
-collectable =
+velocity : VelocityType
+velocity =
     ComponentType
-        { getComponents = .collectableComponents
-        , setComponents = setCollectableComponents
+        { getComponents = .velocityComponents
+        , setComponents = setVelocityComponents
         }
 
 
-setCollectableComponents : Dict Int Collectable -> Model -> Model
-setCollectableComponents components model =
-    { model | collectableComponents = components }
+setVelocityComponents : Dict Int Velocity -> Model -> Model
+setVelocityComponents components model =
+    { model | velocityComponents = components }
 
 
-type alias AiType =
-    ComponentType Ai
+type alias ControlsType =
+    ComponentType Controls
 
 
-ai : AiType
-ai =
+controls : ControlsType
+controls =
     ComponentType
-        { getComponents = .aiComponents
-        , setComponents = setAiComponents
+        { getComponents = .controlsComponents
+        , setComponents = setControlsComponents
         }
 
 
-setAiComponents : Dict Int Ai -> Model -> Model
-setAiComponents components model =
-    { model | aiComponents = components }
+setControlsComponents : Dict Int Controls -> Model -> Model
+setControlsComponents components model =
+    { model | controlsComponents = components }

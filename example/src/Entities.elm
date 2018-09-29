@@ -20,7 +20,7 @@ import WebGL.Texture exposing (Texture)
 
 init : Context -> ( Ecs, Context )
 init context =
-    ( Ecs.init, context )
+    ( Ecs.empty, context )
         |> times 30 createCollectable
         |> times 10 createAiCollector
         |> createPlayerCollector

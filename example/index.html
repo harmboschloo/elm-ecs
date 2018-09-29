@@ -8047,7 +8047,7 @@ var author$project$Context$init = F3(
 		};
 	});
 var author$project$Ecs$Ecs = elm$core$Basics$identity;
-var author$project$Ecs$init = {M: elm$core$Dict$empty, N: elm$core$Dict$empty, O: elm$core$Dict$empty, P: elm$core$Dict$empty, Q: elm$core$Dict$empty, T: elm$core$Dict$empty, U: elm$core$Dict$empty, aj: 0, W: elm$core$Dict$empty, Z: elm$core$Dict$empty, _: elm$core$Dict$empty, ab: elm$core$Dict$empty, ac: elm$core$Dict$empty};
+var author$project$Ecs$empty = {M: elm$core$Dict$empty, N: elm$core$Dict$empty, O: elm$core$Dict$empty, P: elm$core$Dict$empty, Q: elm$core$Dict$empty, T: elm$core$Dict$empty, U: elm$core$Dict$empty, aj: 0, W: elm$core$Dict$empty, Z: elm$core$Dict$empty, _: elm$core$Dict$empty, ab: elm$core$Dict$empty, ac: elm$core$Dict$empty};
 var elm$random$Random$step = F2(
 	function (_n0, seed) {
 		var generator = _n0;
@@ -8438,7 +8438,7 @@ var author$project$Entities$init = function (context) {
 				author$project$Utils$times,
 				30,
 				author$project$Entities$createCollectable,
-				_Utils_Tuple2(author$project$Ecs$init, context))));
+				_Utils_Tuple2(author$project$Ecs$empty, context))));
 };
 var elm$core$Basics$round = _Basics_round;
 var elm$random$Random$initialSeed = function (x) {
