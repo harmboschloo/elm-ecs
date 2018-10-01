@@ -4,11 +4,12 @@ import Array exposing (Array)
 import Browser
 import Browser.Dom as Dom
 import Browser.Navigation as Navigation
+import Css
 import EcsGenerator
-import Html exposing (Html)
-import Html.Attributes as Attributes
-import Html.Events as Events
-import Html.Lazy as Lazy
+import Html.Styled as Html exposing (Html)
+import Html.Styled.Attributes as Attributes
+import Html.Styled.Events as Events
+import Html.Styled.Lazy as Lazy
 import Set exposing (Set)
 import Task
 import Url exposing (Url)
@@ -150,13 +151,14 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "ECS Generator"
     , body =
-        [ viewEcsModuleNameInput model.ecsModuleName
-        , Html.hr [] []
-        , viewComponentInputs model.componentModuleName model.componentTypeName
-        , Lazy.lazy viewComponents model.components
-        , Html.hr [] []
-        , Lazy.lazy2 viewGeneratResult model.ecsModuleName model.components
-        ]
+        List.map Html.toUnstyled
+            [ viewEcsModuleNameInput model.ecsModuleName
+            , Html.hr [] []
+            , viewComponentInputs model.componentModuleName model.componentTypeName
+            , Lazy.lazy viewComponents model.components
+            , Html.hr [] []
+            , Lazy.lazy2 viewGeneratResult model.ecsModuleName model.components
+            ]
     }
 
 
@@ -241,7 +243,7 @@ viewErrors errors =
             List.length errors
     in
     Html.textarea
-        (textAreaStyles lines ++ errorStyles True)
+        (textAreaAttributes lines ++ errorStyles True)
         [ Html.text content ]
 
 
@@ -252,24 +254,26 @@ viewEcsCode ecsCode =
             List.length (String.lines ecsCode)
     in
     Html.textarea
-        (textAreaStyles lines)
+        (textAreaAttributes lines)
         [ Html.text ecsCode ]
 
 
-textAreaStyles : Int -> List (Html.Attribute Msg)
-textAreaStyles numberOfLines =
+textAreaAttributes : Int -> List (Html.Attribute Msg)
+textAreaAttributes numberOfLines =
     [ Attributes.readonly True
     , Attributes.rows (numberOfLines + 1)
     , Attributes.wrap "off"
-    , Attributes.style "width" "100%"
+    , Attributes.css [ Css.width (Css.pct 100) ]
     ]
 
 
 errorStyles : Bool -> List (Html.Attribute Msg)
 errorStyles hasError =
     if hasError then
-        [ Attributes.style "color" "#ff0000"
-        , Attributes.style "borderColor" "#ff0000"
+        [ Attributes.css
+            [ Css.color (Css.rgb 255 0 0)
+            , Css.borderColor (Css.rgb 255 0 0)
+            ]
         ]
 
     else
