@@ -1,47 +1,17 @@
 module Main exposing (main)
 
 import Array exposing (Array)
-import Browser exposing (Document, UrlRequest)
+import Browser
 import Browser.Dom as Dom
 import Browser.Navigation as Navigation
 import EcsGenerator
-    exposing
-        ( Config
-        , Error(..)
-        , decode
-        , encode
-        , generate
-        )
-import Html
-    exposing
-        ( Attribute
-        , Html
-        , button
-        , div
-        , form
-        , hr
-        , input
-        , text
-        , textarea
-        )
-import Html.Attributes
-    exposing
-        ( autofocus
-        , id
-        , pattern
-        , placeholder
-        , readonly
-        , required
-        , rows
-        , style
-        , value
-        , wrap
-        )
-import Html.Events exposing (onClick, onInput, onSubmit)
-import Html.Lazy exposing (lazy, lazy2)
+import Html exposing (Html)
+import Html.Attributes as Attributes
+import Html.Events as Events
+import Html.Lazy as Lazy
 import Set exposing (Set)
 import Task
-import Url exposing (Url, percentDecode, percentEncode)
+import Url exposing (Url)
 
 
 
@@ -79,7 +49,7 @@ init _ url navigationKey =
 
 type Msg
     = NoOp
-    | LinkClicked UrlRequest
+    | LinkClicked Browser.UrlRequest
     | UrlChanged Url
     | EcsModuleNameChanged String
     | ComponentModuleNameChanged String
@@ -152,12 +122,12 @@ update msg model =
             )
 
 
-decodeFragment : Url -> Config
+decodeFragment : Url -> EcsGenerator.Config
 decodeFragment url =
     url.fragment
-        |> Maybe.andThen percentDecode
+        |> Maybe.andThen Url.percentDecode
         |> Maybe.withDefault ""
-        |> decode
+        |> EcsGenerator.decode
 
 
 pushUrlCmd : Navigation.Key -> String -> Set ( String, String ) -> Cmd Msg
@@ -165,7 +135,7 @@ pushUrlCmd navigationKey ecsModuleName components =
     Navigation.pushUrl
         navigationKey
         ("#"
-            ++ (encode >> percentEncode)
+            ++ (EcsGenerator.encode >> Url.percentEncode)
                 { moduleName = ecsModuleName
                 , components = components
                 }
@@ -176,28 +146,28 @@ pushUrlCmd navigationKey ecsModuleName components =
 -- VIEW
 
 
-view : Model -> Document Msg
+view : Model -> Browser.Document Msg
 view model =
     { title = "ECS Generator"
     , body =
         [ viewEcsModuleNameInput model.ecsModuleName
-        , hr [] []
+        , Html.hr [] []
         , viewComponentInputs model.componentModuleName model.componentTypeName
-        , lazy viewComponents model.components
-        , hr [] []
-        , lazy2 viewGeneratResult model.ecsModuleName model.components
+        , Lazy.lazy viewComponents model.components
+        , Html.hr [] []
+        , Lazy.lazy2 viewGeneratResult model.ecsModuleName model.components
         ]
     }
 
 
 viewEcsModuleNameInput : String -> Html Msg
 viewEcsModuleNameInput moduleName =
-    div []
-        [ text "ecs module name: "
-        , input
-            [ value moduleName
-            , required True
-            , onInput EcsModuleNameChanged
+    Html.div []
+        [ Html.text "ecs module name: "
+        , Html.input
+            [ Attributes.value moduleName
+            , Attributes.required True
+            , Events.onInput EcsModuleNameChanged
             ]
             []
         ]
@@ -205,51 +175,51 @@ viewEcsModuleNameInput moduleName =
 
 viewComponentInputs : String -> String -> Html Msg
 viewComponentInputs moduleName typeName =
-    form [ onSubmit ComponentSubmitted ]
-        [ text "component: "
-        , input
-            [ id "componentModuleNameInput"
-            , value moduleName
-            , required True
-            , placeholder "module name"
-            , autofocus True
-            , onInput ComponentModuleNameChanged
+    Html.form [ Events.onSubmit ComponentSubmitted ]
+        [ Html.text "component: "
+        , Html.input
+            [ Attributes.id "componentModuleNameInput"
+            , Attributes.value moduleName
+            , Attributes.required True
+            , Attributes.placeholder "module name"
+            , Attributes.autofocus True
+            , Events.onInput ComponentModuleNameChanged
             ]
             []
-        , input
-            [ value typeName
-            , required True
-            , placeholder "type name"
-            , onInput ComponentTypeNameChanged
+        , Html.input
+            [ Attributes.value typeName
+            , Attributes.required True
+            , Attributes.placeholder "type name"
+            , Events.onInput ComponentTypeNameChanged
             ]
             []
-        , button [] [ text "add" ]
+        , Html.button [] [ Html.text "add" ]
         ]
 
 
 viewComponents : Set ( String, String ) -> Html Msg
 viewComponents components =
-    div [] (components |> Set.toList |> List.sort |> List.map viewComponent)
+    Html.div [] (components |> Set.toList |> List.sort |> List.map viewComponent)
 
 
 viewComponent : ( String, String ) -> Html Msg
 viewComponent ( moduleName, typeName ) =
-    div []
-        [ text (moduleName ++ "." ++ typeName)
-        , button
-            [ onClick (ComponentRemoved ( moduleName, typeName )) ]
-            [ text "remove" ]
+    Html.div []
+        [ Html.text (moduleName ++ "." ++ typeName)
+        , Html.button
+            [ Events.onClick (ComponentRemoved ( moduleName, typeName )) ]
+            [ Html.text "remove" ]
         ]
 
 
 viewGeneratResult : String -> Set ( String, String ) -> Html Msg
 viewGeneratResult ecsModuleName components =
     if Set.isEmpty components then
-        text "-- no components --"
+        Html.text "-- no components --"
 
     else
         case
-            generate
+            EcsGenerator.generate
                 { moduleName = ecsModuleName
                 , components = components
                 }
@@ -261,7 +231,7 @@ viewGeneratResult ecsModuleName components =
                 viewEcsCode ecsCode
 
 
-viewErrors : List Error -> Html Msg
+viewErrors : List EcsGenerator.Error -> Html Msg
 viewErrors errors =
     let
         content =
@@ -270,9 +240,9 @@ viewErrors errors =
         lines =
             List.length errors
     in
-    textarea
+    Html.textarea
         (textAreaStyles lines ++ errorStyles True)
-        [ text content ]
+        [ Html.text content ]
 
 
 viewEcsCode : String -> Html Msg
@@ -281,44 +251,44 @@ viewEcsCode ecsCode =
         lines =
             List.length (String.lines ecsCode)
     in
-    textarea
+    Html.textarea
         (textAreaStyles lines)
-        [ text ecsCode ]
+        [ Html.text ecsCode ]
 
 
-textAreaStyles : Int -> List (Attribute Msg)
+textAreaStyles : Int -> List (Html.Attribute Msg)
 textAreaStyles numberOfLines =
-    [ readonly True
-    , rows (numberOfLines + 1)
-    , wrap "off"
-    , style "width" "100%"
+    [ Attributes.readonly True
+    , Attributes.rows (numberOfLines + 1)
+    , Attributes.wrap "off"
+    , Attributes.style "width" "100%"
     ]
 
 
-errorStyles : Bool -> List (Attribute Msg)
+errorStyles : Bool -> List (Html.Attribute Msg)
 errorStyles hasError =
     if hasError then
-        [ style "color" "#ff0000"
-        , style "borderColor" "#ff0000"
+        [ Attributes.style "color" "#ff0000"
+        , Attributes.style "borderColor" "#ff0000"
         ]
 
     else
         []
 
 
-errorToString : Error -> String
+errorToString : EcsGenerator.Error -> String
 errorToString error =
     case error of
-        ComponentsEmpty ->
+        EcsGenerator.ComponentsEmpty ->
             "No components entered"
 
-        InvalidEcsModuleName name ->
+        EcsGenerator.InvalidEcsModuleName name ->
             "Invalid ecs module name: " ++ name
 
-        InvalidComponentModuleName name ->
+        EcsGenerator.InvalidComponentModuleName name ->
             "Invalid component module name: " ++ name
 
-        InvalidComponentTypeName name ->
+        EcsGenerator.InvalidComponentTypeName name ->
             "Invalid component type name: " ++ name
 
 
