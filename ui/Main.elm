@@ -34,9 +34,16 @@ init _ url navigationKey =
     let
         config =
             decodeFragment url
+
+        ecsModuleName =
+            if String.isEmpty config.moduleName then
+                "Ecs"
+
+            else
+                config.moduleName
     in
     ( { navigationKey = navigationKey
-      , ecsModuleName = config.moduleName
+      , ecsModuleName = ecsModuleName
       , componentModuleName = ""
       , componentTypeName = ""
       , components = config.components
@@ -323,8 +330,11 @@ viewComponent ( moduleName, typeName ) =
 
 viewGeneratResult : String -> Set ( String, String ) -> Html Msg
 viewGeneratResult ecsModuleName components =
-    if Set.isEmpty components then
-        Html.text "-- no components --"
+    if String.isEmpty ecsModuleName then
+        viewEcsCode "-- no ecs module name --"
+
+    else if Set.isEmpty components then
+        viewEcsCode "-- no components --"
 
     else
         case
@@ -350,7 +360,7 @@ viewErrors errors =
             List.length errors
     in
     Html.textarea
-        (textAreaAttributes lines ++ errorStyles True)
+        (textAreaAttributes lines errorStyles)
         [ Html.text content ]
 
 
@@ -361,33 +371,29 @@ viewEcsCode ecsCode =
             List.length (String.lines ecsCode)
     in
     Html.textarea
-        (textAreaAttributes lines)
+        (textAreaAttributes lines [])
         [ Html.text ecsCode ]
 
 
-textAreaAttributes : Int -> List (Html.Attribute Msg)
-textAreaAttributes numberOfLines =
+textAreaAttributes : Int -> List Css.Style -> List (Html.Attribute Msg)
+textAreaAttributes numberOfLines extraStyles =
     [ Attributes.readonly True
     , Attributes.rows (numberOfLines + 1)
     , Attributes.wrap "off"
     , Attributes.css
-        [ Css.width (Css.pct 100)
-        , Css.fontSize (Css.px 14)
-        ]
+        ([ Css.width (Css.pct 100)
+         , Css.fontSize (Css.px 14)
+         ]
+            ++ extraStyles
+        )
     ]
 
 
-errorStyles : Bool -> List (Html.Attribute Msg)
-errorStyles hasError =
-    if hasError then
-        [ Attributes.css
-            [ Css.color (Css.rgb 255 0 0)
-            , Css.borderColor (Css.rgb 255 0 0)
-            ]
-        ]
-
-    else
-        []
+errorStyles : List Css.Style
+errorStyles =
+    [ Css.color (Css.rgb 255 0 0)
+    , Css.borderColor (Css.rgb 255 0 0)
+    ]
 
 
 errorToString : EcsGenerator.Error -> String

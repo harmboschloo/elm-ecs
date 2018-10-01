@@ -15,6 +15,7 @@ import Set exposing (Set)
 import String exposing (trim)
 import Url exposing (percentEncode)
 
+
 type alias Config =
     { moduleName : String
     , components : Set ( String, String )
@@ -455,15 +456,7 @@ decode string =
             String.split ";" string
 
         ecsModuleName =
-            case List.head parts of
-                Nothing ->
-                    "Ecs"
-
-                Just "" ->
-                    "Ecs"
-
-                Just moduleName ->
-                    moduleName
+            Maybe.withDefault "" (List.head parts)
 
         components =
             List.drop 1 parts
