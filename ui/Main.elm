@@ -217,7 +217,7 @@ viewHeading =
         (List.intersperse (Html.text " - ")
             [ Html.text "ecs generator"
             , Html.a
-                [ Attributes.href "https://harmboschloo.github.io/elm-ecs-generator/#Ecs%3BComponents%2CAi%3BComponents%2CCollectable%3BComponents%2CCollector%3BComponents%2CDestroy%3BComponents%2CKeyControlsMap%3BComponents%2CMotion%3BComponents%2CPosition%3BComponents%2CScale%3BComponents%2CScaleAnimation%3BComponents%2CSprite%3BComponents%2CVelocity%3BComponents.Controls%2CControls" ]
+                [ Attributes.href "#Ecs%3BComponents%2CAi%3BComponents%2CCollectable%3BComponents%2CCollector%3BComponents%2CDestroy%3BComponents%2CKeyControlsMap%3BComponents%2CMotion%3BComponents%2CPosition%3BComponents%2CScale%3BComponents%2CScaleAnimation%3BComponents%2CSprite%3BComponents%2CVelocity%3BComponents.Controls%2CControls" ]
                 [ Html.text "example" ]
             , Html.a
                 [ Attributes.href "https://harmboschloo.github.io/elm-ecs-generator/example/build/" ]

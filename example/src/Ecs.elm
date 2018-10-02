@@ -23,6 +23,7 @@ module Ecs exposing
     , controls
     , createEntity
     , destroy
+    , destroyEntity
     , empty
     , getComponent
     , insertComponent
@@ -41,7 +42,6 @@ module Ecs exposing
     , keyControlsMap
     , motion
     , position
-    , removeAllComponents
     , removeComponent
     , resetEntity
     , scale
@@ -74,6 +74,10 @@ import Dict
         )
 
 
+
+-- MODEL --
+
+
 type Ecs
     = Ecs Model
 
@@ -91,7 +95,8 @@ type alias Model =
     , spriteComponents : Dict Int Sprite
     , velocityComponents : Dict Int Velocity
     , controlsComponents : Dict Int Controls
-    , numberOfEntities : Int
+    , numberOfCreatedEntities : Int
+    , destroyedEntities : List Int
     }
 
 
@@ -110,7 +115,8 @@ empty =
         , spriteComponents = Dict.empty
         , velocityComponents = Dict.empty
         , controlsComponents = Dict.empty
-        , numberOfEntities = 0
+        , numberOfCreatedEntities = 0
+        , destroyedEntities = []
         }
 
 
@@ -124,14 +130,46 @@ type EntityId
 
 createEntity : Ecs -> ( Ecs, EntityId )
 createEntity (Ecs model) =
-    ( Ecs { model | numberOfEntities = model.numberOfEntities + 1 }
-    , EntityId model.numberOfEntities
-    )
+    case model.destroyedEntities of
+        [] ->
+            ( Ecs { model | numberOfCreatedEntities = model.numberOfCreatedEntities + 1 }
+            , EntityId model.numberOfCreatedEntities
+            )
+
+        head :: tail ->
+            ( Ecs { model | destroyedEntities = tail }
+            , EntityId head
+            )
+
+
+destroyEntity : EntityId -> Ecs -> Ecs
+destroyEntity (EntityId entityId) (Ecs model) =
+    { model | destroyedEntities = entityId :: model.destroyedEntities }
+        |> removeEntityComponents entityId
+        |> Ecs
 
 
 resetEntity : EntityId -> Ecs -> Ecs
-resetEntity =
-    removeAllComponents
+resetEntity (EntityId entityId) (Ecs model) =
+    Ecs (removeEntityComponents entityId model)
+
+
+removeEntityComponents : Int -> Model -> Model
+removeEntityComponents entityId model =
+    { model
+        | aiComponents = Dict.remove entityId model.aiComponents
+        , collectableComponents = Dict.remove entityId model.collectableComponents
+        , collectorComponents = Dict.remove entityId model.collectorComponents
+        , destroyComponents = Dict.remove entityId model.destroyComponents
+        , keyControlsMapComponents = Dict.remove entityId model.keyControlsMapComponents
+        , motionComponents = Dict.remove entityId model.motionComponents
+        , positionComponents = Dict.remove entityId model.positionComponents
+        , scaleComponents = Dict.remove entityId model.scaleComponents
+        , scaleAnimationComponents = Dict.remove entityId model.scaleAnimationComponents
+        , spriteComponents = Dict.remove entityId model.spriteComponents
+        , velocityComponents = Dict.remove entityId model.velocityComponents
+        , controlsComponents = Dict.remove entityId model.controlsComponents
+    }
 
 
 
@@ -154,25 +192,6 @@ removeComponent (EntityId entityId) (ComponentType type_) (Ecs model) =
             (Dict.remove entityId (type_.getComponents model))
             model
         )
-
-
-removeAllComponents : EntityId -> Ecs -> Ecs
-removeAllComponents (EntityId entityId) (Ecs model) =
-    Ecs
-        { model
-            | aiComponents = Dict.remove entityId model.aiComponents
-            , collectableComponents = Dict.remove entityId model.collectableComponents
-            , collectorComponents = Dict.remove entityId model.collectorComponents
-            , destroyComponents = Dict.remove entityId model.destroyComponents
-            , keyControlsMapComponents = Dict.remove entityId model.keyControlsMapComponents
-            , motionComponents = Dict.remove entityId model.motionComponents
-            , positionComponents = Dict.remove entityId model.positionComponents
-            , scaleComponents = Dict.remove entityId model.scaleComponents
-            , scaleAnimationComponents = Dict.remove entityId model.scaleAnimationComponents
-            , spriteComponents = Dict.remove entityId model.spriteComponents
-            , velocityComponents = Dict.remove entityId model.velocityComponents
-            , controlsComponents = Dict.remove entityId model.controlsComponents
-        }
 
 
 getComponent : EntityId -> ComponentType a -> Ecs -> Maybe a

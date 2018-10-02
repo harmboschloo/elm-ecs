@@ -17,7 +17,7 @@ updateEntity :
     -> ( Ecs, Context )
 updateEntity entityId destroy ( ecs, context ) =
     if context.time >= destroy.time then
-        ( Ecs.resetEntity entityId ecs, context )
+        ( Ecs.destroyEntity entityId ecs, context )
 
     else
         ( ecs, context )

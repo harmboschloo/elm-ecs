@@ -8299,95 +8299,101 @@ var author$project$EcsGenerator$generateApi = F2(
 				'getComponent',
 				A2(
 					author$project$EcsGenerator$declaration,
-					'\r\nremoveAllComponents : EntityId -> Ecs -> Ecs\r\nremoveAllComponents (EntityId entityId) (Ecs model) =\r\n    Ecs\r\n        { model\r\n            | ' + (A2(
-						elm$core$String$join,
-						'\n            , ',
-						A2(
-							elm$core$List$map,
-							A2(
-								elm$core$Basics$composeR,
-								author$project$EcsGenerator$componentModelField,
-								function (field) {
-									return field + (' = Dict.remove entityId model.' + field);
-								}),
-							components)) + '\r\n        }\r\n'),
+					'\r\nremoveComponent : EntityId -> ComponentType a -> Ecs -> Ecs\r\nremoveComponent (EntityId entityId) (ComponentType type_) (Ecs model) =\r\n    Ecs\r\n        (type_.setComponents\r\n            (Dict.remove entityId (type_.getComponents model))\r\n            model\r\n        )\r\n',
 					A2(
 						author$project$EcsGenerator$exposed,
-						'removeAllComponents',
+						'removeComponent',
 						A2(
 							author$project$EcsGenerator$declaration,
-							'\r\nremoveComponent : EntityId -> ComponentType a -> Ecs -> Ecs\r\nremoveComponent (EntityId entityId) (ComponentType type_) (Ecs model) =\r\n    Ecs\r\n        (type_.setComponents\r\n            (Dict.remove entityId (type_.getComponents model))\r\n            model\r\n        )\r\n',
+							'\r\ninsertComponent : EntityId -> ComponentType a -> a -> Ecs -> Ecs\r\ninsertComponent (EntityId entityId) (ComponentType type_) component (Ecs model) =\r\n    Ecs\r\n        (type_.setComponents\r\n            (Dict.insert entityId component (type_.getComponents model))\r\n            model\r\n        )\r\n',
 							A2(
 								author$project$EcsGenerator$exposed,
-								'removeComponent',
+								'insertComponent',
 								A2(
-									author$project$EcsGenerator$declaration,
-									'\r\ninsertComponent : EntityId -> ComponentType a -> a -> Ecs -> Ecs\r\ninsertComponent (EntityId entityId) (ComponentType type_) component (Ecs model) =\r\n    Ecs\r\n        (type_.setComponents\r\n            (Dict.insert entityId component (type_.getComponents model))\r\n            model\r\n        )\r\n',
+									author$project$EcsGenerator$comment,
+									'-- COMPONENTS --',
 									A2(
-										author$project$EcsGenerator$exposed,
-										'insertComponent',
-										A2(
-											author$project$EcsGenerator$comment,
-											'-- COMPONENTS --',
+										author$project$EcsGenerator$declaration,
+										'\r\nremoveEntityComponents : Int -> Model -> Model\r\nremoveEntityComponents entityId model =\r\n    { model\r\n        | ' + (A2(
+											elm$core$String$join,
+											'\n        , ',
 											A2(
-												author$project$EcsGenerator$declaration,
-												'\r\nresetEntity : EntityId -> Ecs -> Ecs\r\nresetEntity =\r\n    removeAllComponents\r\n',
+												elm$core$List$map,
 												A2(
-													author$project$EcsGenerator$exposed,
-													'resetEntity',
+													elm$core$Basics$composeR,
+													author$project$EcsGenerator$componentModelField,
+													function (field) {
+														return field + (' = Dict.remove entityId model.' + field);
+													}),
+												components)) + '\r\n    }\r\n'),
+										A2(
+											author$project$EcsGenerator$declaration,
+											'\r\nresetEntity : EntityId -> Ecs -> Ecs\r\nresetEntity (EntityId entityId) (Ecs model) =\r\n    Ecs (removeEntityComponents entityId model)\r\n',
+											A2(
+												author$project$EcsGenerator$exposed,
+												'resetEntity',
+												A2(
+													author$project$EcsGenerator$declaration,
+													'\r\ndestroyEntity : EntityId -> Ecs -> Ecs\r\ndestroyEntity (EntityId entityId) (Ecs model) =\r\n    { model | destroyedEntities = entityId :: model.destroyedEntities }\r\n        |> removeEntityComponents entityId\r\n        |> Ecs\r\n',
 													A2(
-														author$project$EcsGenerator$declaration,
-														'\r\ncreateEntity : Ecs -> ( Ecs, EntityId )\r\ncreateEntity (Ecs model) =\r\n    ( Ecs { model | numberOfEntities = model.numberOfEntities + 1 }\r\n    , EntityId model.numberOfEntities\r\n    )\r\n',
+														author$project$EcsGenerator$exposed,
+														'destroyEntity',
 														A2(
-															author$project$EcsGenerator$exposed,
-															'createEntity',
+															author$project$EcsGenerator$declaration,
+															'\r\ncreateEntity : Ecs -> ( Ecs, EntityId )\r\ncreateEntity (Ecs model) =\r\n    case model.destroyedEntities of\r\n        [] ->\r\n            ( Ecs { model | numberOfCreatedEntities = model.numberOfCreatedEntities + 1 }\r\n            , EntityId model.numberOfCreatedEntities\r\n            )\r\n\r\n        head :: tail ->\r\n            ( Ecs { model | destroyedEntities = tail }\r\n            , EntityId head\r\n            )\r\n',
 															A2(
-																author$project$EcsGenerator$declaration,
-																'\r\ntype EntityId\r\n    = EntityId Int\r\n',
+																author$project$EcsGenerator$exposed,
+																'createEntity',
 																A2(
-																	author$project$EcsGenerator$exposed,
-																	'EntityId',
+																	author$project$EcsGenerator$declaration,
+																	'\r\ntype EntityId\r\n    = EntityId Int\r\n',
 																	A2(
-																		author$project$EcsGenerator$comment,
-																		'-- ENTITIES --',
+																		author$project$EcsGenerator$exposed,
+																		'EntityId',
 																		A2(
-																			author$project$EcsGenerator$declaration,
-																			'\r\nempty : Ecs\r\nempty =\r\n    Ecs\r\n        { ' + (A2(
-																				elm$core$String$join,
-																				'\n        , ',
-																				A2(
-																					elm$core$List$map,
-																					A2(
-																						elm$core$Basics$composeR,
-																						author$project$EcsGenerator$componentModelField,
-																						author$project$EcsGenerator$append(' = Dict.empty')),
-																					components)) + '\r\n        , numberOfEntities = 0\r\n        }\r\n'),
+																			author$project$EcsGenerator$comment,
+																			'-- ENTITIES --',
 																			A2(
-																				author$project$EcsGenerator$exposed,
-																				'empty',
-																				A2(
-																					author$project$EcsGenerator$declaration,
-																					'\r\ntype alias Model =\r\n    { ' + (A2(
-																						elm$core$String$join,
-																						'\n    , ',
+																				author$project$EcsGenerator$declaration,
+																				'\r\nempty : Ecs\r\nempty =\r\n    Ecs\r\n        { ' + (A2(
+																					elm$core$String$join,
+																					'\n        , ',
+																					A2(
+																						elm$core$List$map,
 																						A2(
-																							elm$core$List$map,
-																							function (c) {
-																								return author$project$EcsGenerator$componentModelField(c) + (' : Dict Int ' + author$project$EcsGenerator$componentTypeName(c));
-																							},
-																							components)) + '\r\n    , numberOfEntities : Int\r\n    }\r\n'),
+																							elm$core$Basics$composeR,
+																							author$project$EcsGenerator$componentModelField,
+																							author$project$EcsGenerator$append(' = Dict.empty')),
+																						components)) + '\r\n        , numberOfCreatedEntities = 0\r\n        , destroyedEntities = []\r\n        }\r\n'),
+																				A2(
+																					author$project$EcsGenerator$exposed,
+																					'empty',
 																					A2(
 																						author$project$EcsGenerator$declaration,
-																						'\r\ntype Ecs\r\n    = Ecs Model\r\n',
+																						'\r\ntype alias Model =\r\n    { ' + (A2(
+																							elm$core$String$join,
+																							'\n    , ',
+																							A2(
+																								elm$core$List$map,
+																								function (c) {
+																									return author$project$EcsGenerator$componentModelField(c) + (' : Dict Int ' + author$project$EcsGenerator$componentTypeName(c));
+																								},
+																								components)) + '\r\n    , numberOfCreatedEntities : Int\r\n    , destroyedEntities : List Int\r\n    }\r\n'),
 																						A2(
-																							author$project$EcsGenerator$exposed,
-																							'Ecs',
-																							A3(
-																								author$project$EcsGenerator$imported,
-																								'Dict',
-																								_List_fromArray(
-																									['Dict']),
-																								doc))))))))))))))))))))));
+																							author$project$EcsGenerator$declaration,
+																							'\r\ntype Ecs\r\n    = Ecs Model\r\n',
+																							A2(
+																								author$project$EcsGenerator$exposed,
+																								'Ecs',
+																								A2(
+																									author$project$EcsGenerator$comment,
+																									'-- MODEL --',
+																									A3(
+																										author$project$EcsGenerator$imported,
+																										'Dict',
+																										_List_fromArray(
+																											['Dict']),
+																										doc))))))))))))))))))))))));
 	});
 var author$project$EcsGenerator$generateComponentImports = F2(
 	function (components, doc) {
@@ -8875,7 +8881,7 @@ var author$project$Main$viewHeading = A2(
 				rtfeldman$elm_css$Html$Styled$a,
 				_List_fromArray(
 					[
-						rtfeldman$elm_css$Html$Styled$Attributes$href('https://harmboschloo.github.io/elm-ecs-generator/#Ecs%3BComponents%2CAi%3BComponents%2CCollectable%3BComponents%2CCollector%3BComponents%2CDestroy%3BComponents%2CKeyControlsMap%3BComponents%2CMotion%3BComponents%2CPosition%3BComponents%2CScale%3BComponents%2CScaleAnimation%3BComponents%2CSprite%3BComponents%2CVelocity%3BComponents.Controls%2CControls')
+						rtfeldman$elm_css$Html$Styled$Attributes$href('#Ecs%3BComponents%2CAi%3BComponents%2CCollectable%3BComponents%2CCollector%3BComponents%2CDestroy%3BComponents%2CKeyControlsMap%3BComponents%2CMotion%3BComponents%2CPosition%3BComponents%2CScale%3BComponents%2CScaleAnimation%3BComponents%2CSprite%3BComponents%2CVelocity%3BComponents.Controls%2CControls')
 					]),
 				_List_fromArray(
 					[

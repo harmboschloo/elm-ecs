@@ -58,6 +58,7 @@ generateApi : List ( String, String ) -> Document -> Document
 generateApi components doc =
     doc
         |> imported "Dict" [ "Dict" ]
+        |> comment "-- MODEL --"
         |> exposed "Ecs"
         |> declaration """
 type Ecs
@@ -77,7 +78,8 @@ type alias Model =
                         |> String.join "\n    , "
                    )
                 ++ """
-    , numberOfEntities : Int
+    , numberOfCreatedEntities : Int
+    , destroyedEntities : List Int
     }
 """
             )
@@ -94,7 +96,8 @@ empty =
                         |> String.join "\n        , "
                    )
                 ++ """
-        , numberOfEntities = 0
+        , numberOfCreatedEntities = 0
+        , destroyedEntities = []
         }
 """
             )
@@ -108,16 +111,52 @@ type EntityId
         |> declaration """
 createEntity : Ecs -> ( Ecs, EntityId )
 createEntity (Ecs model) =
-    ( Ecs { model | numberOfEntities = model.numberOfEntities + 1 }
-    , EntityId model.numberOfEntities
-    )
+    case model.destroyedEntities of
+        [] ->
+            ( Ecs { model | numberOfCreatedEntities = model.numberOfCreatedEntities + 1 }
+            , EntityId model.numberOfCreatedEntities
+            )
+
+        head :: tail ->
+            ( Ecs { model | destroyedEntities = tail }
+            , EntityId head
+            )
+"""
+        |> exposed "destroyEntity"
+        |> declaration """
+destroyEntity : EntityId -> Ecs -> Ecs
+destroyEntity (EntityId entityId) (Ecs model) =
+    { model | destroyedEntities = entityId :: model.destroyedEntities }
+        |> removeEntityComponents entityId
+        |> Ecs
 """
         |> exposed "resetEntity"
         |> declaration """
 resetEntity : EntityId -> Ecs -> Ecs
-resetEntity =
-    removeAllComponents
+resetEntity (EntityId entityId) (Ecs model) =
+    Ecs (removeEntityComponents entityId model)
 """
+        |> declaration
+            ("""
+removeEntityComponents : Int -> Model -> Model
+removeEntityComponents entityId model =
+    { model
+        | """
+                ++ (List.map
+                        (componentModelField
+                            >> (\field ->
+                                    field
+                                        ++ " = Dict.remove entityId model."
+                                        ++ field
+                               )
+                        )
+                        components
+                        |> String.join "\n        , "
+                   )
+                ++ """
+    }
+"""
+            )
         |> comment "-- COMPONENTS --"
         |> exposed "insertComponent"
         |> declaration """
@@ -139,29 +178,6 @@ removeComponent (EntityId entityId) (ComponentType type_) (Ecs model) =
             model
         )
 """
-        |> exposed "removeAllComponents"
-        |> declaration
-            ("""
-removeAllComponents : EntityId -> Ecs -> Ecs
-removeAllComponents (EntityId entityId) (Ecs model) =
-    Ecs
-        { model
-            | """
-                ++ (List.map
-                        (componentModelField
-                            >> (\field ->
-                                    field
-                                        ++ " = Dict.remove entityId model."
-                                        ++ field
-                               )
-                        )
-                        components
-                        |> String.join "\n            , "
-                   )
-                ++ """
-        }
-"""
-            )
         |> exposed "getComponent"
         |> declaration """
 getComponent : EntityId -> ComponentType a -> Ecs -> Maybe a
