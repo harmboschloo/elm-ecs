@@ -266,8 +266,8 @@ iterateEntities"""
     in
     Dict.foldl
         (\\entityId component1 result ->
-            Dict.get entityId components2
-                |> Maybe.map (callback (EntityId entityId) component1)
+            callback (EntityId entityId) component1
+                |> nextComponent components2 entityId
                 """
                 ++ (range
                         |> List.drop 2

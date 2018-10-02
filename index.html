@@ -8483,7 +8483,7 @@ var author$project$EcsGenerator$generateEntityIterator = F2(
 					function (i) {
 						return 'components' + (i + (' =\n            type' + (i + '.getComponents model')));
 					},
-					range)) + ('\r\n    in\r\n    Dict.foldl\r\n        (\\entityId component1 result ->\r\n            Dict.get entityId components2\r\n                |> Maybe.map (callback (EntityId entityId) component1)\r\n                ' + (A2(
+					range)) + ('\r\n    in\r\n    Dict.foldl\r\n        (\\entityId component1 result ->\r\n            callback (EntityId entityId) component1\r\n                |> nextComponent components2 entityId\r\n                ' + (A2(
 				elm$core$String$join,
 				'',
 				A2(

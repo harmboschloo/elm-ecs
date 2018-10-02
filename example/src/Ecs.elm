@@ -231,8 +231,8 @@ iterateEntities2 (ComponentType type1) (ComponentType type2) callback ( Ecs mode
     in
     Dict.foldl
         (\entityId component1 result ->
-            Dict.get entityId components2
-                |> Maybe.map (callback (EntityId entityId) component1)
+            callback (EntityId entityId) component1
+                |> nextComponent components2 entityId
                 |> Maybe.map ((|>) result)
                 |> Maybe.withDefault result
         )
@@ -260,8 +260,8 @@ iterateEntities3 (ComponentType type1) (ComponentType type2) (ComponentType type
     in
     Dict.foldl
         (\entityId component1 result ->
-            Dict.get entityId components2
-                |> Maybe.map (callback (EntityId entityId) component1)
+            callback (EntityId entityId) component1
+                |> nextComponent components2 entityId
                 |> Maybe.andThen (nextComponent components3 entityId)
                 |> Maybe.map ((|>) result)
                 |> Maybe.withDefault result
@@ -294,8 +294,8 @@ iterateEntities4 (ComponentType type1) (ComponentType type2) (ComponentType type
     in
     Dict.foldl
         (\entityId component1 result ->
-            Dict.get entityId components2
-                |> Maybe.map (callback (EntityId entityId) component1)
+            callback (EntityId entityId) component1
+                |> nextComponent components2 entityId
                 |> Maybe.andThen (nextComponent components3 entityId)
                 |> Maybe.andThen (nextComponent components4 entityId)
                 |> Maybe.map ((|>) result)
@@ -333,8 +333,8 @@ iterateEntities5 (ComponentType type1) (ComponentType type2) (ComponentType type
     in
     Dict.foldl
         (\entityId component1 result ->
-            Dict.get entityId components2
-                |> Maybe.map (callback (EntityId entityId) component1)
+            callback (EntityId entityId) component1
+                |> nextComponent components2 entityId
                 |> Maybe.andThen (nextComponent components3 entityId)
                 |> Maybe.andThen (nextComponent components4 entityId)
                 |> Maybe.andThen (nextComponent components5 entityId)
@@ -377,8 +377,8 @@ iterateEntities6 (ComponentType type1) (ComponentType type2) (ComponentType type
     in
     Dict.foldl
         (\entityId component1 result ->
-            Dict.get entityId components2
-                |> Maybe.map (callback (EntityId entityId) component1)
+            callback (EntityId entityId) component1
+                |> nextComponent components2 entityId
                 |> Maybe.andThen (nextComponent components3 entityId)
                 |> Maybe.andThen (nextComponent components4 entityId)
                 |> Maybe.andThen (nextComponent components5 entityId)
@@ -426,8 +426,8 @@ iterateEntities7 (ComponentType type1) (ComponentType type2) (ComponentType type
     in
     Dict.foldl
         (\entityId component1 result ->
-            Dict.get entityId components2
-                |> Maybe.map (callback (EntityId entityId) component1)
+            callback (EntityId entityId) component1
+                |> nextComponent components2 entityId
                 |> Maybe.andThen (nextComponent components3 entityId)
                 |> Maybe.andThen (nextComponent components4 entityId)
                 |> Maybe.andThen (nextComponent components5 entityId)
@@ -480,8 +480,8 @@ iterateEntities8 (ComponentType type1) (ComponentType type2) (ComponentType type
     in
     Dict.foldl
         (\entityId component1 result ->
-            Dict.get entityId components2
-                |> Maybe.map (callback (EntityId entityId) component1)
+            callback (EntityId entityId) component1
+                |> nextComponent components2 entityId
                 |> Maybe.andThen (nextComponent components3 entityId)
                 |> Maybe.andThen (nextComponent components4 entityId)
                 |> Maybe.andThen (nextComponent components5 entityId)
@@ -539,8 +539,8 @@ iterateEntities9 (ComponentType type1) (ComponentType type2) (ComponentType type
     in
     Dict.foldl
         (\entityId component1 result ->
-            Dict.get entityId components2
-                |> Maybe.map (callback (EntityId entityId) component1)
+            callback (EntityId entityId) component1
+                |> nextComponent components2 entityId
                 |> Maybe.andThen (nextComponent components3 entityId)
                 |> Maybe.andThen (nextComponent components4 entityId)
                 |> Maybe.andThen (nextComponent components5 entityId)
@@ -603,8 +603,8 @@ iterateEntities10 (ComponentType type1) (ComponentType type2) (ComponentType typ
     in
     Dict.foldl
         (\entityId component1 result ->
-            Dict.get entityId components2
-                |> Maybe.map (callback (EntityId entityId) component1)
+            callback (EntityId entityId) component1
+                |> nextComponent components2 entityId
                 |> Maybe.andThen (nextComponent components3 entityId)
                 |> Maybe.andThen (nextComponent components4 entityId)
                 |> Maybe.andThen (nextComponent components5 entityId)
@@ -672,8 +672,8 @@ iterateEntities11 (ComponentType type1) (ComponentType type2) (ComponentType typ
     in
     Dict.foldl
         (\entityId component1 result ->
-            Dict.get entityId components2
-                |> Maybe.map (callback (EntityId entityId) component1)
+            callback (EntityId entityId) component1
+                |> nextComponent components2 entityId
                 |> Maybe.andThen (nextComponent components3 entityId)
                 |> Maybe.andThen (nextComponent components4 entityId)
                 |> Maybe.andThen (nextComponent components5 entityId)
@@ -746,8 +746,8 @@ iterateEntities12 (ComponentType type1) (ComponentType type2) (ComponentType typ
     in
     Dict.foldl
         (\entityId component1 result ->
-            Dict.get entityId components2
-                |> Maybe.map (callback (EntityId entityId) component1)
+            callback (EntityId entityId) component1
+                |> nextComponent components2 entityId
                 |> Maybe.andThen (nextComponent components3 entityId)
                 |> Maybe.andThen (nextComponent components4 entityId)
                 |> Maybe.andThen (nextComponent components5 entityId)

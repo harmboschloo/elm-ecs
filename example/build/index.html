@@ -8522,6 +8522,13 @@ var elm$core$Maybe$map = F2(
 			return elm$core$Maybe$Nothing;
 		}
 	});
+var author$project$Ecs$nextComponent = F3(
+	function (components, entityId, callback) {
+		return A2(
+			elm$core$Maybe$map,
+			callback,
+			A2(elm$core$Dict$get, entityId, components));
+	});
 var elm$core$Maybe$withDefault = F2(
 	function (_default, maybe) {
 		if (!maybe.$) {
@@ -8549,10 +8556,11 @@ var author$project$Ecs$iterateEntities2 = F4(
 						A2(
 							elm$core$Maybe$map,
 							elm$core$Basics$apR(result),
-							A2(
-								elm$core$Maybe$map,
-								A2(callback, entityId, component1),
-								A2(elm$core$Dict$get, entityId, components2))));
+							A3(
+								author$project$Ecs$nextComponent,
+								components2,
+								entityId,
+								A2(callback, entityId, component1))));
 				}),
 			_Utils_Tuple2(model, x),
 			components1);
@@ -8976,13 +8984,6 @@ var author$project$Systems$KeyControls$updateEntity = F4(
 			context);
 	});
 var author$project$Systems$KeyControls$update = A3(author$project$Ecs$iterateEntities2, author$project$Ecs$keyControlsMap, author$project$Ecs$controls, author$project$Systems$KeyControls$updateEntity);
-var author$project$Ecs$nextComponent = F3(
-	function (components, entityId, callback) {
-		return A2(
-			elm$core$Maybe$map,
-			callback,
-			A2(elm$core$Dict$get, entityId, components));
-	});
 var elm$core$Maybe$andThen = F2(
 	function (callback, maybeValue) {
 		if (!maybeValue.$) {
@@ -9020,10 +9021,11 @@ var author$project$Ecs$iterateEntities4 = F6(
 								A2(
 									elm$core$Maybe$andThen,
 									A2(author$project$Ecs$nextComponent, components3, entityId),
-									A2(
-										elm$core$Maybe$map,
-										A2(callback, entityId, component1),
-										A2(elm$core$Dict$get, entityId, components2))))));
+									A3(
+										author$project$Ecs$nextComponent,
+										components2,
+										entityId,
+										A2(callback, entityId, component1))))));
 				}),
 			_Utils_Tuple2(model, x),
 			components1);
