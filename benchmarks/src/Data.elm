@@ -1,6 +1,7 @@
 module Data exposing
     ( EcsApi
     , arrayEcsApi
+    , arraySetEcsApi
     , createEntity
     , createEntity2
     , createEntity3
@@ -10,6 +11,7 @@ module Data exposing
     )
 
 import ArrayEcs
+import ArraySetEcs
 import DictEcs
 import DictSetEcs
 
@@ -58,6 +60,17 @@ dictSetEcsApi =
     , a = DictSetEcs.a
     , b = DictSetEcs.b
     , c = DictSetEcs.c
+    }
+
+
+arraySetEcsApi : EcsApi ArraySetEcs.Ecs ArraySetEcs.EntityId (ArraySetEcs.ComponentType ())
+arraySetEcsApi =
+    { empty = ArraySetEcs.empty
+    , createEntity = ArraySetEcs.createEntity
+    , insertComponent = ArraySetEcs.insertComponent
+    , a = ArraySetEcs.a
+    , b = ArraySetEcs.b
+    , c = ArraySetEcs.c
     }
 
 
