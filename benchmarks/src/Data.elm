@@ -5,11 +5,13 @@ module Data exposing
     , createEntity2
     , createEntity3
     , dictEcsApi
+    , dictSetEcsApi
     , times
     )
 
 import ArrayEcs
 import DictEcs
+import DictSetEcs
 
 
 
@@ -45,6 +47,17 @@ dictEcsApi =
     , a = DictEcs.a
     , b = DictEcs.b
     , c = DictEcs.c
+    }
+
+
+dictSetEcsApi : EcsApi DictSetEcs.Ecs DictSetEcs.EntityId (DictSetEcs.ComponentType ())
+dictSetEcsApi =
+    { empty = DictSetEcs.empty
+    , createEntity = DictSetEcs.createEntity
+    , insertComponent = DictSetEcs.insertComponent
+    , a = DictSetEcs.a
+    , b = DictSetEcs.b
+    , c = DictSetEcs.c
     }
 
 
