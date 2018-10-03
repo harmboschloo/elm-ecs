@@ -6,6 +6,7 @@ module Ecs exposing
     ( AiType
     , CollectableType
     , CollectorType
+    , ComponentType
     , ControlsType
     , DestroyType
     , Ecs

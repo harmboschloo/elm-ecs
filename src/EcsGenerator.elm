@@ -292,6 +292,7 @@ generateComponentTypes : List ( String, String ) -> Document -> Document
 generateComponentTypes components doc =
     doc
         |> comment "-- COMPONENT TYPES --"
+        |> exposed "ComponentType"
         |> declaration """
 type ComponentType a
     = ComponentType

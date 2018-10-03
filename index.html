@@ -8441,7 +8441,10 @@ var author$project$EcsGenerator$generateComponentTypes = F2(
 			A2(
 				author$project$EcsGenerator$declaration,
 				'\r\ntype ComponentType a\r\n    = ComponentType\r\n        { getComponents : Model -> Dict Int a\r\n        , setComponents : Dict Int a -> Model -> Model\r\n        }\r\n',
-				A2(author$project$EcsGenerator$comment, '-- COMPONENT TYPES --', doc)));
+				A2(
+					author$project$EcsGenerator$exposed,
+					'ComponentType',
+					A2(author$project$EcsGenerator$comment, '-- COMPONENT TYPES --', doc))));
 	});
 var author$project$EcsGenerator$generateEntityIterator = F2(
 	function (n, doc) {
