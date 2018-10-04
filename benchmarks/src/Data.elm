@@ -7,13 +7,43 @@ module Data exposing
     , createEntity3
     , dictEcsApi
     , dictSetEcsApi
-    , times
+    , initCompareIterateEntities
+    , initCompareIterateEntitiesLabel
     )
 
 import ArrayEcs
 import ArraySetEcs
 import DictEcs
 import DictSetEcs
+import Random
+import Random.List
+
+
+
+-- Data
+
+
+initCompareIterateEntitiesLabel : String
+initCompareIterateEntitiesLabel =
+    "500 a, 500 b, 500 c, 100 ab, 100 ac, 100 abc"
+
+
+initCompareIterateEntities : EcsApi ecs entityId componentType -> ecs
+initCompareIterateEntities api =
+    Random.step
+        ([ List.repeat 500 (createEntity api api.a)
+         , List.repeat 500 (createEntity api api.b)
+         , List.repeat 500 (createEntity api api.c)
+         , List.repeat 100 (createEntity2 api api.a api.b)
+         , List.repeat 100 (createEntity2 api api.a api.c)
+         , List.repeat 100 (createEntity3 api api.a api.b api.c)
+         ]
+            |> List.concat
+            |> Random.List.shuffle
+        )
+        (Random.initialSeed 1234)
+        |> Tuple.first
+        |> List.foldl (\f ecs -> f ecs) api.empty
 
 
 
@@ -119,16 +149,3 @@ createEntity3 api componentType1 componentType2 componentType3 ecs =
         |> api.insertComponent entityId componentType1 ()
         |> api.insertComponent entityId componentType2 ()
         |> api.insertComponent entityId componentType3 ()
-
-
-
--- HELPERS
-
-
-times : Int -> (a -> a) -> a -> a
-times count function value =
-    if count <= 0 then
-        value
-
-    else
-        times (count - 1) function (function value)
