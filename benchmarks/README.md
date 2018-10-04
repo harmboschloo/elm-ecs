@@ -1,5 +1,5 @@
 # ECS Benchmarks
 
-- [ArrayEcs vs DictEcs](build/arrayVsDictEcs.html)
-- [DictEcs vs DictSetEcs](build/dictVsDictSetEcs.html)
-- [DictSetEcs vs ArraySetEcs](build/dictSetVsArraySetEcs.html)
+- [ArrayEcs vs DictEcs](https://harmboschloo.github.io/elm-ecs-generator/benchmarks/build/arrayVsDictEcs.html)
+- [DictEcs vs DictSetEcs](https://harmboschloo.github.io/elm-ecs-generator/benchmarks/build/dictVsDictSetEcs.html)
+- [DictSetEcs vs ArraySetEcs](https://harmboschloo.github.io/elm-ecs-generator/benchmarks/build/dictSetVsArraySetEcs.html)
