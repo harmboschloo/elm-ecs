@@ -15,7 +15,7 @@ type alias CollectableEntity =
 
 update : ( Ecs, Context ) -> ( Ecs, Context )
 update =
-    Ecs.iterateEntities2 Ecs.collectable Ecs.position checkCollectable
+    Ecs.iterateCollectableEntities checkCollectable
 
 
 checkCollectable :
@@ -25,9 +25,7 @@ checkCollectable :
     -> ( Ecs, Context )
     -> ( Ecs, Context )
 checkCollectable entityId collectable position =
-    Ecs.iterateEntities2
-        Ecs.collector
-        Ecs.position
+    Ecs.iterateCollectorEntities
         (checkCollection (CollectableEntity entityId position))
 
 

@@ -7,16 +7,16 @@ import Ecs exposing (Ecs, EntityId)
 
 update : ( Ecs, Context ) -> ( Ecs, Context )
 update =
-    Ecs.iterateEntities2 Ecs.velocity Ecs.position updateEntity
+    Ecs.iterateMovementEntities updateEntity
 
 
 updateEntity :
     EntityId
-    -> Velocity
     -> Position
+    -> Velocity
     -> ( Ecs, Context )
     -> ( Ecs, Context )
-updateEntity entityId velocity position ( ecs, { deltaTime } as context ) =
+updateEntity entityId position velocity ( ecs, { deltaTime } as context ) =
     ( Ecs.insertComponent
         entityId
         Ecs.position

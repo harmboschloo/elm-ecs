@@ -8,34 +8,29 @@ import Ecs exposing (Ecs, EntityId)
 
 update : ( Ecs, Context ) -> ( Ecs, Context )
 update =
-    Ecs.iterateEntities4
-        Ecs.controls
-        Ecs.motion
-        Ecs.velocity
-        Ecs.position
-        updateEntity
+    Ecs.iterateMotionControlEntities updateEntity
 
 
 updateEntity :
     EntityId
     -> Controls
     -> Motion
-    -> Velocity
     -> Position
+    -> Velocity
     -> ( Ecs, Context )
     -> ( Ecs, Context )
-updateEntity entityId controls motion velocity position ( ecs, context ) =
+updateEntity entityId controls motion position velocity ( ecs, context ) =
     ( Ecs.insertComponent
         entityId
         Ecs.velocity
-        (applyControls controls motion velocity position context.deltaTime)
+        (applyControls controls motion position velocity context.deltaTime)
         ecs
     , context
     )
 
 
-applyControls : Controls -> Motion -> Velocity -> Position -> Float -> Velocity
-applyControls controls motion velocity position deltaTime =
+applyControls : Controls -> Motion -> Position -> Velocity -> Float -> Velocity
+applyControls controls motion position velocity deltaTime =
     let
         accelerationControls =
             Controls.getAcceleration controls

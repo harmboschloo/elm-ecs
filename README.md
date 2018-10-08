@@ -5,7 +5,7 @@ Generates elm code for an entity-component-system (ECS) given a list of componen
 Experimental / work in progress.
 
 - [live](https://harmboschloo.github.io/elm-ecs-generator/)
-- [example](https://harmboschloo.github.io/elm-ecs-generator/#Ecs%3BComponents%2CAi%3BComponents%2CCollectable%3BComponents%2CCollector%3BComponents%2CDestroy%3BComponents%2CKeyControlsMap%3BComponents%2CMotion%3BComponents%2CPosition%3BComponents%2CScale%3BComponents%2CScaleAnimation%3BComponents%2CSprite%3BComponents%2CVelocity%3BComponents.Controls%2CControls)
+- [example](https://harmboschloo.github.io/elm-ecs-generator/#%7B%22ecs%22%3A%5B%22Ecs%22%2C%22Ecs%22%5D%2C%22components%22%3A%5B%5B%22Components%22%2C%22Ai%22%5D%2C%5B%22Components%22%2C%22Collectable%22%5D%2C%5B%22Components%22%2C%22Collector%22%5D%2C%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22Destroy%22%5D%2C%5B%22Components%22%2C%22KeyControlsMap%22%5D%2C%5B%22Components%22%2C%22Motion%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Scale%22%5D%2C%5B%22Components%22%2C%22ScaleAnimation%22%5D%2C%5B%22Components%22%2C%22Sprite%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%2C%22iterators%22%3A%5B%7B%22name%22%3A%22Animation%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Scale%22%5D%2C%5B%22Components%22%2C%22ScaleAnimation%22%5D%5D%7D%2C%7B%22name%22%3A%22Collectable%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Collectable%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%5D%7D%2C%7B%22name%22%3A%22Collector%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Collector%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%5D%7D%2C%7B%22name%22%3A%22Destroy%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Destroy%22%5D%5D%7D%2C%7B%22name%22%3A%22KeyControls%22%2C%22components%22%3A%5B%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22KeyControlsMap%22%5D%5D%7D%2C%7B%22name%22%3A%22MotionControl%22%2C%22components%22%3A%5B%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22Motion%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%7D%2C%7B%22name%22%3A%22Movement%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%7D%2C%7B%22name%22%3A%22Render%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Sprite%22%5D%5D%7D%5D%7D)
 - [example demo](https://harmboschloo.github.io/elm-ecs-generator/example/build/) - controls: arrow keys, esc to pause
 - [example code](https://github.com/harmboschloo/elm-ecs-generator/tree/master/example)
 
@@ -25,6 +25,7 @@ ecs
 webgl
 
 - https://package.elm-lang.org/packages/elm-explorations/webgl/latest/
+- https://package.elm-lang.org/packages/Zinggi/elm-2d-game/latest/
 - http://www.lighthouse3d.com/tutorials/glsl-tutorial/spaces-and-matrices/
 - http://www.lighthouse3d.com/tutorials/glsl-tutorial/texture-coordinates/
 - https://webglfundamentals.org/webgl/lessons/webgl-shaders-and-glsl.html

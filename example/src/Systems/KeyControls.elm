@@ -10,16 +10,16 @@ import Set exposing (Set)
 
 update : ( Ecs, Context ) -> ( Ecs, Context )
 update =
-    Ecs.iterateEntities2 Ecs.keyControlsMap Ecs.controls updateEntity
+    Ecs.iterateKeyControlsEntities updateEntity
 
 
 updateEntity :
     EntityId
-    -> KeyControlsMap
     -> Controls
+    -> KeyControlsMap
     -> ( Ecs, Context )
     -> ( Ecs, Context )
-updateEntity entityId keyMap controls ( ecs, context ) =
+updateEntity entityId controls keyMap ( ecs, context ) =
     ( Ecs.insertComponent
         entityId
         Ecs.controls

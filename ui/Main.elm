@@ -6,11 +6,14 @@ import Browser.Dom as Dom
 import Browser.Navigation as Navigation
 import Css
 import Css.Global
+import Dict exposing (Dict)
 import EcsGenerator
+import EcsGenerator.Error as Error exposing (Error)
 import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as Attributes
 import Html.Styled.Events as Events
-import Html.Styled.Lazy as Lazy
+import Html.Styled.Keyed as HtmlKeyed
+import Json.Decode as Decode
 import Set exposing (Set)
 import Task
 import Url exposing (Url)
@@ -22,34 +25,134 @@ import Url exposing (Url)
 
 type alias Model =
     { navigationKey : Navigation.Key
-    , ecsModuleName : String
-    , componentModuleName : String
-    , componentTypeName : String
-    , components : Set ( String, String )
+    , encodedConfig : String
+    , decodeError : Maybe String
+    , ecs : ( String, String )
+    , components : Dict Int ( String, String )
+    , iterators : Dict Int { name : String, components : List Int }
+    , lastComponentKey : Int
+    , lastIteratorKey : Int
     }
 
 
 init : () -> Url -> Navigation.Key -> ( Model, Cmd Msg )
 init _ url navigationKey =
-    let
-        config =
-            decodeFragment url
+    case decodeFragment url of
+        Err decodeError ->
+            ( initEmpty navigationKey decodeError
+            , Cmd.none
+            )
 
-        ecsModuleName =
-            if String.isEmpty config.moduleName then
-                "Ecs"
+        Ok config ->
+            ( initFromConfig navigationKey config
+            , Cmd.none
+            )
+
+
+initEmpty : Navigation.Key -> Maybe String -> Model
+initEmpty navigationKey decodeError =
+    { navigationKey = navigationKey
+    , encodedConfig = ""
+    , decodeError = decodeError
+    , ecs = ( "Ecs", "Ecs" )
+    , components = Dict.empty
+    , iterators = Dict.empty
+    , lastComponentKey = 0
+    , lastIteratorKey = 0
+    }
+
+
+initFromConfig : Navigation.Key -> EcsGenerator.Config -> Model
+initFromConfig navigationKey config =
+    let
+        ecs =
+            ( EcsGenerator.ecsModuleName config.ecs
+            , EcsGenerator.ecsTypeName config.ecs
+            )
+
+        components =
+            config.components
+                |> List.map fromComponent
+                |> List.indexedMap (\i v -> ( i, v ))
+                |> Dict.fromList
+
+        iterators =
+            config.iterators
+                |> List.map
+                    (\iterator ->
+                        { name = EcsGenerator.iteratorName iterator
+                        , components =
+                            EcsGenerator.iteratorComponents iterator
+                                |> List.map fromComponent
+                                |> List.filterMap (findComponentKey components)
+                        }
+                    )
+                |> List.indexedMap (\i v -> ( i, v ))
+                |> Dict.fromList
+    in
+    { navigationKey = navigationKey
+    , encodedConfig = ""
+    , ecs = ecs
+    , decodeError = Nothing
+    , components = components
+    , iterators = iterators
+    , lastComponentKey = Dict.size components
+    , lastIteratorKey = Dict.size iterators
+    }
+
+
+fromComponent : EcsGenerator.Component -> ( String, String )
+fromComponent component =
+    ( EcsGenerator.componentModuleName component
+    , EcsGenerator.componentTypeName component
+    )
+
+
+findComponentKey : Dict Int ( String, String ) -> ( String, String ) -> Maybe Int
+findComponentKey components component =
+    Dict.foldl
+        (\key value found ->
+            if value == component then
+                Just key
 
             else
-                config.moduleName
-    in
-    ( { navigationKey = navigationKey
-      , ecsModuleName = ecsModuleName
-      , componentModuleName = ""
-      , componentTypeName = ""
-      , components = config.components
-      }
-    , Cmd.none
-    )
+                found
+        )
+        Nothing
+        components
+
+
+toConfig : Model -> EcsGenerator.Config
+toConfig model =
+    { ecs = tupleMap2 EcsGenerator.ecs model.ecs
+    , components =
+        Dict.values model.components
+            |> List.sortBy Tuple.second
+            |> List.map (tupleMap2 EcsGenerator.component)
+    , iterators =
+        Dict.values model.iterators
+            |> List.sortBy .name
+            |> List.map
+                (\{ name, components } ->
+                    EcsGenerator.iterator
+                        name
+                        (components
+                            |> List.filterMap (findComponent model.components)
+                            |> List.sortBy Tuple.second
+                            |> List.map (tupleMap2 EcsGenerator.component)
+                        )
+                )
+    }
+
+
+tupleMap2 : (a -> b -> c) -> ( a, b ) -> c
+tupleMap2 mapper ( a, b ) =
+    mapper a b
+
+
+findComponent : Dict Int ( String, String ) -> Int -> Maybe ( String, String )
+findComponent components key =
+    Dict.get key components
 
 
 
@@ -61,10 +164,13 @@ type Msg
     | LinkClicked Browser.UrlRequest
     | UrlChanged Url
     | EcsModuleNameChanged String
-    | ComponentModuleNameChanged String
-    | ComponentTypeNameChanged String
-    | ComponentSubmitted
-    | ComponentRemoved ( String, String )
+    | EcsTypeNameChanged String
+    | ComponentModuleNameChanged Int String
+    | ComponentTypeNameChanged Int String
+    | ComponentRemoved Int
+    | IteratorNameChanged Int String
+    | IteratorComponentChanged Int Int Bool
+    | IteratorRemoved Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -86,78 +192,183 @@ update msg model =
                     )
 
         UrlChanged url ->
-            let
-                config =
-                    decodeFragment url
-            in
-            ( { model
-                | ecsModuleName = config.moduleName
-                , components = config.components
+            if url.fragment == Just model.encodedConfig then
+                ( model, Cmd.none )
+
+            else
+                case decodeFragment url of
+                    Err decodeError ->
+                        ( initEmpty model.navigationKey decodeError
+                        , Cmd.none
+                        )
+
+                    Ok config ->
+                        ( initFromConfig model.navigationKey config
+                        , Cmd.none
+                        )
+
+        EcsModuleNameChanged name ->
+            { model | ecs = ( name, Tuple.second model.ecs ) }
+                |> pushUrl
+
+        EcsTypeNameChanged name ->
+            { model | ecs = ( Tuple.first model.ecs, name ) }
+                |> pushUrl
+
+        ComponentModuleNameChanged key moduleName ->
+            model
+                |> ensureComponent key
+                |> (\( ( _, typeName ), m ) ->
+                        { m
+                            | components =
+                                Dict.insert
+                                    key
+                                    ( moduleName, typeName )
+                                    model.components
+                        }
+                   )
+                |> pushUrl
+
+        ComponentTypeNameChanged key typeName ->
+            model
+                |> ensureComponent key
+                |> (\( ( moduleName, _ ), m ) ->
+                        { m
+                            | components =
+                                Dict.insert
+                                    key
+                                    ( moduleName, typeName )
+                                    model.components
+                        }
+                   )
+                |> pushUrl
+
+        ComponentRemoved key ->
+            { model | components = Dict.remove key model.components }
+                |> pushUrl
+
+        IteratorNameChanged key name ->
+            model
+                |> ensureIterator key
+                |> (\( i, m ) ->
+                        { m
+                            | iterators =
+                                Dict.insert
+                                    key
+                                    { i | name = name }
+                                    model.iterators
+                        }
+                   )
+                |> pushUrl
+
+        IteratorComponentChanged iteratorKey componentKey checked ->
+            model
+                |> ensureIterator iteratorKey
+                |> updateIteratorComponent iteratorKey componentKey checked
+                |> pushUrl
+
+        IteratorRemoved key ->
+            { model | iterators = Dict.remove key model.iterators }
+                |> pushUrl
+
+
+ensureComponent : Int -> Model -> ( ( String, String ), Model )
+ensureComponent key model =
+    case Dict.get key model.components of
+        Nothing ->
+            ( ( "", "" )
+            , { model
+                | lastComponentKey =
+                    if key > model.lastComponentKey then
+                        key
+
+                    else
+                        model.lastComponentKey
               }
-            , Cmd.none
             )
 
-        EcsModuleNameChanged ecsModuleName ->
-            ( { model | ecsModuleName = ecsModuleName }
-            , pushUrlCmd model.navigationKey ecsModuleName model.components
-            )
+        Just compnent ->
+            ( compnent, model )
 
-        ComponentModuleNameChanged componentModuleName ->
-            ( { model | componentModuleName = componentModuleName }, Cmd.none )
 
-        ComponentTypeNameChanged componentTypeName ->
-            ( { model | componentTypeName = componentTypeName }, Cmd.none )
+ensureIterator : Int -> Model -> ( { name : String, components : List Int }, Model )
+ensureIterator key model =
+    case Dict.get key model.iterators of
+        Nothing ->
+            ( { name = "", components = [] }
+            , { model
+                | lastIteratorKey =
+                    if key > model.lastIteratorKey then
+                        key
 
-        ComponentSubmitted ->
-            let
-                moduleName =
-                    model.componentModuleName
-
-                typeName =
-                    model.componentTypeName
-            in
-            ( { model
-                | componentModuleName = ""
-                , componentTypeName = ""
+                    else
+                        model.lastIteratorKey
               }
-            , Cmd.batch
-                [ Task.attempt
-                    (always NoOp)
-                    (Dom.focus "componentModuleNameInput")
-                , pushUrlCmd
-                    model.navigationKey
-                    model.ecsModuleName
-                    (Set.insert ( moduleName, typeName ) model.components)
-                ]
             )
 
-        ComponentRemoved component ->
-            ( model
-            , pushUrlCmd
-                model.navigationKey
-                model.ecsModuleName
-                (Set.remove component model.components)
-            )
+        Just iterator ->
+            ( iterator, model )
 
 
-decodeFragment : Url -> EcsGenerator.Config
-decodeFragment url =
-    url.fragment
-        |> Maybe.andThen Url.percentDecode
-        |> Maybe.withDefault ""
-        |> EcsGenerator.decode
+updateIteratorComponent :
+    Int
+    -> Int
+    -> Bool
+    -> ( { name : String, components : List Int }, Model )
+    -> Model
+updateIteratorComponent iteratorKey componentKey checked ( iterator, model ) =
+    { model
+        | iterators =
+            Dict.insert
+                iteratorKey
+                { iterator
+                    | components =
+                        if checked then
+                            componentKey :: iterator.components
 
-
-pushUrlCmd : Navigation.Key -> String -> Set ( String, String ) -> Cmd Msg
-pushUrlCmd navigationKey ecsModuleName components =
-    Navigation.pushUrl
-        navigationKey
-        ("#"
-            ++ (EcsGenerator.encode >> Url.percentEncode)
-                { moduleName = ecsModuleName
-                , components = components
+                        else
+                            List.filter
+                                (\key -> key /= componentKey)
+                                iterator.components
                 }
-        )
+                model.iterators
+    }
+
+
+decodeFragment : Url -> Result (Maybe String) EcsGenerator.Config
+decodeFragment url =
+    case url.fragment of
+        Nothing ->
+            Err Nothing
+
+        Just "" ->
+            Err Nothing
+
+        Just fragment ->
+            fragment
+                |> Url.percentDecode
+                |> Maybe.withDefault ""
+                |> EcsGenerator.decode
+                |> Result.mapError (Decode.errorToString >> Just)
+
+
+pushUrl : Model -> ( Model, Cmd Msg )
+pushUrl model =
+    EcsGenerator.validate (toConfig model)
+        |> Result.map
+            (\config ->
+                let
+                    encodedConfig =
+                        Url.percentEncode (EcsGenerator.encode config)
+                in
+                ( { model
+                    | encodedConfig = encodedConfig
+                    , decodeError = Nothing
+                  }
+                , Navigation.pushUrl model.navigationKey ("#" ++ encodedConfig)
+                )
+            )
+        |> Result.withDefault ( model, Cmd.none )
 
 
 
@@ -192,15 +403,13 @@ view model =
                         [ Css.flexDirection Css.column
                         ]
                     ]
-                    [ viewEcsModuleNameInput model.ecsModuleName
-                    , viewComponents
-                        model.componentModuleName
-                        model.componentTypeName
-                        model.components
+                    [ viewEcsInputs model.ecs
+                    , viewComponents model
+                    , viewIterators model
                     ]
                 ]
             , viewHeading2 "generated code"
-            , Lazy.lazy2 viewGeneratResult model.ecsModuleName model.components
+            , viewGeneratResult model
             ]
     }
 
@@ -217,7 +426,7 @@ viewHeading =
         (List.intersperse (Html.text " - ")
             [ Html.text "ecs generator"
             , Html.a
-                [ Attributes.href "#Ecs%3BComponents%2CAi%3BComponents%2CCollectable%3BComponents%2CCollector%3BComponents%2CDestroy%3BComponents%2CKeyControlsMap%3BComponents%2CMotion%3BComponents%2CPosition%3BComponents%2CScale%3BComponents%2CScaleAnimation%3BComponents%2CSprite%3BComponents%2CVelocity%3BComponents.Controls%2CControls" ]
+                [ Attributes.href "#%7B%22ecs%22%3A%5B%22Ecs%22%2C%22Ecs%22%5D%2C%22components%22%3A%5B%5B%22Components%22%2C%22Ai%22%5D%2C%5B%22Components%22%2C%22Collectable%22%5D%2C%5B%22Components%22%2C%22Collector%22%5D%2C%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22Destroy%22%5D%2C%5B%22Components%22%2C%22KeyControlsMap%22%5D%2C%5B%22Components%22%2C%22Motion%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Scale%22%5D%2C%5B%22Components%22%2C%22ScaleAnimation%22%5D%2C%5B%22Components%22%2C%22Sprite%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%2C%22iterators%22%3A%5B%7B%22name%22%3A%22Animation%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Scale%22%5D%2C%5B%22Components%22%2C%22ScaleAnimation%22%5D%5D%7D%2C%7B%22name%22%3A%22Collectable%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Collectable%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%5D%7D%2C%7B%22name%22%3A%22Collector%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Collector%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%5D%7D%2C%7B%22name%22%3A%22Destroy%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Destroy%22%5D%5D%7D%2C%7B%22name%22%3A%22KeyControls%22%2C%22components%22%3A%5B%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22KeyControlsMap%22%5D%5D%7D%2C%7B%22name%22%3A%22MotionControl%22%2C%22components%22%3A%5B%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22Motion%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%7D%2C%7B%22name%22%3A%22Movement%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%7D%2C%7B%22name%22%3A%22Render%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Sprite%22%5D%5D%7D%5D%7D" ]
                 [ Html.text "example" ]
             , Html.a
                 [ Attributes.href "https://harmboschloo.github.io/elm-ecs-generator/example/build/" ]
@@ -241,123 +450,204 @@ viewHeading2 heading =
         [ Html.text heading ]
 
 
-viewEcsModuleNameInput : String -> Html Msg
-viewEcsModuleNameInput moduleName =
-    Html.div []
-        [ viewHeading2 "ecs module name"
-        , Html.input
-            [ Attributes.value moduleName
-            , Attributes.required True
-            , Events.onInput EcsModuleNameChanged
-            , Attributes.css
-                [ Css.width (Css.pct 100)
-                , Css.padding (Css.px 4)
+viewEcsInputs : ( String, String ) -> Html Msg
+viewEcsInputs ( moduleName, typeName ) =
+    Html.div
+        [ Attributes.css
+            [ Css.textAlign Css.center ]
+        ]
+        [ viewHeading2 "ecs (moduleName|typename)"
+        , Html.div []
+            [ Html.input
+                [ Attributes.value moduleName
+                , Events.onInput EcsModuleNameChanged
+                , Attributes.css
+                    [ Css.padding (Css.px 4)
+                    ]
                 ]
+                []
+            , Html.input
+                [ Attributes.value typeName
+                , Events.onInput EcsTypeNameChanged
+                , Attributes.css
+                    [ Css.padding (Css.px 4)
+                    ]
+                ]
+                []
             ]
-            []
         ]
 
 
-viewComponents : String -> String -> Set ( String, String ) -> Html Msg
-viewComponents moduleNameInput typeNameInput components =
+viewComponents : Model -> Html Msg
+viewComponents { lastComponentKey, components } =
     Html.div []
-        [ viewHeading2 "components"
-        , Html.form
-            [ Events.onSubmit ComponentSubmitted
-            , Attributes.css
+        [ viewHeading2 "components (moduleName|typename)"
+        , HtmlKeyed.ul
+            [ Attributes.css
                 [ Css.property "display" "grid"
                 , Css.property "grid-template-columns" "auto auto auto"
                 ]
             ]
-            (viewComponentInputs moduleNameInput typeNameInput
-                :: (components |> Set.toList |> List.sort |> List.map viewComponent)
+            ((Dict.toList components ++ [ ( lastComponentKey + 1, ( "", "" ) ) ])
+                |> List.map viewComponentInputs
                 |> List.concat
             )
         ]
 
 
-viewComponentInputs : String -> String -> List (Html Msg)
-viewComponentInputs moduleName typeName =
-    [ Html.input
-        [ Attributes.id "componentModuleNameInput"
-        , Attributes.value moduleName
-        , Attributes.required True
-        , Attributes.placeholder "module name"
-        , Attributes.autofocus True
-        , Events.onInput ComponentModuleNameChanged
-        , Attributes.css
-            [ Css.padding (Css.px 4)
+viewComponentInputs : ( Int, ( String, String ) ) -> List ( String, Html Msg )
+viewComponentInputs ( key, ( moduleName, typeName ) ) =
+    [ ( "componentModuleName" ++ String.fromInt key
+      , Html.input
+            [ Attributes.value moduleName
+            , Attributes.placeholder "module name"
+            , Events.onInput (ComponentModuleNameChanged key)
+            , Attributes.css
+                [ Css.padding (Css.px 4)
+                ]
             ]
-        ]
-        []
-    , Html.input
-        [ Attributes.value typeName
-        , Attributes.required True
-        , Attributes.placeholder "type name"
-        , Events.onInput ComponentTypeNameChanged
-        , Attributes.css
-            [ Css.padding (Css.px 4)
+            []
+      )
+    , ( "componentTypeName" ++ String.fromInt key
+      , Html.input
+            [ Attributes.value typeName
+            , Attributes.placeholder "type name"
+            , Events.onInput (ComponentTypeNameChanged key)
+            , Attributes.css
+                [ Css.padding (Css.px 4)
+                ]
             ]
-        ]
-        []
-    , Html.button
-        [ Attributes.type_ "submit" ]
-        [ Html.text "add" ]
+            []
+      )
+    , ( "componentRemoveButton" ++ String.fromInt key
+      , Html.button
+            [ Events.onClick (ComponentRemoved key)
+            , Attributes.tabindex -1
+            ]
+            [ Html.text "remove" ]
+      )
     ]
 
 
-viewComponent : ( String, String ) -> List (Html Msg)
-viewComponent ( moduleName, typeName ) =
-    [ Html.span
-        [ Attributes.css
-            [ Css.padding (Css.px 5)
+viewIterators : Model -> Html Msg
+viewIterators { lastIteratorKey, components, iterators } =
+    Html.div []
+        [ viewHeading2 "iterators (name|components)"
+        , HtmlKeyed.ul
+            [ Attributes.css
+                [ Css.property "display" "grid"
+                , Css.property "grid-template-columns" "auto auto auto"
+                ]
             ]
+            ((Dict.toList iterators ++ [ ( lastIteratorKey + 1, { name = "", components = [] } ) ])
+                |> List.map (viewIteratorInputs components)
+                |> List.concat
+            )
         ]
-        [ Html.text moduleName ]
-    , Html.span
-        [ Attributes.css
-            [ Css.padding (Css.px 5)
+
+
+viewIteratorInputs :
+    Dict Int ( String, String )
+    -> ( Int, { name : String, components : List Int } )
+    -> List ( String, Html Msg )
+viewIteratorInputs components ( iteratorKey, iterator ) =
+    [ ( "iteratorName" ++ String.fromInt iteratorKey
+      , Html.input
+            [ Attributes.value iterator.name
+            , Attributes.placeholder "name"
+            , Events.onInput (IteratorNameChanged iteratorKey)
+            , Attributes.css
+                [ Css.padding (Css.px 4)
+                ]
             ]
-        ]
-        [ Html.text typeName ]
-    , Html.button
-        [ Events.onClick (ComponentRemoved ( moduleName, typeName ))
-        , Attributes.type_ "button"
-        ]
-        [ Html.text "remove" ]
+            []
+      )
+    , ( "iteratorComponents" ++ String.fromInt iteratorKey
+      , Html.div
+            [ Attributes.css
+                [ Css.border2 (Css.px 1) Css.inset
+                ]
+            ]
+            (components
+                |> Dict.toList
+                |> List.sort
+                |> List.map
+                    (\( componentKey, ( _, componentTypeName ) ) ->
+                        ( List.member componentKey iterator.components
+                        , componentKey
+                        , componentTypeName
+                        )
+                    )
+                |> List.map (viewIteratorComponent iteratorKey)
+            )
+      )
+    , ( "iteratorRemoveButton" ++ String.fromInt iteratorKey
+      , Html.button
+            [ Events.onClick (IteratorRemoved iteratorKey)
+            , Attributes.tabindex -1
+            ]
+            [ Html.text "remove" ]
+      )
     ]
 
 
-viewGeneratResult : String -> Set ( String, String ) -> Html Msg
-viewGeneratResult ecsModuleName components =
-    if String.isEmpty ecsModuleName then
-        viewEcsCode "-- no ecs module name --"
+viewIteratorComponent : Int -> ( Bool, Int, String ) -> Html Msg
+viewIteratorComponent iteratorKey ( isMember, componentKey, componentTypeName ) =
+    Html.label
+        [ Attributes.css
+            (List.concat
+                [ [ Css.display Css.inlineBlock
+                  , Css.whiteSpace Css.noWrap
+                  , Css.padding (Css.px 4)
+                  , Css.height (Css.pct 100)
+                  ]
+                , if isMember then
+                    [ Css.fontWeight Css.bold
+                    , Css.backgroundColor (Css.rgb 0x00 0xFF 0x00)
+                    ]
 
-    else if Set.isEmpty components then
-        viewEcsCode "-- no components --"
+                  else
+                    []
+                ]
+            )
+        ]
+        [ Html.input
+            [ Attributes.type_ "checkbox"
+            , Attributes.checked isMember
+            , Events.onCheck (IteratorComponentChanged iteratorKey componentKey)
+            , Attributes.css
+                [ Css.padding (Css.px 4)
+                ]
+            ]
+            []
+        , Html.text componentTypeName
+        ]
 
-    else
-        case
-            EcsGenerator.generate
-                { moduleName = ecsModuleName
-                , components = components
-                }
-        of
-            Err errors ->
-                viewErrors errors
 
-            Ok ecsCode ->
-                viewEcsCode ecsCode
+viewGeneratResult : Model -> Html Msg
+viewGeneratResult model =
+    case ( model.decodeError, EcsGenerator.generate (toConfig model) ) of
+        ( Just decodeError, Err errors ) ->
+            viewErrors decodeError errors
+
+        ( Just decodeError, Ok _ ) ->
+            viewErrors decodeError []
+
+        ( Nothing, Err errors ) ->
+            viewErrors "" errors
+
+        ( Nothing, Ok ecsCode ) ->
+            viewEcsCode ecsCode
 
 
-viewErrors : List EcsGenerator.Error -> Html Msg
-viewErrors errors =
+viewErrors : String -> List Error -> Html Msg
+viewErrors decodeError errors =
     let
         content =
-            String.join "\n" (List.map errorToString errors)
+            String.join "\n" (decodeError :: List.map errorToString errors)
 
         lines =
-            List.length errors
+            List.length (String.lines content)
     in
     Html.textarea
         (textAreaAttributes lines errorStyles)
@@ -396,20 +686,59 @@ errorStyles =
     ]
 
 
-errorToString : EcsGenerator.Error -> String
+errorToString : Error -> String
 errorToString error =
     case error of
-        EcsGenerator.ComponentsEmpty ->
-            "No components entered"
+        Error.InvalidEcsModuleName ecs ->
+            "invalid ecs module name: " ++ EcsGenerator.ecsModuleName ecs
 
-        EcsGenerator.InvalidEcsModuleName name ->
-            "Invalid ecs module name: " ++ name
+        Error.InvalidEcsTypeName ecs ->
+            "invalid ecs type name: " ++ EcsGenerator.ecsTypeName ecs
 
-        EcsGenerator.InvalidComponentModuleName name ->
-            "Invalid component module name: " ++ name
+        Error.ComponentsEmpty ->
+            "no components entered"
 
-        EcsGenerator.InvalidComponentTypeName name ->
-            "Invalid component type name: " ++ name
+        Error.InvalidComponentModuleName component ->
+            "invalid component module name: "
+                ++ EcsGenerator.componentModuleName component
+
+        Error.InvalidComponentTypeName component ->
+            "invalid component type name: "
+                ++ EcsGenerator.componentTypeName component
+
+        Error.DuplicateComponent component ->
+            "duplicate component: "
+                ++ EcsGenerator.componentModuleName component
+                ++ "."
+                ++ EcsGenerator.componentTypeName component
+
+        Error.IteratorsEmpty ->
+            "no iterators entered"
+
+        Error.IteratorNameInvalid iterator ->
+            "invalid iterator name: "
+                ++ EcsGenerator.iteratorName iterator
+
+        Error.IteratorComponentsEmpty iterator ->
+            "components empty for iterator '"
+                ++ EcsGenerator.iteratorName iterator
+                ++ "'"
+
+        Error.UnknownIteratorComponent iterator component ->
+            "unkown component for iterator '"
+                ++ EcsGenerator.iteratorName iterator
+                ++ "': "
+                ++ EcsGenerator.componentModuleName component
+                ++ "."
+                ++ EcsGenerator.componentTypeName component
+
+        Error.DuplicateIteratorComponent iterator component ->
+            "duplicate component for iterator '"
+                ++ EcsGenerator.iteratorName iterator
+                ++ "': "
+                ++ EcsGenerator.componentModuleName component
+                ++ "."
+                ++ EcsGenerator.componentTypeName component
 
 
 

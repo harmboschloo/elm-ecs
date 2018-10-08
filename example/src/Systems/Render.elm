@@ -70,10 +70,7 @@ renderEntities context ecs cameraTransform =
             [ renderBackground context cameraTransform ]
     in
     ( ecs, entities )
-        |> Ecs.iterateEntities2
-            Ecs.sprite
-            Ecs.position
-            (renderSprite cameraTransform)
+        |> Ecs.iterateRenderEntities (renderSprite cameraTransform)
         |> Tuple.second
 
 
@@ -106,11 +103,11 @@ renderBackground context cameraTransform =
 renderSprite :
     Mat4
     -> EntityId
-    -> Sprite
     -> Position
+    -> Sprite
     -> ( Ecs, List WebGL.Entity )
     -> ( Ecs, List WebGL.Entity )
-renderSprite cameraTransform entityId sprite position ( ecs, elements ) =
+renderSprite cameraTransform entityId position sprite ( ecs, elements ) =
     let
         spriteTransform =
             Mat4.makeScale3 sprite.width sprite.height 1

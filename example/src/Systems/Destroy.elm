@@ -7,7 +7,7 @@ import Ecs exposing (Ecs, EntityId)
 
 update : ( Ecs, Context ) -> ( Ecs, Context )
 update =
-    Ecs.iterateEntities Ecs.destroy updateEntity
+    Ecs.iterateDestroyEntities updateEntity
 
 
 updateEntity :

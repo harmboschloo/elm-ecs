@@ -8,16 +8,16 @@ import Ecs exposing (Ecs, EntityId)
 
 update : ( Ecs, Context ) -> ( Ecs, Context )
 update =
-    Ecs.iterateEntities2 Ecs.scaleAnimation Ecs.scale updateScale
+    Ecs.iterateAnimationEntities updateScale
 
 
 updateScale :
     EntityId
-    -> Animation
     -> Scale
+    -> Animation
     -> ( Ecs, Context )
     -> ( Ecs, Context )
-updateScale entityId animation scale ( ecs, context ) =
+updateScale entityId scale animation ( ecs, context ) =
     ( Ecs.insertComponent
         entityId
         Ecs.scale
