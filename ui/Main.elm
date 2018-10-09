@@ -566,6 +566,8 @@ viewIteratorInputs components ( iteratorKey, iterator ) =
       , Html.div
             [ Attributes.css
                 [ Css.border2 (Css.px 1) Css.inset
+                , Css.displayFlex
+                , Css.flexWrap Css.wrap
                 ]
             ]
             (components
@@ -599,7 +601,6 @@ viewIteratorComponent iteratorKey ( isMember, componentKey, componentTypeName ) 
                 [ [ Css.display Css.inlineBlock
                   , Css.whiteSpace Css.noWrap
                   , Css.padding (Css.px 4)
-                  , Css.height (Css.pct 100)
                   ]
                 , if isMember then
                     [ Css.fontWeight Css.bold

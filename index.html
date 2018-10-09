@@ -9572,7 +9572,6 @@ var rtfeldman$elm_css$Css$fontWeight = function (_n0) {
 	var value = _n0.w;
 	return A2(rtfeldman$elm_css$Css$property, 'font-weight', value);
 };
-var rtfeldman$elm_css$Css$height = rtfeldman$elm_css$Css$prop1('height');
 var rtfeldman$elm_css$Css$inlineBlock = {f: 0, w: 'inline-block'};
 var rtfeldman$elm_css$Css$noWrap = {aD: 0, aW: 0, w: 'nowrap', H: 0};
 var rtfeldman$elm_css$Css$whiteSpace = rtfeldman$elm_css$Css$prop1('white-space');
@@ -9609,9 +9608,7 @@ var author$project$Main$viewIteratorComponent = F2(
 									rtfeldman$elm_css$Css$display(rtfeldman$elm_css$Css$inlineBlock),
 									rtfeldman$elm_css$Css$whiteSpace(rtfeldman$elm_css$Css$noWrap),
 									rtfeldman$elm_css$Css$padding(
-									rtfeldman$elm_css$Css$px(4)),
-									rtfeldman$elm_css$Css$height(
-									rtfeldman$elm_css$Css$pct(100))
+									rtfeldman$elm_css$Css$px(4))
 								]),
 								isMember ? _List_fromArray(
 								[
@@ -9654,7 +9651,10 @@ var rtfeldman$elm_css$Css$prop2 = F3(
 					[argA.w, argB.w])));
 	});
 var rtfeldman$elm_css$Css$border2 = rtfeldman$elm_css$Css$prop2('border');
+var rtfeldman$elm_css$Css$displayFlex = A2(rtfeldman$elm_css$Css$property, 'display', 'flex');
+var rtfeldman$elm_css$Css$flexWrap = rtfeldman$elm_css$Css$prop1('flex-wrap');
 var rtfeldman$elm_css$Css$inset = {m: 0, w: 'inset'};
+var rtfeldman$elm_css$Css$wrap = {aD: 0, aW: 0, w: 'wrap'};
 var author$project$Main$viewIteratorInputs = F2(
 	function (components, _n0) {
 		var iteratorKey = _n0.a;
@@ -9691,7 +9691,9 @@ var author$project$Main$viewIteratorInputs = F2(
 									A2(
 									rtfeldman$elm_css$Css$border2,
 									rtfeldman$elm_css$Css$px(1),
-									rtfeldman$elm_css$Css$inset)
+									rtfeldman$elm_css$Css$inset),
+									rtfeldman$elm_css$Css$displayFlex,
+									rtfeldman$elm_css$Css$flexWrap(rtfeldman$elm_css$Css$wrap)
 								]))
 						]),
 					A2(
@@ -9767,7 +9769,6 @@ var rtfeldman$elm_css$Css$row = {a9: 0, aD: 0, w: 'row'};
 var rtfeldman$elm_css$Css$column = _Utils_update(
 	rtfeldman$elm_css$Css$row,
 	{w: 'column'});
-var rtfeldman$elm_css$Css$displayFlex = A2(rtfeldman$elm_css$Css$property, 'display', 'flex');
 var rtfeldman$elm_css$Css$flexDirection = rtfeldman$elm_css$Css$prop1('flex-direction');
 var rtfeldman$elm_css$Css$fontFamily = rtfeldman$elm_css$Css$prop1('font-family');
 var rtfeldman$elm_css$Css$justifyContent = function (fn) {
