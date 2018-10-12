@@ -46,7 +46,7 @@ createPlayerCollector ( ecs, context ) =
                     }
                 |> Ecs.insertComponent
                     entityId
-                    Ecs.keyControlsMap
+                    Ecs.keyControlsMapComponent
                     { accelerate = KeyCode.arrowUp
                     , decelerate = KeyCode.arrowDown
                     , rotateLeft = KeyCode.arrowLeft
@@ -84,19 +84,19 @@ createAiCollector ( ecs, context ) =
                     entityId
                     context2.assets.sprites.aiShip
                     position
-                |> Ecs.insertComponent entityId Ecs.ai ()
+                |> Ecs.insertComponent entityId Ecs.aiComponent ()
     in
     ( ecs3, context2 )
 
 
 insertCollectorComponents : EntityId -> Sprite -> Position -> Ecs -> Ecs
 insertCollectorComponents entityId sprite position =
-    Ecs.insertComponent entityId Ecs.sprite sprite
-        >> Ecs.insertComponent entityId Ecs.position position
-        >> Ecs.insertComponent entityId Ecs.controls (controls 0 0)
-        >> Ecs.insertComponent entityId Ecs.motion shipMotion
-        >> Ecs.insertComponent entityId Ecs.velocity (Velocity 0 0 0)
-        >> Ecs.insertComponent entityId Ecs.collector (Collector 30)
+    Ecs.insertComponent entityId Ecs.spriteComponent sprite
+        >> Ecs.insertComponent entityId Ecs.positionComponent position
+        >> Ecs.insertComponent entityId Ecs.controlsComponent (controls 0 0)
+        >> Ecs.insertComponent entityId Ecs.motionComponent shipMotion
+        >> Ecs.insertComponent entityId Ecs.velocityComponent (Velocity 0 0 0)
+        >> Ecs.insertComponent entityId Ecs.collectorComponent (Collector 30)
 
 
 shipMotion : Motion
@@ -125,9 +125,9 @@ createCollectableWithId entityId ( ecs, context ) =
 
         ecs2 =
             ecs
-                |> Ecs.insertComponent entityId Ecs.sprite context.assets.sprites.collectable
-                |> Ecs.insertComponent entityId Ecs.position position
-                |> Ecs.insertComponent entityId Ecs.velocity (Velocity 0 0 (pi / 4))
-                |> Ecs.insertComponent entityId Ecs.collectable ()
+                |> Ecs.insertComponent entityId Ecs.spriteComponent context.assets.sprites.collectable
+                |> Ecs.insertComponent entityId Ecs.positionComponent position
+                |> Ecs.insertComponent entityId Ecs.velocityComponent (Velocity 0 0 (pi / 4))
+                |> Ecs.insertComponent entityId Ecs.collectableComponent ()
     in
     ( ecs2, context2 )

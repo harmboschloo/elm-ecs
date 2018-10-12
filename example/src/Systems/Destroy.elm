@@ -1,22 +1,21 @@
 module Systems.Destroy exposing (update)
 
-import Components exposing (Destroy)
 import Context exposing (Context)
-import Ecs exposing (Ecs, EntityId)
+import Ecs exposing (Ecs)
 
 
 update : ( Ecs, Context ) -> ( Ecs, Context )
 update =
-    Ecs.iterateDestroyEntities updateEntity
+    Ecs.iterateEntities Ecs.destroyNode updateEntity
 
 
 updateEntity :
-    EntityId
-    -> Destroy
+    Ecs.EntityId
+    -> Ecs.DestroyNode
     -> ( Ecs, Context )
     -> ( Ecs, Context )
-updateEntity entityId destroy ( ecs, context ) =
-    if context.time >= destroy.time then
+updateEntity entityId node ( ecs, context ) =
+    if context.time >= node.destroy.time then
         ( Ecs.destroyEntity entityId ecs, context )
 
     else

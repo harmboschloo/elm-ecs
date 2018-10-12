@@ -29,9 +29,9 @@ type alias Model =
     , decodeError : Maybe String
     , ecs : ( String, String )
     , components : Dict Int ( String, String )
-    , iterators : Dict Int { name : String, components : List Int }
+    , nodes : Dict Int { name : String, components : List Int }
     , lastComponentKey : Int
-    , lastIteratorKey : Int
+    , lastNodeKey : Int
     }
 
 
@@ -56,9 +56,9 @@ initEmpty navigationKey decodeError =
     , decodeError = decodeError
     , ecs = ( "Ecs", "Ecs" )
     , components = Dict.empty
-    , iterators = Dict.empty
+    , nodes = Dict.empty
     , lastComponentKey = 0
-    , lastIteratorKey = 0
+    , lastNodeKey = 0
     }
 
 
@@ -76,13 +76,13 @@ initFromConfig navigationKey config =
                 |> List.indexedMap (\i v -> ( i, v ))
                 |> Dict.fromList
 
-        iterators =
-            config.iterators
+        nodes =
+            config.nodes
                 |> List.map
-                    (\iterator ->
-                        { name = EcsGenerator.iteratorName iterator
+                    (\node ->
+                        { name = EcsGenerator.nodeName node
                         , components =
-                            EcsGenerator.iteratorComponents iterator
+                            EcsGenerator.nodeComponents node
                                 |> List.map fromComponent
                                 |> List.filterMap (findComponentKey components)
                         }
@@ -95,9 +95,9 @@ initFromConfig navigationKey config =
     , ecs = ecs
     , decodeError = Nothing
     , components = components
-    , iterators = iterators
+    , nodes = nodes
     , lastComponentKey = Dict.size components
-    , lastIteratorKey = Dict.size iterators
+    , lastNodeKey = Dict.size nodes
     }
 
 
@@ -129,12 +129,12 @@ toConfig model =
         Dict.values model.components
             |> List.sortBy Tuple.second
             |> List.map (tupleMap2 EcsGenerator.component)
-    , iterators =
-        Dict.values model.iterators
+    , nodes =
+        Dict.values model.nodes
             |> List.sortBy .name
             |> List.map
                 (\{ name, components } ->
-                    EcsGenerator.iterator
+                    EcsGenerator.node
                         name
                         (components
                             |> List.filterMap (findComponent model.components)
@@ -168,9 +168,9 @@ type Msg
     | ComponentModuleNameChanged Int String
     | ComponentTypeNameChanged Int String
     | ComponentRemoved Int
-    | IteratorNameChanged Int String
-    | IteratorComponentChanged Int Int Bool
-    | IteratorRemoved Int
+    | NodeNameChanged Int String
+    | NodeComponentChanged Int Int Bool
+    | NodeRemoved Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -247,28 +247,28 @@ update msg model =
             { model | components = Dict.remove key model.components }
                 |> pushUrl
 
-        IteratorNameChanged key name ->
+        NodeNameChanged key name ->
             model
-                |> ensureIterator key
+                |> ensureNode key
                 |> (\( i, m ) ->
                         { m
-                            | iterators =
+                            | nodes =
                                 Dict.insert
                                     key
                                     { i | name = name }
-                                    model.iterators
+                                    model.nodes
                         }
                    )
                 |> pushUrl
 
-        IteratorComponentChanged iteratorKey componentKey checked ->
+        NodeComponentChanged nodeKey componentKey checked ->
             model
-                |> ensureIterator iteratorKey
-                |> updateIteratorComponent iteratorKey componentKey checked
+                |> ensureNode nodeKey
+                |> updateNodeComponent nodeKey componentKey checked
                 |> pushUrl
 
-        IteratorRemoved key ->
-            { model | iterators = Dict.remove key model.iterators }
+        NodeRemoved key ->
+            { model | nodes = Dict.remove key model.nodes }
                 |> pushUrl
 
 
@@ -291,47 +291,47 @@ ensureComponent key model =
             ( compnent, model )
 
 
-ensureIterator : Int -> Model -> ( { name : String, components : List Int }, Model )
-ensureIterator key model =
-    case Dict.get key model.iterators of
+ensureNode : Int -> Model -> ( { name : String, components : List Int }, Model )
+ensureNode key model =
+    case Dict.get key model.nodes of
         Nothing ->
             ( { name = "", components = [] }
             , { model
-                | lastIteratorKey =
-                    if key > model.lastIteratorKey then
+                | lastNodeKey =
+                    if key > model.lastNodeKey then
                         key
 
                     else
-                        model.lastIteratorKey
+                        model.lastNodeKey
               }
             )
 
-        Just iterator ->
-            ( iterator, model )
+        Just node ->
+            ( node, model )
 
 
-updateIteratorComponent :
+updateNodeComponent :
     Int
     -> Int
     -> Bool
     -> ( { name : String, components : List Int }, Model )
     -> Model
-updateIteratorComponent iteratorKey componentKey checked ( iterator, model ) =
+updateNodeComponent nodeKey componentKey checked ( node, model ) =
     { model
-        | iterators =
+        | nodes =
             Dict.insert
-                iteratorKey
-                { iterator
+                nodeKey
+                { node
                     | components =
                         if checked then
-                            componentKey :: iterator.components
+                            componentKey :: node.components
 
                         else
                             List.filter
                                 (\key -> key /= componentKey)
-                                iterator.components
+                                node.components
                 }
-                model.iterators
+                model.nodes
     }
 
 
@@ -401,11 +401,15 @@ view model =
                 [ Html.div
                     [ Attributes.css
                         [ Css.flexDirection Css.column
+                        , Css.textAlign Css.center
                         ]
                     ]
-                    [ viewEcsInputs model.ecs
+                    [ viewHeading2 "ecs (moduleName|typename)"
+                    , viewEcsInputs model.ecs
+                    , viewHeading2 "components (moduleName|typename)"
                     , viewComponents model
-                    , viewIterators model
+                    , viewHeading2 "nodes (name|components)"
+                    , viewNodes model
                     ]
                 ]
             , viewHeading2 "generated code"
@@ -426,7 +430,7 @@ viewHeading =
         (List.intersperse (Html.text " - ")
             [ Html.text "ecs generator"
             , Html.a
-                [ Attributes.href "#%7B%22ecs%22%3A%5B%22Ecs%22%2C%22Ecs%22%5D%2C%22components%22%3A%5B%5B%22Components%22%2C%22Ai%22%5D%2C%5B%22Components%22%2C%22Collectable%22%5D%2C%5B%22Components%22%2C%22Collector%22%5D%2C%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22Destroy%22%5D%2C%5B%22Components%22%2C%22KeyControlsMap%22%5D%2C%5B%22Components%22%2C%22Motion%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Scale%22%5D%2C%5B%22Components%22%2C%22ScaleAnimation%22%5D%2C%5B%22Components%22%2C%22Sprite%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%2C%22iterators%22%3A%5B%7B%22name%22%3A%22Animation%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Scale%22%5D%2C%5B%22Components%22%2C%22ScaleAnimation%22%5D%5D%7D%2C%7B%22name%22%3A%22Collectable%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Collectable%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%5D%7D%2C%7B%22name%22%3A%22Collector%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Collector%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%5D%7D%2C%7B%22name%22%3A%22Destroy%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Destroy%22%5D%5D%7D%2C%7B%22name%22%3A%22KeyControls%22%2C%22components%22%3A%5B%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22KeyControlsMap%22%5D%5D%7D%2C%7B%22name%22%3A%22MotionControl%22%2C%22components%22%3A%5B%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22Motion%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%7D%2C%7B%22name%22%3A%22Movement%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%7D%2C%7B%22name%22%3A%22Render%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Sprite%22%5D%5D%7D%5D%7D" ]
+                [ Attributes.href "#%7B%22ecs%22%3A%5B%22Ecs%22%2C%22Ecs%22%5D%2C%22components%22%3A%5B%5B%22Components%22%2C%22Ai%22%5D%2C%5B%22Components%22%2C%22Collectable%22%5D%2C%5B%22Components%22%2C%22Collector%22%5D%2C%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22Destroy%22%5D%2C%5B%22Components%22%2C%22KeyControlsMap%22%5D%2C%5B%22Components%22%2C%22Motion%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Scale%22%5D%2C%5B%22Components%22%2C%22ScaleAnimation%22%5D%2C%5B%22Components%22%2C%22Sprite%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%2C%22nodes%22%3A%5B%7B%22name%22%3A%22collectable%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Collectable%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%5D%7D%2C%7B%22name%22%3A%22collector%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Collector%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%5D%7D%2C%7B%22name%22%3A%22destroy%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Destroy%22%5D%5D%7D%2C%7B%22name%22%3A%22keyControls%22%2C%22components%22%3A%5B%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22KeyControlsMap%22%5D%5D%7D%2C%7B%22name%22%3A%22motionControl%22%2C%22components%22%3A%5B%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22Motion%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%7D%2C%7B%22name%22%3A%22movement%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%7D%2C%7B%22name%22%3A%22render%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Sprite%22%5D%5D%7D%2C%7B%22name%22%3A%22scaleAnimation%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22ScaleAnimation%22%5D%5D%7D%5D%7D" ]
                 [ Html.text "example" ]
             , Html.a
                 [ Attributes.href "https://harmboschloo.github.io/elm-ecs-generator/example/build/" ]
@@ -454,45 +458,40 @@ viewEcsInputs : ( String, String ) -> Html Msg
 viewEcsInputs ( moduleName, typeName ) =
     Html.div
         [ Attributes.css
-            [ Css.textAlign Css.center ]
-        ]
-        [ viewHeading2 "ecs (moduleName|typename)"
-        , Html.div []
-            [ Html.input
-                [ Attributes.value moduleName
-                , Events.onInput EcsModuleNameChanged
-                , Attributes.css
-                    [ Css.padding (Css.px 4)
-                    ]
-                ]
-                []
-            , Html.input
-                [ Attributes.value typeName
-                , Events.onInput EcsTypeNameChanged
-                , Attributes.css
-                    [ Css.padding (Css.px 4)
-                    ]
-                ]
-                []
+            [ Css.display Css.inlineBlock
             ]
+        ]
+        [ Html.input
+            [ Attributes.value moduleName
+            , Events.onInput EcsModuleNameChanged
+            , Attributes.css
+                [ Css.padding (Css.px 4)
+                ]
+            ]
+            []
+        , Html.input
+            [ Attributes.value typeName
+            , Events.onInput EcsTypeNameChanged
+            , Attributes.css
+                [ Css.padding (Css.px 4)
+                ]
+            ]
+            []
         ]
 
 
 viewComponents : Model -> Html Msg
 viewComponents { lastComponentKey, components } =
-    Html.div []
-        [ viewHeading2 "components (moduleName|typename)"
-        , HtmlKeyed.ul
-            [ Attributes.css
-                [ Css.property "display" "grid"
-                , Css.property "grid-template-columns" "auto auto auto"
-                ]
+    HtmlKeyed.node "div"
+        [ Attributes.css
+            [ Css.property "display" "inline-grid"
+            , Css.property "grid-template-columns" "auto auto auto"
             ]
-            ((Dict.toList components ++ [ ( lastComponentKey + 1, ( "", "" ) ) ])
-                |> List.map viewComponentInputs
-                |> List.concat
-            )
         ]
+        ((Dict.toList components ++ [ ( lastComponentKey + 1, ( "", "" ) ) ])
+            |> List.map viewComponentInputs
+            |> List.concat
+        )
 
 
 viewComponentInputs : ( Int, ( String, String ) ) -> List ( String, Html Msg )
@@ -529,40 +528,37 @@ viewComponentInputs ( key, ( moduleName, typeName ) ) =
     ]
 
 
-viewIterators : Model -> Html Msg
-viewIterators { lastIteratorKey, components, iterators } =
-    Html.div []
-        [ viewHeading2 "iterators (name|components)"
-        , HtmlKeyed.ul
-            [ Attributes.css
-                [ Css.property "display" "grid"
-                , Css.property "grid-template-columns" "auto auto auto"
-                ]
+viewNodes : Model -> Html Msg
+viewNodes { lastNodeKey, components, nodes } =
+    HtmlKeyed.node "div"
+        [ Attributes.css
+            [ Css.property "display" "inline-grid"
+            , Css.property "grid-template-columns" "auto auto auto"
             ]
-            ((Dict.toList iterators ++ [ ( lastIteratorKey + 1, { name = "", components = [] } ) ])
-                |> List.map (viewIteratorInputs components)
-                |> List.concat
-            )
         ]
+        ((Dict.toList nodes ++ [ ( lastNodeKey + 1, { name = "", components = [] } ) ])
+            |> List.map (viewNodeInputs components)
+            |> List.concat
+        )
 
 
-viewIteratorInputs :
+viewNodeInputs :
     Dict Int ( String, String )
     -> ( Int, { name : String, components : List Int } )
     -> List ( String, Html Msg )
-viewIteratorInputs components ( iteratorKey, iterator ) =
-    [ ( "iteratorName" ++ String.fromInt iteratorKey
+viewNodeInputs components ( nodeKey, node ) =
+    [ ( "nodeName" ++ String.fromInt nodeKey
       , Html.input
-            [ Attributes.value iterator.name
+            [ Attributes.value node.name
             , Attributes.placeholder "name"
-            , Events.onInput (IteratorNameChanged iteratorKey)
+            , Events.onInput (NodeNameChanged nodeKey)
             , Attributes.css
                 [ Css.padding (Css.px 4)
                 ]
             ]
             []
       )
-    , ( "iteratorComponents" ++ String.fromInt iteratorKey
+    , ( "nodeComponents" ++ String.fromInt nodeKey
       , Html.div
             [ Attributes.css
                 [ Css.border2 (Css.px 1) Css.inset
@@ -575,17 +571,17 @@ viewIteratorInputs components ( iteratorKey, iterator ) =
                 |> List.sort
                 |> List.map
                     (\( componentKey, ( _, componentTypeName ) ) ->
-                        ( List.member componentKey iterator.components
+                        ( List.member componentKey node.components
                         , componentKey
                         , componentTypeName
                         )
                     )
-                |> List.map (viewIteratorComponent iteratorKey)
+                |> List.map (viewNodeComponent nodeKey)
             )
       )
-    , ( "iteratorRemoveButton" ++ String.fromInt iteratorKey
+    , ( "nodeRemoveButton" ++ String.fromInt nodeKey
       , Html.button
-            [ Events.onClick (IteratorRemoved iteratorKey)
+            [ Events.onClick (NodeRemoved nodeKey)
             , Attributes.tabindex -1
             ]
             [ Html.text "remove" ]
@@ -593,14 +589,15 @@ viewIteratorInputs components ( iteratorKey, iterator ) =
     ]
 
 
-viewIteratorComponent : Int -> ( Bool, Int, String ) -> Html Msg
-viewIteratorComponent iteratorKey ( isMember, componentKey, componentTypeName ) =
+viewNodeComponent : Int -> ( Bool, Int, String ) -> Html Msg
+viewNodeComponent nodeKey ( isMember, componentKey, componentTypeName ) =
     Html.label
         [ Attributes.css
             (List.concat
                 [ [ Css.display Css.inlineBlock
                   , Css.whiteSpace Css.noWrap
                   , Css.padding (Css.px 4)
+                  , Css.fontSize (Css.px 14)
                   ]
                 , if isMember then
                     [ Css.fontWeight Css.bold
@@ -615,7 +612,7 @@ viewIteratorComponent iteratorKey ( isMember, componentKey, componentTypeName ) 
         [ Html.input
             [ Attributes.type_ "checkbox"
             , Attributes.checked isMember
-            , Events.onCheck (IteratorComponentChanged iteratorKey componentKey)
+            , Events.onCheck (NodeComponentChanged nodeKey componentKey)
             , Attributes.css
                 [ Css.padding (Css.px 4)
                 ]
@@ -713,29 +710,29 @@ errorToString error =
                 ++ "."
                 ++ EcsGenerator.componentTypeName component
 
-        Error.IteratorsEmpty ->
-            "no iterators entered"
+        Error.NodesEmpty ->
+            "no nodes entered"
 
-        Error.IteratorNameInvalid iterator ->
-            "invalid iterator name: "
-                ++ EcsGenerator.iteratorName iterator
+        Error.NodeNameInvalid node ->
+            "invalid node name: "
+                ++ EcsGenerator.nodeName node
 
-        Error.IteratorComponentsEmpty iterator ->
-            "components empty for iterator '"
-                ++ EcsGenerator.iteratorName iterator
+        Error.NodeComponentsEmpty node ->
+            "components empty for node '"
+                ++ EcsGenerator.nodeName node
                 ++ "'"
 
-        Error.UnknownIteratorComponent iterator component ->
-            "unkown component for iterator '"
-                ++ EcsGenerator.iteratorName iterator
+        Error.UnknownNodeComponent node component ->
+            "unkown component for node '"
+                ++ EcsGenerator.nodeName node
                 ++ "': "
                 ++ EcsGenerator.componentModuleName component
                 ++ "."
                 ++ EcsGenerator.componentTypeName component
 
-        Error.DuplicateIteratorComponent iterator component ->
-            "duplicate component for iterator '"
-                ++ EcsGenerator.iteratorName iterator
+        Error.DuplicateNodeComponent node component ->
+            "duplicate component for node '"
+                ++ EcsGenerator.nodeName node
                 ++ "': "
                 ++ EcsGenerator.componentModuleName component
                 ++ "."

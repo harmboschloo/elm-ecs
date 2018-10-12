@@ -1,7 +1,7 @@
 module EcsGenerator.Generate exposing (generate)
 
 import EcsGenerator.CodeBuilder as Builder exposing (Document)
-import EcsGenerator.Config as Config exposing (Component, Config, Iterator)
+import EcsGenerator.Config as Config exposing (Component, Config, Node)
 import EcsGenerator.Utils as Utils
 import Url exposing (percentEncode)
 
@@ -17,9 +17,10 @@ generate config =
     Builder.document (Config.ecsModuleName config.ecs) topComment
         |> generateComponentImports config
         |> generateApi config
-        |> generateEntityIterators config
-        |> generateEntitySetTypes config
         |> generateComponentTypes config
+        |> generateNodes config
+        |> generateNodeTypes config
+        |> generateEntitySetTypes config
         |> Builder.replace "{Ecs}" (Config.ecsTypeName config.ecs)
         |> Builder.toString
 
@@ -35,7 +36,7 @@ generateComponentImports { components } document =
 
 
 generateApi : Config -> Document -> Document
-generateApi { components, iterators } document =
+generateApi { components, nodes } document =
     document
         |> Builder.imported "Array"
         |> Builder.imported "Set"
@@ -58,10 +59,10 @@ type alias Model_ =
                         )
                         components
                     , List.map
-                        (iteratorEntitiesFieldName
+                        (nodeEntitiesFieldName
                             >> Utils.append " : Set.Set Int"
                         )
-                        iterators
+                        nodes
                     ]
                         |> List.concat
                         |> String.join "\n    , "
@@ -84,10 +85,10 @@ empty =
                         )
                         components
                     , List.map
-                        (iteratorEntitiesFieldName
+                        (nodeEntitiesFieldName
                             >> Utils.append " = Set.empty"
                         )
-                        iterators
+                        nodes
                     ]
                         |> List.concat
                         |> String.join "\n        , "
@@ -170,14 +171,14 @@ removeEntityComponents_ entityId_ model_ =
                         )
                         components
                     , List.map
-                        (iteratorEntitiesFieldName
+                        (nodeEntitiesFieldName
                             >> (\field ->
                                     field
                                         ++ " = Set.remove entityId_ model_."
                                         ++ field
                                )
                         )
-                        iterators
+                        nodes
                     ]
                         |> List.concat
                         |> String.join "\n        , "
@@ -186,6 +187,26 @@ removeEntityComponents_ entityId_ model_ =
     }
 """
             )
+        |> Builder.exposed "iterateEntities"
+        |> Builder.declaration """
+iterateEntities :
+    NodeType node
+    -> (EntityId -> node -> ( Ecs, context ) -> ( Ecs, context ))
+    -> ( Ecs, context )
+    -> ( Ecs, context )
+iterateEntities (NodeType nodeType_) callback_ ( Ecs_ model_, context_ ) =
+    Set.foldl
+        (\\entityId_ result_ ->
+            case nodeType_.getNode entityId_ model_ of
+                Nothing ->
+                    result_
+
+                Just node_ ->
+                    callback_ (EntityId entityId_) node_ result_
+        )
+        ( Ecs_ model_, context_ )
+        (nodeType_.getEntities model_)
+"""
         |> Builder.comment "-- COMPONENTS --"
         |> Builder.exposed "insertComponent"
         |> Builder.declaration """
@@ -237,16 +258,123 @@ getComponent (EntityId entityId_) (ComponentType type_) (Ecs_ model_) =
 """
 
 
-generateEntityIterators : Config -> Document -> Document
-generateEntityIterators { iterators } document =
+generateComponentTypes : Config -> Document -> Document
+generateComponentTypes { components, nodes } document =
     document
-        |> Builder.comment "-- ENTITY ITERATORS --"
-        |> (\doc ->
-                List.foldl
-                    generateEntityIterator
-                    doc
-                    iterators
-           )
+        |> Builder.comment "-- COMPONENT TYPES --"
+        |> Builder.exposed "ComponentType"
+        |> Builder.declaration """
+type ComponentType a
+    = ComponentType
+        { getComponents : Model_ -> Array.Array (Maybe a)
+        , setComponents : Array.Array (Maybe a) -> Model_ -> Model_
+        , entitySets : List EntitySetType_
+        }
+"""
+        |> (\doc -> List.foldl (generateComponentType nodes) doc components)
+
+
+generateComponentType : List Node -> Component -> Document -> Document
+generateComponentType nodes component document =
+    let
+        typeName =
+            componentTypeReference component
+
+        modelField =
+            componentsFieldName component
+
+        name =
+            Config.componentTypeName component
+                |> Utils.firstToLower
+                |> Utils.append "Component"
+
+        componentNodes =
+            List.filter
+                (Config.nodeComponents >> List.member component)
+                nodes
+    in
+    document
+        |> Builder.exposed name
+        |> Builder.declaration
+            (name
+                ++ " : ComponentType "
+                ++ typeName
+                ++ "\n"
+                ++ name
+                ++ """ =
+    ComponentType
+        { getComponents = ."""
+                ++ modelField
+                ++ """
+        , setComponents = \\components_ model_ -> { model_ | """
+                ++ modelField
+                ++ """ = components_ }
+        , entitySets = ["""
+                ++ (List.map entitySetVariableName componentNodes
+                        |> String.join ", "
+                        |> padIfNotEmpty
+                   )
+                ++ """]
+        }
+"""
+            )
+
+
+padIfNotEmpty : String -> String
+padIfNotEmpty string =
+    if String.isEmpty string then
+        string
+
+    else
+        " " ++ string ++ " "
+
+
+generateNodes : Config -> Document -> Document
+generateNodes { nodes } document =
+    document
+        |> Builder.comment "-- NODES --"
+        |> (\doc -> List.foldl generateNode doc nodes)
+
+
+generateNode : Node -> Document -> Document
+generateNode node document =
+    document
+        |> Builder.exposed (nodeTypeAliasName node)
+        |> Builder.declaration
+            ("""
+type alias """
+                ++ nodeTypeAliasName node
+                ++ """ =
+    { """
+                ++ (List.map
+                        (\component ->
+                            nodeComponentFieldName component
+                                ++ " : "
+                                ++ componentTypeReference component
+                        )
+                        (Config.nodeComponents node)
+                        |> String.join """
+    , """
+                   )
+                ++ """
+    }
+"""
+            )
+
+
+generateNodeTypes : Config -> Document -> Document
+generateNodeTypes { nodes } document =
+    document
+        |> Builder.comment "-- NODE TYPES --"
+        |> Builder.exposed "NodeType"
+        |> Builder.declaration """
+type NodeType node
+    = NodeType
+        { getEntities : Model_ -> Set.Set Int
+        , getNode : Int -> Model_ -> Maybe node
+        }
+"""
+        |> (\doc -> List.foldl generateNodeType doc nodes)
         |> Builder.declaration """
 nextComponent_ : Array.Array (Maybe a) -> Int -> (a -> b) -> Maybe b
 nextComponent_ components_ entityId_ callback_ =
@@ -256,32 +384,31 @@ nextComponent_ components_ entityId_ callback_ =
 """
 
 
-generateEntityIterator : Iterator -> Document -> Document
-generateEntityIterator iterator document =
+generateNodeType : Node -> Document -> Document
+generateNodeType node document =
     let
         name =
-            iteratorVariableName iterator
+            nodeTypeVariableName node
     in
     document
         |> Builder.exposed name
         |> Builder.declaration
             (name
-                ++ """ :
-    (EntityId -> """
-                ++ String.join " -> "
-                    (Config.iteratorComponents iterator
-                        |> List.map componentTypeReference
-                    )
-                ++ """ -> ( {Ecs}, context ) -> ( {Ecs}, context ))
-    -> ( {Ecs}, context )
-    -> ( {Ecs}, context )
-"""
+                ++ " : NodeType "
+                ++ nodeTypeAliasName node
+                ++ "\n"
                 ++ name
-                ++ """ callback_ ( Ecs_ model_, context_ ) =
-    Set.foldl
-        (\\entityId_ result_ ->
-            callback_ (EntityId entityId_)
+                ++ """ =
+    NodeType
+        { getEntities = ."""
+                ++ nodeEntitiesFieldName node
+                ++ """
+        , getNode =
+            \\entityId_ model_ ->
                 """
+                ++ nodeTypeAliasName node
+                ++ """
+                    """
                 ++ (List.indexedMap
                         (\index component ->
                             "|> "
@@ -291,16 +418,13 @@ generateEntityIterator iterator document =
                                         ++ " entityId_"
                                     )
                         )
-                        (Config.iteratorComponents iterator)
-                        |> String.join "\n                "
+                        (Config.nodeComponents node)
+                        |> String.join """
+                    """
                    )
                 ++ """
-                |> Maybe.map ((|>) result_)
-                |> Maybe.withDefault result_
-        )
-        ( Ecs_ model_, context_ )
-        model_."""
-                ++ iteratorEntitiesFieldName iterator
+        }
+"""
             )
 
 
@@ -314,7 +438,7 @@ wrapNextComponent index =
 
 
 generateEntitySetTypes : Config -> Document -> Document
-generateEntitySetTypes { components, iterators } document =
+generateEntitySetTypes { nodes } document =
     document
         |> Builder.comment "-- ENTITY SET TYPES --"
         |> Builder.declaration """
@@ -324,7 +448,7 @@ type alias EntitySetType_ =
     , member : Int -> Model_ -> Bool
     }
 """
-        |> (\doc -> List.foldl generateEntitySetType doc iterators)
+        |> (\doc -> List.foldl generateEntitySetType doc nodes)
         |> Builder.declaration """
 isComponentsMember_ entityId_ components_ =
     case Array.get entityId_ components_ of
@@ -336,14 +460,14 @@ isComponentsMember_ entityId_ components_ =
 """
 
 
-generateEntitySetType : Iterator -> Document -> Document
-generateEntitySetType iterator document =
+generateEntitySetType : Node -> Document -> Document
+generateEntitySetType node document =
     let
         name =
-            entitySetVariableName iterator
+            entitySetVariableName node
 
         entitiesModelField =
-            iteratorEntitiesFieldName iterator
+            nodeEntitiesFieldName node
     in
     document
         |> Builder.declaration
@@ -364,82 +488,13 @@ generateEntitySetType iterator document =
                         (componentsFieldName
                             >> (++) "isComponentsMember_ entityId_ model_."
                         )
-                        (Config.iteratorComponents iterator)
+                        (Config.nodeComponents node)
                         |> String.join "\n                && "
                    )
                 ++ """
     }
     """
             )
-
-
-generateComponentTypes : Config -> Document -> Document
-generateComponentTypes { components, iterators } document =
-    document
-        |> Builder.comment "-- COMPONENT TYPES --"
-        |> Builder.exposed "ComponentType"
-        |> Builder.declaration """
-type ComponentType a
-    = ComponentType
-        { getComponents : Model_ -> Array.Array (Maybe a)
-        , setComponents : Array.Array (Maybe a) -> Model_ -> Model_
-        , entitySets : List EntitySetType_
-        }
-"""
-        |> (\doc -> List.foldl (generateComponentType iterators) doc components)
-
-
-generateComponentType : List Iterator -> Component -> Document -> Document
-generateComponentType iterators component document =
-    let
-        typeName =
-            componentTypeReference component
-
-        modelField =
-            componentsFieldName component
-
-        name =
-            Utils.firstToLower (Config.componentTypeName component)
-
-        componentIterators =
-            List.filter
-                (Config.iteratorComponents >> List.member component)
-                iterators
-    in
-    document
-        |> Builder.exposed name
-        |> Builder.declaration
-            (name
-                ++ " : ComponentType "
-                ++ typeName
-                ++ "\n"
-                ++ name
-                ++ """ =
-    ComponentType
-        { getComponents = ."""
-                ++ modelField
-                ++ """
-        , setComponents = \\components_ model_ -> { model_ | """
-                ++ modelField
-                ++ """ = components_ }
-        , entitySets = ["""
-                ++ (List.map entitySetVariableName componentIterators
-                        |> String.join ", "
-                        |> padIfNotEmpty
-                   )
-                ++ """]
-        }
-"""
-            )
-
-
-padIfNotEmpty : String -> String
-padIfNotEmpty string =
-    if String.isEmpty string then
-        string
-
-    else
-        " " ++ string ++ " "
 
 
 
@@ -460,23 +515,35 @@ componentsFieldName =
         >> Utils.append "Components"
 
 
-iteratorEntitiesFieldName : Iterator -> String
-iteratorEntitiesFieldName =
-    Config.iteratorName
+nodeEntitiesFieldName : Node -> String
+nodeEntitiesFieldName =
+    Config.nodeName
         >> Utils.firstToLower
         >> Utils.append "Entities"
 
 
-iteratorVariableName : Iterator -> String
-iteratorVariableName =
-    Config.iteratorName
+nodeTypeAliasName : Node -> String
+nodeTypeAliasName =
+    Config.nodeName
         >> Utils.firstToUpper
-        >> (++) "iterate"
-        >> Utils.append "Entities"
+        >> Utils.append "Node"
 
 
-entitySetVariableName : Iterator -> String
+nodeComponentFieldName : Component -> String
+nodeComponentFieldName =
+    Config.componentTypeName
+        >> Utils.firstToLower
+
+
+nodeTypeVariableName : Node -> String
+nodeTypeVariableName =
+    Config.nodeName
+        >> Utils.firstToLower
+        >> Utils.append "Node"
+
+
+entitySetVariableName : Node -> String
 entitySetVariableName =
-    Config.iteratorName
+    Config.nodeName
         >> Utils.firstToLower
         >> Utils.append "EntitySet_"

@@ -3,26 +3,23 @@ module Systems.MotionControl exposing (update)
 import Components exposing (Motion, Position, Velocity)
 import Components.Controls as Controls exposing (Controls)
 import Context exposing (Context)
-import Ecs exposing (Ecs, EntityId)
+import Ecs exposing (Ecs)
 
 
 update : ( Ecs, Context ) -> ( Ecs, Context )
 update =
-    Ecs.iterateMotionControlEntities updateEntity
+    Ecs.iterateEntities Ecs.motionControlNode updateEntity
 
 
 updateEntity :
-    EntityId
-    -> Controls
-    -> Motion
-    -> Position
-    -> Velocity
+    Ecs.EntityId
+    -> Ecs.MotionControlNode
     -> ( Ecs, Context )
     -> ( Ecs, Context )
-updateEntity entityId controls motion position velocity ( ecs, context ) =
+updateEntity entityId { controls, motion, position, velocity } ( ecs, context ) =
     ( Ecs.insertComponent
         entityId
-        Ecs.velocity
+        Ecs.velocityComponent
         (applyControls controls motion position velocity context.deltaTime)
         ecs
     , context

@@ -1,8 +1,7 @@
 module Systems.Render exposing (view)
 
-import Components exposing (Position, Sprite)
 import Context exposing (Context)
-import Ecs exposing (Ecs, EntityId)
+import Ecs exposing (Ecs)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (height, style, width)
 import Math.Matrix4 as Mat4 exposing (Mat4, makeOrtho2D)
@@ -70,7 +69,7 @@ renderEntities context ecs cameraTransform =
             [ renderBackground context cameraTransform ]
     in
     ( ecs, entities )
-        |> Ecs.iterateRenderEntities (renderSprite cameraTransform)
+        |> Ecs.iterateEntities Ecs.renderNode (renderSprite cameraTransform)
         |> Tuple.second
 
 
@@ -102,19 +101,18 @@ renderBackground context cameraTransform =
 
 renderSprite :
     Mat4
-    -> EntityId
-    -> Position
-    -> Sprite
+    -> Ecs.EntityId
+    -> Ecs.RenderNode
     -> ( Ecs, List WebGL.Entity )
     -> ( Ecs, List WebGL.Entity )
-renderSprite cameraTransform entityId position sprite ( ecs, elements ) =
+renderSprite cameraTransform entityId { position, sprite } ( ecs, elements ) =
     let
         spriteTransform =
             Mat4.makeScale3 sprite.width sprite.height 1
                 |> Mat4.translate3 -sprite.pivotX -sprite.pivotY 0
 
         scalekMat =
-            case Ecs.getComponent entityId Ecs.scale ecs of
+            case Ecs.getComponent entityId Ecs.scaleComponent ecs of
                 Nothing ->
                     identity
 

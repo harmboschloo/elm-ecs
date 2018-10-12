@@ -4,38 +4,37 @@ import Components exposing (KeyControlsMap)
 import Components.Controls exposing (Controls, controls)
 import Context exposing (Context)
 import Data.KeyCode exposing (KeyCode)
-import Ecs exposing (Ecs, EntityId)
+import Ecs exposing (Ecs)
 import Set exposing (Set)
 
 
 update : ( Ecs, Context ) -> ( Ecs, Context )
 update =
-    Ecs.iterateKeyControlsEntities updateEntity
+    Ecs.iterateEntities Ecs.keyControlsNode updateEntity
 
 
 updateEntity :
-    EntityId
-    -> Controls
-    -> KeyControlsMap
+    Ecs.EntityId
+    -> Ecs.KeyControlsNode
     -> ( Ecs, Context )
     -> ( Ecs, Context )
-updateEntity entityId controls keyMap ( ecs, context ) =
+updateEntity entityId { controls, keyControlsMap } ( ecs, context ) =
     ( Ecs.insertComponent
         entityId
-        Ecs.controls
-        (updateControls keyMap context.activeKeys)
+        Ecs.controlsComponent
+        (updateControls keyControlsMap context.activeKeys)
         ecs
     , context
     )
 
 
 updateControls : KeyControlsMap -> Set KeyCode -> Controls
-updateControls keyMap activeKeys =
+updateControls keyControlsMap activeKeys =
     let
         acceleration =
             case
-                ( Set.member keyMap.accelerate activeKeys
-                , Set.member keyMap.decelerate activeKeys
+                ( Set.member keyControlsMap.accelerate activeKeys
+                , Set.member keyControlsMap.decelerate activeKeys
                 )
             of
                 ( False, False ) ->
@@ -52,8 +51,8 @@ updateControls keyMap activeKeys =
 
         rotation =
             case
-                ( Set.member keyMap.rotateLeft activeKeys
-                , Set.member keyMap.rotateRight activeKeys
+                ( Set.member keyControlsMap.rotateLeft activeKeys
+                , Set.member keyControlsMap.rotateRight activeKeys
                 )
             of
                 ( False, False ) ->

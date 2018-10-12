@@ -1,6 +1,6 @@
 module EcsGenerator.Error exposing (Error(..))
 
-import EcsGenerator.Config exposing (Component, Ecs, Iterator)
+import EcsGenerator.Config exposing (Component, Ecs, Node)
 
 
 type Error
@@ -10,8 +10,8 @@ type Error
     | InvalidComponentModuleName Component
     | InvalidComponentTypeName Component
     | DuplicateComponent Component
-    | IteratorsEmpty
-    | IteratorNameInvalid Iterator
-    | IteratorComponentsEmpty Iterator
-    | UnknownIteratorComponent Iterator Component
-    | DuplicateIteratorComponent Iterator Component
+    | NodesEmpty
+    | NodeNameInvalid Node
+    | NodeComponentsEmpty Node
+    | UnknownNodeComponent Node Component
+    | DuplicateNodeComponent Node Component

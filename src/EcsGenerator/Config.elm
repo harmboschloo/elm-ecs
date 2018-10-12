@@ -2,7 +2,7 @@ module EcsGenerator.Config exposing
     ( Component(..)
     , Config
     , Ecs(..)
-    , Iterator(..)
+    , Node(..)
     , component
     , componentModuleName
     , componentTypeName
@@ -13,9 +13,9 @@ module EcsGenerator.Config exposing
     , ecsTypeName
     , encode
     , encodeString
-    , iterator
-    , iteratorComponents
-    , iteratorName
+    , node
+    , nodeComponents
+    , nodeName
     )
 
 import Json.Decode as Decode exposing (Decoder)
@@ -25,7 +25,7 @@ import Json.Encode as Encode
 type alias Config =
     { ecs : Ecs
     , components : List Component
-    , iterators : List Iterator
+    , nodes : List Node
     }
 
 
@@ -37,11 +37,11 @@ type Component
     = Component { moduleName : String, typeName : String }
 
 
-type Iterator
-    = Iterator IteratorConfig
+type Node
+    = Node NodeConfig
 
 
-type alias IteratorConfig =
+type alias NodeConfig =
     { name : String
     , components : List Component
     }
@@ -83,21 +83,21 @@ componentTypeName (Component { typeName }) =
     typeName
 
 
-iterator : String -> List Component -> Iterator
-iterator name components =
-    Iterator
+node : String -> List Component -> Node
+node name components =
+    Node
         { name = name
         , components = components
         }
 
 
-iteratorName : Iterator -> String
-iteratorName (Iterator { name }) =
+nodeName : Node -> String
+nodeName (Node { name }) =
     name
 
 
-iteratorComponents : Iterator -> List Component
-iteratorComponents (Iterator { components }) =
+nodeComponents : Node -> List Component
+nodeComponents (Node { components }) =
     components
 
 
@@ -111,7 +111,7 @@ decoder =
     Decode.map3 Config
         (Decode.field "ecs" ecsDecoder)
         (Decode.field "components" (Decode.list componentDecoder))
-        (Decode.field "iterators" (Decode.list iteratorDecoder))
+        (Decode.field "nodes" (Decode.list nodeDecoder))
 
 
 ecsDecoder : Decoder Ecs
@@ -124,10 +124,10 @@ componentDecoder =
     Decode.map Component moduleAndTypeNameDecoder
 
 
-iteratorDecoder : Decoder Iterator
-iteratorDecoder =
-    Decode.map Iterator
-        (Decode.map2 IteratorConfig
+nodeDecoder : Decoder Node
+nodeDecoder =
+    Decode.map Node
+        (Decode.map2 NodeConfig
             (Decode.field "name" Decode.string)
             (Decode.field "components" (Decode.list componentDecoder))
         )
@@ -164,7 +164,7 @@ encode config =
     Encode.object
         [ ( "ecs", encodeEcs config.ecs )
         , ( "components", Encode.list encodeComponent config.components )
-        , ( "iterators", Encode.list encodeIterator config.iterators )
+        , ( "nodes", Encode.list encodeNode config.nodes )
         ]
 
 
@@ -178,8 +178,8 @@ encodeComponent (Component componentConfig) =
     encodeModuleAndTypeName componentConfig
 
 
-encodeIterator : Iterator -> Encode.Value
-encodeIterator (Iterator { name, components }) =
+encodeNode : Node -> Encode.Value
+encodeNode (Node { name, components }) =
     Encode.object
         [ ( "name", Encode.string name )
         , ( "components", Encode.list encodeComponent components )

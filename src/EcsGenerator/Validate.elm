@@ -10,7 +10,7 @@ import EcsGenerator.Config
         ( Component(..)
         , Config
         , Ecs(..)
-        , Iterator(..)
+        , Node(..)
         )
 import EcsGenerator.Error exposing (Error(..))
 
@@ -26,7 +26,7 @@ validate config =
             []
                 |> validateEcs config.ecs
                 |> validateComponents config.components
-                |> validateIterators config.components config.iterators
+                |> validateNodes config.components config.nodes
     in
     case errors of
         [] ->
@@ -58,57 +58,57 @@ validateComponent components ((Component { moduleName, typeName }) as component)
         >> validateNoDuplicate (DuplicateComponent component) component components
 
 
-validateIterators : List Component -> List Iterator -> Errors -> Errors
-validateIterators components iterators errors =
-    if List.isEmpty iterators then
-        IteratorsEmpty :: errors
+validateNodes : List Component -> List Node -> Errors -> Errors
+validateNodes components nodes errors =
+    if List.isEmpty nodes then
+        NodesEmpty :: errors
 
     else
         List.foldl
-            (\iterator ->
-                validateIteratorName iterator
-                    >> validateIteratorComponents components iterator
+            (\node ->
+                validateNodeName node
+                    >> validateNodeComponents components node
             )
             errors
-            iterators
+            nodes
 
 
-validateIteratorName : Iterator -> Errors -> Errors
-validateIteratorName ((Iterator { name }) as iterator) errors =
+validateNodeName : Node -> Errors -> Errors
+validateNodeName ((Node { name }) as node) errors =
     if isValidName (always True) name then
         errors
 
     else
-        IteratorNameInvalid iterator :: errors
+        NodeNameInvalid node :: errors
 
 
-validateIteratorComponents : List Component -> Iterator -> Errors -> Errors
-validateIteratorComponents components (Iterator iterator) errors =
-    if List.isEmpty iterator.components then
-        IteratorComponentsEmpty (Iterator iterator) :: errors
+validateNodeComponents : List Component -> Node -> Errors -> Errors
+validateNodeComponents components (Node node) errors =
+    if List.isEmpty node.components then
+        NodeComponentsEmpty (Node node) :: errors
 
     else
         List.foldl
-            (\iteratorComponent errs ->
-                (if not (List.member iteratorComponent components) then
-                    UnknownIteratorComponent
-                        (Iterator iterator)
-                        iteratorComponent
+            (\nodeComponent errs ->
+                (if not (List.member nodeComponent components) then
+                    UnknownNodeComponent
+                        (Node node)
+                        nodeComponent
                         :: errs
 
                  else
                     errs
                 )
                     |> validateNoDuplicate
-                        (DuplicateIteratorComponent
-                            (Iterator iterator)
-                            iteratorComponent
+                        (DuplicateNodeComponent
+                            (Node node)
+                            nodeComponent
                         )
-                        iteratorComponent
-                        iterator.components
+                        nodeComponent
+                        node.components
             )
             errors
-            iterator.components
+            node.components
 
 
 validateNoDuplicate : Error -> a -> List a -> Errors -> Errors

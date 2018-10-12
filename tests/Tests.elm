@@ -4,10 +4,9 @@ import EcsGenerator
     exposing
         ( Component
         , Ecs
-        , Iterator
         , component
         , ecs
-        , iterator
+        , node
         )
 import Expect exposing (Expectation)
 import Test exposing (Test)
@@ -36,7 +35,7 @@ suite =
                 EcsGenerator.generate
                     { ecs = testEcs
                     , components = [ a ]
-                    , iterators = [ iterator "a" [ a ] ]
+                    , nodes = [ node "a" [ a ] ]
                     }
                     |> Expect.ok
             )
@@ -46,7 +45,7 @@ suite =
                     EcsGenerator.generate
                         { ecs = ecs "Test Ecs" "Ecs"
                         , components = [ a ]
-                        , iterators = [ iterator "a" [ a ] ]
+                        , nodes = [ node "a" [ a ] ]
                         }
                         |> Expect.err
                 )
@@ -55,7 +54,7 @@ suite =
                     EcsGenerator.generate
                         { ecs = ecs "Test.Ecs" "ecs"
                         , components = [ a ]
-                        , iterators = [ iterator "a" [ a ] ]
+                        , nodes = [ node "a" [ a ] ]
                         }
                         |> Expect.err
                 )
@@ -64,7 +63,7 @@ suite =
                     EcsGenerator.generate
                         { ecs = testEcs
                         , components = []
-                        , iterators = []
+                        , nodes = []
                         }
                         |> Expect.err
                 )
@@ -73,7 +72,7 @@ suite =
                     EcsGenerator.generate
                         { ecs = testEcs
                         , components = [ component "components" "A" ]
-                        , iterators = [ iterator "a" [ component "components" "A" ] ]
+                        , nodes = [ node "a" [ component "components" "A" ] ]
                         }
                         |> Expect.err
                 )
@@ -82,7 +81,7 @@ suite =
                     EcsGenerator.generate
                         { ecs = testEcs
                         , components = [ component "Components" "a" ]
-                        , iterators = [ iterator "a" [ component "Components" "a" ] ]
+                        , nodes = [ node "a" [ component "Components" "a" ] ]
                         }
                         |> Expect.err
                 )
@@ -91,52 +90,52 @@ suite =
                     EcsGenerator.generate
                         { ecs = testEcs
                         , components = [ a, a ]
-                        , iterators = [ iterator "a" [ a ] ]
+                        , nodes = [ node "a" [ a ] ]
                         }
                         |> Expect.err
                 )
-            , Test.test "iterators empty"
+            , Test.test "nodes empty"
                 (\_ ->
                     EcsGenerator.generate
                         { ecs = testEcs
                         , components = [ a ]
-                        , iterators = []
+                        , nodes = []
                         }
                         |> Expect.err
                 )
-            , Test.test "iterator name invalid"
+            , Test.test "node name invalid"
                 (\_ ->
                     EcsGenerator.generate
                         { ecs = testEcs
                         , components = [ a ]
-                        , iterators = [ iterator "a a" [ a ] ]
+                        , nodes = [ node "a a" [ a ] ]
                         }
                         |> Expect.err
                 )
-            , Test.test "iterator components empty"
+            , Test.test "node components empty"
                 (\_ ->
                     EcsGenerator.generate
                         { ecs = testEcs
                         , components = [ a ]
-                        , iterators = [ iterator "a" [] ]
+                        , nodes = [ node "a" [] ]
                         }
                         |> Expect.err
                 )
-            , Test.test "unkonwn iterator component"
+            , Test.test "unkonwn node component"
                 (\_ ->
                     EcsGenerator.generate
                         { ecs = testEcs
                         , components = [ a ]
-                        , iterators = [ iterator "b" [ b ] ]
+                        , nodes = [ node "b" [ b ] ]
                         }
                         |> Expect.err
                 )
-            , Test.test "duplicate iterator component"
+            , Test.test "duplicate node component"
                 (\_ ->
                     EcsGenerator.generate
                         { ecs = testEcs
                         , components = [ a ]
-                        , iterators = [ iterator "a" [ a, a ] ]
+                        , nodes = [ node "a" [ a, a ] ]
                         }
                         |> Expect.err
                 )

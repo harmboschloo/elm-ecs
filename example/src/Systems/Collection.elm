@@ -1,42 +1,40 @@
 module Systems.Collection exposing (update)
 
-import Components exposing (Collectable, Collector, Position, Scale, Velocity)
+import Components exposing (Position, Velocity)
 import Context exposing (Context)
 import Data.Animation as Animation
 import Ease
-import Ecs exposing (Ecs, EntityId)
+import Ecs exposing (Ecs)
 
 
 type alias CollectableEntity =
-    { id : EntityId
+    { id : Ecs.EntityId
     , position : Position
     }
 
 
 update : ( Ecs, Context ) -> ( Ecs, Context )
 update =
-    Ecs.iterateCollectableEntities checkCollectable
+    Ecs.iterateEntities Ecs.collectableNode checkCollectable
 
 
 checkCollectable :
-    EntityId
-    -> Collectable
-    -> Position
+    Ecs.EntityId
+    -> Ecs.CollectableNode
     -> ( Ecs, Context )
     -> ( Ecs, Context )
-checkCollectable entityId collectable position =
-    Ecs.iterateCollectorEntities
-        (checkCollection (CollectableEntity entityId position))
+checkCollectable entityId node =
+    Ecs.iterateEntities Ecs.collectorNode
+        (checkCollection (CollectableEntity entityId node.position))
 
 
 checkCollection :
     CollectableEntity
-    -> EntityId
-    -> Collector
-    -> Position
+    -> Ecs.EntityId
+    -> Ecs.CollectorNode
     -> ( Ecs, Context )
     -> ( Ecs, Context )
-checkCollection collectable entityId collector position ( ecs, context ) =
+checkCollection collectable entityId { collector, position } ( ecs, context ) =
     let
         deltaX =
             collectable.position.x - position.x
@@ -52,12 +50,14 @@ checkCollection collectable entityId collector position ( ecs, context ) =
     in
     if distanceSquared < radiusSquared then
         ( ecs
-            |> Ecs.removeComponent collectable.id Ecs.collectable
-            |> Ecs.insertComponent collectable.id Ecs.velocity (Velocity 0 0 (2 * pi))
-            |> Ecs.insertComponent collectable.id Ecs.scale 1
+            |> Ecs.removeComponent collectable.id Ecs.collectableComponent
             |> Ecs.insertComponent
                 collectable.id
-                Ecs.scaleAnimation
+                Ecs.velocityComponent
+                (Velocity 0 0 (2 * pi))
+            |> Ecs.insertComponent
+                collectable.id
+                Ecs.scaleAnimationComponent
                 (Animation.animation
                     { startTime = context.time
                     , duration = 0.5
@@ -71,7 +71,10 @@ checkCollection collectable entityId collector position ( ecs, context ) =
                             }
                         )
                 )
-            |> Ecs.insertComponent collectable.id Ecs.destroy { time = context.time + 1 }
+            |> Ecs.insertComponent
+                collectable.id
+                Ecs.destroyComponent
+                { time = context.time + 1 }
         , context
         )
 

@@ -2,7 +2,7 @@ module EcsGenerator exposing
     ( Component
     , Config
     , Ecs
-    , Iterator
+    , Node
     , component
     , componentModuleName
     , componentTypeName
@@ -15,9 +15,9 @@ module EcsGenerator exposing
     , isValidModuleName
     , isValidTypeName
     , isValidVariableName
-    , iterator
-    , iteratorComponents
-    , iteratorName
+    , node
+    , nodeComponents
+    , nodeName
     , validate
     )
 
@@ -45,8 +45,8 @@ type alias Component =
     Config.Component
 
 
-type alias Iterator =
-    Config.Iterator
+type alias Node =
+    Config.Node
 
 
 ecs : String -> String -> Ecs
@@ -79,19 +79,19 @@ componentTypeName =
     Config.componentTypeName
 
 
-iterator : String -> List Component -> Iterator
-iterator =
-    Config.iterator
+node : String -> List Component -> Node
+node =
+    Config.node
 
 
-iteratorName : Iterator -> String
-iteratorName =
-    Config.iteratorName
+nodeName : Node -> String
+nodeName =
+    Config.nodeName
 
 
-iteratorComponents : Iterator -> List Component
-iteratorComponents =
-    Config.iteratorComponents
+nodeComponents : Node -> List Component
+nodeComponents =
+    Config.nodeComponents
 
 
 
