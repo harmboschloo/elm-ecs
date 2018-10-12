@@ -1868,7 +1868,7 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.cf,
+		impl.ce,
 		impl.cr,
 		impl.cp,
 		function() { return function() {} }
@@ -3894,7 +3894,7 @@ var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debug
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.cf,
+		impl.ce,
 		impl.cr,
 		impl.cp,
 		function(sendToApp, initialModel) {
@@ -3930,7 +3930,7 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.cf,
+		impl.ce,
 		impl.cr,
 		impl.cp,
 		function(sendToApp, initialModel) {
@@ -3943,7 +3943,7 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 			{
 				_VirtualDom_divertHrefToApp = divertHrefToApp;
 				var doc = view(model);
-				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.b5);
+				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.b4);
 				var patches = _VirtualDom_diff(currNode, nextNode);
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
@@ -3999,8 +3999,8 @@ function _Browser_makeAnimator(model, draw)
 
 function _Browser_application(impl)
 {
-	var onUrlChange = impl.ci;
-	var onUrlRequest = impl.cj;
+	var onUrlChange = impl.ch;
+	var onUrlRequest = impl.ci;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
@@ -4020,9 +4020,9 @@ function _Browser_application(impl)
 					var next = elm$url$Url$fromString(href).a;
 					sendToApp(onUrlRequest(
 						(next
-							&& curr.bQ === next.bQ
+							&& curr.bP === next.bP
 							&& curr.bC === next.bC
-							&& curr.bN.a === next.bN.a
+							&& curr.bM.a === next.bM.a
 						)
 							? elm$browser$Browser$Internal(next)
 							: elm$browser$Browser$External(href)
@@ -4030,9 +4030,9 @@ function _Browser_application(impl)
 				}
 			});
 		},
-		cf: function(flags)
+		ce: function(flags)
 		{
-			return A3(impl.cf, flags, _Browser_getUrl(), key);
+			return A3(impl.ce, flags, _Browser_getUrl(), key);
 		},
 		cu: impl.cu,
 		cr: impl.cr,
@@ -4102,17 +4102,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { cc: 'hidden', aA: 'visibilitychange' }
+		? { cb: 'hidden', aA: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { cc: 'mozHidden', aA: 'mozvisibilitychange' }
+		? { cb: 'mozHidden', aA: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { cc: 'msHidden', aA: 'msvisibilitychange' }
+		? { cb: 'msHidden', aA: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { cc: 'webkitHidden', aA: 'webkitvisibilitychange' }
-		: { cc: 'hidden', aA: 'visibilitychange' };
+		? { cb: 'webkitHidden', aA: 'webkitvisibilitychange' }
+		: { cb: 'hidden', aA: 'visibilitychange' };
 }
 
 
@@ -4193,8 +4193,8 @@ var _Browser_call = F2(function(functionName, id)
 function _Browser_getViewport()
 {
 	return {
-		bV: _Browser_getScene(),
-		b0: {
+		bU: _Browser_getScene(),
+		b$: {
 			a5: _Browser_window.pageXOffset,
 			a6: _Browser_window.pageYOffset,
 			av: _Browser_doc.documentElement.clientWidth,
@@ -4232,11 +4232,11 @@ function _Browser_getViewportOf(id)
 	return _Browser_withNode(id, function(node)
 	{
 		return {
-			bV: {
+			bU: {
 				av: node.scrollWidth,
 				ag: node.scrollHeight
 			},
-			b0: {
+			b$: {
 				a5: node.scrollLeft,
 				a6: node.scrollTop,
 				av: node.clientWidth,
@@ -4270,14 +4270,14 @@ function _Browser_getElement(id)
 		var x = _Browser_window.pageXOffset;
 		var y = _Browser_window.pageYOffset;
 		return {
-			bV: _Browser_getScene(),
-			b0: {
+			bU: _Browser_getScene(),
+			b$: {
 				a5: x,
 				a6: y,
 				av: _Browser_doc.documentElement.clientWidth,
 				ag: _Browser_doc.documentElement.clientHeight
 			},
-			b9: {
+			b8: {
 				a5: x + rect.left,
 				a6: y + rect.top,
 				av: rect.width,
@@ -5909,7 +5909,7 @@ var elm$core$String$contains = _String_contains;
 var elm$core$String$toInt = _String_toInt;
 var elm$url$Url$Url = F6(
 	function (protocol, host, port_, path, query, fragment) {
-		return {bB: fragment, bC: host, bL: path, bN: port_, bQ: protocol, bR: query};
+		return {bB: fragment, bC: host, ck: path, bM: port_, bP: protocol, bQ: query};
 	});
 var elm$url$Url$chompBeforePath = F5(
 	function (protocol, path, params, frag, str) {
@@ -6451,6 +6451,7 @@ var elm$core$Dict$remove = F2(
 			return x;
 		}
 	});
+var elm$core$String$endsWith = _String_endsWith;
 var elm$url$Url$addPort = F2(
 	function (maybePort, starter) {
 		if (maybePort.$ === 1) {
@@ -6473,7 +6474,7 @@ var elm$url$Url$addPrefixed = F3(
 	});
 var elm$url$Url$toString = function (url) {
 	var http = function () {
-		var _n0 = url.bQ;
+		var _n0 = url.bP;
 		if (!_n0) {
 			return 'http://';
 		} else {
@@ -6487,13 +6488,13 @@ var elm$url$Url$toString = function (url) {
 		A3(
 			elm$url$Url$addPrefixed,
 			'?',
-			url.bR,
+			url.bQ,
 			_Utils_ap(
 				A2(
 					elm$url$Url$addPort,
-					url.bN,
+					url.bM,
 					_Utils_ap(http, url.bC)),
-				url.bL)));
+				url.ck)));
 };
 var author$project$Main$update = F2(
 	function (msg, model) {
@@ -6504,7 +6505,10 @@ var author$project$Main$update = F2(
 				var urlRequest = msg.a;
 				if (!urlRequest.$) {
 					var url = urlRequest.a;
-					return _Utils_Tuple2(
+					return A2(elm$core$String$endsWith, 'example/build/', url.ck) ? _Utils_Tuple2(
+						model,
+						elm$browser$Browser$Navigation$load(
+							elm$url$Url$toString(url))) : _Utils_Tuple2(
 						model,
 						A2(
 							elm$browser$Browser$Navigation$pushUrl,
@@ -6800,7 +6804,7 @@ var elm$core$List$singleton = function (value) {
 };
 var elm$core$String$cons = _String_cons;
 var rtfeldman$elm_css$Css$Preprocess$stylesheet = function (snippets) {
-	return {bv: elm$core$Maybe$Nothing, bD: _List_Nil, bI: _List_Nil, bW: snippets};
+	return {bv: elm$core$Maybe$Nothing, bD: _List_Nil, bI: _List_Nil, bV: snippets};
 };
 var elm$core$List$append = F2(
 	function (xs, ys) {
@@ -7815,7 +7819,7 @@ var rtfeldman$elm_css$Css$Preprocess$Resolve$applyStyles = F2(
 						_List_fromArray(
 							[
 								rtfeldman$elm_css$Css$Structure$Keyframes(
-								{b7: str, aZ: name})
+								{b6: str, aZ: name})
 							]));
 				case 4:
 					var _n12 = styles.a;
@@ -7953,10 +7957,10 @@ var rtfeldman$elm_css$Css$Preprocess$Resolve$toStructure = function (_n0) {
 	var charset = _n0.bv;
 	var imports = _n0.bD;
 	var namespaces = _n0.bI;
-	var snippets = _n0.bW;
+	var snippets = _n0.bV;
 	var declarations = rtfeldman$elm_css$Css$Preprocess$Resolve$extract(
 		A2(elm$core$List$concatMap, rtfeldman$elm_css$Css$Preprocess$unwrapSnippet, snippets));
-	return {bv: charset, b8: declarations, bD: imports, bI: namespaces};
+	return {bv: charset, b7: declarations, bD: imports, bI: namespaces};
 };
 var rtfeldman$elm_css$Css$Structure$compactHelp = F2(
 	function (declaration, _n0) {
@@ -8001,8 +8005,8 @@ var rtfeldman$elm_css$Css$Structure$compactHelp = F2(
 					A2(elm$core$List$cons, declaration, declarations));
 			case 6:
 				var record = declaration.a;
-				return elm$core$String$isEmpty(record.b7) ? _Utils_Tuple2(keyframesByName, declarations) : _Utils_Tuple2(
-					A3(elm$core$Dict$insert, record.aZ, record.b7, keyframesByName),
+				return elm$core$String$isEmpty(record.b6) ? _Utils_Tuple2(keyframesByName, declarations) : _Utils_Tuple2(
+					A3(elm$core$Dict$insert, record.aZ, record.b6, keyframesByName),
 					declarations);
 			case 7:
 				var properties = declaration.a;
@@ -8037,7 +8041,7 @@ var rtfeldman$elm_css$Css$Structure$withKeyframeDeclarations = F2(
 					var name = _n0.a;
 					var decl = _n0.b;
 					return rtfeldman$elm_css$Css$Structure$Keyframes(
-						{b7: decl, aZ: name});
+						{b6: decl, aZ: name});
 				},
 				elm$core$Dict$toList(keyframesByName)),
 			compactedDeclarations);
@@ -8046,7 +8050,7 @@ var rtfeldman$elm_css$Css$Structure$compactStylesheet = function (_n0) {
 	var charset = _n0.bv;
 	var imports = _n0.bD;
 	var namespaces = _n0.bI;
-	var declarations = _n0.b8;
+	var declarations = _n0.b7;
 	var _n1 = A3(
 		elm$core$List$foldr,
 		rtfeldman$elm_css$Css$Structure$compactHelp,
@@ -8055,7 +8059,7 @@ var rtfeldman$elm_css$Css$Structure$compactStylesheet = function (_n0) {
 	var keyframesByName = _n1.a;
 	var compactedDeclarations = _n1.b;
 	var finalDeclarations = A2(rtfeldman$elm_css$Css$Structure$withKeyframeDeclarations, keyframesByName, compactedDeclarations);
-	return {bv: charset, b8: finalDeclarations, bD: imports, bI: namespaces};
+	return {bv: charset, b7: finalDeclarations, bD: imports, bI: namespaces};
 };
 var rtfeldman$elm_css$Css$Structure$Output$charsetToString = function (charset) {
 	return A2(
@@ -8318,7 +8322,7 @@ var rtfeldman$elm_css$Css$Structure$Output$prettyPrintDeclaration = function (de
 			return 'TODO';
 		case 6:
 			var name = decl.a.aZ;
-			var declaration = decl.a.b7;
+			var declaration = decl.a.b6;
 			return '@keyframes ' + (name + (' {\n' + (declaration + '\n}')));
 		case 7:
 			return 'TODO';
@@ -8332,7 +8336,7 @@ var rtfeldman$elm_css$Css$Structure$Output$prettyPrint = function (_n0) {
 	var charset = _n0.bv;
 	var imports = _n0.bD;
 	var namespaces = _n0.bI;
-	var declarations = _n0.b8;
+	var declarations = _n0.b7;
 	return A2(
 		elm$core$String$join,
 		'\n\n',
@@ -9541,7 +9545,7 @@ var author$project$Main$viewHeading = A2(
 				rtfeldman$elm_css$Html$Styled$a,
 				_List_fromArray(
 					[
-						rtfeldman$elm_css$Html$Styled$Attributes$href('https://harmboschloo.github.io/elm-ecs-generator/example/build/')
+						rtfeldman$elm_css$Html$Styled$Attributes$href('example/build/')
 					]),
 				_List_fromArray(
 					[
@@ -10318,7 +10322,7 @@ var rtfeldman$elm_css$VirtualDom$Styled$toUnstyled = function (vdom) {
 var rtfeldman$elm_css$Html$Styled$toUnstyled = rtfeldman$elm_css$VirtualDom$Styled$toUnstyled;
 var author$project$Main$view = function (model) {
 	return {
-		b5: A2(
+		b4: A2(
 			elm$core$List$map,
 			rtfeldman$elm_css$Html$Styled$toUnstyled,
 			_List_fromArray(
@@ -10384,7 +10388,7 @@ var author$project$Main$view = function (model) {
 };
 var elm$browser$Browser$application = _Browser_application;
 var author$project$Main$main = elm$browser$Browser$application(
-	{cf: author$project$Main$init, ci: author$project$Main$UrlChanged, cj: author$project$Main$LinkClicked, cp: author$project$Main$subscriptions, cr: author$project$Main$update, cu: author$project$Main$view});
+	{ce: author$project$Main$init, ch: author$project$Main$UrlChanged, ci: author$project$Main$LinkClicked, cp: author$project$Main$subscriptions, cr: author$project$Main$update, cu: author$project$Main$view});
 _Platform_export({'Main':{'init':author$project$Main$main(
 	elm$json$Json$Decode$succeed(0))(0)}});}(this));
 

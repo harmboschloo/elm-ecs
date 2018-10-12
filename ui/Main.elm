@@ -182,9 +182,15 @@ update msg model =
         LinkClicked urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
-                    ( model
-                    , Navigation.pushUrl model.navigationKey (Url.toString url)
-                    )
+                    if String.endsWith "example/build/" url.path then
+                        ( model
+                        , Navigation.load (Url.toString url)
+                        )
+
+                    else
+                        ( model
+                        , Navigation.pushUrl model.navigationKey (Url.toString url)
+                        )
 
                 Browser.External url ->
                     ( model
@@ -433,7 +439,7 @@ viewHeading =
                 [ Attributes.href "#%7B%22ecs%22%3A%5B%22Ecs%22%2C%22Ecs%22%5D%2C%22components%22%3A%5B%5B%22Components%22%2C%22Ai%22%5D%2C%5B%22Components%22%2C%22Collectable%22%5D%2C%5B%22Components%22%2C%22Collector%22%5D%2C%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22Destroy%22%5D%2C%5B%22Components%22%2C%22KeyControlsMap%22%5D%2C%5B%22Components%22%2C%22Motion%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Scale%22%5D%2C%5B%22Components%22%2C%22ScaleAnimation%22%5D%2C%5B%22Components%22%2C%22Sprite%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%2C%22nodes%22%3A%5B%7B%22name%22%3A%22collectable%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Collectable%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%5D%7D%2C%7B%22name%22%3A%22collector%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Collector%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%5D%7D%2C%7B%22name%22%3A%22destroy%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Destroy%22%5D%5D%7D%2C%7B%22name%22%3A%22keyControls%22%2C%22components%22%3A%5B%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22KeyControlsMap%22%5D%5D%7D%2C%7B%22name%22%3A%22motionControl%22%2C%22components%22%3A%5B%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22Motion%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%7D%2C%7B%22name%22%3A%22movement%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%7D%2C%7B%22name%22%3A%22render%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Sprite%22%5D%5D%7D%2C%7B%22name%22%3A%22scaleAnimation%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22ScaleAnimation%22%5D%5D%7D%5D%7D" ]
                 [ Html.text "example" ]
             , Html.a
-                [ Attributes.href "https://harmboschloo.github.io/elm-ecs-generator/example/build/" ]
+                [ Attributes.href "example/build/" ]
                 [ Html.text "example demo" ]
             , Html.a
                 [ Attributes.href "https://github.com/harmboschloo/elm-ecs-generator" ]
