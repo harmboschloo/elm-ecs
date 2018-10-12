@@ -5,6 +5,7 @@ import Ecs exposing (Ecs, EntityId)
 import Html exposing (Html)
 import Systems.Animation as Animation
 import Systems.Collection as Collection
+import Systems.Spawn as Spawn
 import Systems.Destroy as Destroy
 import Systems.KeyControls as KeyControls
 import Systems.MotionControl as MotionControl
@@ -16,6 +17,7 @@ update : Context -> Ecs -> ( Ecs, Context )
 update context ecs =
     ( ecs, context )
         |> Destroy.update
+        |> Spawn.update
         |> KeyControls.update
         |> MotionControl.update
         |> Movement.update

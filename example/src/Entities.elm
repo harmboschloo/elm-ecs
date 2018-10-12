@@ -1,4 +1,4 @@
-module Entities exposing (init)
+module Entities exposing (createCollectable, init)
 
 import Assets exposing (Assets, Spritesheet)
 import Components

@@ -26,8 +26,8 @@ view context ecs =
             "stepCount: "
                 ++ String.fromInt context.stepCount
                 ++ " ( "
-                ++ String.fromFloat context.deltaTime
-                ++ ")"
+                ++ String.fromInt (round (1 / context.deltaTime))
+                ++ " FPS)"
         , text <|
             if context.running then
                 " running"
