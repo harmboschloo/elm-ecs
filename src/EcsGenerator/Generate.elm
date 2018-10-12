@@ -189,8 +189,8 @@ removeEntityComponents_ entityId_ model_ =
         |> Builder.comment "-- COMPONENTS --"
         |> Builder.exposed "insertComponent"
         |> Builder.declaration """
-insertComponent : EntityId -> ComponentTypeName a -> a -> {Ecs} -> {Ecs}
-insertComponent (EntityId entityId_) (ComponentTypeName type_) component_ (Ecs_ model_) =
+insertComponent : EntityId -> ComponentType a -> a -> {Ecs} -> {Ecs}
+insertComponent (EntityId entityId_) (ComponentType type_) component_ (Ecs_ model_) =
     let
         updatedModel_ =
             type_.setComponents
@@ -213,8 +213,8 @@ insertEntityInSet_ entityId_ entitySetType_ model_ =
 """
         |> Builder.exposed "removeComponent"
         |> Builder.declaration """
-removeComponent : EntityId -> ComponentTypeName a -> {Ecs} -> {Ecs}
-removeComponent (EntityId entityId_) (ComponentTypeName type_) (Ecs_ model_) =
+removeComponent : EntityId -> ComponentType a -> {Ecs} -> {Ecs}
+removeComponent (EntityId entityId_) (ComponentType type_) (Ecs_ model_) =
     type_.entitySets
         |> List.foldl (removeEntityFromSet_ entityId_) model_
         |> type_.setComponents
@@ -230,8 +230,8 @@ removeEntityFromSet_ entityId_ entitySetType_ model_ =
 """
         |> Builder.exposed "getComponent"
         |> Builder.declaration """
-getComponent : EntityId -> ComponentTypeName a -> {Ecs} -> Maybe a
-getComponent (EntityId entityId_) (ComponentTypeName type_) (Ecs_ model_) =
+getComponent : EntityId -> ComponentType a -> {Ecs} -> Maybe a
+getComponent (EntityId entityId_) (ComponentType type_) (Ecs_ model_) =
     Array.get entityId_ (type_.getComponents model_)
         |> Maybe.withDefault Nothing
 """
@@ -377,10 +377,10 @@ generateComponentTypes : Config -> Document -> Document
 generateComponentTypes { components, iterators } document =
     document
         |> Builder.comment "-- COMPONENT TYPES --"
-        |> Builder.exposed "ComponentTypeName"
+        |> Builder.exposed "ComponentType"
         |> Builder.declaration """
-type ComponentTypeName a
-    = ComponentTypeName
+type ComponentType a
+    = ComponentType
         { getComponents : Model_ -> Array.Array (Maybe a)
         , setComponents : Array.Array (Maybe a) -> Model_ -> Model_
         , entitySets : List EntitySetType_
@@ -410,12 +410,12 @@ generateComponentType iterators component document =
         |> Builder.exposed name
         |> Builder.declaration
             (name
-                ++ " : ComponentTypeName "
+                ++ " : ComponentType "
                 ++ typeName
                 ++ "\n"
                 ++ name
                 ++ """ =
-    ComponentTypeName
+    ComponentType
         { getComponents = ."""
                 ++ modelField
                 ++ """
