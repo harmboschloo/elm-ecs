@@ -404,11 +404,11 @@ view model =
                         , Css.textAlign Css.center
                         ]
                     ]
-                    [ viewHeading2 "ecs (moduleName|typename)"
+                    [ viewHeading2 "ecs (module name | type name)"
                     , viewEcsInputs model.ecs
-                    , viewHeading2 "components (moduleName|typename)"
+                    , viewHeading2 "components (module name | type name)"
                     , viewComponents model
-                    , viewHeading2 "nodes (name|components)"
+                    , viewHeading2 "nodes (name | components)"
                     , viewNodes model
                     ]
                 ]
