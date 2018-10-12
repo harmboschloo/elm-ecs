@@ -1,7 +1,7 @@
 module Systems.Animation exposing (update)
 
 import Context exposing (Context)
-import Data.Animation exposing (Animation, animate)
+import Data.Animation as Animation exposing (Animation)
 import Ecs exposing (Ecs)
 
 
@@ -16,10 +16,18 @@ updateScale :
     -> ( Ecs, Context )
     -> ( Ecs, Context )
 updateScale entityId { scaleAnimation } ( ecs, context ) =
-    ( Ecs.insertComponent
-        entityId
-        Ecs.scaleComponent
-        (animate context.time scaleAnimation)
-        ecs
-    , context
-    )
+    let
+        newEcs =
+            Ecs.insertComponent
+                entityId
+                Ecs.scaleComponent
+                (Animation.animate context.time scaleAnimation)
+                ecs
+    in
+    if Animation.hasEnded context.time scaleAnimation then
+        ( Ecs.removeComponent entityId Ecs.scaleAnimationComponent newEcs
+        , context
+        )
+
+    else
+        ( newEcs, context )

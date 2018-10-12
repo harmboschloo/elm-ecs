@@ -1915,9 +1915,9 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.cf,
-		impl.cB,
-		impl.cx,
+		impl.ce,
+		impl.cC,
+		impl.cw,
 		function() { return function() {} }
 	);
 });
@@ -3937,11 +3937,11 @@ var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debug
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.cf,
-		impl.cB,
-		impl.cx,
+		impl.ce,
+		impl.cC,
+		impl.cw,
 		function(sendToApp, initialModel) {
-			var view = impl.cG;
+			var view = impl.cH;
 			/**/
 			var domNode = args['node'];
 			//*/
@@ -3973,12 +3973,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.cf,
-		impl.cB,
-		impl.cx,
+		impl.ce,
+		impl.cC,
+		impl.cw,
 		function(sendToApp, initialModel) {
 			var divertHrefToApp = impl.ay && impl.ay(sendToApp)
-			var view = impl.cG;
+			var view = impl.cH;
 			var title = _VirtualDom_doc.title;
 			var bodyNode = _VirtualDom_doc.body;
 			var currNode = _VirtualDom_virtualize(bodyNode);
@@ -3991,7 +3991,7 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.cA) && (_VirtualDom_doc.title = title = doc.cA);
+				(title !== doc.cz) && (_VirtualDom_doc.title = title = doc.cz);
 			});
 		}
 	);
@@ -4042,8 +4042,8 @@ function _Browser_makeAnimator(model, draw)
 
 function _Browser_application(impl)
 {
-	var onUrlChange = impl.cn;
-	var onUrlRequest = impl.co;
+	var onUrlChange = impl.cm;
+	var onUrlRequest = impl.cn;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
@@ -4073,13 +4073,13 @@ function _Browser_application(impl)
 				}
 			});
 		},
-		cf: function(flags)
+		ce: function(flags)
 		{
-			return A3(impl.cf, flags, _Browser_getUrl(), key);
+			return A3(impl.ce, flags, _Browser_getUrl(), key);
 		},
-		cG: impl.cG,
-		cB: impl.cB,
-		cx: impl.cx
+		cH: impl.cH,
+		cC: impl.cC,
+		cw: impl.cw
 	});
 }
 
@@ -4145,17 +4145,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { cd: 'hidden', as: 'visibilitychange' }
+		? { cc: 'hidden', as: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { cd: 'mozHidden', as: 'mozvisibilitychange' }
+		? { cc: 'mozHidden', as: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { cd: 'msHidden', as: 'msvisibilitychange' }
+		? { cc: 'msHidden', as: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { cd: 'webkitHidden', as: 'webkitvisibilitychange' }
-		: { cd: 'hidden', as: 'visibilitychange' };
+		? { cc: 'webkitHidden', as: 'webkitvisibilitychange' }
+		: { cc: 'hidden', as: 'visibilitychange' };
 }
 
 
@@ -4320,7 +4320,7 @@ function _Browser_getElement(id)
 				a8: _Browser_doc.documentElement.clientWidth,
 				aU: _Browser_doc.documentElement.clientHeight
 			},
-			ca: {
+			b9: {
 				ba: x + rect.left,
 				bb: y + rect.top,
 				a8: rect.width,
@@ -6098,7 +6098,7 @@ function _WebGL_diff(oldModel, newModel) {
 }
 var author$project$Assets$Assets = F2(
 	function (background, sprites) {
-		return {b4: background, cw: sprites};
+		return {b4: background, cv: sprites};
 	});
 var author$project$Assets$backgroundSrc = '../assets/spaceshooter/darkPurple.png';
 var elm$core$Basics$False = 1;
@@ -7989,7 +7989,7 @@ var author$project$Context$update = F2(
 				return _Utils_Tuple2(
 					_Utils_update(
 						context,
-						{aT: deltaTime, aO: context.aO + 1, cz: context.cz + deltaTime}),
+						{aT: deltaTime, aO: context.aO + 1, cy: context.cy + deltaTime}),
 					1);
 			case 1:
 				var width = msg.a;
@@ -8042,12 +8042,12 @@ var author$project$Context$init = F3(
 			a1: screen,
 			aN: seed,
 			aO: 0,
-			cz: 0,
+			cy: 0,
 			b_: author$project$Context$getWorld(screen)
 		};
 	});
 var author$project$Ecs$Ecs_ = elm$core$Basics$identity;
-var author$project$Ecs$empty = {H: elm$core$Array$empty, u: elm$core$Array$empty, W: elm$core$Set$empty, v: elm$core$Array$empty, X: elm$core$Set$empty, o: elm$core$Array$empty, w: elm$core$Array$empty, Z: elm$core$Set$empty, ak: _List_Nil, ab: elm$core$Set$empty, y: elm$core$Array$empty, A: elm$core$Array$empty, ad: elm$core$Set$empty, ae: elm$core$Set$empty, e: elm$core$Array$empty, ag: elm$core$Set$empty, E: elm$core$Array$empty, ah: elm$core$Set$empty, T: elm$core$Array$empty, F: elm$core$Array$empty, q: elm$core$Array$empty};
+var author$project$Ecs$empty = {H: elm$core$Array$empty, u: elm$core$Array$empty, W: elm$core$Set$empty, v: elm$core$Array$empty, X: elm$core$Set$empty, o: elm$core$Array$empty, ak: _List_Nil, aa: elm$core$Set$empty, x: elm$core$Array$empty, z: elm$core$Array$empty, ac: elm$core$Set$empty, ad: elm$core$Set$empty, e: elm$core$Array$empty, af: elm$core$Set$empty, D: elm$core$Array$empty, ag: elm$core$Set$empty, T: elm$core$Array$empty, E: elm$core$Array$empty, ah: elm$core$Set$empty, F: elm$core$Array$empty, q: elm$core$Array$empty};
 var elm$random$Random$step = F2(
 	function (_n0, seed) {
 		var generator = _n0;
@@ -8179,12 +8179,12 @@ var author$project$Ecs$createEntity = function (_n0) {
 					u: A2(elm$core$Array$push, elm$core$Maybe$Nothing, model_.u),
 					v: A2(elm$core$Array$push, elm$core$Maybe$Nothing, model_.v),
 					o: A2(elm$core$Array$push, elm$core$Maybe$Nothing, model_.o),
-					w: A2(elm$core$Array$push, elm$core$Maybe$Nothing, model_.w),
-					y: A2(elm$core$Array$push, elm$core$Maybe$Nothing, model_.y),
-					A: A2(elm$core$Array$push, elm$core$Maybe$Nothing, model_.A),
+					x: A2(elm$core$Array$push, elm$core$Maybe$Nothing, model_.x),
+					z: A2(elm$core$Array$push, elm$core$Maybe$Nothing, model_.z),
 					e: A2(elm$core$Array$push, elm$core$Maybe$Nothing, model_.e),
-					E: A2(elm$core$Array$push, elm$core$Maybe$Nothing, model_.E),
+					D: A2(elm$core$Array$push, elm$core$Maybe$Nothing, model_.D),
 					T: A2(elm$core$Array$push, elm$core$Maybe$Nothing, model_.T),
+					E: A2(elm$core$Array$push, elm$core$Maybe$Nothing, model_.E),
 					F: A2(elm$core$Array$push, elm$core$Maybe$Nothing, model_.F),
 					q: A2(elm$core$Array$push, elm$core$Maybe$Nothing, model_.q)
 				}),
@@ -8201,7 +8201,7 @@ var author$project$Ecs$createEntity = function (_n0) {
 };
 var author$project$Ecs$insertEntityInSet_ = F3(
 	function (entityId_, entitySetType_, model_) {
-		return A2(entitySetType_.z, entityId_, model_) ? A2(
+		return A2(entitySetType_.y, entityId_, model_) ? A2(
 			entitySetType_.s,
 			A2(
 				elm$core$Set$insert,
@@ -8274,11 +8274,11 @@ var author$project$Ecs$insertComponent = F4(
 			type_.k);
 	});
 var author$project$Components$Collector = function (radius) {
-	return {cq: radius};
+	return {cp: radius};
 };
 var author$project$Components$Velocity = F3(
 	function (velocityX, velocityY, angularVelocity) {
-		return {b2: angularVelocity, cD: velocityX, cE: velocityY};
+		return {b2: angularVelocity, cE: velocityX, cF: velocityY};
 	});
 var author$project$Components$Controls$Controls = elm$core$Basics$identity;
 var elm$core$Basics$clamp = F3(
@@ -8341,7 +8341,7 @@ var author$project$Ecs$collectorEntitySet_ = {
 	b: function ($) {
 		return $.X;
 	},
-	z: F2(
+	y: F2(
 		function (entityId_, model_) {
 			return A2(author$project$Ecs$isComponentsMember_, entityId_, model_.v) && A2(author$project$Ecs$isComponentsMember_, entityId_, model_.e);
 		}),
@@ -8367,32 +8367,32 @@ var author$project$Ecs$collectorComponent = {
 };
 var author$project$Ecs$keyControlsEntitySet_ = {
 	b: function ($) {
-		return $.ab;
+		return $.aa;
 	},
-	z: F2(
+	y: F2(
 		function (entityId_, model_) {
-			return A2(author$project$Ecs$isComponentsMember_, entityId_, model_.o) && A2(author$project$Ecs$isComponentsMember_, entityId_, model_.y);
+			return A2(author$project$Ecs$isComponentsMember_, entityId_, model_.o) && A2(author$project$Ecs$isComponentsMember_, entityId_, model_.x);
 		}),
 	s: F2(
 		function (entities_, model_) {
 			return _Utils_update(
 				model_,
-				{ab: entities_});
+				{aa: entities_});
 		})
 };
 var author$project$Ecs$motionControlEntitySet_ = {
 	b: function ($) {
-		return $.ad;
+		return $.ac;
 	},
-	z: F2(
+	y: F2(
 		function (entityId_, model_) {
-			return A2(author$project$Ecs$isComponentsMember_, entityId_, model_.o) && (A2(author$project$Ecs$isComponentsMember_, entityId_, model_.A) && (A2(author$project$Ecs$isComponentsMember_, entityId_, model_.e) && A2(author$project$Ecs$isComponentsMember_, entityId_, model_.q)));
+			return A2(author$project$Ecs$isComponentsMember_, entityId_, model_.o) && (A2(author$project$Ecs$isComponentsMember_, entityId_, model_.z) && (A2(author$project$Ecs$isComponentsMember_, entityId_, model_.e) && A2(author$project$Ecs$isComponentsMember_, entityId_, model_.q)));
 		}),
 	s: F2(
 		function (entities_, model_) {
 			return _Utils_update(
 				model_,
-				{ad: entities_});
+				{ac: entities_});
 		})
 };
 var author$project$Ecs$controlsComponent = {
@@ -8412,20 +8412,20 @@ var author$project$Ecs$motionComponent = {
 	k: _List_fromArray(
 		[author$project$Ecs$motionControlEntitySet_]),
 	j: function ($) {
-		return $.A;
+		return $.z;
 	},
 	l: F2(
 		function (components_, model_) {
 			return _Utils_update(
 				model_,
-				{A: components_});
+				{z: components_});
 		})
 };
 var author$project$Ecs$collectableEntitySet_ = {
 	b: function ($) {
 		return $.W;
 	},
-	z: F2(
+	y: F2(
 		function (entityId_, model_) {
 			return A2(author$project$Ecs$isComponentsMember_, entityId_, model_.u) && A2(author$project$Ecs$isComponentsMember_, entityId_, model_.e);
 		}),
@@ -8438,9 +8438,9 @@ var author$project$Ecs$collectableEntitySet_ = {
 };
 var author$project$Ecs$movementEntitySet_ = {
 	b: function ($) {
-		return $.ae;
+		return $.ad;
 	},
-	z: F2(
+	y: F2(
 		function (entityId_, model_) {
 			return A2(author$project$Ecs$isComponentsMember_, entityId_, model_.e) && A2(author$project$Ecs$isComponentsMember_, entityId_, model_.q);
 		}),
@@ -8448,22 +8448,22 @@ var author$project$Ecs$movementEntitySet_ = {
 		function (entities_, model_) {
 			return _Utils_update(
 				model_,
-				{ae: entities_});
+				{ad: entities_});
 		})
 };
 var author$project$Ecs$renderEntitySet_ = {
 	b: function ($) {
-		return $.ag;
+		return $.af;
 	},
-	z: F2(
+	y: F2(
 		function (entityId_, model_) {
-			return A2(author$project$Ecs$isComponentsMember_, entityId_, model_.e) && A2(author$project$Ecs$isComponentsMember_, entityId_, model_.F);
+			return A2(author$project$Ecs$isComponentsMember_, entityId_, model_.e) && A2(author$project$Ecs$isComponentsMember_, entityId_, model_.E);
 		}),
 	s: F2(
 		function (entities_, model_) {
 			return _Utils_update(
 				model_,
-				{ag: entities_});
+				{af: entities_});
 		})
 };
 var author$project$Ecs$positionComponent = {
@@ -8483,13 +8483,13 @@ var author$project$Ecs$spriteComponent = {
 	k: _List_fromArray(
 		[author$project$Ecs$renderEntitySet_]),
 	j: function ($) {
-		return $.F;
+		return $.E;
 	},
 	l: F2(
 		function (components_, model_) {
 			return _Utils_update(
 				model_,
-				{F: components_});
+				{E: components_});
 		})
 };
 var author$project$Ecs$velocityComponent = {
@@ -8505,7 +8505,7 @@ var author$project$Ecs$velocityComponent = {
 				{q: components_});
 		})
 };
-var author$project$Entities$shipMotion = {ch: 400, ci: 12, cj: 6, ck: 200};
+var author$project$Entities$shipMotion = {cg: 400, ch: 12, ci: 6, cj: 200};
 var elm$core$Basics$composeR = F3(
 	function (f, g, x) {
 		return g(
@@ -8628,22 +8628,183 @@ var author$project$Entities$createAiCollector = function (_n0) {
 		entityId,
 		author$project$Ecs$aiComponent,
 		0,
-		A4(author$project$Entities$insertCollectorComponents, entityId, context2.be.cw.bd, position, ecs2));
+		A4(author$project$Entities$insertCollectorComponents, entityId, context2.be.cv.bd, position, ecs2));
 	return _Utils_Tuple2(ecs3, context2);
 };
-var author$project$Ecs$collectableComponent = {
+var author$project$Components$Transforms$InsertCollectable = function (a) {
+	return {$: 1, a: a};
+};
+var author$project$Components$Transforms$Transform = F2(
+	function (time, type_) {
+		return {cy: time, cB: type_};
+	});
+var elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (!maybe.$) {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var author$project$Components$Transforms$add = F3(
+	function (time, type_, maybeTransforms) {
+		return elm$core$Maybe$Just(
+			A2(
+				elm$core$List$cons,
+				A2(author$project$Components$Transforms$Transform, time, type_),
+				A2(elm$core$Maybe$withDefault, _List_Nil, maybeTransforms)));
+	});
+var author$project$Data$Animation$AnimationData = F2(
+	function (a, b) {
+		return {$: 0, a: a, b: b};
+	});
+var author$project$Data$Animation$animation = function (config) {
+	return A2(
+		author$project$Data$Animation$AnimationData,
+		{Q: 0, r: config.r, _: config._, U: config.U, t: config.t},
+		_List_Nil);
+};
+var author$project$Data$Animation$delay = F2(
+	function (deltaTime, _n0) {
+		var data = _n0.a;
+		var appended = _n0.b;
+		return A2(
+			author$project$Data$Animation$AnimationData,
+			_Utils_update(
+				data,
+				{Q: deltaTime}),
+			appended);
+	});
+var author$project$Ecs$scaleAnimationEntitySet_ = {
+	b: function ($) {
+		return $.ag;
+	},
+	y: F2(
+		function (entityId_, model_) {
+			return A2(author$project$Ecs$isComponentsMember_, entityId_, model_.D);
+		}),
+	s: F2(
+		function (entities_, model_) {
+			return _Utils_update(
+				model_,
+				{ag: entities_});
+		})
+};
+var author$project$Ecs$scaleAnimationComponent = {
 	k: _List_fromArray(
-		[author$project$Ecs$collectableEntitySet_]),
+		[author$project$Ecs$scaleAnimationEntitySet_]),
 	j: function ($) {
-		return $.u;
+		return $.D;
 	},
 	l: F2(
 		function (components_, model_) {
 			return _Utils_update(
 				model_,
-				{u: components_});
+				{D: components_});
 		})
 };
+var author$project$Ecs$scaleComponent = {
+	k: _List_Nil,
+	j: function ($) {
+		return $.T;
+	},
+	l: F2(
+		function (components_, model_) {
+			return _Utils_update(
+				model_,
+				{T: components_});
+		})
+};
+var author$project$Ecs$transformEntitySet_ = {
+	b: function ($) {
+		return $.ah;
+	},
+	y: F2(
+		function (entityId_, model_) {
+			return A2(author$project$Ecs$isComponentsMember_, entityId_, model_.F);
+		}),
+	s: F2(
+		function (entities_, model_) {
+			return _Utils_update(
+				model_,
+				{ah: entities_});
+		})
+};
+var author$project$Ecs$transformsComponent = {
+	k: _List_fromArray(
+		[author$project$Ecs$transformEntitySet_]),
+	j: function ($) {
+		return $.F;
+	},
+	l: F2(
+		function (components_, model_) {
+			return _Utils_update(
+				model_,
+				{F: components_});
+		})
+};
+var author$project$Ecs$getComponent = F3(
+	function (_n0, _n1, _n2) {
+		var entityId_ = _n0;
+		var type_ = _n1;
+		var model_ = _n2;
+		return A2(
+			elm$core$Maybe$withDefault,
+			elm$core$Maybe$Nothing,
+			A2(
+				elm$core$Array$get,
+				entityId_,
+				type_.j(model_)));
+	});
+var author$project$Ecs$removeEntityFromSet_ = F3(
+	function (entityId_, entitySetType_, model_) {
+		return A2(
+			entitySetType_.s,
+			A2(
+				elm$core$Set$remove,
+				entityId_,
+				entitySetType_.b(model_)),
+			model_);
+	});
+var author$project$Ecs$removeComponent = F3(
+	function (_n0, _n1, _n2) {
+		var entityId_ = _n0;
+		var type_ = _n1;
+		var model_ = _n2;
+		return A2(
+			type_.l,
+			A3(
+				elm$core$Array$set,
+				entityId_,
+				elm$core$Maybe$Nothing,
+				type_.j(model_)),
+			A3(
+				elm$core$List$foldl,
+				author$project$Ecs$removeEntityFromSet_(entityId_),
+				model_,
+				type_.k));
+	});
+var author$project$Ecs$updateComponent = F4(
+	function (entityId_, type_, updater_, ecs_) {
+		var maybeComponent_ = A3(author$project$Ecs$getComponent, entityId_, type_, ecs_);
+		var _n0 = _Utils_Tuple2(
+			maybeComponent_,
+			updater_(maybeComponent_));
+		if (!_n0.b.$) {
+			var component_ = _n0.b.a;
+			return A4(author$project$Ecs$insertComponent, entityId_, type_, component_, ecs_);
+		} else {
+			if (!_n0.a.$) {
+				var _n1 = _n0.b;
+				return A3(author$project$Ecs$removeComponent, entityId_, type_, ecs_);
+			} else {
+				var _n2 = _n0.a;
+				var _n3 = _n0.b;
+				return ecs_;
+			}
+		}
+	});
 var author$project$Entities$createCollectableWithId = F2(
 	function (entityId, _n0) {
 		var ecs = _n0.a;
@@ -8654,23 +8815,49 @@ var author$project$Entities$createCollectableWithId = F2(
 			context);
 		var position = _n1.a;
 		var context2 = _n1.b;
+		var _n2 = A2(
+			elm$random$Random$step,
+			A2(elm$random$Random$float, 0, 1),
+			context2.aN);
+		var delay = _n2.a;
+		var seed = _n2.b;
+		var context3 = _Utils_update(
+			context2,
+			{aN: seed});
 		var ecs2 = A4(
-			author$project$Ecs$insertComponent,
+			author$project$Ecs$updateComponent,
 			entityId,
-			author$project$Ecs$collectableComponent,
-			0,
+			author$project$Ecs$transformsComponent,
+			A2(
+				author$project$Components$Transforms$add,
+				(context.cy + delay) + 0.5,
+				author$project$Components$Transforms$InsertCollectable(0)),
 			A4(
 				author$project$Ecs$insertComponent,
 				entityId,
-				author$project$Ecs$velocityComponent,
-				A3(author$project$Components$Velocity, 0, 0, elm$core$Basics$pi / 4),
+				author$project$Ecs$scaleAnimationComponent,
+				A2(
+					author$project$Data$Animation$delay,
+					delay,
+					author$project$Data$Animation$animation(
+						{r: 0.5, _: 0, U: context.cy, t: 1})),
 				A4(
 					author$project$Ecs$insertComponent,
 					entityId,
-					author$project$Ecs$positionComponent,
-					position,
-					A4(author$project$Ecs$insertComponent, entityId, author$project$Ecs$spriteComponent, context.be.cw.bg, ecs))));
-		return _Utils_Tuple2(ecs2, context2);
+					author$project$Ecs$scaleComponent,
+					0,
+					A4(
+						author$project$Ecs$insertComponent,
+						entityId,
+						author$project$Ecs$velocityComponent,
+						A3(author$project$Components$Velocity, 0, 0, elm$core$Basics$pi / 4),
+						A4(
+							author$project$Ecs$insertComponent,
+							entityId,
+							author$project$Ecs$positionComponent,
+							position,
+							A4(author$project$Ecs$insertComponent, entityId, author$project$Ecs$spriteComponent, context.be.cv.bg, ecs))))));
+		return _Utils_Tuple2(ecs2, context3);
 	});
 var author$project$Entities$createCollectable = function (_n0) {
 	var ecs = _n0.a;
@@ -8691,13 +8878,13 @@ var author$project$Ecs$keyControlsMapComponent = {
 	k: _List_fromArray(
 		[author$project$Ecs$keyControlsEntitySet_]),
 	j: function ($) {
-		return $.y;
+		return $.x;
 	},
 	l: F2(
 		function (components_, model_) {
 			return _Utils_update(
 				model_,
-				{y: components_});
+				{x: components_});
 		})
 };
 var author$project$Entities$createPlayerCollector = function (_n0) {
@@ -8713,11 +8900,11 @@ var author$project$Entities$createPlayerCollector = function (_n0) {
 		author$project$Ecs$insertComponent,
 		entityId,
 		author$project$Ecs$keyControlsMapComponent,
-		{b0: author$project$Data$KeyCode$arrowUp, b8: author$project$Data$KeyCode$arrowDown, cs: author$project$Data$KeyCode$arrowLeft, ct: author$project$Data$KeyCode$arrowRight},
+		{b0: author$project$Data$KeyCode$arrowUp, b8: author$project$Data$KeyCode$arrowDown, cr: author$project$Data$KeyCode$arrowLeft, cs: author$project$Data$KeyCode$arrowRight},
 		A4(
 			author$project$Entities$insertCollectorComponents,
 			entityId,
-			context2.be.cw.bM,
+			context2.be.cv.bM,
 			{b1: angle, ba: context.b_.a8 / 2, bb: context.b_.aU / 2},
 			ecs2));
 	return _Utils_Tuple2(ecs3, context2);
@@ -8815,7 +9002,7 @@ var author$project$Ecs$iterateEntities = F3(
 	});
 var author$project$Ecs$NodeType = elm$core$Basics$identity;
 var author$project$Ecs$ScaleAnimationNode = function (scaleAnimation) {
-	return {cu: scaleAnimation};
+	return {ct: scaleAnimation};
 };
 var elm$core$Maybe$map = F2(
 	function (f, maybe) {
@@ -8825,15 +9012,6 @@ var elm$core$Maybe$map = F2(
 				f(value));
 		} else {
 			return elm$core$Maybe$Nothing;
-		}
-	});
-var elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (!maybe.$) {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
 		}
 	});
 var author$project$Ecs$nextComponent_ = F3(
@@ -8848,11 +9026,11 @@ var author$project$Ecs$nextComponent_ = F3(
 	});
 var author$project$Ecs$scaleAnimationNode = {
 	b: function ($) {
-		return $.ah;
+		return $.ag;
 	},
 	K: F2(
 		function (entityId_, model_) {
-			return A3(author$project$Ecs$nextComponent_, model_.E, entityId_, author$project$Ecs$ScaleAnimationNode);
+			return A3(author$project$Ecs$nextComponent_, model_.D, entityId_, author$project$Ecs$ScaleAnimationNode);
 		})
 };
 var author$project$Data$Animation$getEndTime = function (data) {
@@ -8902,7 +9080,7 @@ var mgold$elm_animation$Animation$animate = F2(
 		var start = _n0.a2;
 		var delay_ = _n0.m;
 		var dos = _n0.i;
-		var ramp = _n0.D;
+		var ramp = _n0.C;
 		var from_ = _n0.d;
 		var to_ = _n0.a;
 		var ease_ = _n0.I;
@@ -8924,7 +9102,7 @@ var mgold$elm_animation$Animation$animate = F2(
 var mgold$elm_animation$Animation$A = elm$core$Basics$identity;
 var mgold$elm_animation$Animation$AnimRecord = F7(
 	function (start, delay_, dos, ramp, ease_, from_, to_) {
-		return {m: delay_, i: dos, I: ease_, d: from_, D: ramp, a2: start, a: to_};
+		return {m: delay_, i: dos, I: ease_, d: from_, C: ramp, a2: start, a: to_};
 	});
 var mgold$elm_animation$Animation$Duration = function (a) {
 	return {$: 0, a: a};
@@ -8954,14 +9132,14 @@ var mgold$elm_animation$Animation$from = F2(
 		var a = _n0;
 		return _Utils_update(
 			a,
-			{d: x, D: elm$core$Maybe$Nothing});
+			{d: x, C: elm$core$Maybe$Nothing});
 	});
 var mgold$elm_animation$Animation$to = F2(
 	function (x, _n0) {
 		var a = _n0;
 		return _Utils_update(
 			a,
-			{D: elm$core$Maybe$Nothing, a: x});
+			{C: elm$core$Maybe$Nothing, a: x});
 	});
 var author$project$Data$Animation$animate = F2(
 	function (time, _n0) {
@@ -8976,7 +9154,7 @@ var author$project$Data$Animation$animate = F2(
 				data.t,
 				A2(
 					mgold$elm_animation$Animation$from,
-					data.aa,
+					data._,
 					A2(
 						mgold$elm_animation$Animation$duration,
 						data.r,
@@ -8985,31 +9163,29 @@ var author$project$Data$Animation$animate = F2(
 							data.Q,
 							mgold$elm_animation$Animation$animation(data.U))))));
 	});
-var author$project$Ecs$scaleComponent = {
-	k: _List_Nil,
-	j: function ($) {
-		return $.T;
-	},
-	l: F2(
-		function (components_, model_) {
-			return _Utils_update(
-				model_,
-				{T: components_});
-		})
-};
+var author$project$Data$Animation$hasEnded = F2(
+	function (time, _n0) {
+		var start = _n0.a;
+		var appended = _n0.b;
+		var data = A3(author$project$Data$Animation$getActive, time, start, appended);
+		return (_Utils_cmp(
+			author$project$Data$Animation$getEndTime(data),
+			time) > 0) ? false : true;
+	});
 var author$project$Systems$Animation$updateScale = F3(
 	function (entityId, _n0, _n1) {
-		var scaleAnimation = _n0.cu;
+		var scaleAnimation = _n0.ct;
 		var ecs = _n1.a;
 		var context = _n1.b;
-		return _Utils_Tuple2(
-			A4(
-				author$project$Ecs$insertComponent,
-				entityId,
-				author$project$Ecs$scaleComponent,
-				A2(author$project$Data$Animation$animate, context.cz, scaleAnimation),
-				ecs),
-			context);
+		var newEcs = A4(
+			author$project$Ecs$insertComponent,
+			entityId,
+			author$project$Ecs$scaleComponent,
+			A2(author$project$Data$Animation$animate, context.cy, scaleAnimation),
+			ecs);
+		return A2(author$project$Data$Animation$hasEnded, context.cy, scaleAnimation) ? _Utils_Tuple2(
+			A3(author$project$Ecs$removeComponent, entityId, author$project$Ecs$scaleAnimationComponent, newEcs),
+			context) : _Utils_Tuple2(newEcs, context);
 	});
 var author$project$Systems$Animation$update = A2(author$project$Ecs$iterateEntities, author$project$Ecs$scaleAnimationNode, author$project$Systems$Animation$updateScale);
 var author$project$Ecs$CollectableNode = F2(
@@ -9057,10 +9233,7 @@ var author$project$Systems$Collection$CollectableEntity = F2(
 	function (id, position) {
 		return {av: id, ax: position};
 	});
-var author$project$Data$Animation$AnimationData = F2(
-	function (a, b) {
-		return {$: 0, a: a, b: b};
-	});
+var author$project$Components$Transforms$DestroyEntity = {$: 0};
 var author$project$Data$Animation$getLast = F2(
 	function (data, appended) {
 		getLast:
@@ -9087,7 +9260,7 @@ var author$project$Data$Animation$andNext = F2(
 		var data = {
 			Q: nextData.Q,
 			r: nextData.r,
-			aa: lastData.t,
+			_: lastData.t,
 			U: author$project$Data$Animation$getEndTime(lastData),
 			t: nextData.t
 		};
@@ -9099,100 +9272,23 @@ var author$project$Data$Animation$andNext = F2(
 				_List_fromArray(
 					[data])));
 	});
-var author$project$Data$Animation$animation = function (config) {
-	return A2(
-		author$project$Data$Animation$AnimationData,
-		{Q: 0, r: config.r, aa: config.aa, U: config.U, t: config.t},
-		_List_Nil);
-};
 var author$project$Data$Animation$nextAnimation = function (config) {
 	return A2(
 		author$project$Data$Animation$AnimationData,
-		{Q: 0, r: config.r, aa: 0, U: 0, t: config.t},
+		{Q: 0, r: config.r, _: 0, U: 0, t: config.t},
 		_List_Nil);
 };
-var author$project$Ecs$destroyEntitySet_ = {
-	b: function ($) {
-		return $.Z;
-	},
-	z: F2(
-		function (entityId_, model_) {
-			return A2(author$project$Ecs$isComponentsMember_, entityId_, model_.w);
-		}),
-	s: F2(
-		function (entities_, model_) {
-			return _Utils_update(
-				model_,
-				{Z: entities_});
-		})
-};
-var author$project$Ecs$destroyComponent = {
+var author$project$Ecs$collectableComponent = {
 	k: _List_fromArray(
-		[author$project$Ecs$destroyEntitySet_]),
+		[author$project$Ecs$collectableEntitySet_]),
 	j: function ($) {
-		return $.w;
+		return $.u;
 	},
 	l: F2(
 		function (components_, model_) {
 			return _Utils_update(
 				model_,
-				{w: components_});
-		})
-};
-var author$project$Ecs$removeEntityFromSet_ = F3(
-	function (entityId_, entitySetType_, model_) {
-		return A2(
-			entitySetType_.s,
-			A2(
-				elm$core$Set$remove,
-				entityId_,
-				entitySetType_.b(model_)),
-			model_);
-	});
-var author$project$Ecs$removeComponent = F3(
-	function (_n0, _n1, _n2) {
-		var entityId_ = _n0;
-		var type_ = _n1;
-		var model_ = _n2;
-		return A2(
-			type_.l,
-			A3(
-				elm$core$Array$set,
-				entityId_,
-				elm$core$Maybe$Nothing,
-				type_.j(model_)),
-			A3(
-				elm$core$List$foldl,
-				author$project$Ecs$removeEntityFromSet_(entityId_),
-				model_,
-				type_.k));
-	});
-var author$project$Ecs$scaleAnimationEntitySet_ = {
-	b: function ($) {
-		return $.ah;
-	},
-	z: F2(
-		function (entityId_, model_) {
-			return A2(author$project$Ecs$isComponentsMember_, entityId_, model_.E);
-		}),
-	s: F2(
-		function (entities_, model_) {
-			return _Utils_update(
-				model_,
-				{ah: entities_});
-		})
-};
-var author$project$Ecs$scaleAnimationComponent = {
-	k: _List_fromArray(
-		[author$project$Ecs$scaleAnimationEntitySet_]),
-	j: function ($) {
-		return $.E;
-	},
-	l: F2(
-		function (components_, model_) {
-			return _Utils_update(
-				model_,
-				{E: components_});
+				{u: components_});
 		})
 };
 var author$project$Systems$Collection$checkCollection = F4(
@@ -9201,16 +9297,16 @@ var author$project$Systems$Collection$checkCollection = F4(
 		var position = _n0.ax;
 		var ecs = _n1.a;
 		var context = _n1.b;
-		var radiusSquared = collector.cq * collector.cq;
+		var radiusSquared = collector.cp * collector.cp;
 		var deltaY = collectable.ax.bb - position.bb;
 		var deltaX = collectable.ax.ba - position.ba;
 		var distanceSquared = (deltaX * deltaX) + (deltaY * deltaY);
 		return (_Utils_cmp(distanceSquared, radiusSquared) < 0) ? _Utils_Tuple2(
 			A4(
-				author$project$Ecs$insertComponent,
+				author$project$Ecs$updateComponent,
 				collectable.av,
-				author$project$Ecs$destroyComponent,
-				{cz: context.cz + 1},
+				author$project$Ecs$transformsComponent,
+				A2(author$project$Components$Transforms$add, context.cy + 1, author$project$Components$Transforms$DestroyEntity),
 				A4(
 					author$project$Ecs$insertComponent,
 					collectable.av,
@@ -9220,7 +9316,7 @@ var author$project$Systems$Collection$checkCollection = F4(
 						author$project$Data$Animation$nextAnimation(
 							{r: 0.5, t: 0}),
 						author$project$Data$Animation$animation(
-							{r: 0.5, aa: 1, U: context.cz, t: 1.5})),
+							{r: 0.5, _: 1, U: context.cy, t: 1.5})),
 					A4(
 						author$project$Ecs$insertComponent,
 						collectable.av,
@@ -9238,80 +9334,19 @@ var author$project$Systems$Collection$checkCollectable = F2(
 				A2(author$project$Systems$Collection$CollectableEntity, entityId, node.ax)));
 	});
 var author$project$Systems$Collection$update = A2(author$project$Ecs$iterateEntities, author$project$Ecs$collectableNode, author$project$Systems$Collection$checkCollectable);
-var author$project$Ecs$DestroyNode = function (destroy) {
-	return {b9: destroy};
-};
-var author$project$Ecs$destroyNode = {
-	b: function ($) {
-		return $.Z;
-	},
-	K: F2(
-		function (entityId_, model_) {
-			return A3(author$project$Ecs$nextComponent_, model_.w, entityId_, author$project$Ecs$DestroyNode);
-		})
-};
-var author$project$Ecs$removeEntityComponents_ = F2(
-	function (entityId_, model_) {
-		return _Utils_update(
-			model_,
-			{
-				H: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.H),
-				u: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.u),
-				W: A2(elm$core$Set$remove, entityId_, model_.W),
-				v: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.v),
-				X: A2(elm$core$Set$remove, entityId_, model_.X),
-				o: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.o),
-				w: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.w),
-				Z: A2(elm$core$Set$remove, entityId_, model_.Z),
-				ab: A2(elm$core$Set$remove, entityId_, model_.ab),
-				y: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.y),
-				A: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.A),
-				ad: A2(elm$core$Set$remove, entityId_, model_.ad),
-				ae: A2(elm$core$Set$remove, entityId_, model_.ae),
-				e: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.e),
-				ag: A2(elm$core$Set$remove, entityId_, model_.ag),
-				E: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.E),
-				ah: A2(elm$core$Set$remove, entityId_, model_.ah),
-				T: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.T),
-				F: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.F),
-				q: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.q)
-			});
-	});
-var author$project$Ecs$destroyEntity = F2(
-	function (_n0, _n1) {
-		var entityId_ = _n0;
-		var model_ = _n1;
-		return A2(
-			author$project$Ecs$removeEntityComponents_,
-			entityId_,
-			_Utils_update(
-				model_,
-				{
-					ak: A2(elm$core$List$cons, entityId_, model_.ak)
-				}));
-	});
-var author$project$Systems$Destroy$updateEntity = F3(
-	function (entityId, node, _n0) {
-		var ecs = _n0.a;
-		var context = _n0.b;
-		return (_Utils_cmp(context.cz, node.b9.cz) > -1) ? _Utils_Tuple2(
-			A2(author$project$Ecs$destroyEntity, entityId, ecs),
-			context) : _Utils_Tuple2(ecs, context);
-	});
-var author$project$Systems$Destroy$update = A2(author$project$Ecs$iterateEntities, author$project$Ecs$destroyNode, author$project$Systems$Destroy$updateEntity);
 var author$project$Ecs$KeyControlsNode = F2(
 	function (controls, keyControlsMap) {
-		return {bh: controls, cg: keyControlsMap};
+		return {bh: controls, cf: keyControlsMap};
 	});
 var author$project$Ecs$keyControlsNode = {
 	b: function ($) {
-		return $.ab;
+		return $.aa;
 	},
 	K: F2(
 		function (entityId_, model_) {
 			return A2(
 				elm$core$Maybe$andThen,
-				A2(author$project$Ecs$nextComponent_, model_.y, entityId_),
+				A2(author$project$Ecs$nextComponent_, model_.x, entityId_),
 				A3(author$project$Ecs$nextComponent_, model_.o, entityId_, author$project$Ecs$KeyControlsNode));
 		})
 };
@@ -9364,8 +9399,8 @@ var author$project$Systems$KeyControls$updateControls = F2(
 	function (keyControlsMap, activeKeys) {
 		var rotation = function () {
 			var _n1 = _Utils_Tuple2(
-				A2(elm$core$Set$member, keyControlsMap.cs, activeKeys),
-				A2(elm$core$Set$member, keyControlsMap.ct, activeKeys));
+				A2(elm$core$Set$member, keyControlsMap.cr, activeKeys),
+				A2(elm$core$Set$member, keyControlsMap.cs, activeKeys));
 			if (_n1.a) {
 				if (_n1.b) {
 					return 0;
@@ -9403,7 +9438,7 @@ var author$project$Systems$KeyControls$updateControls = F2(
 var author$project$Systems$KeyControls$updateEntity = F3(
 	function (entityId, _n0, _n1) {
 		var controls = _n0.bh;
-		var keyControlsMap = _n0.cg;
+		var keyControlsMap = _n0.cf;
 		var ecs = _n1.a;
 		var context = _n1.b;
 		return _Utils_Tuple2(
@@ -9418,11 +9453,11 @@ var author$project$Systems$KeyControls$updateEntity = F3(
 var author$project$Systems$KeyControls$update = A2(author$project$Ecs$iterateEntities, author$project$Ecs$keyControlsNode, author$project$Systems$KeyControls$updateEntity);
 var author$project$Ecs$MotionControlNode = F4(
 	function (controls, motion, position, velocity) {
-		return {bh: controls, cl: motion, ax: position, bY: velocity};
+		return {bh: controls, ck: motion, ax: position, bY: velocity};
 	});
 var author$project$Ecs$motionControlNode = {
 	b: function ($) {
-		return $.ad;
+		return $.ac;
 	},
 	K: F2(
 		function (entityId_, model_) {
@@ -9434,7 +9469,7 @@ var author$project$Ecs$motionControlNode = {
 					A2(author$project$Ecs$nextComponent_, model_.e, entityId_),
 					A2(
 						elm$core$Maybe$andThen,
-						A2(author$project$Ecs$nextComponent_, model_.A, entityId_),
+						A2(author$project$Ecs$nextComponent_, model_.z, entityId_),
 						A3(author$project$Ecs$nextComponent_, model_.o, entityId_, author$project$Ecs$MotionControlNode))));
 		})
 };
@@ -9450,23 +9485,23 @@ var elm$core$Basics$sin = _Basics_sin;
 var author$project$Systems$MotionControl$applyControls = F5(
 	function (controls, motion, position, velocity, deltaTime) {
 		var rotationControls = author$project$Components$Controls$getRotation(controls);
-		var targetAngularVelocity = rotationControls * motion.cj;
-		var angularAcceleration = A3(elm$core$Basics$clamp, -motion.ci, motion.ci, (targetAngularVelocity - velocity.b2) / deltaTime);
-		var uncheckedAngularVelocity = A3(elm$core$Basics$clamp, -motion.cj, motion.cj, velocity.b2 + (angularAcceleration * deltaTime));
+		var targetAngularVelocity = rotationControls * motion.ci;
+		var angularAcceleration = A3(elm$core$Basics$clamp, -motion.ch, motion.ch, (targetAngularVelocity - velocity.b2) / deltaTime);
+		var uncheckedAngularVelocity = A3(elm$core$Basics$clamp, -motion.ci, motion.ci, velocity.b2 + (angularAcceleration * deltaTime));
 		var angularVelocity = ((uncheckedAngularVelocity < 0) && (velocity.b2 > 0)) ? 0 : (((uncheckedAngularVelocity > 0) && (velocity.b2 < 0)) ? 0 : uncheckedAngularVelocity);
 		var accelerationControls = author$project$Components$Controls$getAcceleration(controls);
-		var maxAcceleration = (accelerationControls > 0) ? motion.ch : motion.ck;
+		var maxAcceleration = (accelerationControls > 0) ? motion.cg : motion.cj;
 		var acceleration = accelerationControls * maxAcceleration;
 		return {
 			b2: angularVelocity,
-			cD: velocity.cD + ((acceleration * elm$core$Basics$cos(position.b1)) * deltaTime),
-			cE: velocity.cE + ((acceleration * elm$core$Basics$sin(position.b1)) * deltaTime)
+			cE: velocity.cE + ((acceleration * elm$core$Basics$cos(position.b1)) * deltaTime),
+			cF: velocity.cF + ((acceleration * elm$core$Basics$sin(position.b1)) * deltaTime)
 		};
 	});
 var author$project$Systems$MotionControl$updateEntity = F3(
 	function (entityId, _n0, _n1) {
 		var controls = _n0.bh;
-		var motion = _n0.cl;
+		var motion = _n0.ck;
 		var position = _n0.ax;
 		var velocity = _n0.bY;
 		var ecs = _n1.a;
@@ -9487,7 +9522,7 @@ var author$project$Ecs$MovementNode = F2(
 	});
 var author$project$Ecs$movementNode = {
 	b: function ($) {
-		return $.ae;
+		return $.ad;
 	},
 	K: F2(
 		function (entityId_, model_) {
@@ -9509,11 +9544,133 @@ var author$project$Systems$Movement$updateEntity = F3(
 				author$project$Ecs$insertComponent,
 				entityId,
 				author$project$Ecs$positionComponent,
-				{b1: position.b1 + (velocity.b2 * deltaTime), ba: position.ba + (velocity.cD * deltaTime), bb: position.bb + (velocity.cE * deltaTime)},
+				{b1: position.b1 + (velocity.b2 * deltaTime), ba: position.ba + (velocity.cE * deltaTime), bb: position.bb + (velocity.cF * deltaTime)},
 				ecs),
 			context);
 	});
 var author$project$Systems$Movement$update = A2(author$project$Ecs$iterateEntities, author$project$Ecs$movementNode, author$project$Systems$Movement$updateEntity);
+var author$project$Systems$Spawn$spawnRate = 5;
+var author$project$Systems$Spawn$update = function (_n0) {
+	var ecs = _n0.a;
+	var context = _n0.b;
+	var spawn = author$project$Systems$Spawn$spawnRate * context.aT;
+	var fraction = spawn - elm$core$Basics$floor(spawn);
+	var _n1 = A2(
+		elm$random$Random$step,
+		A2(elm$random$Random$float, 0, 1),
+		context.aN);
+	var probability = _n1.a;
+	var seed = _n1.b;
+	var nFraction = (_Utils_cmp(probability, fraction) < 1) ? 1 : 0;
+	var n = elm$core$Basics$floor(spawn) + nFraction;
+	return A3(
+		author$project$Utils$times,
+		n,
+		author$project$Entities$createCollectable,
+		_Utils_Tuple2(
+			ecs,
+			_Utils_update(
+				context,
+				{aN: seed})));
+};
+var author$project$Ecs$TransformNode = function (transforms) {
+	return {cA: transforms};
+};
+var author$project$Ecs$transformNode = {
+	b: function ($) {
+		return $.ah;
+	},
+	K: F2(
+		function (entityId_, model_) {
+			return A3(author$project$Ecs$nextComponent_, model_.F, entityId_, author$project$Ecs$TransformNode);
+		})
+};
+var author$project$Ecs$removeEntityComponents_ = F2(
+	function (entityId_, model_) {
+		return _Utils_update(
+			model_,
+			{
+				H: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.H),
+				u: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.u),
+				W: A2(elm$core$Set$remove, entityId_, model_.W),
+				v: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.v),
+				X: A2(elm$core$Set$remove, entityId_, model_.X),
+				o: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.o),
+				aa: A2(elm$core$Set$remove, entityId_, model_.aa),
+				x: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.x),
+				z: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.z),
+				ac: A2(elm$core$Set$remove, entityId_, model_.ac),
+				ad: A2(elm$core$Set$remove, entityId_, model_.ad),
+				e: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.e),
+				af: A2(elm$core$Set$remove, entityId_, model_.af),
+				D: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.D),
+				ag: A2(elm$core$Set$remove, entityId_, model_.ag),
+				T: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.T),
+				E: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.E),
+				ah: A2(elm$core$Set$remove, entityId_, model_.ah),
+				F: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.F),
+				q: A3(elm$core$Array$set, entityId_, elm$core$Maybe$Nothing, model_.q)
+			});
+	});
+var author$project$Ecs$destroyEntity = F2(
+	function (_n0, _n1) {
+		var entityId_ = _n0;
+		var model_ = _n1;
+		return A2(
+			author$project$Ecs$removeEntityComponents_,
+			entityId_,
+			_Utils_update(
+				model_,
+				{
+					ak: A2(elm$core$List$cons, entityId_, model_.ak)
+				}));
+	});
+var author$project$Systems$Transform$handleTransform = F3(
+	function (entityId, transform, ecs) {
+		var _n0 = transform.cB;
+		if (!_n0.$) {
+			return A2(author$project$Ecs$destroyEntity, entityId, ecs);
+		} else {
+			var collectable = _n0.a;
+			return A4(author$project$Ecs$insertComponent, entityId, author$project$Ecs$collectableComponent, collectable, ecs);
+		}
+	});
+var author$project$Systems$Transform$updateTransform = F3(
+	function (entityId, transform, _n0) {
+		var transforms = _n0.a;
+		var _n1 = _n0.b;
+		var ecs = _n1.a;
+		var context = _n1.b;
+		return (_Utils_cmp(transform.cy, context.cy) > 0) ? _Utils_Tuple2(
+			A2(elm$core$List$cons, transform, transforms),
+			_Utils_Tuple2(ecs, context)) : _Utils_Tuple2(
+			transforms,
+			_Utils_Tuple2(
+				A3(author$project$Systems$Transform$handleTransform, entityId, transform, ecs),
+				context));
+	});
+var author$project$Systems$Transform$updateEntity = F3(
+	function (entityId, node, data) {
+		var _n0 = A3(
+			elm$core$List$foldr,
+			author$project$Systems$Transform$updateTransform(entityId),
+			_Utils_Tuple2(_List_Nil, data),
+			node.cA);
+		var transforms = _n0.a;
+		var _n1 = _n0.b;
+		var ecs = _n1.a;
+		var context = _n1.b;
+		if (!transforms.b) {
+			return _Utils_Tuple2(
+				A3(author$project$Ecs$removeComponent, entityId, author$project$Ecs$transformsComponent, ecs),
+				context);
+		} else {
+			return _Utils_Tuple2(
+				A4(author$project$Ecs$insertComponent, entityId, author$project$Ecs$transformsComponent, transforms, ecs),
+				context);
+		}
+	});
+var author$project$Systems$Transform$update = A2(author$project$Ecs$iterateEntities, author$project$Ecs$transformNode, author$project$Systems$Transform$updateEntity);
 var author$project$Systems$update = F2(
 	function (context, ecs) {
 		return author$project$Systems$Collection$update(
@@ -9521,8 +9678,9 @@ var author$project$Systems$update = F2(
 				author$project$Systems$Movement$update(
 					author$project$Systems$MotionControl$update(
 						author$project$Systems$KeyControls$update(
-							author$project$Systems$Destroy$update(
-								_Utils_Tuple2(ecs, context)))))));
+							author$project$Systems$Spawn$update(
+								author$project$Systems$Transform$update(
+									_Utils_Tuple2(ecs, context))))))));
 	});
 var elm$core$Platform$Cmd$batch = _Platform_batch;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
@@ -9611,22 +9769,22 @@ var author$project$Systems$Render$getCameraTransform = function (_n0) {
 };
 var author$project$Ecs$RenderNode = F2(
 	function (position, sprite) {
-		return {ax: position, cv: sprite};
+		return {ax: position, cu: sprite};
 	});
 var author$project$Ecs$renderNode = {
 	b: function ($) {
-		return $.ag;
+		return $.af;
 	},
 	K: F2(
 		function (entityId_, model_) {
 			return A2(
 				elm$core$Maybe$andThen,
-				A2(author$project$Ecs$nextComponent_, model_.F, entityId_),
+				A2(author$project$Ecs$nextComponent_, model_.E, entityId_),
 				A3(author$project$Ecs$nextComponent_, model_.e, entityId_, author$project$Ecs$RenderNode));
 		})
 };
 var author$project$Systems$Render$Attributes = function (vertexPosition) {
-	return {cF: vertexPosition};
+	return {cG: vertexPosition};
 };
 var author$project$Systems$Render$face = F4(
 	function (a, b, c, d) {
@@ -9663,7 +9821,7 @@ var author$project$Systems$Render$texturedFragmentShader = {
 };
 var author$project$Systems$Render$texturedVertexShader = {
 	src: '\n\n        attribute vec2 vertexPosition;\n        uniform mat4 transform;\n        uniform vec2 textureOffset;\n        uniform vec2 textureSize;\n        varying vec2 textureCoordinate;\n\n        void main () {\n          gl_Position = transform * vec4(vertexPosition, 0, 1.0);\n          textureCoordinate = textureOffset + vertexPosition * textureSize;\n        }\n\n    ',
-	attributes: {vertexPosition: 'cF'},
+	attributes: {vertexPosition: 'cG'},
 	uniforms: {textureOffset: 'a5', textureSize: 'a6', transform: 'a7'}
 };
 var elm_explorations$linear_algebra$Math$Matrix4$makeScale3 = _MJS_m4x4makeScale3;
@@ -9736,12 +9894,12 @@ var elm_explorations$webgl$WebGL$Internal$DepthTest = F4(
 	});
 var elm_explorations$webgl$WebGL$Settings$DepthTest$less = function (_n0) {
 	var write = _n0.G;
-	var near = _n0.B;
-	var far = _n0.x;
+	var near = _n0.A;
+	var far = _n0.w;
 	return A4(elm_explorations$webgl$WebGL$Internal$DepthTest, 513, write, near, far);
 };
 var elm_explorations$webgl$WebGL$Settings$DepthTest$default = elm_explorations$webgl$WebGL$Settings$DepthTest$less(
-	{x: 1, B: 0, G: true});
+	{w: 1, A: 0, G: true});
 var elm_explorations$webgl$WebGL$entity = elm_explorations$webgl$WebGL$entityWith(
 	_List_fromArray(
 		[elm_explorations$webgl$WebGL$Settings$DepthTest$default]));
@@ -9769,19 +9927,6 @@ var author$project$Systems$Render$renderBackground = F2(
 					A3(elm_explorations$linear_algebra$Math$Matrix4$makeScale3, width, height, 1))
 			});
 	});
-var author$project$Ecs$getComponent = F3(
-	function (_n0, _n1, _n2) {
-		var entityId_ = _n0;
-		var type_ = _n1;
-		var model_ = _n2;
-		return A2(
-			elm$core$Maybe$withDefault,
-			elm$core$Maybe$Nothing,
-			A2(
-				elm$core$Array$get,
-				entityId_,
-				type_.j(model_)));
-	});
 var elm_explorations$linear_algebra$Math$Matrix4$makeTranslate3 = _MJS_m4x4makeTranslate3;
 var elm_explorations$linear_algebra$Math$Matrix4$rotate = _MJS_m4x4rotate;
 var elm_explorations$linear_algebra$Math$Matrix4$scale3 = _MJS_m4x4scale3;
@@ -9790,7 +9935,7 @@ var elm_explorations$linear_algebra$Math$Vector3$vec3 = _MJS_v3;
 var author$project$Systems$Render$renderSprite = F4(
 	function (cameraTransform, entityId, _n0, _n1) {
 		var position = _n0.ax;
-		var sprite = _n0.cv;
+		var sprite = _n0.cu;
 		var ecs = _n1.a;
 		var elements = _n1.b;
 		var spriteTransform = A4(
@@ -9897,7 +10042,6 @@ var author$project$Systems$Render$viewWebGL = F2(
 				ecs,
 				author$project$Systems$Render$getCameraTransform(context)));
 	});
-var elm$core$String$fromFloat = _String_fromNumber;
 var elm$html$Html$div = _VirtualDom_node('div');
 var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
@@ -9918,7 +10062,8 @@ var author$project$Systems$Render$view = F2(
 			_List_fromArray(
 				[
 					elm$html$Html$text(
-					'stepCount: ' + (elm$core$String$fromInt(context.aO) + (' ( ' + (elm$core$String$fromFloat(context.aT) + ')')))),
+					'stepCount: ' + (elm$core$String$fromInt(context.aO) + (' ( ' + (elm$core$String$fromInt(
+						elm$core$Basics$round(1 / context.aT)) + ' FPS)')))),
 					elm$html$Html$text(
 					context.ao ? ' running' : ' paused'),
 					A2(
@@ -9960,12 +10105,12 @@ var author$project$Main$view = function (state) {
 					return author$project$Main$viewOk(internalModel);
 			}
 		}(),
-		cA: 'Ecs Example'
+		cz: 'Ecs Example'
 	};
 };
 var elm$browser$Browser$document = _Browser_document;
 var author$project$Main$main = elm$browser$Browser$document(
-	{cf: author$project$Main$init, cx: author$project$Main$subscriptions, cB: author$project$Main$update, cG: author$project$Main$view});
+	{ce: author$project$Main$init, cw: author$project$Main$subscriptions, cC: author$project$Main$update, cH: author$project$Main$view});
 _Platform_export({'Main':{'init':author$project$Main$main(
 	elm$json$Json$Decode$succeed(0))(0)}});}(this));
 

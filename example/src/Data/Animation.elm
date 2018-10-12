@@ -6,6 +6,7 @@ module Data.Animation exposing
     , animate
     , animation
     , delay
+    , hasEnded
     , nextAnimation
     )
 
@@ -142,3 +143,16 @@ animate time (AnimationData start appended) =
         |> Animation.from data.from
         |> Animation.to data.to
         |> Animation.animate time
+
+
+hasEnded : Float -> Animation -> Bool
+hasEnded time (AnimationData start appended) =
+    let
+        data =
+            getActive time start appended
+    in
+    if getEndTime data > time then
+        False
+
+    else
+        True

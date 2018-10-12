@@ -1,6 +1,7 @@
 module Systems.Collection exposing (update)
 
 import Components exposing (Position, Velocity)
+import Components.Transforms as Transforms
 import Context exposing (Context)
 import Data.Animation as Animation
 import Ease
@@ -71,10 +72,10 @@ checkCollection collectable entityId { collector, position } ( ecs, context ) =
                             }
                         )
                 )
-            |> Ecs.insertComponent
+            |> Ecs.updateComponent
                 collectable.id
-                Ecs.destroyComponent
-                { time = context.time + 1 }
+                Ecs.transformsComponent
+                (Transforms.add (context.time + 1) Transforms.DestroyEntity)
         , context
         )
 

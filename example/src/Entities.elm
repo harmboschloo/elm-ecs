@@ -10,7 +10,9 @@ import Components
         , Velocity
         )
 import Components.Controls exposing (controls)
+import Components.Transforms as Transforms
 import Context exposing (Context)
+import Data.Animation as Animation
 import Data.KeyCode as KeyCode
 import Ecs exposing (Ecs, EntityId)
 import Random exposing (Generator)
@@ -123,11 +125,35 @@ createCollectableWithId entityId ( ecs, context ) =
         ( position, context2 ) =
             Context.randomStep (randomPositionGenerator context) context
 
+        ( delay, seed ) =
+            Random.step (Random.float 0 1) context2.seed
+
+        context3 =
+            { context2 | seed = seed }
+
         ecs2 =
             ecs
                 |> Ecs.insertComponent entityId Ecs.spriteComponent context.assets.sprites.collectable
                 |> Ecs.insertComponent entityId Ecs.positionComponent position
                 |> Ecs.insertComponent entityId Ecs.velocityComponent (Velocity 0 0 (pi / 4))
-                |> Ecs.insertComponent entityId Ecs.collectableComponent ()
+                |> Ecs.insertComponent entityId Ecs.scaleComponent 0
+                |> Ecs.insertComponent
+                    entityId
+                    Ecs.scaleAnimationComponent
+                    (Animation.animation
+                        { startTime = context.time
+                        , duration = 0.5
+                        , from = 0
+                        , to = 1
+                        }
+                        |> Animation.delay delay
+                    )
+                |> Ecs.updateComponent
+                    entityId
+                    Ecs.transformsComponent
+                    (Transforms.add
+                        (context.time + delay + 0.5)
+                        (Transforms.InsertCollectable ())
+                    )
     in
-    ( ecs2, context2 )
+    ( ecs2, context3 )

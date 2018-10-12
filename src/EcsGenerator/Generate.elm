@@ -249,6 +249,24 @@ removeEntityFromSet_ entityId_ entitySetType_ model_ =
         (Set.remove entityId_ (entitySetType_.getEntities model_))
         model_
 """
+        |> Builder.exposed "updateComponent"
+        |> Builder.declaration """
+updateComponent : EntityId -> ComponentType a -> (Maybe a -> Maybe a) -> Ecs -> Ecs
+updateComponent entityId_ type_ updater_ ecs_ =
+    let
+        maybeComponent_ =
+            getComponent entityId_ type_ ecs_
+    in
+    case ( maybeComponent_, updater_ maybeComponent_ ) of
+        ( _, Just component_ ) ->
+            insertComponent entityId_ type_ component_ ecs_
+
+        ( Just _, Nothing ) ->
+            removeComponent entityId_ type_ ecs_
+
+        ( Nothing, Nothing ) ->
+            ecs_
+"""
         |> Builder.exposed "getComponent"
         |> Builder.declaration """
 getComponent : EntityId -> ComponentType a -> {Ecs} -> Maybe a
