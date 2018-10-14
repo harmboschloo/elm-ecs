@@ -7,7 +7,7 @@ import Ecs exposing (Ecs)
 
 update : ( Ecs, Context ) -> ( Ecs, Context )
 update =
-    Ecs.iterateEntities Ecs.transformNode updateEntity
+    Ecs.iterate Ecs.transformNode updateEntity
 
 
 updateEntity :
@@ -25,7 +25,7 @@ updateEntity entityId node data =
     in
     case transforms of
         [] ->
-            ( Ecs.removeComponent
+            ( Ecs.remove
                 entityId
                 Ecs.transformsComponent
                 ecs
@@ -33,7 +33,7 @@ updateEntity entityId node data =
             )
 
         _ ->
-            ( Ecs.insertComponent
+            ( Ecs.insert
                 entityId
                 Ecs.transformsComponent
                 transforms
@@ -59,10 +59,10 @@ handleTransform : Ecs.EntityId -> Transform -> Ecs -> Ecs
 handleTransform entityId transform ecs =
     case transform.type_ of
         Transforms.DestroyEntity ->
-            Ecs.destroyEntity entityId ecs
+            Ecs.destroy entityId ecs
 
         Transforms.InsertCollectable collectable ->
-            Ecs.insertComponent entityId
+            Ecs.insert entityId
                 Ecs.collectableComponent
                 collectable
                 ecs

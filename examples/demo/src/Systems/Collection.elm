@@ -16,7 +16,7 @@ type alias CollectableEntity =
 
 update : ( Ecs, Context ) -> ( Ecs, Context )
 update =
-    Ecs.iterateEntities Ecs.collectableNode checkCollectable
+    Ecs.iterate Ecs.collectableNode checkCollectable
 
 
 checkCollectable :
@@ -25,7 +25,7 @@ checkCollectable :
     -> ( Ecs, Context )
     -> ( Ecs, Context )
 checkCollectable entityId node =
-    Ecs.iterateEntities Ecs.collectorNode
+    Ecs.iterate Ecs.collectorNode
         (checkCollection (CollectableEntity entityId node.position))
 
 
@@ -51,12 +51,12 @@ checkCollection collectable entityId { collector, position } ( ecs, context ) =
     in
     if distanceSquared < radiusSquared then
         ( ecs
-            |> Ecs.removeComponent collectable.id Ecs.collectableComponent
-            |> Ecs.insertComponent
+            |> Ecs.remove collectable.id Ecs.collectableComponent
+            |> Ecs.insert
                 collectable.id
                 Ecs.velocityComponent
                 (Velocity 0 0 (2 * pi))
-            |> Ecs.insertComponent
+            |> Ecs.insert
                 collectable.id
                 Ecs.scaleAnimationComponent
                 (Animation.animation
@@ -72,7 +72,7 @@ checkCollection collectable entityId { collector, position } ( ecs, context ) =
                             }
                         )
                 )
-            |> Ecs.updateComponent
+            |> Ecs.update
                 collectable.id
                 Ecs.transformsComponent
                 (Transforms.add (context.time + 1) Transforms.DestroyEntity)

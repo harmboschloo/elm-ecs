@@ -1,55 +1,97 @@
 module EcsGenerator.CodeBuilder exposing
-    ( Document
+    ( Builder
     , comment
     , declaration
-    , document
     , exposed
     , imported
+    , init
+    , internal
     , replace
     , toString
     )
 
+import Dict exposing (Dict)
 import EcsGenerator.Utils as Utils
 import Set exposing (Set)
 
 
-type alias Document =
-    { moduleName : String
-    , topComment : String
-    , exposed : Set String
-    , imported : Set String
-    , statements : List String
-    }
+type Builder
+    = Model
+        { moduleName : String
+        , topComment : String
+        , topDocs : String
+        , exposed : Dict String ( Int, List String )
+        , imported : Set String
+        , statements : List String
+        }
 
 
-document : String -> String -> Document
-document moduleName topComment =
-    { moduleName = moduleName
-    , topComment = String.trim topComment
-    , exposed = Set.empty
-    , imported = Set.empty
-    , statements = []
-    }
+type DeclarationType
+    = InternalDeclaration
+    | ExposedDeclaration String String
 
 
-exposed : String -> Document -> Document
-exposed value doc =
-    { doc | exposed = Set.insert (String.trim value) doc.exposed }
+init : String -> String -> String -> Builder
+init moduleName topComment topDocs =
+    Model
+        { moduleName = moduleName
+        , topComment = String.trim topComment
+        , topDocs = String.trim topDocs
+        , exposed = Dict.empty
+        , imported = Set.empty
+        , statements = []
+        }
 
 
-imported : String -> Document -> Document
-imported moduleName doc =
-    { doc | imported = Set.insert (String.trim moduleName) doc.imported }
+internal : DeclarationType
+internal =
+    InternalDeclaration
 
 
-declaration : String -> Document -> Document
-declaration value doc =
-    { doc | statements = String.trim value :: doc.statements }
+exposed : String -> String -> DeclarationType
+exposed =
+    ExposedDeclaration
 
 
-comment : String -> Document -> Document
-comment value doc =
-    { doc | statements = formatComment value :: doc.statements }
+imported : String -> Builder -> Builder
+imported moduleName (Model model) =
+    Model { model | imported = Set.insert (String.trim moduleName) model.imported }
+
+
+declaration : DeclarationType -> String -> Builder -> Builder
+declaration type_ value (Model model) =
+    let
+        trimmed =
+            String.trim value
+
+        ( statement, updatedExposed ) =
+            case type_ of
+                InternalDeclaration ->
+                    ( trimmed
+                    , model.exposed
+                    )
+
+                ExposedDeclaration name category ->
+                    ( "{-| -}\n" ++ trimmed
+                    , Dict.update
+                        category
+                        (Maybe.withDefault ( Dict.size model.exposed, [] )
+                            >> Tuple.mapSecond ((::) name)
+                            >> Just
+                        )
+                        model.exposed
+                    )
+    in
+    Model
+        { model
+            | statements = statement :: model.statements
+            , exposed = updatedExposed
+        }
+
+
+comment : String -> Builder -> Builder
+comment value (Model model) =
+    Model { model | statements = formatComment value :: model.statements }
 
 
 formatComment : String -> String
@@ -57,33 +99,61 @@ formatComment value =
     "\n" ++ String.trim value
 
 
-replace : String -> String -> Document -> Document
-replace from to doc =
-    { doc
-        | moduleName = Utils.replace from to doc.moduleName
-        , exposed = Set.map (Utils.replace from to) doc.exposed
-        , imported = Set.map (Utils.replace from to) doc.imported
-        , statements = List.map (Utils.replace from to) doc.statements
-    }
+replace : String -> String -> Builder -> Builder
+replace from to (Model model) =
+    Model
+        { model
+            | moduleName = Utils.replace from to model.moduleName
+            , exposed =
+                Dict.map
+                    (\_ -> Tuple.mapSecond (List.map (Utils.replace from to)))
+                    model.exposed
+            , imported = Set.map (Utils.replace from to) model.imported
+            , statements = List.map (Utils.replace from to) model.statements
+        }
 
 
-toString : Document -> String
-toString doc =
-    doc.topComment
+toString : Builder -> String
+toString (Model model) =
+    let
+        exposedValues =
+            Dict.toList model.exposed
+                |> List.sortBy (Tuple.second >> Tuple.first)
+                |> List.map
+                    (\( heading, ( _, values ) ) ->
+                        ( heading, List.reverse values )
+                    )
+    in
+    model.topComment
         :: ("module "
-                ++ doc.moduleName
+                ++ model.moduleName
                 ++ " exposing\n    ( "
-                ++ (Set.toList doc.exposed
-                        |> List.sort
+                ++ (exposedValues
+                        |> List.map (Tuple.second >> String.join ", ")
                         |> String.join "\n    , "
                    )
                 ++ "\n    )\n\n"
-                ++ (Set.toList doc.imported
+                ++ "{-| "
+                ++ model.topDocs
+                ++ "\n\n\n"
+                ++ (exposedValues
+                        |> List.map
+                            (\( heading, values ) ->
+                                "# "
+                                    ++ heading
+                                    ++ "\n\n"
+                                    ++ "@docs "
+                                    ++ String.join ", " values
+                            )
+                        |> String.join "\n\n\n"
+                        |> Utils.append "\n\n-}\n\n"
+                   )
+                ++ (Set.toList model.imported
                         |> List.sort
                         |> List.map ((++) "import ")
                         |> String.join "\n"
                    )
            )
-        :: List.reverse doc.statements
+        :: List.reverse model.statements
         |> String.join "\n\n\n"
         |> Utils.append "\n"

@@ -69,7 +69,7 @@ renderEntities context ecs cameraTransform =
             [ renderBackground context cameraTransform ]
     in
     ( ecs, entities )
-        |> Ecs.iterateEntities Ecs.renderNode (renderSprite cameraTransform)
+        |> Ecs.iterate Ecs.renderNode (renderSprite cameraTransform)
         |> Tuple.second
 
 
@@ -112,7 +112,7 @@ renderSprite cameraTransform entityId { position, sprite } ( ecs, elements ) =
                 |> Mat4.translate3 -sprite.pivotX -sprite.pivotY 0
 
         scalekMat =
-            case Ecs.getComponent entityId Ecs.scaleComponent ecs of
+            case Ecs.get entityId Ecs.scaleComponent ecs of
                 Nothing ->
                     identity
 

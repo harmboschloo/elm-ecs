@@ -182,7 +182,10 @@ update msg model =
         LinkClicked urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
-                    if String.endsWith "example/build/" url.path then
+                    if
+                        String.endsWith "examples/demo/build/" url.path
+                            || String.endsWith "examples/basic/" url.path
+                    then
                         ( model
                         , Navigation.load (Url.toString url)
                         )
@@ -433,19 +436,28 @@ viewHeading =
             , Css.margin3 (Css.px 5) Css.zero Css.zero
             ]
         ]
-        (List.intersperse (Html.text " - ")
-            [ Html.text "ecs generator"
-            , Html.a
-                [ Attributes.href "#%7B%22ecs%22%3A%5B%22Ecs%22%2C%22Ecs%22%5D%2C%22components%22%3A%5B%5B%22Components%22%2C%22Ai%22%5D%2C%5B%22Components%22%2C%22Collectable%22%5D%2C%5B%22Components%22%2C%22Collector%22%5D%2C%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22KeyControlsMap%22%5D%2C%5B%22Components%22%2C%22Motion%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Scale%22%5D%2C%5B%22Components%22%2C%22ScaleAnimation%22%5D%2C%5B%22Components%22%2C%22Sprite%22%5D%2C%5B%22Components.Transforms%22%2C%22Transforms%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%2C%22nodes%22%3A%5B%7B%22name%22%3A%22collectable%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Collectable%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%5D%7D%2C%7B%22name%22%3A%22collector%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Collector%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%5D%7D%2C%7B%22name%22%3A%22keyControls%22%2C%22components%22%3A%5B%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22KeyControlsMap%22%5D%5D%7D%2C%7B%22name%22%3A%22motionControl%22%2C%22components%22%3A%5B%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22Motion%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%7D%2C%7B%22name%22%3A%22movement%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%7D%2C%7B%22name%22%3A%22render%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Sprite%22%5D%5D%7D%2C%7B%22name%22%3A%22scaleAnimation%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22ScaleAnimation%22%5D%5D%7D%2C%7B%22name%22%3A%22transform%22%2C%22components%22%3A%5B%5B%22Components.Transforms%22%2C%22Transforms%22%5D%5D%7D%5D%7D" ]
-                [ Html.text "example" ]
-            , Html.a
-                [ Attributes.href "example/build/" ]
-                [ Html.text "example demo" ]
-            , Html.a
-                [ Attributes.href "https://github.com/harmboschloo/elm-ecs-generator" ]
-                [ Html.text "code" ]
-            ]
-        )
+        [ Html.text "ecs generator"
+        , Html.text " - basic "
+        , Html.a
+            [ Attributes.href "#%7B%22ecs%22%3A%5B%22EcsGenerator.Example.Ecs%22%2C%22Ecs%22%5D%2C%22components%22%3A%5B%5B%22EcsGenerator.Example.Components%22%2C%22Color%22%5D%2C%5B%22EcsGenerator.Example.Components%22%2C%22Position%22%5D%2C%5B%22EcsGenerator.Example.Components%22%2C%22Velocity%22%5D%5D%2C%22nodes%22%3A%5B%7B%22name%22%3A%22bounds%22%2C%22components%22%3A%5B%5B%22EcsGenerator.Example.Components%22%2C%22Position%22%5D%5D%7D%2C%7B%22name%22%3A%22movement%22%2C%22components%22%3A%5B%5B%22EcsGenerator.Example.Components%22%2C%22Position%22%5D%2C%5B%22EcsGenerator.Example.Components%22%2C%22Velocity%22%5D%5D%7D%2C%7B%22name%22%3A%22render%22%2C%22components%22%3A%5B%5B%22EcsGenerator.Example.Components%22%2C%22Color%22%5D%2C%5B%22EcsGenerator.Example.Components%22%2C%22Position%22%5D%5D%7D%5D%7D" ]
+            [ Html.text "example" ]
+        , Html.text "/"
+        , Html.a
+            [ Attributes.href "examples/basic/" ]
+            [ Html.text "live" ]
+        , Html.text " - demo "
+        , Html.a
+            [ Attributes.href "#%7B%22ecs%22%3A%5B%22Ecs%22%2C%22Ecs%22%5D%2C%22components%22%3A%5B%5B%22Components%22%2C%22Ai%22%5D%2C%5B%22Components%22%2C%22Collectable%22%5D%2C%5B%22Components%22%2C%22Collector%22%5D%2C%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22KeyControlsMap%22%5D%2C%5B%22Components%22%2C%22Motion%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Scale%22%5D%2C%5B%22Components%22%2C%22ScaleAnimation%22%5D%2C%5B%22Components%22%2C%22Sprite%22%5D%2C%5B%22Components.Transforms%22%2C%22Transforms%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%2C%22nodes%22%3A%5B%7B%22name%22%3A%22collectable%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Collectable%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%5D%7D%2C%7B%22name%22%3A%22collector%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Collector%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%5D%7D%2C%7B%22name%22%3A%22keyControls%22%2C%22components%22%3A%5B%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22KeyControlsMap%22%5D%5D%7D%2C%7B%22name%22%3A%22motionControl%22%2C%22components%22%3A%5B%5B%22Components.Controls%22%2C%22Controls%22%5D%2C%5B%22Components%22%2C%22Motion%22%5D%2C%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%7D%2C%7B%22name%22%3A%22movement%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Velocity%22%5D%5D%7D%2C%7B%22name%22%3A%22render%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22Position%22%5D%2C%5B%22Components%22%2C%22Sprite%22%5D%5D%7D%2C%7B%22name%22%3A%22scaleAnimation%22%2C%22components%22%3A%5B%5B%22Components%22%2C%22ScaleAnimation%22%5D%5D%7D%2C%7B%22name%22%3A%22transform%22%2C%22components%22%3A%5B%5B%22Components.Transforms%22%2C%22Transforms%22%5D%5D%7D%5D%7D" ]
+            [ Html.text "example" ]
+        , Html.text "/"
+        , Html.a
+            [ Attributes.href "examples/demo/build/" ]
+            [ Html.text "live" ]
+        , Html.text " - "
+        , Html.a
+            [ Attributes.href "https://github.com/harmboschloo/elm-ecs-generator" ]
+            [ Html.text "code" ]
+        ]
 
 
 viewHeading2 : String -> Html Msg

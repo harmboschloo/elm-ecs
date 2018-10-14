@@ -7,7 +7,7 @@ import Ecs exposing (Ecs)
 
 update : ( Ecs, Context ) -> ( Ecs, Context )
 update =
-    Ecs.iterateEntities Ecs.scaleAnimationNode updateScale
+    Ecs.iterate Ecs.scaleAnimationNode updateScale
 
 
 updateScale :
@@ -18,14 +18,14 @@ updateScale :
 updateScale entityId { scaleAnimation } ( ecs, context ) =
     let
         newEcs =
-            Ecs.insertComponent
+            Ecs.insert
                 entityId
                 Ecs.scaleComponent
                 (Animation.animate context.time scaleAnimation)
                 ecs
     in
     if Animation.hasEnded context.time scaleAnimation then
-        ( Ecs.removeComponent entityId Ecs.scaleAnimationComponent newEcs
+        ( Ecs.remove entityId Ecs.scaleAnimationComponent newEcs
         , context
         )
 

@@ -1,8 +1,15 @@
 module EcsGenerator.Error exposing (Error(..))
 
+{-|
+
+@docs Error
+
+-}
+
 import EcsGenerator.Config exposing (Component, Ecs, Node)
 
 
+{-| -}
 type Error
     = InvalidEcsModuleName Ecs
     | InvalidEcsTypeName Ecs

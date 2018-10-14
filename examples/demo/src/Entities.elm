@@ -23,16 +23,16 @@ import WebGL.Texture exposing (Texture)
 init : Context -> ( Ecs, Context )
 init context =
     ( Ecs.empty, context )
-        |> times 30 createCollectable
         |> times 10 createAiCollector
         |> createPlayerCollector
+        |> times 30 createCollectable
 
 
 createPlayerCollector : ( Ecs, Context ) -> ( Ecs, Context )
 createPlayerCollector ( ecs, context ) =
     let
         ( ecs2, entityId ) =
-            Ecs.createEntity ecs
+            Ecs.create ecs
 
         ( angle, context2 ) =
             Context.randomStep randomAngleGenerator context
@@ -46,7 +46,7 @@ createPlayerCollector ( ecs, context ) =
                     , y = context.world.height / 2
                     , angle = angle
                     }
-                |> Ecs.insertComponent
+                |> Ecs.insert
                     entityId
                     Ecs.keyControlsMapComponent
                     { accelerate = KeyCode.arrowUp
@@ -75,7 +75,7 @@ createAiCollector : ( Ecs, Context ) -> ( Ecs, Context )
 createAiCollector ( ecs, context ) =
     let
         ( ecs2, entityId ) =
-            Ecs.createEntity ecs
+            Ecs.create ecs
 
         ( position, context2 ) =
             Context.randomStep (randomPositionGenerator context) context
@@ -86,19 +86,19 @@ createAiCollector ( ecs, context ) =
                     entityId
                     context2.assets.sprites.aiShip
                     position
-                |> Ecs.insertComponent entityId Ecs.aiComponent ()
+                |> Ecs.insert entityId Ecs.aiComponent ()
     in
     ( ecs3, context2 )
 
 
 insertCollectorComponents : EntityId -> Sprite -> Position -> Ecs -> Ecs
 insertCollectorComponents entityId sprite position =
-    Ecs.insertComponent entityId Ecs.spriteComponent sprite
-        >> Ecs.insertComponent entityId Ecs.positionComponent position
-        >> Ecs.insertComponent entityId Ecs.controlsComponent (controls 0 0)
-        >> Ecs.insertComponent entityId Ecs.motionComponent shipMotion
-        >> Ecs.insertComponent entityId Ecs.velocityComponent (Velocity 0 0 0)
-        >> Ecs.insertComponent entityId Ecs.collectorComponent (Collector 30)
+    Ecs.insert entityId Ecs.spriteComponent sprite
+        >> Ecs.insert entityId Ecs.positionComponent position
+        >> Ecs.insert entityId Ecs.controlsComponent (controls 0 0)
+        >> Ecs.insert entityId Ecs.motionComponent shipMotion
+        >> Ecs.insert entityId Ecs.velocityComponent (Velocity 0 0 0)
+        >> Ecs.insert entityId Ecs.collectorComponent (Collector 30)
 
 
 shipMotion : Motion
@@ -114,7 +114,7 @@ createCollectable : ( Ecs, Context ) -> ( Ecs, Context )
 createCollectable ( ecs, context ) =
     let
         ( ecs2, entityId ) =
-            Ecs.createEntity ecs
+            Ecs.create ecs
     in
     createCollectableWithId entityId ( ecs2, context )
 
@@ -133,11 +133,11 @@ createCollectableWithId entityId ( ecs, context ) =
 
         ecs2 =
             ecs
-                |> Ecs.insertComponent entityId Ecs.spriteComponent context.assets.sprites.collectable
-                |> Ecs.insertComponent entityId Ecs.positionComponent position
-                |> Ecs.insertComponent entityId Ecs.velocityComponent (Velocity 0 0 (pi / 4))
-                |> Ecs.insertComponent entityId Ecs.scaleComponent 0
-                |> Ecs.insertComponent
+                |> Ecs.insert entityId Ecs.spriteComponent context.assets.sprites.collectable
+                |> Ecs.insert entityId Ecs.positionComponent position
+                |> Ecs.insert entityId Ecs.velocityComponent (Velocity 0 0 (pi / 4))
+                |> Ecs.insert entityId Ecs.scaleComponent 0
+                |> Ecs.insert
                     entityId
                     Ecs.scaleAnimationComponent
                     (Animation.animation
@@ -148,7 +148,7 @@ createCollectableWithId entityId ( ecs, context ) =
                         }
                         |> Animation.delay delay
                     )
-                |> Ecs.updateComponent
+                |> Ecs.update
                     entityId
                     Ecs.transformsComponent
                     (Transforms.add
