@@ -6,6 +6,7 @@ import Browser.Dom exposing (Viewport, getViewport)
 import Context exposing (Context)
 import Ecs exposing (Ecs)
 import Entities
+import Frame exposing (Frame)
 import Html exposing (Html, text)
 import Random
 import Systems
@@ -27,6 +28,7 @@ type InitState
 type alias Model =
     { assets : Assets
     , context : Context
+    , frame : Frame
     , ecs : Ecs
     }
 
@@ -71,6 +73,11 @@ initModel { assets, posix, viewport } =
     in
     { assets = assets
     , context = context
+    , frame =
+        Frame.init
+            { maxDeltaTime = 1.0 / 20.0
+            , maxHistory = 500
+            }
     , ecs = ecs
     }
 
@@ -82,6 +89,7 @@ initModel { assets, posix, viewport } =
 type Msg
     = InitReceived (Result Error InitData)
     | ContextMsg Context.Msg
+    | FrameMsg Frame.Msg
 
 
 update : Msg -> InitState -> ( InitState, Cmd Msg )
@@ -102,24 +110,53 @@ update msg state =
                     Context.update contextMsg model.context
             in
             case outMsg of
-                Context.None ->
+                Context.NoOp ->
                     ( InitOk { model | context = context }, Cmd.none )
 
-                Context.DeltaTimeUpdated ->
-                    let
-                        ( ecs, updatedContext ) =
-                            Systems.update context model.ecs
-                    in
+                Context.PauseToggled ->
                     ( InitOk
                         { model
-                            | context = updatedContext
-                            , ecs = ecs
+                            | context = context
+                            , frame = Frame.togglePaused model.frame
                         }
                     , Cmd.none
                     )
 
+        ( InitOk model, FrameMsg frameMsg ) ->
+            let
+                ( frame, outMsg ) =
+                    Frame.update frameMsg model.frame
+            in
+            case outMsg of
+                Frame.NoOp ->
+                    ( InitOk { model | frame = frame }, Cmd.none )
+
+                Frame.Update data cmd ->
+                    let
+                        ( ecs, context ) =
+                            Systems.update
+                                (updateContext data model.context)
+                                model.ecs
+                    in
+                    ( InitOk
+                        { model
+                            | context = context
+                            , frame = frame
+                            , ecs = ecs
+                        }
+                    , Cmd.map FrameMsg cmd
+                    )
+
         _ ->
             ( state, Cmd.none )
+
+
+updateContext : { deltaTime : Float, accumulatedTime : Float } -> Context -> Context
+updateContext data context =
+    { context
+        | time = data.accumulatedTime
+        , deltaTime = data.deltaTime
+    }
 
 
 
@@ -130,7 +167,10 @@ subscriptions : InitState -> Sub Msg
 subscriptions state =
     case state of
         InitOk model ->
-            Sub.map ContextMsg (Context.subscriptions model.context)
+            Sub.batch
+                [ Sub.map ContextMsg (Context.subscriptions model.context)
+                , Sub.map FrameMsg (Frame.subscriptions model.frame)
+                ]
 
         _ ->
             Sub.none
@@ -173,7 +213,7 @@ viewError error =
 
 viewOk : Model -> List (Html Msg)
 viewOk model =
-    [ Systems.view model.context model.ecs ]
+    [ Systems.view model.frame model.context model.ecs ]
 
 
 

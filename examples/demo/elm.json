@@ -15,6 +15,7 @@
             "elm-community/easing-functions": "2.0.0",
             "elm-explorations/linear-algebra": "1.0.3",
             "elm-explorations/webgl": "1.0.1",
+            "folkertdev/elm-deque": "3.0.0",
             "mgold/elm-animation": "2.0.0"
         },
         "indirect": {

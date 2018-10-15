@@ -103,10 +103,10 @@ insertCollectorComponents entityId sprite position =
 
 shipMotion : Motion
 shipMotion =
-    { maxAcceleration = 400
-    , maxDeceleration = 200
-    , maxAngularAcceleration = 12
-    , maxAngularVelocity = 6
+    { maxAcceleration = 600
+    , maxDeceleration = 400
+    , maxAngularAcceleration = 20
+    , maxAngularVelocity = 5
     }
 
 

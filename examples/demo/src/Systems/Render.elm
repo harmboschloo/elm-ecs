@@ -2,6 +2,7 @@ module Systems.Render exposing (view)
 
 import Context exposing (Context)
 import Ecs exposing (Ecs)
+import Frame exposing (Frame)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (height, style, width)
 import Math.Matrix4 as Mat4 exposing (Mat4, makeOrtho2D)
@@ -11,8 +12,8 @@ import WebGL exposing (Mesh, Shader)
 import WebGL.Texture as Texture exposing (Texture)
 
 
-view : Context -> Ecs -> Html msg
-view context ecs =
+view : Frame -> Context -> Ecs -> Html msg
+view frame context ecs =
     div
         [ style "color" "#fff"
         , style "position" "absolute"
@@ -22,18 +23,14 @@ view context ecs =
         , style "right" "0"
         , style "overflow" "hidden"
         ]
-        [ text <|
-            "stepCount: "
-                ++ String.fromInt context.stepCount
-                ++ " ( "
-                ++ String.fromInt (round (1 / context.deltaTime))
-                ++ " FPS)"
+        [ text "controls: arrow keys - "
         , text <|
-            if context.running then
-                " running"
+            if Frame.isPaused frame then
+                "paused"
 
             else
-                " paused"
+                "running"
+        , text <| " (ecs) - fps: " ++ String.fromInt (round (1 / context.deltaTime))
         , div
             [ style "position" "absolute"
             , style "top" "0"

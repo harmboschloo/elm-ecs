@@ -14,8 +14,7 @@ import Assets exposing (Assets)
 import Browser.Dom exposing (Viewport, getViewport)
 import Browser.Events
     exposing
-        ( onAnimationFrameDelta
-        , onKeyDown
+        ( onKeyDown
         , onKeyUp
         , onResize
         )
@@ -39,8 +38,6 @@ type alias Context =
     , world : World
     , time : Float
     , deltaTime : Float
-    , stepCount : Int
-    , running : Bool
     }
 
 
@@ -65,8 +62,6 @@ init assets seed screen =
     , world = getWorld screen
     , time = 0
     , deltaTime = 0
-    , stepCount = 0
-    , running = True
     }
 
 
@@ -87,33 +82,19 @@ maxDeltaTime =
 
 
 type Msg
-    = AnimationFrameStarted Float
-    | WindowSizeChanged Int Int
+    = WindowSizeChanged Int Int
     | KeyDown KeyCode
     | KeyUp KeyCode
 
 
 type OutMsg
-    = None
-    | DeltaTimeUpdated
+    = NoOp
+    | PauseToggled
 
 
 update : Msg -> Context -> ( Context, OutMsg )
 update msg context =
     case msg of
-        AnimationFrameStarted deltaTimeMillis ->
-            let
-                deltaTime =
-                    min (deltaTimeMillis / 1000) maxDeltaTime
-            in
-            ( { context
-                | time = context.time + deltaTime
-                , deltaTime = deltaTime
-                , stepCount = context.stepCount + 1
-              }
-            , DeltaTimeUpdated
-            )
-
         WindowSizeChanged width height ->
             ( { context
                 | screen =
@@ -121,25 +102,21 @@ update msg context =
                     , height = height
                     }
               }
-            , None
+            , NoOp
             )
 
         KeyDown keyCode ->
             ( { context | activeKeys = Set.insert keyCode context.activeKeys }
-            , None
+            , NoOp
             )
 
         KeyUp keyCode ->
-            ( { context
-                | activeKeys = Set.remove keyCode context.activeKeys
-                , running =
-                    if keyCode == KeyCode.esc then
-                        not context.running
+            ( { context | activeKeys = Set.remove keyCode context.activeKeys }
+            , if keyCode == KeyCode.esc then
+                PauseToggled
 
-                    else
-                        context.running
-              }
-            , None
+              else
+                NoOp
             )
 
 
@@ -158,22 +135,11 @@ randomStep generator context =
 
 subscriptions : Context -> Sub Msg
 subscriptions context =
-    if context.running then
-        Sub.batch
-            (onAnimationFrameDelta AnimationFrameStarted
-                :: defaultSubscriptions
-            )
-
-    else
-        Sub.batch defaultSubscriptions
-
-
-defaultSubscriptions : List (Sub Msg)
-defaultSubscriptions =
-    [ onResize WindowSizeChanged
-    , onKeyUp keyUpDecoder
-    , onKeyDown keyDownDecoder
-    ]
+    Sub.batch
+        [ onResize WindowSizeChanged
+        , onKeyUp keyUpDecoder
+        , onKeyDown keyDownDecoder
+        ]
 
 
 keyUpDecoder : Decoder Msg
