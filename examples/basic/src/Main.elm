@@ -1,10 +1,10 @@
-module EcsGenerator.Example.Main exposing (main)
+module Main exposing (main)
 
 import Browser exposing (Document)
 import Browser.Events exposing (onAnimationFrameDelta)
-import EcsGenerator.Example.Ecs as Ecs exposing (Ecs)
-import EcsGenerator.Example.Systems as Systems
+import Ecs exposing (Ecs)
 import Html exposing (Html, text)
+import Systems
 import Time exposing (Posix, posixToMillis)
 
 
@@ -17,24 +17,30 @@ type alias Model =
     }
 
 
+type BoundsResolution
+    = Bounce
+    | Teleport
+
+
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( { ecs =
             Ecs.empty
-                |> createEntity ( 50, 50 ) ( 50, 20 ) "#f00"
-                |> createEntity ( 250, 50 ) ( -70, 90 ) "#0f0"
-                |> createEntity ( 50, 250 ) ( 60, -40 ) "#00f"
-                |> createEntity ( 250, 250 ) ( -80, -30 ) "#ff0"
-                |> createEntity ( 150, 250 ) ( -120, -90 ) "#f0f"
-                |> createEntity ( 250, 150 ) ( -80, 60 ) "#0ff"
-                |> createEntity ( 150, 150 ) ( 65, -90 ) "#fff"
+                |> createMovingEntity ( 50, 50 ) ( 50, 20 ) Bounce "#f00"
+                |> createMovingEntity ( 250, 50 ) ( -70, 90 ) Teleport "#0f0"
+                |> createMovingEntity ( 50, 250 ) ( 60, -40 ) Bounce "#00f"
+                |> createMovingEntity ( 250, 250 ) ( -80, -30 ) Teleport "#ff0"
+                |> createMovingEntity ( 150, 250 ) ( -120, -90 ) Bounce "#f0f"
+                |> createMovingEntity ( 250, 150 ) ( -80, 60 ) Teleport "#0ff"
+                |> createStaticEntity ( 220, 140 ) "#fff"
+                |> createStaticEntity ( 160, 180 ) "#fa0"
       }
     , Cmd.none
     )
 
 
-createEntity : ( Float, Float ) -> ( Float, Float ) -> String -> Ecs -> Ecs
-createEntity ( x, y ) ( velocityX, velocityY ) color ecs =
+createMovingEntity : ( Float, Float ) -> ( Float, Float ) -> BoundsResolution -> String -> Ecs -> Ecs
+createMovingEntity ( x, y ) ( velocityX, velocityY ) boundsResolution color ecs =
     let
         ( updatedEcs, entityId ) =
             Ecs.create ecs
@@ -42,6 +48,24 @@ createEntity ( x, y ) ( velocityX, velocityY ) color ecs =
     updatedEcs
         |> Ecs.insert entityId Ecs.positionComponent { x = x, y = y }
         |> Ecs.insert entityId Ecs.velocityComponent { x = velocityX, y = velocityY }
+        |> Ecs.insert entityId Ecs.colorComponent color
+        |> (case boundsResolution of
+                Bounce ->
+                    Ecs.insert entityId Ecs.bounceComponent { damping = 0.6 }
+
+                Teleport ->
+                    Ecs.insert entityId Ecs.teleportComponent ()
+           )
+
+
+createStaticEntity : ( Float, Float ) -> String -> Ecs -> Ecs
+createStaticEntity ( x, y ) color ecs =
+    let
+        ( updatedEcs, entityId ) =
+            Ecs.create ecs
+    in
+    updatedEcs
+        |> Ecs.insert entityId Ecs.positionComponent { x = x, y = y }
         |> Ecs.insert entityId Ecs.colorComponent color
 
 
@@ -64,7 +88,8 @@ update msg model =
             ( { ecs =
                     ( model.ecs, deltaTime )
                         |> Systems.move
-                        |> Systems.checkBounds
+                        |> Systems.bounce
+                        |> Systems.teleport
                         |> Tuple.first
               }
             , Cmd.none

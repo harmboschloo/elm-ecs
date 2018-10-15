@@ -1,7 +1,7 @@
-module EcsGenerator.Example.Systems exposing (checkBounds, move, render)
+module Systems exposing (bounce, move, render, teleport)
 
-import EcsGenerator.Example.Components exposing (Color, Position)
-import EcsGenerator.Example.Ecs as Ecs exposing (Ecs, EntityId)
+import Components exposing (Color, Position)
+import Ecs exposing (Ecs, EntityId)
 import Html exposing (Html)
 import Html.Attributes
 
@@ -39,16 +39,71 @@ moveEntity entityId { position, velocity } ( ecs, deltaTime ) =
 
 
 
--- CHECK BOUNDS --
+--  BOUNDS CHECK --
 
 
-checkBounds : ( Ecs, Float ) -> ( Ecs, Float )
-checkBounds =
-    Ecs.iterate Ecs.boundsNode checkEntityBounds
+bounce : ( Ecs, Float ) -> ( Ecs, Float )
+bounce =
+    Ecs.iterate Ecs.boundsBounceNode checkEntityBoundsBounce
 
 
-checkEntityBounds : Ecs.EntityId -> Ecs.BoundsNode -> ( Ecs, Float ) -> ( Ecs, Float )
-checkEntityBounds entityId { position } ( ecs, deltaTime ) =
+checkEntityBoundsBounce :
+    Ecs.EntityId
+    -> Ecs.BoundsBounceNode
+    -> ( Ecs, Float )
+    -> ( Ecs, Float )
+checkEntityBoundsBounce entityId node ( ecs, deltaTime ) =
+    let
+        absNewVelocityX =
+            abs (node.velocity.x * node.bounce.damping)
+
+        absNewVelocityY =
+            abs (node.velocity.y * node.bounce.damping)
+
+        ( newX, newVelocityX, changedX ) =
+            if node.position.x < 0 then
+                ( 0, absNewVelocityX, True )
+
+            else if node.position.x > toFloat worldWidth then
+                ( toFloat worldWidth, -absNewVelocityX, True )
+
+            else
+                ( node.position.x, node.velocity.x, False )
+
+        ( newY, newVelocityY, changedY ) =
+            if node.position.y < 0 then
+                ( 0, absNewVelocityY, True )
+
+            else if node.position.y > toFloat worldHeight then
+                ( toFloat worldHeight, -absNewVelocityY, True )
+
+            else
+                ( node.position.y, node.velocity.y, False )
+    in
+    if changedX || changedY then
+        ( ecs
+            |> Ecs.insert entityId Ecs.positionComponent { x = newX, y = newY }
+            |> Ecs.insert entityId Ecs.velocityComponent { x = newVelocityX, y = newVelocityY }
+        , deltaTime
+        )
+
+    else
+        ( ecs
+        , deltaTime
+        )
+
+
+teleport : ( Ecs, Float ) -> ( Ecs, Float )
+teleport =
+    Ecs.iterate Ecs.boundsTeleportNode checkEntityBoundsTeleport
+
+
+checkEntityBoundsTeleport :
+    Ecs.EntityId
+    -> Ecs.BoundsTeleportNode
+    -> ( Ecs, Float )
+    -> ( Ecs, Float )
+checkEntityBoundsTeleport entityId { position } ( ecs, deltaTime ) =
     let
         newX =
             if position.x < 0 then
