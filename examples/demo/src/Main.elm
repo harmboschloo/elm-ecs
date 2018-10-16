@@ -7,6 +7,7 @@ import Context exposing (Context)
 import Ecs exposing (Ecs)
 import Entities
 import Frame exposing (Frame)
+import History exposing (History)
 import Html exposing (Html, text)
 import Random
 import Systems
@@ -28,8 +29,9 @@ type InitState
 type alias Model =
     { assets : Assets
     , context : Context
-    , frame : Frame
     , ecs : Ecs
+    , frame : Frame
+    , history : History
     }
 
 
@@ -73,12 +75,9 @@ initModel { assets, posix, viewport } =
     in
     { assets = assets
     , context = context
-    , frame =
-        Frame.init
-            { maxDeltaTime = 1.0 / 20.0
-            , maxHistory = 500
-            }
     , ecs = ecs
+    , frame = Frame.init (1.0 / 20.0)
+    , history = History.empty 500
     }
 
 
@@ -131,18 +130,33 @@ update msg state =
                 Frame.NoOp ->
                     ( InitOk { model | frame = frame }, Cmd.none )
 
-                Frame.Update data cmd ->
+                Frame.Update data maybeStats cmd ->
                     let
                         ( ecs, context ) =
                             Systems.update
                                 (updateContext data model.context)
                                 model.ecs
+
+                        history =
+                            case maybeStats of
+                                Nothing ->
+                                    model.history
+
+                                Just stats ->
+                                    History.add
+                                        { index = stats.index
+                                        , updateTime = stats.updateTime
+                                        , frameTime = stats.frameTime
+                                        , entityCount = Ecs.activeSize model.ecs
+                                        }
+                                        model.history
                     in
                     ( InitOk
                         { model
                             | context = context
-                            , frame = frame
                             , ecs = ecs
+                            , frame = frame
+                            , history = history
                         }
                     , Cmd.map FrameMsg cmd
                     )
@@ -213,7 +227,7 @@ viewError error =
 
 viewOk : Model -> List (Html Msg)
 viewOk model =
-    [ Systems.view model.frame model.context model.ecs ]
+    [ Systems.view model.frame model.history model.context model.ecs ]
 
 
 

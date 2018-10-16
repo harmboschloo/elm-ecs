@@ -3,6 +3,7 @@ module Systems exposing (update, view)
 import Context exposing (Context)
 import Ecs exposing (Ecs, EntityId)
 import Frame exposing (Frame)
+import History exposing (History)
 import Html exposing (Html)
 import Systems.Animation as Animation
 import Systems.Collection as Collection
@@ -26,6 +27,6 @@ update context ecs =
         |> Collection.update
 
 
-view : Frame -> Context -> Ecs -> Html msg
+view : Frame -> History -> Context -> Ecs -> Html msg
 view =
     Render.view

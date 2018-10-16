@@ -1,9 +1,8 @@
 module Frame exposing
     ( Frame
-    , HistoryDataPoint
     , Msg
     , OutMsg(..)
-    , getHistory
+    , Stats
     , init
     , isPaused
     , subscriptions
@@ -25,17 +24,9 @@ type Frame
     = Model
         { state : State
         , maxDeltaTime : Float
+        , index : Int
         , accumulatedTime : Float
-        , history : BoundedDeque HistoryDataPoint
         }
-
-
-type alias HistoryDataPoint =
-    { index : Int
-    , deltaTime : Float
-    , updateTime : Float
-    , frameTime : Float
-    }
 
 
 type State
@@ -55,19 +46,14 @@ type State
         }
 
 
-init : { maxDeltaTime : Float, maxHistory : Int } -> Frame
-init { maxDeltaTime, maxHistory } =
+init : Float  -> Frame
+init maxDeltaTime =
     Model
         { state = Initializing
         , maxDeltaTime = maxDeltaTime
+        , index = 0
         , accumulatedTime = 0
-        , history = BoundedDeque.empty maxHistory
         }
-
-
-getHistory : Frame -> List HistoryDataPoint
-getHistory (Model model) =
-    BoundedDeque.toList model.history
 
 
 togglePaused : Frame -> Frame
@@ -105,7 +91,16 @@ type OutMsg
         { deltaTime : Float
         , accumulatedTime : Float
         }
+        (Maybe Stats)
         (Cmd Msg)
+
+
+type alias Stats =
+    { index : Int
+    , deltaTime : Float
+    , updateTime : Float
+    , frameTime : Float
+    }
 
 
 update : Msg -> Frame -> ( Frame, OutMsg )
@@ -135,9 +130,7 @@ update msg (Model model) =
                     min frameTime model.maxDeltaTime
 
                 index =
-                    BoundedDeque.last model.history
-                        |> Maybe.map (\d -> d.index + 1)
-                        |> Maybe.withDefault 1
+                    model.index + 1
 
                 accumulatedTime =
                     model.accumulatedTime + deltaTime
@@ -149,25 +142,23 @@ update msg (Model model) =
                             { startTime = time
                             , deltaTime = deltaTime
                             }
+                    , index = index
                     , accumulatedTime = accumulatedTime
-                    , history =
-                        case data.updateData of
-                            Nothing ->
-                                model.history
-
-                            Just updateData ->
-                                BoundedDeque.pushBack
-                                    { index = index
-                                    , deltaTime = updateData.deltaTime
-                                    , updateTime = updateData.updateTime
-                                    , frameTime = frameTime
-                                    }
-                                    model.history
                 }
             , Update
                 { deltaTime = deltaTime
                 , accumulatedTime = accumulatedTime
                 }
+                (Maybe.map
+                    (\updateData ->
+                        { index = model.index
+                        , deltaTime = updateData.deltaTime
+                        , updateTime = updateData.updateTime
+                        , frameTime = frameTime
+                        }
+                    )
+                    data.updateData
+                )
                 (Task.perform OnUpdateTime Time.now)
             )
 

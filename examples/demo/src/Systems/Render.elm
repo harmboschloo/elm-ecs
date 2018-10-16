@@ -3,6 +3,7 @@ module Systems.Render exposing (view)
 import Context exposing (Context)
 import Ecs exposing (Ecs)
 import Frame exposing (Frame)
+import History exposing (History)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (height, style, width)
 import Math.Matrix4 as Mat4 exposing (Mat4, makeOrtho2D)
@@ -12,33 +13,42 @@ import WebGL exposing (Mesh, Shader)
 import WebGL.Texture as Texture exposing (Texture)
 
 
-view : Frame -> Context -> Ecs -> Html msg
-view frame context ecs =
-    div
-        [ style "color" "#fff"
-        , style "position" "absolute"
-        , style "top" "0"
-        , style "bottom" "0"
-        , style "left" "0"
-        , style "right" "0"
-        , style "overflow" "hidden"
-        ]
-        [ text "controls: arrow keys - "
-        , text <|
-            if Frame.isPaused frame then
-                "paused"
-
-            else
-                "running"
-        , text <| " (ecs) - fps: " ++ String.fromInt (round (1 / context.deltaTime))
-        , div
-            [ style "position" "absolute"
+view : Frame -> History -> Context -> Ecs -> Html msg
+view frame history context ecs =
+    div []
+        [ div
+            [ style "color" "#fff"
+            , style "position" "absolute"
             , style "top" "0"
+            , style "bottom" "0"
             , style "left" "0"
-            , style "z-index" "-1"
+            , style "right" "0"
+            , style "overflow" "hidden"
             ]
-            [ viewWebGL context ecs
+            [ text "controls: arrow keys - "
+            , text <|
+                if Frame.isPaused frame then
+                    "paused"
+
+                else
+                    "running"
+            , text <|
+                " (ecs) - fps: "
+                    ++ String.fromInt (round <| History.getMeanFps 50 history)
+            , div
+                [ style "position" "absolute"
+                , style "top" "0"
+                , style "left" "0"
+                , style "z-index" "-1"
+                ]
+                [ viewWebGL context ecs
+                ]
             ]
+        , if Frame.isPaused frame then
+            History.view history
+
+          else
+            Html.text ""
         ]
 
 
