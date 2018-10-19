@@ -1,9 +1,7 @@
 module Ecs5 exposing
     ( Ecs, empty
-    , EntityId, create, destroy, reset, size, activeSize, idToInt, intToId
-    , ComponentType, get, insert, update, remove
+    , EntityId, Entity, emptyEntity, insert, remove, reset, get, set, update, size, activeSize, idToInt, intToId
     , NodeType, iterate, nodeSize
-    , aComponent, bComponent, cComponent
     , ANode, AbNode, AbcNode
     , aNode, abNode, abcNode
     )
@@ -18,22 +16,12 @@ module Ecs5 exposing
 
 # Entities
 
-@docs EntityId, create, destroy, reset, size, activeSize, idToInt, intToId
-
-
-# Components
-
-@docs ComponentType, get, insert, update, remove
+@docs EntityId, Entity, emptyEntity, insert, remove, reset, get, set, update, size, activeSize, idToInt, intToId
 
 
 # Nodes
 
 @docs NodeType, iterate, nodeSize
-
-
-# Your Component Types
-
-@docs aComponent, bComponent, cComponent
 
 
 # Your Nodes
@@ -83,6 +71,8 @@ empty =
 
 
 
+--TODO
+--emptyWith
 -- ENTITIES --
 
 
@@ -98,8 +88,8 @@ type alias Entity =
     }
 
 
-defaultEntity : Entity
-defaultEntity =
+emptyEntity : Entity
+emptyEntity =
     { a = Nothing
     , b = Nothing
     , c = Nothing
@@ -107,23 +97,34 @@ defaultEntity =
 
 
 {-| -}
-create : Ecs -> ( Ecs, EntityId )
-create (Ecs model) =
+insert : Entity -> Ecs -> ( Ecs, EntityId )
+insert entity (Ecs model) =
     case model.destroyedEntitiesCache of
         [] ->
-            ( Ecs { model | entities = Array.push defaultEntity model.entities }
-            , EntityId (entitiesSize model)
+            let
+                entityId =
+                    entitiesSize model
+            in
+            ( { model | entities = Array.push entity model.entities }
+                |> updateEntitySets (insertInEntitySet entityId entity)
+                |> Ecs
+            , EntityId entityId
             )
 
-        head :: tail ->
-            ( Ecs { model | destroyedEntitiesCache = tail }
-            , EntityId head
+        entityId :: others ->
+            ( { model
+                | entities = Array.set entityId entity model.entities
+                , destroyedEntitiesCache = others
+              }
+                |> updateEntitySets (insertInEntitySet entityId entity)
+                |> Ecs
+            , EntityId entityId
             )
 
 
 {-| -}
-destroy : EntityId -> Ecs -> Ecs
-destroy (EntityId entityId) (Ecs model) =
+remove : EntityId -> Ecs -> Ecs
+remove (EntityId entityId) (Ecs model) =
     { model | destroyedEntitiesCache = entityId :: model.destroyedEntitiesCache }
         |> resetEntity entityId
         |> Ecs
@@ -132,17 +133,79 @@ destroy (EntityId entityId) (Ecs model) =
 {-| -}
 reset : EntityId -> Ecs -> Ecs
 reset (EntityId entityId) (Ecs model) =
-    Ecs (resetEntity entityId model)
+    model
+        |> resetEntity entityId
+        |> Ecs
 
 
 resetEntity : Int -> Model -> Model
 resetEntity entityId model =
     { model
-        | entities = Array.set entityId defaultEntity model.entities
+        | entities = Array.set entityId emptyEntity model.entities
         , aEntities = Set.remove entityId model.aEntities
         , abEntities = Set.remove entityId model.abEntities
         , abcEntities = Set.remove entityId model.abcEntities
     }
+
+
+{-| -}
+get : EntityId -> Ecs -> Entity
+get (EntityId entityId) (Ecs model) =
+    Array.get entityId model.entities |> Maybe.withDefault emptyEntity
+
+
+{-| -}
+set : EntityId -> Entity -> Ecs -> Ecs
+set (EntityId entityId) entity (Ecs model) =
+    let
+        entitySetUpdater =
+            updateInEntitySet entityId entity
+    in
+    Ecs
+        { model
+            | entities = Array.set entityId entity model.entities
+            , aEntities = entitySetUpdater aEntitySet model.aEntities
+            , abEntities = entitySetUpdater abEntitySet model.abEntities
+            , abcEntities = entitySetUpdater abcEntitySet model.abcEntities
+        }
+
+
+updateEntitySets : (EntitySetType -> Set.Set Int -> Set.Set Int) -> Model -> Model
+updateEntitySets updater model =
+    { model
+        | aEntities = updater aEntitySet model.aEntities
+        , abEntities = updater abEntitySet model.abEntities
+        , abcEntities = updater abcEntitySet model.abcEntities
+    }
+
+
+insertInEntitySet : Int -> Entity -> EntitySetType -> Set.Set Int -> Set.Set Int
+insertInEntitySet entityId entity entitySetType entitySet =
+    if entitySetType.member entity then
+        Set.insert entityId entitySet
+
+    else
+        entitySet
+
+
+updateInEntitySet : Int -> Entity -> EntitySetType -> Set.Set Int -> Set.Set Int
+updateInEntitySet entityId entity entitySetType entitySet =
+    if entitySetType.member entity then
+        Set.insert entityId entitySet
+
+    else
+        Set.remove entityId entitySet
+
+
+{-| -}
+update : EntityId -> (Entity -> Entity) -> Ecs -> Ecs
+update (EntityId entityId) updater (Ecs model) =
+    case Array.get entityId model.entities of
+        Nothing ->
+            Ecs model
+
+        Just entity ->
+            set (EntityId entityId) (updater entity) (Ecs model)
 
 
 {-| -}
@@ -179,126 +242,6 @@ intToId id ecs =
 
 
 
--- COMPONENTS --
-
-
-{-| -}
-type ComponentType a
-    = ComponentType
-        { getComponent : Entity -> Maybe a
-        , setComponent : Maybe a -> Entity -> Entity
-        , entitySets : List EntitySetType
-        }
-
-
-{-| -}
-get : EntityId -> ComponentType a -> Ecs -> Maybe a
-get (EntityId entityId) (ComponentType componentType) (Ecs model) =
-    Array.get entityId model.entities
-        |> Maybe.map componentType.getComponent
-        |> Maybe.withDefault Nothing
-
-
-{-| -}
-insert : EntityId -> ComponentType a -> a -> Ecs -> Ecs
-insert (EntityId entityId) (ComponentType componentType) component (Ecs model) =
-    let
-        updatedModel =
-            case Array.get entityId model.entities of
-                Nothing ->
-                    model
-
-                Just entity ->
-                    { model
-                        | entities =
-                            Array.set
-                                entityId
-                                (componentType.setComponent (Just component) entity)
-                                model.entities
-                    }
-    in
-    Ecs
-        (List.foldl (insertEntityInSet entityId) updatedModel componentType.entitySets)
-
-
-insertEntityInSet : Int -> EntitySetType -> Model -> Model
-insertEntityInSet entityId entitySetType model =
-    if entitySetType.member entityId model then
-        entitySetType.setEntities
-            (Set.insert entityId (entitySetType.getEntities model))
-            model
-
-    else
-        model
-
-
-{-| -}
-update : EntityId -> ComponentType a -> (Maybe a -> Maybe a) -> Ecs -> Ecs
-update (EntityId entityId) (ComponentType componentType) updater (Ecs model) =
-    case Array.get entityId model.entities of
-        Nothing ->
-            Ecs model
-
-        Just entity ->
-            let
-                maybeComponent =
-                    componentType.getComponent entity
-            in
-            case ( maybeComponent, updater maybeComponent ) of
-                ( _, Just component ) ->
-                    Ecs
-                        { model
-                            | entities =
-                                Array.set
-                                    entityId
-                                    (componentType.setComponent (Just component) entity)
-                                    model.entities
-                        }
-
-                ( Just _, Nothing ) ->
-                    Ecs
-                        { model
-                            | entities =
-                                Array.set
-                                    entityId
-                                    (componentType.setComponent Nothing entity)
-                                    model.entities
-                        }
-
-                ( Nothing, Nothing ) ->
-                    Ecs model
-
-
-{-| -}
-remove : EntityId -> ComponentType a -> Ecs -> Ecs
-remove (EntityId entityId) (ComponentType componentType) (Ecs model) =
-    componentType.entitySets
-        |> List.foldl (removeEntityFromSet entityId) model
-        |> (\m ->
-                case Array.get entityId model.entities of
-                    Nothing ->
-                        m
-
-                    Just entity ->
-                        { m
-                            | entities =
-                                Array.set
-                                    entityId
-                                    (componentType.setComponent Nothing entity)
-                                    model.entities
-                        }
-           )
-        |> Ecs
-
-
-removeEntityFromSet : Int -> EntitySetType -> Model -> Model
-removeEntityFromSet entityId entitySetType model =
-    entitySetType.setEntities
-        (Set.remove entityId (entitySetType.getEntities model))
-        model
-
-
-
 -- NODES --
 
 
@@ -306,25 +249,34 @@ removeEntityFromSet entityId entitySetType model =
 type NodeType node
     = NodeType
         { getEntities : Model -> Set.Set Int
-        , getNode : Int -> Model -> Maybe node
+        , getNode : Entity -> Maybe node
         }
 
 
 {-| -}
 iterate :
     NodeType node
-    -> (EntityId -> node -> ( Ecs, context ) -> ( Ecs, context ))
+    -> (EntityId -> Entity -> node -> ( Ecs, context ) -> ( Ecs, context ))
     -> ( Ecs, context )
     -> ( Ecs, context )
 iterate (NodeType nodeType) callback ( Ecs model, context ) =
     Set.foldl
         (\entityId result ->
-            case nodeType.getNode entityId model of
+            case Array.get entityId model.entities of
                 Nothing ->
                     result
 
-                Just node ->
-                    callback (EntityId entityId) node result
+                Just entity ->
+                    case nodeType.getNode entity of
+                        Nothing ->
+                            result
+
+                        Just node ->
+                            callback
+                                (EntityId entityId)
+                                entity
+                                node
+                                result
         )
         ( Ecs model, context )
         (nodeType.getEntities model)
@@ -334,40 +286,6 @@ iterate (NodeType nodeType) callback ( Ecs model, context ) =
 nodeSize : NodeType a -> Ecs -> Int
 nodeSize (NodeType nodeType) (Ecs model) =
     Set.size (nodeType.getEntities model)
-
-
-
--- YOUR COMPONENT TYPES --
-
-
-{-| -}
-aComponent : ComponentType Components.A
-aComponent =
-    ComponentType
-        { getComponent = .a
-        , setComponent = \component entity -> { entity | a = component }
-        , entitySets = [ aEntitySet, abEntitySet, abcEntitySet ]
-        }
-
-
-{-| -}
-bComponent : ComponentType Components.B
-bComponent =
-    ComponentType
-        { getComponent = .b
-        , setComponent = \component entity -> { entity | b = component }
-        , entitySets = [ abEntitySet, abcEntitySet ]
-        }
-
-
-{-| -}
-cComponent : ComponentType Components.C
-cComponent =
-    ComponentType
-        { getComponent = .c
-        , setComponent = \component entity -> { entity | c = component }
-        , entitySets = [ abcEntitySet ]
-        }
 
 
 
@@ -405,14 +323,8 @@ aNode =
     NodeType
         { getEntities = .aEntities
         , getNode =
-            \entityId model ->
-                Array.get entityId model.entities
-                    |> Maybe.map
-                        (\entity ->
-                            ANode
-                                |> nextComponent entity.a
-                        )
-                    |> Maybe.withDefault Nothing
+            \entity ->
+                Maybe.map ANode entity.a
         }
 
 
@@ -422,15 +334,9 @@ abNode =
     NodeType
         { getEntities = .abEntities
         , getNode =
-            \entityId model ->
-                Array.get entityId model.entities
-                    |> Maybe.map
-                        (\entity ->
-                            AbNode
-                                |> nextComponent entity.a
-                                |> Maybe.andThen (nextComponent entity.b)
-                        )
-                    |> Maybe.withDefault Nothing
+            \entity ->
+                Maybe.map AbNode entity.a
+                    |> maybeAndMap entity.b
         }
 
 
@@ -440,22 +346,16 @@ abcNode =
     NodeType
         { getEntities = .abcEntities
         , getNode =
-            \entityId model ->
-                Array.get entityId model.entities
-                    |> Maybe.map
-                        (\entity ->
-                            AbcNode
-                                |> nextComponent entity.a
-                                |> Maybe.andThen (nextComponent entity.b)
-                                |> Maybe.andThen (nextComponent entity.c)
-                        )
-                    |> Maybe.withDefault Nothing
+            \entity ->
+                Maybe.map AbcNode entity.a
+                    |> maybeAndMap entity.b
+                    |> maybeAndMap entity.c
         }
 
 
-nextComponent : Maybe a -> (a -> b) -> Maybe b
-nextComponent component callback =
-    Maybe.map callback component
+maybeAndMap : Maybe a -> Maybe (a -> b) -> Maybe b
+maybeAndMap =
+    Maybe.map2 (|>)
 
 
 
@@ -463,55 +363,32 @@ nextComponent component callback =
 
 
 type alias EntitySetType =
-    { getEntities : Model -> Set.Set Int
-    , setEntities : Set.Set Int -> Model -> Model
-    , member : Int -> Model -> Bool
+    { member : Entity -> Bool
     }
 
 
 aEntitySet : EntitySetType
 aEntitySet =
-    { getEntities = .aEntities
-    , setEntities = \entities model -> { model | aEntities = entities }
-    , member =
-        \entityId model ->
-            Array.get entityId model.entities
-                |> Maybe.map
-                    (\entity ->
-                        entity.a /= Nothing
-                    )
-                |> Maybe.withDefault False
+    { member =
+        \entity ->
+            entity.a /= Nothing
     }
 
 
 abEntitySet : EntitySetType
 abEntitySet =
-    { getEntities = .abEntities
-    , setEntities = \entities model -> { model | abEntities = entities }
-    , member =
-        \entityId model ->
-            Array.get entityId model.entities
-                |> Maybe.map
-                    (\entity ->
-                        (entity.a /= Nothing)
-                            && (entity.b /= Nothing)
-                    )
-                |> Maybe.withDefault False
+    { member =
+        \entity ->
+            (entity.a /= Nothing)
+                && (entity.b /= Nothing)
     }
 
 
 abcEntitySet : EntitySetType
 abcEntitySet =
-    { getEntities = .abcEntities
-    , setEntities = \entities model -> { model | abcEntities = entities }
-    , member =
-        \entityId model ->
-            Array.get entityId model.entities
-                |> Maybe.map
-                    (\entity ->
-                        (entity.a /= Nothing)
-                            && (entity.b /= Nothing)
-                            && (entity.c /= Nothing)
-                    )
-                |> Maybe.withDefault False
+    { member =
+        \entity ->
+            (entity.a /= Nothing)
+                && (entity.b /= Nothing)
+                && (entity.c /= Nothing)
     }

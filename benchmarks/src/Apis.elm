@@ -117,17 +117,21 @@ ecs4b =
 
 ecs5 : EcsApi Ecs5.Ecs Ecs5.EntityId
 ecs5 =
+    let
+        emptyEntity =
+            Ecs5.emptyEntity
+    in
     { label = "Ecs5 array of records with nodes"
     , empty = Ecs5.empty
-    , createA = createAndInsert Ecs5.create Ecs5.insert Ecs5.aComponent
-    , createB = createAndInsert Ecs5.create Ecs5.insert Ecs5.bComponent
-    , createC = createAndInsert Ecs5.create Ecs5.insert Ecs5.cComponent
-    , createAB = createAndInsert2 Ecs5.create Ecs5.insert Ecs5.aComponent Ecs5.bComponent
-    , createAC = createAndInsert2 Ecs5.create Ecs5.insert Ecs5.aComponent Ecs5.cComponent
-    , createABC = createAndInsert3 Ecs5.create Ecs5.insert Ecs5.aComponent Ecs5.bComponent Ecs5.cComponent
-    , iterateA = Ecs5.iterate Ecs5.aNode (\_ _ x -> x) |> withContext
-    , iterateAB = Ecs5.iterate Ecs5.abNode (\_ _ x -> x) |> withContext
-    , iterateABC = Ecs5.iterate Ecs5.abcNode (\_ _ x -> x) |> withContext
+    , createA = Ecs5.insert { emptyEntity | a = Just () }
+    , createB = Ecs5.insert { emptyEntity | b = Just () }
+    , createC = Ecs5.insert { emptyEntity | c = Just () }
+    , createAB = Ecs5.insert { emptyEntity | a = Just (), b = Just () }
+    , createAC = Ecs5.insert { emptyEntity | a = Just (), c = Just () }
+    , createABC = Ecs5.insert { emptyEntity | a = Just (), b = Just (), c = Just () }
+    , iterateA = Ecs5.iterate Ecs5.aNode (\_ _ _ x -> x) |> withContext
+    , iterateAB = Ecs5.iterate Ecs5.abNode (\_ _ _ x -> x) |> withContext
+    , iterateABC = Ecs5.iterate Ecs5.abcNode (\_ _ _ x -> x) |> withContext
     }
 
 
