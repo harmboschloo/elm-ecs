@@ -2,7 +2,7 @@
 -- https://harmboschloo.github.io/elm-ecs-generator/#Ecs%3BComponents%2CA%3BComponents%2CB%3BComponents%2CC
 
 
-module DictSetEcs exposing
+module Ecs4 exposing
     ( AType
     , BType
     , CType
@@ -24,15 +24,15 @@ module DictSetEcs exposing
     , resetEntity
     )
 
+import Array
+    exposing
+        ( Array
+        )
 import Components
     exposing
         ( A
         , B
         , C
-        )
-import Dict
-    exposing
-        ( Dict
         )
 import Set
     exposing
@@ -49,12 +49,12 @@ type Ecs
 
 
 type alias Model =
-    { aComponents : Dict Int A
-    , bComponents : Dict Int B
-    , cComponents : Dict Int C
+    { aComponents : Array (Maybe A)
+    , bComponents : Array (Maybe B)
+    , cComponents : Array (Maybe C)
+    , aEntities : Set Int
     , aBEntities : Set Int
     , aBCEntities : Set Int
-    , numberOfCreatedEntities : Int
     , destroyedEntities : List Int
     }
 
@@ -62,12 +62,12 @@ type alias Model =
 empty : Ecs
 empty =
     Ecs
-        { aComponents = Dict.empty
-        , bComponents = Dict.empty
-        , cComponents = Dict.empty
+        { aComponents = Array.empty
+        , bComponents = Array.empty
+        , cComponents = Array.empty
+        , aEntities = Set.empty
         , aBEntities = Set.empty
         , aBCEntities = Set.empty
-        , numberOfCreatedEntities = 0
         , destroyedEntities = []
         }
 
@@ -84,8 +84,13 @@ createEntity : Ecs -> ( Ecs, EntityId )
 createEntity (Ecs model) =
     case model.destroyedEntities of
         [] ->
-            ( Ecs { model | numberOfCreatedEntities = model.numberOfCreatedEntities + 1 }
-            , EntityId model.numberOfCreatedEntities
+            ( Ecs
+                { model
+                    | aComponents = Array.push Nothing model.aComponents
+                    , bComponents = Array.push Nothing model.bComponents
+                    , cComponents = Array.push Nothing model.cComponents
+                }
+            , EntityId (Array.length model.aComponents)
             )
 
         head :: tail ->
@@ -109,9 +114,10 @@ resetEntity (EntityId entityId) (Ecs model) =
 removeEntityComponents : Int -> Model -> Model
 removeEntityComponents entityId model =
     { model
-        | aComponents = Dict.remove entityId model.aComponents
-        , bComponents = Dict.remove entityId model.bComponents
-        , cComponents = Dict.remove entityId model.cComponents
+        | aComponents = Array.set entityId Nothing model.aComponents
+        , bComponents = Array.set entityId Nothing model.bComponents
+        , cComponents = Array.set entityId Nothing model.cComponents
+        , aEntities = Set.remove entityId model.aEntities
         , aBEntities = Set.remove entityId model.aBEntities
         , aBCEntities = Set.remove entityId model.aBCEntities
     }
@@ -126,7 +132,7 @@ insertComponent (EntityId entityId) (ComponentType type_) component (Ecs model) 
     let
         updatedModel =
             type_.setComponents
-                (Dict.insert entityId component (type_.getComponents model))
+                (Array.set entityId (Just component) (type_.getComponents model))
                 model
     in
     Ecs
@@ -149,7 +155,7 @@ removeComponent (EntityId entityId) (ComponentType type_) (Ecs model) =
     type_.entitySets
         |> List.foldl (removeEntityFromSet entityId) model
         |> type_.setComponents
-            (Dict.remove entityId (type_.getComponents model))
+            (Array.set entityId Nothing (type_.getComponents model))
         |> Ecs
 
 
@@ -162,7 +168,8 @@ removeEntityFromSet entityId entitySetType model =
 
 getComponent : EntityId -> ComponentType a -> Ecs -> Maybe a
 getComponent (EntityId entityId) (ComponentType { getComponents }) (Ecs model) =
-    Dict.get entityId (getComponents model)
+    Array.get entityId (getComponents model)
+        |> Maybe.withDefault Nothing
 
 
 
@@ -174,10 +181,15 @@ iterateEntitiesWithA :
     -> ( Ecs, x )
     -> ( Ecs, x )
 iterateEntitiesWithA callback ( Ecs model, x ) =
-    Dict.foldl
-        (EntityId >> callback)
+    Set.foldl
+        (\entityId result ->
+            callback (EntityId entityId)
+                |> nextComponent model.aComponents entityId
+                |> Maybe.map ((|>) result)
+                |> Maybe.withDefault result
+        )
         ( Ecs model, x )
-        model.aComponents
+        model.aEntities
 
 
 iterateEntitiesWithAB :
@@ -215,9 +227,11 @@ iterateEntitiesWithABC callback ( Ecs model, x ) =
         model.aBCEntities
 
 
-nextComponent : Dict Int a -> Int -> (a -> b) -> Maybe b
+nextComponent : Array (Maybe a) -> Int -> (a -> b) -> Maybe b
 nextComponent components entityId callback =
-    Dict.get entityId components |> Maybe.map callback
+    Array.get entityId components
+        |> Maybe.withDefault Nothing
+        |> Maybe.map callback
 
 
 
@@ -231,14 +245,24 @@ type alias EntitySetType =
     }
 
 
+aEntitySet : EntitySetType
+aEntitySet =
+    { getEntities = .aBEntities
+    , setEntities = \entities model -> { model | aEntities = entities }
+    , member =
+        \entityId model ->
+            isComponentsMember entityId model.aComponents
+    }
+
+
 aBEntitySet : EntitySetType
 aBEntitySet =
     { getEntities = .aBEntities
     , setEntities = \entities model -> { model | aBEntities = entities }
     , member =
         \entityId model ->
-            Dict.member entityId model.aComponents
-                && Dict.member entityId model.bComponents
+            isComponentsMember entityId model.aComponents
+                && isComponentsMember entityId model.bComponents
     }
 
 
@@ -248,10 +272,19 @@ aBCEntitySet =
     , setEntities = \entities model -> { model | aBCEntities = entities }
     , member =
         \entityId model ->
-            Dict.member entityId model.aComponents
-                && Dict.member entityId model.bComponents
-                && Dict.member entityId model.cComponents
+            isComponentsMember entityId model.aComponents
+                && isComponentsMember entityId model.bComponents
+                && isComponentsMember entityId model.cComponents
     }
+
+
+isComponentsMember entityId components =
+    case Array.get entityId components of
+        Just (Just _) ->
+            True
+
+        _ ->
+            False
 
 
 
@@ -260,8 +293,8 @@ aBCEntitySet =
 
 type ComponentType a
     = ComponentType
-        { getComponents : Model -> Dict Int a
-        , setComponents : Dict Int a -> Model -> Model
+        { getComponents : Model -> Array (Maybe a)
+        , setComponents : Array (Maybe a) -> Model -> Model
         , entitySets : List EntitySetType
         }
 
@@ -275,11 +308,11 @@ a =
     ComponentType
         { getComponents = .aComponents
         , setComponents = setAComponents
-        , entitySets = [ aBEntitySet, aBCEntitySet ]
+        , entitySets = [ aEntitySet, aBEntitySet, aBCEntitySet ]
         }
 
 
-setAComponents : Dict Int A -> Model -> Model
+setAComponents : Array (Maybe A) -> Model -> Model
 setAComponents components model =
     { model | aComponents = components }
 
@@ -297,7 +330,7 @@ b =
         }
 
 
-setBComponents : Dict Int B -> Model -> Model
+setBComponents : Array (Maybe B) -> Model -> Model
 setBComponents components model =
     { model | bComponents = components }
 
@@ -315,6 +348,6 @@ c =
         }
 
 
-setCComponents : Dict Int C -> Model -> Model
+setCComponents : Array (Maybe C) -> Model -> Model
 setCComponents components model =
     { model | cComponents = components }

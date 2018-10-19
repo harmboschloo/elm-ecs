@@ -2,7 +2,7 @@
 -- https://harmboschloo.github.io/elm-ecs-generator/#Ecs%3BComponents%2CA%3BComponents%2CB%3BComponents%2CC
 
 
-module DictEcs exposing
+module Ecs3 exposing
     ( AType
     , BType
     , CType
@@ -17,9 +17,9 @@ module DictEcs exposing
     , empty
     , getComponent
     , insertComponent
-    , iterateEntities
-    , iterateEntities2
-    , iterateEntities3
+    , iterateEntitiesWithA
+    , iterateEntitiesWithAB
+    , iterateEntitiesWithABC
     , removeComponent
     , resetEntity
     )
@@ -33,6 +33,10 @@ import Components
 import Dict
     exposing
         ( Dict
+        )
+import Set
+    exposing
+        ( Set
         )
 
 
@@ -48,6 +52,8 @@ type alias Model =
     { aComponents : Dict Int A
     , bComponents : Dict Int B
     , cComponents : Dict Int C
+    , aBEntities : Set Int
+    , aBCEntities : Set Int
     , numberOfCreatedEntities : Int
     , destroyedEntities : List Int
     }
@@ -59,6 +65,8 @@ empty =
         { aComponents = Dict.empty
         , bComponents = Dict.empty
         , cComponents = Dict.empty
+        , aBEntities = Set.empty
+        , aBCEntities = Set.empty
         , numberOfCreatedEntities = 0
         , destroyedEntities = []
         }
@@ -104,6 +112,8 @@ removeEntityComponents entityId model =
         | aComponents = Dict.remove entityId model.aComponents
         , bComponents = Dict.remove entityId model.bComponents
         , cComponents = Dict.remove entityId model.cComponents
+        , aBEntities = Set.remove entityId model.aBEntities
+        , aBCEntities = Set.remove entityId model.aBCEntities
     }
 
 
@@ -113,20 +123,41 @@ removeEntityComponents entityId model =
 
 insertComponent : EntityId -> ComponentType a -> a -> Ecs -> Ecs
 insertComponent (EntityId entityId) (ComponentType type_) component (Ecs model) =
+    let
+        updatedModel =
+            type_.setComponents
+                (Dict.insert entityId component (type_.getComponents model))
+                model
+    in
     Ecs
-        (type_.setComponents
-            (Dict.insert entityId component (type_.getComponents model))
+        (List.foldl (insertEntityInSet entityId) updatedModel type_.entitySets)
+
+
+insertEntityInSet : Int -> EntitySetType -> Model -> Model
+insertEntityInSet entityId entitySetType model =
+    if entitySetType.member entityId model then
+        entitySetType.setEntities
+            (Set.insert entityId (entitySetType.getEntities model))
             model
-        )
+
+    else
+        model
 
 
 removeComponent : EntityId -> ComponentType a -> Ecs -> Ecs
 removeComponent (EntityId entityId) (ComponentType type_) (Ecs model) =
-    Ecs
-        (type_.setComponents
+    type_.entitySets
+        |> List.foldl (removeEntityFromSet entityId) model
+        |> type_.setComponents
             (Dict.remove entityId (type_.getComponents model))
-            model
-        )
+        |> Ecs
+
+
+removeEntityFromSet : Int -> EntitySetType -> Model -> Model
+removeEntityFromSet entityId entitySetType model =
+    entitySetType.setEntities
+        (Set.remove entityId (entitySetType.getEntities model))
+        model
 
 
 getComponent : EntityId -> ComponentType a -> Ecs -> Maybe a
@@ -138,76 +169,89 @@ getComponent (EntityId entityId) (ComponentType { getComponents }) (Ecs model) =
 -- ENTITY ITERATORS --
 
 
-iterateEntities :
-    ComponentType a
-    -> (EntityId -> a -> ( Ecs, x ) -> ( Ecs, x ))
+iterateEntitiesWithA :
+    (EntityId -> A -> ( Ecs, x ) -> ( Ecs, x ))
     -> ( Ecs, x )
     -> ( Ecs, x )
-iterateEntities (ComponentType type_) callback ( Ecs model, x ) =
+iterateEntitiesWithA callback ( Ecs model, x ) =
     Dict.foldl
         (EntityId >> callback)
         ( Ecs model, x )
-        (type_.getComponents model)
+        model.aComponents
 
 
-iterateEntities2 :
-    ComponentType c1
-    -> ComponentType c2
-    -> (EntityId -> c1 -> c2 -> ( Ecs, x ) -> ( Ecs, x ))
+iterateEntitiesWithAB :
+    (EntityId -> A -> B -> ( Ecs, x ) -> ( Ecs, x ))
     -> ( Ecs, x )
     -> ( Ecs, x )
-iterateEntities2 (ComponentType type1) (ComponentType type2) callback ( Ecs model, x ) =
-    let
-        components1 =
-            type1.getComponents model
-
-        components2 =
-            type2.getComponents model
-    in
-    Dict.foldl
-        (\entityId component1 result ->
-            callback (EntityId entityId) component1
-                |> nextComponent components2 entityId
+iterateEntitiesWithAB callback ( Ecs model, x ) =
+    Set.foldl
+        (\entityId result ->
+            callback (EntityId entityId)
+                |> nextComponent model.aComponents entityId
+                |> Maybe.andThen (nextComponent model.bComponents entityId)
                 |> Maybe.map ((|>) result)
                 |> Maybe.withDefault result
         )
         ( Ecs model, x )
-        components1
+        model.aBEntities
 
 
-iterateEntities3 :
-    ComponentType c1
-    -> ComponentType c2
-    -> ComponentType c3
-    -> (EntityId -> c1 -> c2 -> c3 -> ( Ecs, x ) -> ( Ecs, x ))
+iterateEntitiesWithABC :
+    (EntityId -> A -> B -> C -> ( Ecs, x ) -> ( Ecs, x ))
     -> ( Ecs, x )
     -> ( Ecs, x )
-iterateEntities3 (ComponentType type1) (ComponentType type2) (ComponentType type3) callback ( Ecs model, x ) =
-    let
-        components1 =
-            type1.getComponents model
-
-        components2 =
-            type2.getComponents model
-
-        components3 =
-            type3.getComponents model
-    in
-    Dict.foldl
-        (\entityId component1 result ->
-            callback (EntityId entityId) component1
-                |> nextComponent components2 entityId
-                |> Maybe.andThen (nextComponent components3 entityId)
+iterateEntitiesWithABC callback ( Ecs model, x ) =
+    Set.foldl
+        (\entityId result ->
+            callback (EntityId entityId)
+                |> nextComponent model.aComponents entityId
+                |> Maybe.andThen (nextComponent model.bComponents entityId)
+                |> Maybe.andThen (nextComponent model.cComponents entityId)
                 |> Maybe.map ((|>) result)
                 |> Maybe.withDefault result
         )
         ( Ecs model, x )
-        components1
+        model.aBCEntities
 
 
 nextComponent : Dict Int a -> Int -> (a -> b) -> Maybe b
 nextComponent components entityId callback =
     Dict.get entityId components |> Maybe.map callback
+
+
+
+-- ENTITY SET TYPES --
+
+
+type alias EntitySetType =
+    { getEntities : Model -> Set Int
+    , setEntities : Set Int -> Model -> Model
+    , member : Int -> Model -> Bool
+    }
+
+
+aBEntitySet : EntitySetType
+aBEntitySet =
+    { getEntities = .aBEntities
+    , setEntities = \entities model -> { model | aBEntities = entities }
+    , member =
+        \entityId model ->
+            Dict.member entityId model.aComponents
+                && Dict.member entityId model.bComponents
+    }
+
+
+aBCEntitySet : EntitySetType
+aBCEntitySet =
+    { getEntities = .aBCEntities
+    , setEntities = \entities model -> { model | aBCEntities = entities }
+    , member =
+        \entityId model ->
+            Dict.member entityId model.aComponents
+                && Dict.member entityId model.bComponents
+                && Dict.member entityId model.cComponents
+    }
 
 
 
@@ -218,6 +262,7 @@ type ComponentType a
     = ComponentType
         { getComponents : Model -> Dict Int a
         , setComponents : Dict Int a -> Model -> Model
+        , entitySets : List EntitySetType
         }
 
 
@@ -230,6 +275,7 @@ a =
     ComponentType
         { getComponents = .aComponents
         , setComponents = setAComponents
+        , entitySets = [ aBEntitySet, aBCEntitySet ]
         }
 
 
@@ -247,6 +293,7 @@ b =
     ComponentType
         { getComponents = .bComponents
         , setComponents = setBComponents
+        , entitySets = [ aBEntitySet, aBCEntitySet ]
         }
 
 
@@ -264,6 +311,7 @@ c =
     ComponentType
         { getComponents = .cComponents
         , setComponents = setCComponents
+        , entitySets = [ aBCEntitySet ]
         }
 
 

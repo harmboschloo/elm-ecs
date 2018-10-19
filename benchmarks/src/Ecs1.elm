@@ -2,7 +2,7 @@
 -- https://harmboschloo.github.io/elm-ecs-generator/#Ecs%3BComponents%2CA%3BComponents%2CB%3BComponents%2CC
 
 
-module ArrayEcs exposing
+module Ecs1 exposing
     ( AType
     , BType
     , CType
@@ -24,15 +24,15 @@ module ArrayEcs exposing
     , resetEntity
     )
 
-import Array
-    exposing
-        ( Array
-        )
 import Components
     exposing
         ( A
         , B
         , C
+        )
+import Dict
+    exposing
+        ( Dict
         )
 
 
@@ -45,9 +45,10 @@ type Ecs
 
 
 type alias Model =
-    { aComponents : Array (Maybe A)
-    , bComponents : Array (Maybe B)
-    , cComponents : Array (Maybe C)
+    { aComponents : Dict Int A
+    , bComponents : Dict Int B
+    , cComponents : Dict Int C
+    , numberOfCreatedEntities : Int
     , destroyedEntities : List Int
     }
 
@@ -55,9 +56,10 @@ type alias Model =
 empty : Ecs
 empty =
     Ecs
-        { aComponents = Array.empty
-        , bComponents = Array.empty
-        , cComponents = Array.empty
+        { aComponents = Dict.empty
+        , bComponents = Dict.empty
+        , cComponents = Dict.empty
+        , numberOfCreatedEntities = 0
         , destroyedEntities = []
         }
 
@@ -74,13 +76,8 @@ createEntity : Ecs -> ( Ecs, EntityId )
 createEntity (Ecs model) =
     case model.destroyedEntities of
         [] ->
-            ( Ecs
-                { model
-                    | aComponents = Array.push Nothing model.aComponents
-                    , bComponents = Array.push Nothing model.bComponents
-                    , cComponents = Array.push Nothing model.cComponents
-                }
-            , EntityId (Array.length model.aComponents)
+            ( Ecs { model | numberOfCreatedEntities = model.numberOfCreatedEntities + 1 }
+            , EntityId model.numberOfCreatedEntities
             )
 
         head :: tail ->
@@ -104,9 +101,9 @@ resetEntity (EntityId entityId) (Ecs model) =
 removeEntityComponents : Int -> Model -> Model
 removeEntityComponents entityId model =
     { model
-        | aComponents = Array.set entityId Nothing model.aComponents
-        , bComponents = Array.set entityId Nothing model.bComponents
-        , cComponents = Array.set entityId Nothing model.cComponents
+        | aComponents = Dict.remove entityId model.aComponents
+        , bComponents = Dict.remove entityId model.bComponents
+        , cComponents = Dict.remove entityId model.cComponents
     }
 
 
@@ -118,7 +115,7 @@ insertComponent : EntityId -> ComponentType a -> a -> Ecs -> Ecs
 insertComponent (EntityId entityId) (ComponentType type_) component (Ecs model) =
     Ecs
         (type_.setComponents
-            (Array.set entityId (Just component) (type_.getComponents model))
+            (Dict.insert entityId component (type_.getComponents model))
             model
         )
 
@@ -127,15 +124,14 @@ removeComponent : EntityId -> ComponentType a -> Ecs -> Ecs
 removeComponent (EntityId entityId) (ComponentType type_) (Ecs model) =
     Ecs
         (type_.setComponents
-            (Array.set entityId Nothing (type_.getComponents model))
+            (Dict.remove entityId (type_.getComponents model))
             model
         )
 
 
 getComponent : EntityId -> ComponentType a -> Ecs -> Maybe a
 getComponent (EntityId entityId) (ComponentType { getComponents }) (Ecs model) =
-    Array.get entityId (getComponents model)
-        |> Maybe.withDefault Nothing
+    Dict.get entityId (getComponents model)
 
 
 
@@ -148,18 +144,10 @@ iterateEntities :
     -> ( Ecs, x )
     -> ( Ecs, x )
 iterateEntities (ComponentType type_) callback ( Ecs model, x ) =
-    Array.foldl
-        (\maybeComponent1 ( entityId, result ) ->
-            ( entityId + 1
-            , maybeComponent1
-                |> Maybe.map (callback (EntityId entityId))
-                |> Maybe.map ((|>) result)
-                |> Maybe.withDefault result
-            )
-        )
-        ( 0, ( Ecs model, x ) )
+    Dict.foldl
+        (EntityId >> callback)
+        ( Ecs model, x )
         (type_.getComponents model)
-        |> Tuple.second
 
 
 iterateEntities2 :
@@ -176,19 +164,15 @@ iterateEntities2 (ComponentType type1) (ComponentType type2) callback ( Ecs mode
         components2 =
             type2.getComponents model
     in
-    Array.foldl
-        (\maybeComponent1 ( entityId, result ) ->
-            ( entityId + 1
-            , maybeComponent1
-                |> Maybe.map (callback (EntityId entityId))
-                |> Maybe.andThen (nextComponent components2 entityId)
+    Dict.foldl
+        (\entityId component1 result ->
+            callback (EntityId entityId) component1
+                |> nextComponent components2 entityId
                 |> Maybe.map ((|>) result)
                 |> Maybe.withDefault result
-            )
         )
-        ( 0, ( Ecs model, x ) )
+        ( Ecs model, x )
         components1
-        |> Tuple.second
 
 
 iterateEntities3 :
@@ -209,27 +193,21 @@ iterateEntities3 (ComponentType type1) (ComponentType type2) (ComponentType type
         components3 =
             type3.getComponents model
     in
-    Array.foldl
-        (\maybeComponent1 ( entityId, result ) ->
-            ( entityId + 1
-            , maybeComponent1
-                |> Maybe.map (callback (EntityId entityId))
-                |> Maybe.andThen (nextComponent components2 entityId)
+    Dict.foldl
+        (\entityId component1 result ->
+            callback (EntityId entityId) component1
+                |> nextComponent components2 entityId
                 |> Maybe.andThen (nextComponent components3 entityId)
                 |> Maybe.map ((|>) result)
                 |> Maybe.withDefault result
-            )
         )
-        ( 0, ( Ecs model, x ) )
+        ( Ecs model, x )
         components1
-        |> Tuple.second
 
 
-nextComponent : Array (Maybe a) -> Int -> (a -> b) -> Maybe b
+nextComponent : Dict Int a -> Int -> (a -> b) -> Maybe b
 nextComponent components entityId callback =
-    Array.get entityId components
-        |> Maybe.withDefault Nothing
-        |> Maybe.map callback
+    Dict.get entityId components |> Maybe.map callback
 
 
 
@@ -238,8 +216,8 @@ nextComponent components entityId callback =
 
 type ComponentType a
     = ComponentType
-        { getComponents : Model -> Array (Maybe a)
-        , setComponents : Array (Maybe a) -> Model -> Model
+        { getComponents : Model -> Dict Int a
+        , setComponents : Dict Int a -> Model -> Model
         }
 
 
@@ -255,7 +233,7 @@ a =
         }
 
 
-setAComponents : Array (Maybe A) -> Model -> Model
+setAComponents : Dict Int A -> Model -> Model
 setAComponents components model =
     { model | aComponents = components }
 
@@ -272,7 +250,7 @@ b =
         }
 
 
-setBComponents : Array (Maybe B) -> Model -> Model
+setBComponents : Dict Int B -> Model -> Model
 setBComponents components model =
     { model | bComponents = components }
 
@@ -289,6 +267,6 @@ c =
         }
 
 
-setCComponents : Array (Maybe C) -> Model -> Model
+setCComponents : Dict Int C -> Model -> Model
 setCComponents components model =
     { model | cComponents = components }
