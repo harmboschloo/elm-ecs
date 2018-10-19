@@ -1,10 +1,11 @@
 # Benchmarks
 
-- [Compare_1_2_Iterate](https://harmboschloo.github.io/elm-ecs-generator/benchmarks/build/Compare_1_2_Iterate.html)
-- [Compare_1_3_Iterate](https://harmboschloo.github.io/elm-ecs-generator/benchmarks/build/Compare_1_3_Iterate.html)
-- [Compare_3_4_Iterate](https://harmboschloo.github.io/elm-ecs-generator/benchmarks/build/Compare_3_4_Iterate.html)
-- [Compare_4_4b_Iterate](https://harmboschloo.github.io/elm-ecs-generator/benchmarks/build/Compare_4_4b_Iterate.html)
-- [Compare_4b_5_Iterate](https://harmboschloo.github.io/elm-ecs-generator/benchmarks/build/Compare_4b_5_Iterate.html)
+- [CompareIterate](./build/CompareIterate.html)
+- [CompareIterateAndModify](./build/CompareIterateAndModify.html)
+- [CompareIterateAndModify2](./build/CompareIterateAndModify2.html)
+- [ScaleIterate](./build/ScaleIterate.html)
+- [scaleIterateAndModify](./build/scaleIterateAndModify.html)
+- [scaleIterateAndModify2](./build/scaleIterateAndModify2.html)
 
 ## History
 
@@ -19,3 +20,14 @@
 ### 4b. record of arrays with node caching
 
 ### 5. array of records with node caching
+
+## Demo System Operations
+
+- Animation: iterate (A)B -> insert A
+- Collection: iterate AB x iterate AC -> sometimes remove C, insert DE, update F
+- KeyControls: iterate (A)B -> insert A
+- MotionControl: iterate ABCD -> insert A
+- Movement: iterate AB -> insert A
+- Render: iterate AB
+- Spawn: create with ABCDEF...
+- Transform: iterate A -> insert A & sometimes destroy & sometimes insert B

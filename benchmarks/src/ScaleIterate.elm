@@ -1,11 +1,11 @@
-module Compare_3_4_Iterate exposing (main)
+module ScaleIterate exposing (main)
 
-import Apis
 import Benchmark.Runner exposing (BenchmarkProgram)
 import Benchmarks
+import Config
 
 
 main : BenchmarkProgram
 main =
     Benchmark.Runner.program
-        (Benchmarks.compareIterate Apis.ecs3 Apis.ecs4)
+        (Benchmarks.scaleIterate 20 Config.ecsA Config.ecsB)

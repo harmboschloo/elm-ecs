@@ -1,6 +1,8 @@
 module Data exposing
-    ( bigEcs
-    , bigEcsLabel
+    ( initCompareEcs
+    , initScaleEcsA
+    , initScaleEcsAB
+    , initScaleEcsABC
     )
 
 import Apis
@@ -8,21 +10,69 @@ import Random
 import Random.List
 
 
-bigEcsLabel : String
-bigEcsLabel =
-    "big ecs (500A 500B 500C 100AB 100AC 100ABC)"
+initCompareEcs : Int -> Apis.EcsApi ecs entityId -> ( String, ecs )
+initCompareEcs n api =
+    ( String.join
+        (" " ++ String.fromInt n)
+        [ "Ecs", "ABC", "BC", "C" ]
+    , applyList
+        [ List.repeat n (api.createABC >> Tuple.first)
+        , List.repeat n (api.createBC >> Tuple.first)
+        , List.repeat n (api.createC >> Tuple.first)
+        ]
+        api
+    )
 
 
-bigEcs : Apis.EcsApi ecs entityId -> ecs
-bigEcs api =
+initScaleEcsA : Int -> Apis.EcsApi ecs entityId -> ( String, ecs )
+initScaleEcsA n api =
+    ( String.join
+        (" " ++ String.fromInt n)
+        [ "Ecs", "A", "B", "C", "BC" ]
+    , applyList
+        [ List.repeat n (api.createA >> Tuple.first)
+        , List.repeat n (api.createB >> Tuple.first)
+        , List.repeat n (api.createC >> Tuple.first)
+        , List.repeat n (api.createBC >> Tuple.first)
+        ]
+        api
+    )
+
+
+initScaleEcsAB : Int -> Apis.EcsApi ecs entityId -> ( String, ecs )
+initScaleEcsAB n api =
+    ( String.join
+        (" " ++ String.fromInt n)
+        [ "Ecs", "AB", "A", "B", "C" ]
+    , applyList
+        [ List.repeat n (api.createAB >> Tuple.first)
+        , List.repeat n (api.createA >> Tuple.first)
+        , List.repeat n (api.createB >> Tuple.first)
+        , List.repeat n (api.createC >> Tuple.first)
+        ]
+        api
+    )
+
+
+initScaleEcsABC : Int -> Apis.EcsApi ecs entityId -> ( String, ecs )
+initScaleEcsABC n api =
+    ( String.join
+        (" " ++ String.fromInt n)
+        [ "Ecs", "ABC", "A", "B", "C" ]
+    , applyList
+        [ List.repeat n (api.createABC >> Tuple.first)
+        , List.repeat n (api.createA >> Tuple.first)
+        , List.repeat n (api.createB >> Tuple.first)
+        , List.repeat n (api.createC >> Tuple.first)
+        ]
+        api
+    )
+
+
+applyList : List (List (ecs -> ecs)) -> Apis.EcsApi ecs entityId -> ecs
+applyList list api =
     Random.step
-        ([ List.repeat 500 (api.createA >> Tuple.first)
-         , List.repeat 500 (api.createB >> Tuple.first)
-         , List.repeat 500 (api.createC >> Tuple.first)
-         , List.repeat 100 (api.createAB >> Tuple.first)
-         , List.repeat 100 (api.createAC >> Tuple.first)
-         , List.repeat 100 (api.createABC >> Tuple.first)
-         ]
+        (list
             |> List.concat
             |> Random.List.shuffle
         )
