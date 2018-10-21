@@ -16,7 +16,7 @@ import Data
 import Dict
 
 
-compareIterate : Int -> Apis.EcsApi a1 a2 -> Apis.EcsApi b1 b2 -> Benchmark
+compareIterate : Int -> Apis.EcsApi a -> Apis.EcsApi b -> Benchmark
 compareIterate n apiA apiB =
     let
         ( label, ecsA ) =
@@ -44,7 +44,7 @@ compareIterate n apiA apiB =
         ]
 
 
-compareIterateAndModify : Int -> Apis.EcsApi a1 a2 -> Apis.EcsApi b1 b2 -> Benchmark
+compareIterateAndModify : Int -> Apis.EcsApi a -> Apis.EcsApi b -> Benchmark
 compareIterateAndModify n apiA apiB =
     let
         ( label, ecsA ) =
@@ -72,7 +72,7 @@ compareIterateAndModify n apiA apiB =
         ]
 
 
-compareIterateAndModify2 : Int -> Apis.EcsApi a1 a2 -> Apis.EcsApi b1 b2 -> Benchmark
+compareIterateAndModify2 : Int -> Apis.EcsApi a -> Apis.EcsApi b -> Benchmark
 compareIterateAndModify2 n apiA apiB =
     let
         ( label, ecsA ) =
@@ -100,7 +100,7 @@ compareIterateAndModify2 n apiA apiB =
         ]
 
 
-scaleIterate : Int -> Apis.EcsApi a1 a2 -> Apis.EcsApi b1 b2 -> Benchmark
+scaleIterate : Int -> Apis.EcsApi a -> Apis.EcsApi b -> Benchmark
 scaleIterate n apiA apiB =
     let
         ( labelA_A, ecsA_A ) =
@@ -135,7 +135,7 @@ scaleIterate n apiA apiB =
         ]
 
 
-scaleIterateAndModify : Int -> Apis.EcsApi a1 a2 -> Apis.EcsApi b1 b2 -> Benchmark
+scaleIterateAndModify : Int -> Apis.EcsApi a -> Apis.EcsApi b -> Benchmark
 scaleIterateAndModify n apiA apiB =
     let
         ( labelA_A, ecsA_A ) =
@@ -170,7 +170,7 @@ scaleIterateAndModify n apiA apiB =
         ]
 
 
-scaleIterateAndModify2 : Int -> Apis.EcsApi a1 a2 -> Apis.EcsApi b1 b2 -> Benchmark
+scaleIterateAndModify2 : Int -> Apis.EcsApi a -> Apis.EcsApi b -> Benchmark
 scaleIterateAndModify2 n apiA apiB =
     let
         ( labelA_A, ecsA_A ) =

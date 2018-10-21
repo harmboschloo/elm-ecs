@@ -6,6 +6,7 @@ module Apis exposing
     , ecs4
     , ecs4b
     , ecs5
+    , ecs5b
     )
 
 import Ecs1
@@ -14,22 +15,23 @@ import Ecs3
 import Ecs4
 import Ecs4b
 import Ecs5
+import Ecs5b
 
 
 
 -- APIS --
 
 
-type alias EcsApi ecs entityId =
+type alias EcsApi ecs =
     { label : String
     , empty : ecs
-    , createA : ecs -> ( ecs, entityId )
-    , createB : ecs -> ( ecs, entityId )
-    , createC : ecs -> ( ecs, entityId )
-    , createAB : ecs -> ( ecs, entityId )
-    , createAC : ecs -> ( ecs, entityId )
-    , createBC : ecs -> ( ecs, entityId )
-    , createABC : ecs -> ( ecs, entityId )
+    , createA : ecs -> ecs
+    , createB : ecs -> ecs
+    , createC : ecs -> ecs
+    , createAB : ecs -> ecs
+    , createAC : ecs -> ecs
+    , createBC : ecs -> ecs
+    , createABC : ecs -> ecs
     , iterateA : ecs -> ecs
     , iterateAB : ecs -> ecs
     , iterateABC : ecs -> ecs
@@ -41,7 +43,7 @@ type alias EcsApi ecs entityId =
     }
 
 
-ecs1 : EcsApi Ecs1.Ecs Ecs1.EntityId
+ecs1 : EcsApi Ecs1.Ecs
 ecs1 =
     { label = "Ecs1 record of dicts"
     , empty = Ecs1.empty
@@ -63,7 +65,7 @@ ecs1 =
     }
 
 
-ecs2 : EcsApi Ecs2.Ecs Ecs2.EntityId
+ecs2 : EcsApi Ecs2.Ecs
 ecs2 =
     { label = "Ecs2 record of arrays"
     , empty = Ecs2.empty
@@ -85,7 +87,7 @@ ecs2 =
     }
 
 
-ecs3 : EcsApi Ecs3.Ecs Ecs3.EntityId
+ecs3 : EcsApi Ecs3.Ecs
 ecs3 =
     { label = "Ecs3 record of dicts with nodes"
     , empty = Ecs3.empty
@@ -107,7 +109,7 @@ ecs3 =
     }
 
 
-ecs4 : EcsApi Ecs4.Ecs Ecs4.EntityId
+ecs4 : EcsApi Ecs4.Ecs
 ecs4 =
     { label = "Ecs4 record of arrays with nodes"
     , empty = Ecs4.empty
@@ -129,7 +131,7 @@ ecs4 =
     }
 
 
-ecs4b : EcsApi Ecs4b.Ecs Ecs4b.EntityId
+ecs4b : EcsApi Ecs4b.Ecs
 ecs4b =
     { label = "Ecs4b record of arrays with nodes"
     , empty = Ecs4b.empty
@@ -151,7 +153,7 @@ ecs4b =
     }
 
 
-ecs5 : EcsApi Ecs5.Ecs Ecs5.EntityId
+ecs5 : EcsApi Ecs5.Ecs
 ecs5 =
     let
         emptyEntity =
@@ -159,13 +161,13 @@ ecs5 =
     in
     { label = "Ecs5 array of records with nodes"
     , empty = Ecs5.empty
-    , createA = Ecs5.insert { emptyEntity | a = Just () }
-    , createB = Ecs5.insert { emptyEntity | b = Just () }
-    , createC = Ecs5.insert { emptyEntity | c = Just () }
-    , createAB = Ecs5.insert { emptyEntity | a = Just (), b = Just () }
-    , createAC = Ecs5.insert { emptyEntity | a = Just (), c = Just () }
-    , createBC = Ecs5.insert { emptyEntity | b = Just (), c = Just () }
-    , createABC = Ecs5.insert { emptyEntity | a = Just (), b = Just (), c = Just () }
+    , createA = Ecs5.insert { emptyEntity | a = Just () } >> Tuple.first
+    , createB = Ecs5.insert { emptyEntity | b = Just () } >> Tuple.first
+    , createC = Ecs5.insert { emptyEntity | c = Just () } >> Tuple.first
+    , createAB = Ecs5.insert { emptyEntity | a = Just (), b = Just () } >> Tuple.first
+    , createAC = Ecs5.insert { emptyEntity | a = Just (), c = Just () } >> Tuple.first
+    , createBC = Ecs5.insert { emptyEntity | b = Just (), c = Just () } >> Tuple.first
+    , createABC = Ecs5.insert { emptyEntity | a = Just (), b = Just (), c = Just () } >> Tuple.first
     , iterateA = Ecs5.iterate Ecs5.aNode (\_ _ _ x -> x) |> withContext
     , iterateAB = Ecs5.iterate Ecs5.abNode (\_ _ _ x -> x) |> withContext
     , iterateABC = Ecs5.iterate Ecs5.abcNode (\_ _ _ x -> x) |> withContext
@@ -174,6 +176,28 @@ ecs5 =
     , iterateABCModifyA = Ecs5.iterate Ecs5.abcNode (\entityId entity _ ( ecs, x ) -> ( Ecs5.set entityId { entity | a = Just () } ecs, x )) |> withContext
     , iterateAModifyAB = Ecs5.iterate Ecs5.aNode (\entityId entity _ ( ecs, x ) -> ( Ecs5.set entityId { entity | a = Just (), b = Just () } ecs, x )) |> withContext
     , iterateAModifyABC = Ecs5.iterate Ecs5.aNode (\entityId entity _ ( ecs, x ) -> ( Ecs5.set entityId { entity | a = Just (), b = Just (), c = Just () } ecs, x )) |> withContext
+    }
+
+
+ecs5b : EcsApi Ecs5b.Ecs
+ecs5b =
+    { label = "Ecs5b array of records with nodes"
+    , empty = Ecs5b.empty
+    , createA = Ecs5b.create (Ecs5b.insert Ecs5b.aComponent ())
+    , createB = Ecs5b.create (Ecs5b.insert Ecs5b.bComponent ())
+    , createC = Ecs5b.create (Ecs5b.insert Ecs5b.cComponent ())
+    , createAB = Ecs5b.create (Ecs5b.insert Ecs5b.aComponent () >> Ecs5b.insert Ecs5b.bComponent ())
+    , createAC = Ecs5b.create (Ecs5b.insert Ecs5b.aComponent () >> Ecs5b.insert Ecs5b.cComponent ())
+    , createBC = Ecs5b.create (Ecs5b.insert Ecs5b.bComponent () >> Ecs5b.insert Ecs5b.cComponent ())
+    , createABC = Ecs5b.create (Ecs5b.insert Ecs5b.aComponent () >> Ecs5b.insert Ecs5b.bComponent () >> Ecs5b.insert Ecs5b.cComponent ())
+    , iterateA = Ecs5b.iterate Ecs5b.aNode (\_ _ _ x -> x) |> withContext2
+    , iterateAB = Ecs5b.iterate Ecs5b.abNode (\_ _ _ x -> x) |> withContext2
+    , iterateABC = Ecs5b.iterate Ecs5b.abcNode (\_ _ _ x -> x) |> withContext2
+    , iterateAModifyA = Ecs5b.iterateAndUpdate Ecs5b.aNode (\update _ ( ecs, x ) -> ( Ecs5b.apply (update |> Ecs5b.insert Ecs5b.aComponent ()) ecs, x )) |> withContext
+    , iterateABModifyA = Ecs5b.iterateAndUpdate Ecs5b.abNode (\update _ ( ecs, x ) -> ( Ecs5b.apply (update |> Ecs5b.insert Ecs5b.aComponent ()) ecs, x )) |> withContext
+    , iterateABCModifyA = Ecs5b.iterateAndUpdate Ecs5b.abcNode (\update _ ( ecs, x ) -> ( Ecs5b.apply (update |> Ecs5b.insert Ecs5b.aComponent ()) ecs, x )) |> withContext
+    , iterateAModifyAB = Ecs5b.iterateAndUpdate Ecs5b.aNode (\update _ ( ecs, x ) -> ( Ecs5b.apply (update |> Ecs5b.insert Ecs5b.aComponent () |> Ecs5b.insert Ecs5b.bComponent ()) ecs, x )) |> withContext
+    , iterateAModifyABC = Ecs5b.iterateAndUpdate Ecs5b.aNode (\update _ ( ecs, x ) -> ( Ecs5b.apply (update |> Ecs5b.insert Ecs5b.aComponent () |> Ecs5b.insert Ecs5b.bComponent () |> Ecs5b.insert Ecs5b.cComponent ()) ecs, x )) |> withContext
     }
 
 
@@ -186,9 +210,7 @@ createAndInsert createEntity insertComponent componentType ecs =
         ( newEcs, entityId ) =
             createEntity ecs
     in
-    ( insertComponent entityId componentType () newEcs
-    , entityId
-    )
+    insertComponent entityId componentType () newEcs
 
 
 createAndInsert2 createEntity insertComponent componentType1 componentType2 ecs =
@@ -196,11 +218,9 @@ createAndInsert2 createEntity insertComponent componentType1 componentType2 ecs 
         ( newEcs, entityId ) =
             createEntity ecs
     in
-    ( newEcs
+    newEcs
         |> insertComponent entityId componentType1 ()
         |> insertComponent entityId componentType2 ()
-    , entityId
-    )
 
 
 createAndInsert3 createEntity insertComponent componentType1 componentType2 componentType3 ecs =
@@ -208,12 +228,10 @@ createAndInsert3 createEntity insertComponent componentType1 componentType2 comp
         ( newEcs, entityId ) =
             createEntity ecs
     in
-    ( newEcs
+    newEcs
         |> insertComponent entityId componentType1 ()
         |> insertComponent entityId componentType2 ()
         |> insertComponent entityId componentType3 ()
-    , entityId
-    )
 
 
 insert insertComponent componentType ( ecs, x ) =
@@ -241,3 +259,7 @@ insert3 insertComponent componentType1 componentType2 componentType3 ( ecs, x ) 
 
 withContext f ecs =
     f ( ecs, () ) |> Tuple.first
+
+
+withContext2 f ecs =
+    f ecs () |> always ecs

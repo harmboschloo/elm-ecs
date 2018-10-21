@@ -10,66 +10,66 @@ import Random
 import Random.List
 
 
-initCompareEcs : Int -> Apis.EcsApi ecs entityId -> ( String, ecs )
+initCompareEcs : Int -> Apis.EcsApi ecs -> ( String, ecs )
 initCompareEcs n api =
     ( String.join
         (" " ++ String.fromInt n)
         [ "Ecs", "ABC", "BC", "C" ]
     , applyList
-        [ List.repeat n (api.createABC >> Tuple.first)
-        , List.repeat n (api.createBC >> Tuple.first)
-        , List.repeat n (api.createC >> Tuple.first)
+        [ List.repeat n api.createABC 
+        , List.repeat n api.createBC 
+        , List.repeat n api.createC 
         ]
         api
     )
 
 
-initScaleEcsA : Int -> Apis.EcsApi ecs entityId -> ( String, ecs )
+initScaleEcsA : Int -> Apis.EcsApi ecs -> ( String, ecs )
 initScaleEcsA n api =
     ( String.join
         (" " ++ String.fromInt n)
         [ "Ecs", "A", "B", "C", "BC" ]
     , applyList
-        [ List.repeat n (api.createA >> Tuple.first)
-        , List.repeat n (api.createB >> Tuple.first)
-        , List.repeat n (api.createC >> Tuple.first)
-        , List.repeat n (api.createBC >> Tuple.first)
+        [ List.repeat n api.createA
+        , List.repeat n api.createB
+        , List.repeat n api.createC
+        , List.repeat n api.createBC
         ]
         api
     )
 
 
-initScaleEcsAB : Int -> Apis.EcsApi ecs entityId -> ( String, ecs )
+initScaleEcsAB : Int -> Apis.EcsApi ecs -> ( String, ecs )
 initScaleEcsAB n api =
     ( String.join
         (" " ++ String.fromInt n)
         [ "Ecs", "AB", "A", "B", "C" ]
     , applyList
-        [ List.repeat n (api.createAB >> Tuple.first)
-        , List.repeat n (api.createA >> Tuple.first)
-        , List.repeat n (api.createB >> Tuple.first)
-        , List.repeat n (api.createC >> Tuple.first)
+        [ List.repeat n api.createAB
+        , List.repeat n api.createA
+        , List.repeat n api.createB
+        , List.repeat n api.createC
         ]
         api
     )
 
 
-initScaleEcsABC : Int -> Apis.EcsApi ecs entityId -> ( String, ecs )
+initScaleEcsABC : Int -> Apis.EcsApi ecs -> ( String, ecs )
 initScaleEcsABC n api =
     ( String.join
         (" " ++ String.fromInt n)
         [ "Ecs", "ABC", "A", "B", "C" ]
     , applyList
-        [ List.repeat n (api.createABC >> Tuple.first)
-        , List.repeat n (api.createA >> Tuple.first)
-        , List.repeat n (api.createB >> Tuple.first)
-        , List.repeat n (api.createC >> Tuple.first)
+        [ List.repeat n api.createABC
+        , List.repeat n api.createA
+        , List.repeat n api.createB
+        , List.repeat n api.createC
         ]
         api
     )
 
 
-applyList : List (List (ecs -> ecs)) -> Apis.EcsApi ecs entityId -> ecs
+applyList : List (List (ecs -> ecs)) -> Apis.EcsApi ecs -> ecs
 applyList list api =
     Random.step
         (list
