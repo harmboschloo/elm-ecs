@@ -7,23 +7,23 @@ import Ecs exposing (Ecs)
 
 update : ( Ecs, Context ) -> ( Ecs, Context )
 update =
-    Ecs.iterate Ecs.transformNode updateEntity
+    Ecs.iterate Ecs.transformsComponent updateEntity
 
 
 updateEntity :
     Ecs.EntityId
-    -> Ecs.TransformNode
+    -> Transforms
     -> ( Ecs, Context )
     -> ( Ecs, Context )
-updateEntity entityId node data =
+updateEntity entityId transforms data =
     let
-        ( transforms, ( ecs, context ) ) =
+        ( newTransforms, ( ecs, context ) ) =
             List.foldr
                 (updateTransform entityId)
                 ( [], data )
-                node.transforms
+                transforms
     in
-    case transforms of
+    case newTransforms of
         [] ->
             ( Ecs.remove
                 entityId

@@ -36,4 +36,4 @@ update ( ecs, context ) =
             floor spawn + nFraction
     in
     ( ecs, { context | seed = seed } )
-        |> Utils.times  n Entities.createCollectable
+        |> Utils.times n Entities.createCollectable

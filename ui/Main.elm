@@ -29,9 +29,7 @@ type alias Model =
     , decodeError : Maybe String
     , ecs : ( String, String )
     , components : Dict Int ( String, String )
-    , nodes : Dict Int { name : String, components : List Int }
     , lastComponentKey : Int
-    , lastNodeKey : Int
     }
 
 
@@ -56,9 +54,7 @@ initEmpty navigationKey decodeError =
     , decodeError = decodeError
     , ecs = ( "Ecs", "Ecs" )
     , components = Dict.empty
-    , nodes = Dict.empty
     , lastComponentKey = 0
-    , lastNodeKey = 0
     }
 
 
@@ -75,29 +71,13 @@ initFromConfig navigationKey config =
                 |> List.map fromComponent
                 |> List.indexedMap (\i v -> ( i, v ))
                 |> Dict.fromList
-
-        nodes =
-            config.nodes
-                |> List.map
-                    (\node ->
-                        { name = EcsGenerator.nodeName node
-                        , components =
-                            EcsGenerator.nodeComponents node
-                                |> List.map fromComponent
-                                |> List.filterMap (findComponentKey components)
-                        }
-                    )
-                |> List.indexedMap (\i v -> ( i, v ))
-                |> Dict.fromList
     in
     { navigationKey = navigationKey
     , encodedConfig = ""
     , ecs = ecs
     , decodeError = Nothing
     , components = components
-    , nodes = nodes
     , lastComponentKey = Dict.size components
-    , lastNodeKey = Dict.size nodes
     }
 
 
@@ -129,19 +109,6 @@ toConfig model =
         Dict.values model.components
             |> List.sortBy Tuple.second
             |> List.map (tupleMap2 EcsGenerator.component)
-    , nodes =
-        Dict.values model.nodes
-            |> List.sortBy .name
-            |> List.map
-                (\{ name, components } ->
-                    EcsGenerator.node
-                        name
-                        (components
-                            |> List.filterMap (findComponent model.components)
-                            |> List.sortBy Tuple.second
-                            |> List.map (tupleMap2 EcsGenerator.component)
-                        )
-                )
     }
 
 
@@ -168,9 +135,6 @@ type Msg
     | ComponentModuleNameChanged Int String
     | ComponentTypeNameChanged Int String
     | ComponentRemoved Int
-    | NodeNameChanged Int String
-    | NodeComponentChanged Int Int Bool
-    | NodeRemoved Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -256,30 +220,6 @@ update msg model =
             { model | components = Dict.remove key model.components }
                 |> pushUrl
 
-        NodeNameChanged key name ->
-            model
-                |> ensureNode key
-                |> (\( i, m ) ->
-                        { m
-                            | nodes =
-                                Dict.insert
-                                    key
-                                    { i | name = name }
-                                    model.nodes
-                        }
-                   )
-                |> pushUrl
-
-        NodeComponentChanged nodeKey componentKey checked ->
-            model
-                |> ensureNode nodeKey
-                |> updateNodeComponent nodeKey componentKey checked
-                |> pushUrl
-
-        NodeRemoved key ->
-            { model | nodes = Dict.remove key model.nodes }
-                |> pushUrl
-
 
 ensureComponent : Int -> Model -> ( ( String, String ), Model )
 ensureComponent key model =
@@ -298,50 +238,6 @@ ensureComponent key model =
 
         Just compnent ->
             ( compnent, model )
-
-
-ensureNode : Int -> Model -> ( { name : String, components : List Int }, Model )
-ensureNode key model =
-    case Dict.get key model.nodes of
-        Nothing ->
-            ( { name = "", components = [] }
-            , { model
-                | lastNodeKey =
-                    if key > model.lastNodeKey then
-                        key
-
-                    else
-                        model.lastNodeKey
-              }
-            )
-
-        Just node ->
-            ( node, model )
-
-
-updateNodeComponent :
-    Int
-    -> Int
-    -> Bool
-    -> ( { name : String, components : List Int }, Model )
-    -> Model
-updateNodeComponent nodeKey componentKey checked ( node, model ) =
-    { model
-        | nodes =
-            Dict.insert
-                nodeKey
-                { node
-                    | components =
-                        if checked then
-                            componentKey :: node.components
-
-                        else
-                            List.filter
-                                (\key -> key /= componentKey)
-                                node.components
-                }
-                model.nodes
-    }
 
 
 decodeFragment : Url -> Result (Maybe String) EcsGenerator.Config
@@ -417,8 +313,6 @@ view model =
                     , viewEcsInputs model.ecs
                     , viewHeading2 "components (module name | type name)"
                     , viewComponents model
-                    , viewHeading2 "nodes (name | components)"
-                    , viewNodes model
                     ]
                 ]
             , viewHeading2 "generated code"
@@ -546,100 +440,6 @@ viewComponentInputs ( key, ( moduleName, typeName ) ) =
     ]
 
 
-viewNodes : Model -> Html Msg
-viewNodes { lastNodeKey, components, nodes } =
-    HtmlKeyed.node "div"
-        [ Attributes.css
-            [ Css.property "display" "inline-grid"
-            , Css.property "grid-template-columns" "auto auto auto"
-            ]
-        ]
-        ((Dict.toList nodes ++ [ ( lastNodeKey + 1, { name = "", components = [] } ) ])
-            |> List.map (viewNodeInputs components)
-            |> List.concat
-        )
-
-
-viewNodeInputs :
-    Dict Int ( String, String )
-    -> ( Int, { name : String, components : List Int } )
-    -> List ( String, Html Msg )
-viewNodeInputs components ( nodeKey, node ) =
-    [ ( "nodeName" ++ String.fromInt nodeKey
-      , Html.input
-            [ Attributes.value node.name
-            , Attributes.placeholder "name"
-            , Events.onInput (NodeNameChanged nodeKey)
-            , Attributes.css
-                [ Css.padding (Css.px 4)
-                ]
-            ]
-            []
-      )
-    , ( "nodeComponents" ++ String.fromInt nodeKey
-      , Html.div
-            [ Attributes.css
-                [ Css.border2 (Css.px 1) Css.inset
-                , Css.displayFlex
-                , Css.flexWrap Css.wrap
-                ]
-            ]
-            (components
-                |> Dict.toList
-                |> List.sort
-                |> List.map
-                    (\( componentKey, ( _, componentTypeName ) ) ->
-                        ( List.member componentKey node.components
-                        , componentKey
-                        , componentTypeName
-                        )
-                    )
-                |> List.map (viewNodeComponent nodeKey)
-            )
-      )
-    , ( "nodeRemoveButton" ++ String.fromInt nodeKey
-      , Html.button
-            [ Events.onClick (NodeRemoved nodeKey)
-            , Attributes.tabindex -1
-            ]
-            [ Html.text "remove" ]
-      )
-    ]
-
-
-viewNodeComponent : Int -> ( Bool, Int, String ) -> Html Msg
-viewNodeComponent nodeKey ( isMember, componentKey, componentTypeName ) =
-    Html.label
-        [ Attributes.css
-            (List.concat
-                [ [ Css.display Css.inlineBlock
-                  , Css.whiteSpace Css.noWrap
-                  , Css.padding (Css.px 4)
-                  , Css.fontSize (Css.px 14)
-                  ]
-                , if isMember then
-                    [ Css.fontWeight Css.bold
-                    , Css.backgroundColor (Css.rgb 0x00 0xFF 0x00)
-                    ]
-
-                  else
-                    []
-                ]
-            )
-        ]
-        [ Html.input
-            [ Attributes.type_ "checkbox"
-            , Attributes.checked isMember
-            , Events.onCheck (NodeComponentChanged nodeKey componentKey)
-            , Attributes.css
-                [ Css.padding (Css.px 4)
-                ]
-            ]
-            []
-        , Html.text componentTypeName
-        ]
-
-
 viewGeneratResult : Model -> Html Msg
 viewGeneratResult model =
     case ( model.decodeError, EcsGenerator.generate (toConfig model) ) of
@@ -724,34 +524,6 @@ errorToString error =
 
         Error.DuplicateComponent component ->
             "duplicate component: "
-                ++ EcsGenerator.componentModuleName component
-                ++ "."
-                ++ EcsGenerator.componentTypeName component
-
-        Error.NodesEmpty ->
-            "no nodes entered"
-
-        Error.NodeNameInvalid node ->
-            "invalid node name: "
-                ++ EcsGenerator.nodeName node
-
-        Error.NodeComponentsEmpty node ->
-            "components empty for node '"
-                ++ EcsGenerator.nodeName node
-                ++ "'"
-
-        Error.UnknownNodeComponent node component ->
-            "unkown component for node '"
-                ++ EcsGenerator.nodeName node
-                ++ "': "
-                ++ EcsGenerator.componentModuleName component
-                ++ "."
-                ++ EcsGenerator.componentTypeName component
-
-        Error.DuplicateNodeComponent node component ->
-            "duplicate component for node '"
-                ++ EcsGenerator.nodeName node
-                ++ "': "
                 ++ EcsGenerator.componentModuleName component
                 ++ "."
                 ++ EcsGenerator.componentTypeName component

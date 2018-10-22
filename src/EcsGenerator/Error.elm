@@ -6,7 +6,7 @@ module EcsGenerator.Error exposing (Error(..))
 
 -}
 
-import EcsGenerator.Config exposing (Component, Ecs, Node)
+import EcsGenerator.Config exposing (Component, Ecs)
 
 
 {-| -}
@@ -17,8 +17,3 @@ type Error
     | InvalidComponentModuleName Component
     | InvalidComponentTypeName Component
     | DuplicateComponent Component
-    | NodesEmpty
-    | NodeNameInvalid Node
-    | NodeComponentsEmpty Node
-    | UnknownNodeComponent Node Component
-    | DuplicateNodeComponent Node Component

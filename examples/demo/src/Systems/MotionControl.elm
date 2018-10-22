@@ -8,15 +8,23 @@ import Ecs exposing (Ecs)
 
 update : ( Ecs, Context ) -> ( Ecs, Context )
 update =
-    Ecs.iterate Ecs.motionControlNode updateEntity
+    Ecs.iterate4
+        Ecs.motionComponent
+        Ecs.controlsComponent
+        Ecs.velocityComponent
+        Ecs.positionComponent
+        updateEntity
 
 
 updateEntity :
     Ecs.EntityId
-    -> Ecs.MotionControlNode
+    -> Motion
+    -> Controls
+    -> Velocity
+    -> Position
     -> ( Ecs, Context )
     -> ( Ecs, Context )
-updateEntity entityId { controls, motion, position, velocity } ( ecs, context ) =
+updateEntity entityId motion controls velocity position ( ecs, context ) =
     ( Ecs.insert
         entityId
         Ecs.velocityComponent

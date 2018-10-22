@@ -1,8 +1,7 @@
 module EcsGenerator exposing
-    ( Config, Ecs, Component, Node
+    ( Config, Ecs, Component
     , ecs, ecsModuleName, ecsTypeName
     , component, componentModuleName, componentTypeName
-    , node, nodeName, nodeComponents
     , validate, isValidModuleName, isValidTypeName, isValidVariableName
     , generate
     , encode, decode
@@ -13,10 +12,9 @@ module EcsGenerator exposing
 
 # Config
 
-@docs Config, Ecs, Component, Node
+@docs Config, Ecs, Component
 @docs ecs, ecsModuleName, ecsTypeName
 @docs component, componentModuleName, componentTypeName
-@docs node, nodeName, nodeComponents
 
 
 # Validation
@@ -63,11 +61,6 @@ type alias Component =
 
 
 {-| -}
-type alias Node =
-    Config.Node
-
-
-{-| -}
 ecs : String -> String -> Ecs
 ecs =
     Config.ecs
@@ -101,24 +94,6 @@ componentModuleName =
 componentTypeName : Component -> String
 componentTypeName =
     Config.componentTypeName
-
-
-{-| -}
-node : String -> List Component -> Node
-node =
-    Config.node
-
-
-{-| -}
-nodeName : Node -> String
-nodeName =
-    Config.nodeName
-
-
-{-| -}
-nodeComponents : Node -> List Component
-nodeComponents =
-    Config.nodeComponents
 
 
 

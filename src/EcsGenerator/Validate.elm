@@ -10,7 +10,6 @@ import EcsGenerator.Config
         ( Component(..)
         , Config
         , Ecs(..)
-        , Node(..)
         )
 import EcsGenerator.Error exposing (Error(..))
 
@@ -26,7 +25,6 @@ validate config =
             []
                 |> validateEcs config.ecs
                 |> validateComponents config.components
-                |> validateNodes config.components config.nodes
     in
     case errors of
         [] ->
@@ -56,59 +54,6 @@ validateComponent components ((Component { moduleName, typeName }) as component)
     validateModuleName (InvalidComponentModuleName component) moduleName
         >> validateTypeName (InvalidComponentTypeName component) typeName
         >> validateNoDuplicate (DuplicateComponent component) component components
-
-
-validateNodes : List Component -> List Node -> Errors -> Errors
-validateNodes components nodes errors =
-    if List.isEmpty nodes then
-        NodesEmpty :: errors
-
-    else
-        List.foldl
-            (\node ->
-                validateNodeName node
-                    >> validateNodeComponents components node
-            )
-            errors
-            nodes
-
-
-validateNodeName : Node -> Errors -> Errors
-validateNodeName ((Node { name }) as node) errors =
-    if isValidName (always True) name then
-        errors
-
-    else
-        NodeNameInvalid node :: errors
-
-
-validateNodeComponents : List Component -> Node -> Errors -> Errors
-validateNodeComponents components (Node node) errors =
-    if List.isEmpty node.components then
-        NodeComponentsEmpty (Node node) :: errors
-
-    else
-        List.foldl
-            (\nodeComponent errs ->
-                (if not (List.member nodeComponent components) then
-                    UnknownNodeComponent
-                        (Node node)
-                        nodeComponent
-                        :: errs
-
-                 else
-                    errs
-                )
-                    |> validateNoDuplicate
-                        (DuplicateNodeComponent
-                            (Node node)
-                            nodeComponent
-                        )
-                        nodeComponent
-                        node.components
-            )
-            errors
-            node.components
 
 
 validateNoDuplicate : Error -> a -> List a -> Errors -> Errors
