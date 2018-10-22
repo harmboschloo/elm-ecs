@@ -3,6 +3,8 @@ module Benchmarks exposing
     , compareIterate
     , compareIterateAndModify
     , compareIterateAndModify2
+    , compareIterateAndModifySubset
+    , compareIterateSubset
     , scaleIterate
     , scaleIterateAndModify
     , scaleIterateAndModify2
@@ -24,6 +26,34 @@ compareIterate n apiA apiB =
 
         ( _, ecsB ) =
             Data.initCompareEcs n apiB
+    in
+    Benchmark.describe label
+        [ Benchmark.compare "iterateA"
+            apiA.label
+            (\_ -> apiA.iterateA ecsA)
+            apiB.label
+            (\_ -> apiB.iterateA ecsB)
+        , Benchmark.compare "iterateAB"
+            apiA.label
+            (\_ -> apiA.iterateAB ecsA)
+            apiB.label
+            (\_ -> apiB.iterateAB ecsB)
+        , Benchmark.compare "iterateABC"
+            apiA.label
+            (\_ -> apiA.iterateABC ecsA)
+            apiB.label
+            (\_ -> apiB.iterateABC ecsB)
+        ]
+
+
+compareIterateSubset : Int -> Apis.EcsApi a -> Apis.EcsApi b -> Benchmark
+compareIterateSubset n apiA apiB =
+    let
+        ( label, ecsA ) =
+            Data.initCompareSubsetEcs n apiA
+
+        ( _, ecsB ) =
+            Data.initCompareSubsetEcs n apiB
     in
     Benchmark.describe label
         [ Benchmark.compare "iterateA"
@@ -97,6 +127,34 @@ compareIterateAndModify2 n apiA apiB =
             (\_ -> apiA.iterateAModifyABC ecsA)
             apiB.label
             (\_ -> apiB.iterateAModifyABC ecsB)
+        ]
+
+
+compareIterateAndModifySubset : Int -> Apis.EcsApi a -> Apis.EcsApi b -> Benchmark
+compareIterateAndModifySubset n apiA apiB =
+    let
+        ( label, ecsA ) =
+            Data.initCompareSubsetEcs n apiA
+
+        ( _, ecsB ) =
+            Data.initCompareSubsetEcs n apiB
+    in
+    Benchmark.describe label
+        [ Benchmark.compare "iterateAModifyA"
+            apiA.label
+            (\_ -> apiA.iterateAModifyA ecsA)
+            apiB.label
+            (\_ -> apiB.iterateAModifyA ecsB)
+        , Benchmark.compare "iterateABModifyA"
+            apiA.label
+            (\_ -> apiA.iterateABModifyA ecsA)
+            apiB.label
+            (\_ -> apiB.iterateABModifyA ecsB)
+        , Benchmark.compare "iterateABCModifyA"
+            apiA.label
+            (\_ -> apiA.iterateABCModifyA ecsA)
+            apiB.label
+            (\_ -> apiB.iterateABCModifyA ecsB)
         ]
 
 

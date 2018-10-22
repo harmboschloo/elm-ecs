@@ -1,5 +1,6 @@
 module Data exposing
     ( initCompareEcs
+    , initCompareSubsetEcs
     , initScaleEcsA
     , initScaleEcsAB
     , initScaleEcsABC
@@ -16,9 +17,24 @@ initCompareEcs n api =
         (" " ++ String.fromInt n)
         [ "Ecs", "ABC", "BC", "C" ]
     , applyList
-        [ List.repeat n api.createABC 
-        , List.repeat n api.createBC 
-        , List.repeat n api.createC 
+        [ List.repeat n api.createABC
+        , List.repeat n api.createBC
+        , List.repeat n api.createC
+        ]
+        api
+    )
+
+
+initCompareSubsetEcs : Int -> Apis.EcsApi ecs -> ( String, ecs )
+initCompareSubsetEcs n api =
+    ( String.join
+        (" " ++ String.fromInt n)
+        [ "Ecs", "AB", "AC", "BC", "ABC" ]
+    , applyList
+        [ List.repeat n api.createAB
+        , List.repeat n api.createAC
+        , List.repeat n api.createBC
+        , List.repeat n api.createABC
         ]
         api
     )
