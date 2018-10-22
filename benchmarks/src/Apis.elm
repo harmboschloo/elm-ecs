@@ -47,21 +47,21 @@ ecs1 : EcsApi Ecs1.Ecs
 ecs1 =
     { label = "Ecs1 record of dicts"
     , empty = Ecs1.empty
-    , createA = createAndInsert Ecs1.createEntity Ecs1.insertComponent Ecs1.a
-    , createB = createAndInsert Ecs1.createEntity Ecs1.insertComponent Ecs1.b
-    , createC = createAndInsert Ecs1.createEntity Ecs1.insertComponent Ecs1.c
-    , createAB = createAndInsert2 Ecs1.createEntity Ecs1.insertComponent Ecs1.a Ecs1.b
-    , createAC = createAndInsert2 Ecs1.createEntity Ecs1.insertComponent Ecs1.a Ecs1.c
-    , createBC = createAndInsert2 Ecs1.createEntity Ecs1.insertComponent Ecs1.b Ecs1.c
-    , createABC = createAndInsert3 Ecs1.createEntity Ecs1.insertComponent Ecs1.a Ecs1.b Ecs1.c
-    , iterateA = Ecs1.iterateEntities Ecs1.a (\_ _ x -> x) |> withContext
-    , iterateAB = Ecs1.iterateEntities2 Ecs1.a Ecs1.b (\_ _ _ x -> x) |> withContext
-    , iterateABC = Ecs1.iterateEntities3 Ecs1.a Ecs1.b Ecs1.c (\_ _ _ _ x -> x) |> withContext
-    , iterateAModifyA = Ecs1.iterateEntities Ecs1.a (\entityId _ -> insert (Ecs1.insertComponent entityId) Ecs1.a) |> withContext
-    , iterateABModifyA = Ecs1.iterateEntities2 Ecs1.a Ecs1.b (\entityId _ _ -> insert (Ecs1.insertComponent entityId) Ecs1.a) |> withContext
-    , iterateABCModifyA = Ecs1.iterateEntities3 Ecs1.a Ecs1.b Ecs1.c (\entityId _ _ _ -> insert (Ecs1.insertComponent entityId) Ecs1.a) |> withContext
-    , iterateAModifyAB = Ecs1.iterateEntities Ecs1.a (\entityId _ -> insert (Ecs1.insertComponent entityId) Ecs1.a >> insert (Ecs1.insertComponent entityId) Ecs1.b) |> withContext
-    , iterateAModifyABC = Ecs1.iterateEntities Ecs1.a (\entityId _ -> insert (Ecs1.insertComponent entityId) Ecs1.a >> insert (Ecs1.insertComponent entityId) Ecs1.b >> insert (Ecs1.insertComponent entityId) Ecs1.c) |> withContext
+    , createA = createAndInsert Ecs1.create Ecs1.insert Ecs1.aComponent
+    , createB = createAndInsert Ecs1.create Ecs1.insert Ecs1.bComponent
+    , createC = createAndInsert Ecs1.create Ecs1.insert Ecs1.cComponent
+    , createAB = createAndInsert2 Ecs1.create Ecs1.insert Ecs1.aComponent Ecs1.bComponent
+    , createAC = createAndInsert2 Ecs1.create Ecs1.insert Ecs1.aComponent Ecs1.cComponent
+    , createBC = createAndInsert2 Ecs1.create Ecs1.insert Ecs1.bComponent Ecs1.cComponent
+    , createABC = createAndInsert3 Ecs1.create Ecs1.insert Ecs1.aComponent Ecs1.bComponent Ecs1.cComponent
+    , iterateA = Ecs1.iterate Ecs1.aComponent (\_ _ x -> x) |> withContext
+    , iterateAB = Ecs1.iterate2 Ecs1.aComponent Ecs1.bComponent (\_ _ _ x -> x) |> withContext
+    , iterateABC = Ecs1.iterate3 Ecs1.aComponent Ecs1.bComponent Ecs1.cComponent (\_ _ _ _ x -> x) |> withContext
+    , iterateAModifyA = Ecs1.iterate Ecs1.aComponent (\entityId _ -> insert (Ecs1.insert entityId) Ecs1.aComponent) |> withContext
+    , iterateABModifyA = Ecs1.iterate2 Ecs1.aComponent Ecs1.bComponent (\entityId _ _ -> insert (Ecs1.insert entityId) Ecs1.aComponent) |> withContext
+    , iterateABCModifyA = Ecs1.iterate3 Ecs1.aComponent Ecs1.bComponent Ecs1.cComponent (\entityId _ _ _ -> insert (Ecs1.insert entityId) Ecs1.aComponent) |> withContext
+    , iterateAModifyAB = Ecs1.iterate Ecs1.aComponent (\entityId _ -> insert (Ecs1.insert entityId) Ecs1.aComponent >> insert (Ecs1.insert entityId) Ecs1.bComponent) |> withContext
+    , iterateAModifyABC = Ecs1.iterate Ecs1.aComponent (\entityId _ -> insert (Ecs1.insert entityId) Ecs1.aComponent >> insert (Ecs1.insert entityId) Ecs1.bComponent >> insert (Ecs1.insert entityId) Ecs1.cComponent) |> withContext
     }
 
 
