@@ -1,14 +1,5 @@
 # Benchmarks
 
-- [CompareIterate](./build/CompareIterate.html)
-- [CompareIterateSubset](./build/CompareIterateSubset.html)
-- [CompareIterateAndModify](./build/CompareIterateAndModify.html)
-- [CompareIterateAndModify2](./build/CompareIterateAndModify2.html)
-- [CompareIterateAndModifySubset](./build/CompareIterateAndModifySubset.html)
-- [ScaleIterate](./build/ScaleIterate.html)
-- [scaleIterateAndModify](./build/scaleIterateAndModify.html)
-- [scaleIterateAndModify2](./build/scaleIterateAndModify2.html)
-
 ## History
 
 ### 1. record of dicts

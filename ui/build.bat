@@ -1,1 +1,1 @@
-elm make Main.elm --output=../index.html --optimize
+elm make Main.elm --output=index.html --optimize
