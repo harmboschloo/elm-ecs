@@ -4,49 +4,96 @@ import Components exposing (Collectable, Collector, Position, Velocity)
 import Components.Transforms as Transforms
 import Context exposing (Context)
 import Data.Animation as Animation
+import Data.Bounds as Bounds
+import Data.CollisionGrid as CollisionGrid exposing (CollisionGrid)
 import Ease
 import Ecs exposing (Ecs)
 
 
-type alias CollectableEntity =
+type alias CollectorData =
+    { id : Ecs.EntityId
+    , position : Position
+    , radius : Float
+    }
+
+
+type alias CollectableData =
     { id : Ecs.EntityId
     , position : Position
     }
 
 
+gridConfig : CollisionGrid.Config
+gridConfig =
+    { cellWidth = 60
+    , cellHeight = 60
+    }
+
+
 update : ( Ecs, Context ) -> ( Ecs, Context )
-update =
-    -- FIXME no iterate2 * iterate2
-    Ecs.iterate2 Ecs.collectableComponent Ecs.positionComponent checkCollectable
+update ( ecs, context ) =
+    let
+        ( _, collectorGrid ) =
+            Ecs.iterate2
+                Ecs.collectorComponent
+                Ecs.positionComponent
+                insertCollector
+                ( ecs, CollisionGrid.empty gridConfig )
+
+        ( _, collectableGrid ) =
+            Ecs.iterate2
+                Ecs.collectableComponent
+                Ecs.positionComponent
+                insertCollectable
+                ( ecs, CollisionGrid.empty gridConfig )
+    in
+    List.foldl
+        checkCollection
+        ( ecs, context )
+        (CollisionGrid.cellCollisionsBetween collectableGrid collectorGrid)
 
 
-checkCollectable :
+insertCollector :
+    Ecs.EntityId
+    -> Collector
+    -> Position
+    -> ( Ecs, CollisionGrid CollectorData )
+    -> ( Ecs, CollisionGrid CollectorData )
+insertCollector entityId collector position ( ecs, grid ) =
+    ( ecs
+    , CollisionGrid.insert
+        (Bounds.fromPositionAndRadius position.x position.y collector.radius)
+        (CollectorData entityId position collector.radius)
+        grid
+    )
+
+
+insertCollectable :
     Ecs.EntityId
     -> Collectable
     -> Position
-    -> ( Ecs, Context )
-    -> ( Ecs, Context )
-checkCollectable entityId _ position =
-    Ecs.iterate2
-        Ecs.collectorComponent
-        Ecs.positionComponent
-        (checkCollection (CollectableEntity entityId position))
+    -> ( Ecs, CollisionGrid CollectableData )
+    -> ( Ecs, CollisionGrid CollectableData )
+insertCollectable entityId _ position ( ecs, grid ) =
+    ( ecs
+    , CollisionGrid.insertAtPoint
+        ( position.x, position.y )
+        (CollectableData entityId position)
+        grid
+    )
 
 
 checkCollection :
-    CollectableEntity
-    -> Ecs.EntityId
-    -> Collector
-    -> Position
+    ( CollectableData, CollectorData )
     -> ( Ecs, Context )
     -> ( Ecs, Context )
-checkCollection collectable entityId collector position ( ecs, context ) =
+checkCollection ( collectable, collector ) ( ecs, context ) =
     let
         deltaX =
-            collectable.position.x - position.x
+            collectable.position.x - collector.position.x
 
         deltaY =
-            collectable.position.y - position.y
+            collectable.position.y - collector.position.y
 
         distanceSquared =
             deltaX * deltaX + deltaY * deltaY
