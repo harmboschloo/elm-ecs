@@ -36,6 +36,18 @@ view frame history context ecs =
             , text <|
                 " (ecs) - fps: "
                     ++ String.fromInt (round <| History.getMeanFps 50 history)
+            , text <|
+                " - entities: "
+                    ++ String.fromInt (Ecs.activeSize ecs)
+            , text <|
+                " - test "
+                    ++ (if context.test then
+                            "1"
+
+                        else
+                            "0"
+                       )
+                    ++ " (t)"
             , div
                 [ style "position" "absolute"
                 , style "top" "0"
@@ -46,10 +58,12 @@ view frame history context ecs =
                 ]
             ]
         , if Frame.isPaused frame then
-            History.view history
+            div
+                [ style "margin-top" "1.5em" ]
+                [ History.view history ]
 
           else
-            Html.text ""
+            text ""
         ]
 
 

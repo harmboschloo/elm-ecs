@@ -13,11 +13,24 @@ spawnRate =
     5
 
 
+testSpawnRate : Float
+testSpawnRate =
+    -- per second
+    50
+
+
 update : ( Ecs, Context ) -> ( Ecs, Context )
 update ( ecs, context ) =
     let
+        rate =
+            if context.test then
+                testSpawnRate
+
+            else
+                spawnRate
+
         spawn =
-            spawnRate * context.deltaTime
+            rate * context.deltaTime
 
         fraction =
             spawn - toFloat (floor spawn)

@@ -150,12 +150,23 @@ update msg state =
                                         , entityCount = Ecs.activeSize model.ecs
                                         }
                                         model.history
+
+                        newFrame =
+                            if
+                                context.test
+                                    && not (Frame.isPaused frame)
+                                    && (History.getMeanFps 50 history < 30)
+                            then
+                                Frame.togglePaused frame
+
+                            else
+                                frame
                     in
                     ( InitOk
                         { model
                             | context = context
                             , ecs = ecs
-                            , frame = frame
+                            , frame = newFrame
                             , history = history
                         }
                     , Cmd.map FrameMsg cmd

@@ -38,6 +38,7 @@ type alias Context =
     , world : World
     , time : Float
     , deltaTime : Float
+    , test : Bool
     }
 
 
@@ -62,6 +63,7 @@ init assets seed screen =
     , world = getWorld screen
     , time = 0
     , deltaTime = 0
+    , test = False
     }
 
 
@@ -111,7 +113,15 @@ update msg context =
             )
 
         KeyUp keyCode ->
-            ( { context | activeKeys = Set.remove keyCode context.activeKeys }
+            ( { context
+                | activeKeys = Set.remove keyCode context.activeKeys
+                , test =
+                    if keyCode == KeyCode.t then
+                        not context.test
+
+                    else
+                        context.test
+              }
             , if keyCode == KeyCode.esc then
                 PauseToggled
 
