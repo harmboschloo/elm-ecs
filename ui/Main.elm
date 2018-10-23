@@ -337,7 +337,7 @@ viewHeading =
             [ Html.text "example" ]
         , Html.text "/"
         , Html.a
-            [ Attributes.href "examples/basic/" ]
+            [ Attributes.href "../examples/basic/" ]
             [ Html.text "live" ]
         , Html.text " - demo "
         , Html.a
@@ -345,7 +345,7 @@ viewHeading =
             [ Html.text "example" ]
         , Html.text "/"
         , Html.a
-            [ Attributes.href "examples/demo/build/" ]
+            [ Attributes.href "../examples/demo/build/" ]
             [ Html.text "live" ]
         , Html.text " - "
         , Html.a
