@@ -2,7 +2,9 @@ module History exposing
     ( History
     , add
     , empty
-    , getMeanFps
+    , getFps
+    , getFpsMean
+    , getFpsMedium
     , view
     )
 
@@ -38,8 +40,13 @@ add data (Model model) =
     Model (BoundedDeque.pushBack data model)
 
 
-getMeanFps : Int -> History -> Float
-getMeanFps n (Model model) =
+getFps : History -> Float
+getFps =
+    getFpsMedium 50
+
+
+getFpsMean : Int -> History -> Float
+getFpsMean n (Model model) =
     let
         ( totalSum, totalSize ) =
             List.foldl
@@ -52,6 +59,52 @@ getMeanFps n (Model model) =
 
     else
         0
+
+
+getFpsMedium : Int -> History -> Float
+getFpsMedium n (Model model) =
+    let
+        length =
+            min (BoundedDeque.length model) n
+
+        times =
+            model
+                |> BoundedDeque.takeBack length
+                |> List.map .frameTime
+                |> List.sort
+
+        mediumTimes =
+            if isEven length then
+                times
+                    |> List.drop ((length // 2) - 1)
+                    |> List.take 2
+
+            else
+                times
+                    |> List.drop (length // 2)
+                    |> List.take 1
+
+        deltaTime =
+            case mediumTimes of
+                a :: [] ->
+                    a
+
+                a :: b :: [] ->
+                    (a + b) / 2
+
+                _ ->
+                    0
+    in
+    if deltaTime > 0 then
+        1 / deltaTime
+
+    else
+        0
+
+
+isEven : Int -> Bool
+isEven n =
+    modBy 2 n == 0
 
 
 view : History -> Html msg

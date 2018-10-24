@@ -35,7 +35,7 @@ view frame history context ecs =
                     "running"
             , text <|
                 " (ecs) - fps: "
-                    ++ String.fromInt (round <| History.getMeanFps 50 history)
+                    ++ String.fromInt (round <| History.getFps history)
             , text <|
                 " - entities: "
                     ++ String.fromInt (Ecs.activeSize ecs)

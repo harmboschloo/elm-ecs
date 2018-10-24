@@ -155,7 +155,7 @@ update msg state =
                             if
                                 context.test
                                     && not (Frame.isPaused frame)
-                                    && (History.getMeanFps 50 history < 30)
+                                    && (History.getFps history < 30)
                             then
                                 Frame.togglePaused frame
 
