@@ -7,7 +7,7 @@ module Data.CollisionGrid exposing
     , insertAtPoint
     )
 
-import Data.Bounds exposing (Bounds)
+import Data.Bounds as Bounds exposing (Bounds)
 import Dict exposing (Dict)
 
 
@@ -24,7 +24,7 @@ type alias Model a =
 
 
 type alias Cells a =
-    Dict ( Int, Int ) (List ( Id, a ))
+    Dict ( Int, Int ) (List ( Id, Bounds, a ))
 
 
 type alias Id =
@@ -61,7 +61,7 @@ insert bounds a (CollisionGrid model) =
                 (toCellIndex bounds.bottom model.cellHeight)
 
         data =
-            ( model.idCount, a )
+            ( model.idCount, bounds, a )
 
         newCells =
             foldAxB
@@ -86,13 +86,13 @@ insertAtPoint ( x, y ) a (CollisionGrid model) =
                     ( toCellIndex x model.cellWidth
                     , toCellIndex y model.cellHeight
                     )
-                    ( model.idCount, a )
+                    ( model.idCount, Bounds.fromPoint x y, a )
                     model.cells
             , idCount = model.idCount + 1
         }
 
 
-insertAt : ( Int, Int ) -> ( Id, a ) -> Cells a -> Cells a
+insertAt : ( Int, Int ) -> ( Id, Bounds, a ) -> Cells a -> Cells a
 insertAt key data cells =
     Dict.update key (Maybe.withDefault [] >> (::) data >> Just) cells
 
@@ -122,8 +122,12 @@ cellCollisionsBetween (CollisionGrid modelA) (CollisionGrid modelB) =
 
                 Just dataListB ->
                     foldAxB
-                        (\( idA, a ) ( idB, b ) ->
-                            Dict.insert ( idA, idB ) ( a, b )
+                        (\( idA, boundsA, a ) ( idB, boundsB, b ) ->
+                            if Bounds.intersect boundsA boundsB then
+                                Dict.insert ( idA, idB ) ( a, b )
+
+                            else
+                                identity
                         )
                         pairs
                         dataListA
