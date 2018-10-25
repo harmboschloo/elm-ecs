@@ -1,6 +1,5 @@
 module Systems.Animation exposing (update)
 
-import Components exposing (ScaleAnimation)
 import Context exposing (Context)
 import Data.Animation as Animation exposing (Animation)
 import Ecs exposing (Ecs)
@@ -8,15 +7,15 @@ import Ecs exposing (Ecs)
 
 update : ( Ecs, Context ) -> ( Ecs, Context )
 update =
-    Ecs.iterate Ecs.scaleAnimationComponent updateScale
+    Ecs.iterate Ecs.scaleAnimationNode updateScale
 
 
 updateScale :
     Ecs.EntityId
-    -> ScaleAnimation
+    -> Ecs.ScaleAnimationNode
     -> ( Ecs, Context )
     -> ( Ecs, Context )
-updateScale entityId scaleAnimation ( ecs, context ) =
+updateScale entityId { scaleAnimation } ( ecs, context ) =
     let
         newEcs =
             Ecs.insert

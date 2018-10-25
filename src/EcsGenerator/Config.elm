@@ -2,6 +2,7 @@ module EcsGenerator.Config exposing
     ( Component(..)
     , Config
     , Ecs(..)
+    , Node(..)
     , component
     , componentModuleName
     , componentTypeName
@@ -12,6 +13,9 @@ module EcsGenerator.Config exposing
     , ecsTypeName
     , encode
     , encodeString
+    , node
+    , nodeComponents
+    , nodeName
     )
 
 import Json.Decode as Decode exposing (Decoder)
@@ -21,6 +25,7 @@ import Json.Encode as Encode
 type alias Config =
     { ecs : Ecs
     , components : List Component
+    , nodes : List Node
     }
 
 
@@ -30,6 +35,16 @@ type Ecs
 
 type Component
     = Component { moduleName : String, typeName : String }
+
+
+type Node
+    = Node NodeConfig
+
+
+type alias NodeConfig =
+    { name : String
+    , components : List Component
+    }
 
 
 ecs : String -> String -> Ecs
@@ -68,6 +83,24 @@ componentTypeName (Component { typeName }) =
     typeName
 
 
+node : String -> List Component -> Node
+node name components =
+    Node
+        { name = name
+        , components = components
+        }
+
+
+nodeName : Node -> String
+nodeName (Node { name }) =
+    name
+
+
+nodeComponents : Node -> List Component
+nodeComponents (Node { components }) =
+    components
+
+
 decodeString : String -> Result Decode.Error Config
 decodeString =
     Decode.decodeString decoder
@@ -75,9 +108,10 @@ decodeString =
 
 decoder : Decoder Config
 decoder =
-    Decode.map2 Config
+    Decode.map3 Config
         (Decode.field "ecs" ecsDecoder)
         (Decode.field "components" (Decode.list componentDecoder))
+        (Decode.field "nodes" (Decode.list nodeDecoder))
 
 
 ecsDecoder : Decoder Ecs
@@ -88,6 +122,15 @@ ecsDecoder =
 componentDecoder : Decoder Component
 componentDecoder =
     Decode.map Component moduleAndTypeNameDecoder
+
+
+nodeDecoder : Decoder Node
+nodeDecoder =
+    Decode.map Node
+        (Decode.map2 NodeConfig
+            (Decode.field "name" Decode.string)
+            (Decode.field "components" (Decode.list componentDecoder))
+        )
 
 
 moduleAndTypeNameDecoder : Decoder { moduleName : String, typeName : String }
@@ -121,6 +164,7 @@ encode config =
     Encode.object
         [ ( "ecs", encodeEcs config.ecs )
         , ( "components", Encode.list encodeComponent config.components )
+        , ( "nodes", Encode.list encodeNode config.nodes )
         ]
 
 
@@ -132,6 +176,14 @@ encodeEcs (Ecs ecsConfig) =
 encodeComponent : Component -> Encode.Value
 encodeComponent (Component componentConfig) =
     encodeModuleAndTypeName componentConfig
+
+
+encodeNode : Node -> Encode.Value
+encodeNode (Node { name, components }) =
+    Encode.object
+        [ ( "name", Encode.string name )
+        , ( "components", Encode.list encodeComponent components )
+        ]
 
 
 encodeModuleAndTypeName :

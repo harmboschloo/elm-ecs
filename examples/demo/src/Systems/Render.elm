@@ -1,6 +1,5 @@
 module Systems.Render exposing (view)
 
-import Components exposing (Position, Sprite)
 import Context exposing (Context)
 import Ecs exposing (Ecs)
 import Frame exposing (Frame)
@@ -91,10 +90,7 @@ renderEntities context ecs cameraTransform =
             [ renderBackground context cameraTransform ]
     in
     ( ecs, entities )
-        |> Ecs.iterate2
-            Ecs.spriteComponent
-            Ecs.positionComponent
-            (renderSprite cameraTransform)
+        |> Ecs.iterate Ecs.renderNode (renderSprite cameraTransform)
         |> Tuple.second
 
 
@@ -127,11 +123,10 @@ renderBackground context cameraTransform =
 renderSprite :
     Mat4
     -> Ecs.EntityId
-    -> Sprite
-    -> Position
+    -> Ecs.RenderNode
     -> ( Ecs, List WebGL.Entity )
     -> ( Ecs, List WebGL.Entity )
-renderSprite cameraTransform entityId sprite position ( ecs, elements ) =
+renderSprite cameraTransform entityId { position, sprite } ( ecs, elements ) =
     let
         spriteTransform =
             Mat4.makeScale3 sprite.width sprite.height 1

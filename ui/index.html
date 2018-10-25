@@ -596,11 +596,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.bd.aE === region.bv.aE)
+	if (region.bg.aG === region.bx.aG)
 	{
-		return 'on line ' + region.bd.aE;
+		return 'on line ' + region.bg.aG;
 	}
-	return 'on lines ' + region.bd.aE + ' through ' + region.bv.aE;
+	return 'on lines ' + region.bg.aG + ' through ' + region.bx.aG;
 }
 
 
@@ -1868,9 +1868,9 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.cd,
+		impl.cg,
+		impl.cs,
 		impl.cq,
-		impl.co,
 		function() { return function() {} }
 	);
 });
@@ -2671,8 +2671,8 @@ var _VirtualDom_mapEventRecord = F2(function(func, record)
 {
 	return {
 		D: func(record.D),
-		be: record.be,
-		bc: record.bc
+		bh: record.bh,
+		bf: record.bf
 	}
 });
 
@@ -2941,10 +2941,10 @@ function _VirtualDom_makeCallback(eventNode, initialHandler)
 
 		var value = result.a;
 		var message = !tag ? value : tag < 3 ? value.a : value.D;
-		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.be;
+		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.bh;
 		var currentEventNode = (
 			stopPropagation && event.stopPropagation(),
-			(tag == 2 ? value.b : tag == 3 && value.bc) && event.preventDefault(),
+			(tag == 2 ? value.b : tag == 3 && value.bf) && event.preventDefault(),
 			eventNode
 		);
 		var tagger;
@@ -3894,11 +3894,11 @@ var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debug
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.cd,
+		impl.cg,
+		impl.cs,
 		impl.cq,
-		impl.co,
 		function(sendToApp, initialModel) {
-			var view = impl.ct;
+			var view = impl.cv;
 			/**/
 			var domNode = args['node'];
 			//*/
@@ -3930,12 +3930,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.cd,
+		impl.cg,
+		impl.cs,
 		impl.cq,
-		impl.co,
 		function(sendToApp, initialModel) {
-			var divertHrefToApp = impl.aI && impl.aI(sendToApp)
-			var view = impl.ct;
+			var divertHrefToApp = impl.aK && impl.aK(sendToApp)
+			var view = impl.cv;
 			var title = _VirtualDom_doc.title;
 			var bodyNode = _VirtualDom_doc.body;
 			var currNode = _VirtualDom_virtualize(bodyNode);
@@ -3943,12 +3943,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 			{
 				_VirtualDom_divertHrefToApp = divertHrefToApp;
 				var doc = view(model);
-				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.b3);
+				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.b6);
 				var patches = _VirtualDom_diff(currNode, nextNode);
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.cp) && (_VirtualDom_doc.title = title = doc.cp);
+				(title !== doc.cr) && (_VirtualDom_doc.title = title = doc.cr);
 			});
 		}
 	);
@@ -3999,12 +3999,12 @@ function _Browser_makeAnimator(model, draw)
 
 function _Browser_application(impl)
 {
-	var onUrlChange = impl.ch;
-	var onUrlRequest = impl.ci;
+	var onUrlChange = impl.cj;
+	var onUrlRequest = impl.ck;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
-		aI: function(sendToApp)
+		aK: function(sendToApp)
 		{
 			key.a = sendToApp;
 			_Browser_window.addEventListener('popstate', key);
@@ -4020,9 +4020,9 @@ function _Browser_application(impl)
 					var next = elm$url$Url$fromString(href).a;
 					sendToApp(onUrlRequest(
 						(next
-							&& curr.bM === next.bM
-							&& curr.bz === next.bz
-							&& curr.bJ.a === next.bJ.a
+							&& curr.bP === next.bP
+							&& curr.bB === next.bB
+							&& curr.bM.a === next.bM.a
 						)
 							? elm$browser$Browser$Internal(next)
 							: elm$browser$Browser$External(href)
@@ -4030,13 +4030,13 @@ function _Browser_application(impl)
 				}
 			});
 		},
-		cd: function(flags)
+		cg: function(flags)
 		{
-			return A3(impl.cd, flags, _Browser_getUrl(), key);
+			return A3(impl.cg, flags, _Browser_getUrl(), key);
 		},
-		ct: impl.ct,
-		cq: impl.cq,
-		co: impl.co
+		cv: impl.cv,
+		cs: impl.cs,
+		cq: impl.cq
 	});
 }
 
@@ -4102,17 +4102,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { ca: 'hidden', ay: 'visibilitychange' }
+		? { cd: 'hidden', aA: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { ca: 'mozHidden', ay: 'mozvisibilitychange' }
+		? { cd: 'mozHidden', aA: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { ca: 'msHidden', ay: 'msvisibilitychange' }
+		? { cd: 'msHidden', aA: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { ca: 'webkitHidden', ay: 'webkitvisibilitychange' }
-		: { ca: 'hidden', ay: 'visibilitychange' };
+		? { cd: 'webkitHidden', aA: 'webkitvisibilitychange' }
+		: { cd: 'hidden', aA: 'visibilitychange' };
 }
 
 
@@ -4193,12 +4193,12 @@ var _Browser_call = F2(function(functionName, id)
 function _Browser_getViewport()
 {
 	return {
-		bR: _Browser_getScene(),
-		b_: {
-			a2: _Browser_window.pageXOffset,
-			a3: _Browser_window.pageYOffset,
-			at: _Browser_doc.documentElement.clientWidth,
-			ad: _Browser_doc.documentElement.clientHeight
+		bU: _Browser_getScene(),
+		b1: {
+			a5: _Browser_window.pageXOffset,
+			a6: _Browser_window.pageYOffset,
+			av: _Browser_doc.documentElement.clientWidth,
+			af: _Browser_doc.documentElement.clientHeight
 		}
 	};
 }
@@ -4208,8 +4208,8 @@ function _Browser_getScene()
 	var body = _Browser_doc.body;
 	var elem = _Browser_doc.documentElement;
 	return {
-		at: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
-		ad: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
+		av: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
+		af: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
 	};
 }
 
@@ -4232,15 +4232,15 @@ function _Browser_getViewportOf(id)
 	return _Browser_withNode(id, function(node)
 	{
 		return {
-			bR: {
-				at: node.scrollWidth,
-				ad: node.scrollHeight
+			bU: {
+				av: node.scrollWidth,
+				af: node.scrollHeight
 			},
-			b_: {
-				a2: node.scrollLeft,
-				a3: node.scrollTop,
-				at: node.clientWidth,
-				ad: node.clientHeight
+			b1: {
+				a5: node.scrollLeft,
+				a6: node.scrollTop,
+				av: node.clientWidth,
+				af: node.clientHeight
 			}
 		};
 	});
@@ -4270,18 +4270,18 @@ function _Browser_getElement(id)
 		var x = _Browser_window.pageXOffset;
 		var y = _Browser_window.pageYOffset;
 		return {
-			bR: _Browser_getScene(),
-			b_: {
-				a2: x,
-				a3: y,
-				at: _Browser_doc.documentElement.clientWidth,
-				ad: _Browser_doc.documentElement.clientHeight
+			bU: _Browser_getScene(),
+			b1: {
+				a5: x,
+				a6: y,
+				av: _Browser_doc.documentElement.clientWidth,
+				af: _Browser_doc.documentElement.clientHeight
 			},
-			b7: {
-				a2: x + rect.left,
-				a3: y + rect.top,
-				at: rect.width,
-				ad: rect.height
+			ca: {
+				a5: x + rect.left,
+				a6: y + rect.top,
+				av: rect.width,
+				af: rect.height
 			}
 		};
 	});
@@ -4359,9 +4359,9 @@ var author$project$Main$LinkClicked = function (a) {
 var author$project$Main$UrlChanged = function (a) {
 	return {$: 2, a: a};
 };
-var author$project$EcsGenerator$Config$Config = F2(
-	function (ecs, components) {
-		return {bs: components, bu: ecs};
+var author$project$EcsGenerator$Config$Config = F3(
+	function (ecs, components, nodes) {
+		return {_: components, bw: ecs, bI: nodes};
 	});
 var author$project$EcsGenerator$Config$Component = elm$core$Basics$identity;
 var elm$core$Basics$apR = F2(
@@ -4852,7 +4852,7 @@ var author$project$EcsGenerator$Config$moduleAndTypeNameDecoder = A2(
 			var _n1 = list.b;
 			var typeName = _n1.a;
 			return elm$json$Json$Decode$succeed(
-				{aW: moduleName, aq: typeName});
+				{aY: moduleName, as: typeName});
 		} else {
 			return elm$json$Json$Decode$fail(
 				'expected list of [moduleName, typeName] but got [' + (A2(elm$core$String$join, ', ', list) + ']'));
@@ -4866,16 +4866,37 @@ var elm$json$Json$Decode$map = _Json_map1;
 var author$project$EcsGenerator$Config$componentDecoder = A2(elm$json$Json$Decode$map, elm$core$Basics$identity, author$project$EcsGenerator$Config$moduleAndTypeNameDecoder);
 var author$project$EcsGenerator$Config$Ecs = elm$core$Basics$identity;
 var author$project$EcsGenerator$Config$ecsDecoder = A2(elm$json$Json$Decode$map, elm$core$Basics$identity, author$project$EcsGenerator$Config$moduleAndTypeNameDecoder);
+var author$project$EcsGenerator$Config$Node = elm$core$Basics$identity;
+var author$project$EcsGenerator$Config$NodeConfig = F2(
+	function (name, components) {
+		return {_: components, aZ: name};
+	});
 var elm$json$Json$Decode$field = _Json_decodeField;
 var elm$json$Json$Decode$map2 = _Json_map2;
-var author$project$EcsGenerator$Config$decoder = A3(
-	elm$json$Json$Decode$map2,
+var author$project$EcsGenerator$Config$nodeDecoder = A2(
+	elm$json$Json$Decode$map,
+	elm$core$Basics$identity,
+	A3(
+		elm$json$Json$Decode$map2,
+		author$project$EcsGenerator$Config$NodeConfig,
+		A2(elm$json$Json$Decode$field, 'name', elm$json$Json$Decode$string),
+		A2(
+			elm$json$Json$Decode$field,
+			'components',
+			elm$json$Json$Decode$list(author$project$EcsGenerator$Config$componentDecoder))));
+var elm$json$Json$Decode$map3 = _Json_map3;
+var author$project$EcsGenerator$Config$decoder = A4(
+	elm$json$Json$Decode$map3,
 	author$project$EcsGenerator$Config$Config,
 	A2(elm$json$Json$Decode$field, 'ecs', author$project$EcsGenerator$Config$ecsDecoder),
 	A2(
 		elm$json$Json$Decode$field,
 		'components',
-		elm$json$Json$Decode$list(author$project$EcsGenerator$Config$componentDecoder)));
+		elm$json$Json$Decode$list(author$project$EcsGenerator$Config$componentDecoder)),
+	A2(
+		elm$json$Json$Decode$field,
+		'nodes',
+		elm$json$Json$Decode$list(author$project$EcsGenerator$Config$nodeDecoder)));
 var elm$json$Json$Decode$decodeString = _Json_runOnString;
 var author$project$EcsGenerator$Config$decodeString = elm$json$Json$Decode$decodeString(author$project$EcsGenerator$Config$decoder);
 var author$project$EcsGenerator$decode = author$project$EcsGenerator$Config$decodeString;
@@ -4906,7 +4927,7 @@ var elm$core$Result$mapError = F2(
 	});
 var elm$url$Url$percentDecode = _Url_percentDecode;
 var author$project$Main$decodeFragment = function (url) {
-	var _n0 = url.by;
+	var _n0 = url.bA;
 	if (_n0.$ === 1) {
 		return elm$core$Result$Err(elm$core$Maybe$Nothing);
 	} else {
@@ -4930,31 +4951,79 @@ var elm$core$Dict$empty = elm$core$Dict$RBEmpty_elm_builtin;
 var author$project$Main$initEmpty = F2(
 	function (navigationKey, decodeError) {
 		return {
-			bs: elm$core$Dict$empty,
-			az: decodeError,
-			bu: _Utils_Tuple2('Ecs', 'Ecs'),
-			aA: '',
+			_: elm$core$Dict$empty,
+			aB: decodeError,
+			bw: _Utils_Tuple2('Ecs', 'Ecs'),
+			aC: '',
 			L: 0,
-			P: navigationKey
+			M: 0,
+			Q: navigationKey,
+			bI: elm$core$Dict$empty
 		};
 	});
 var author$project$EcsGenerator$Config$ecsModuleName = function (_n0) {
-	var moduleName = _n0.aW;
+	var moduleName = _n0.aY;
 	return moduleName;
 };
 var author$project$EcsGenerator$ecsModuleName = author$project$EcsGenerator$Config$ecsModuleName;
 var author$project$EcsGenerator$Config$ecsTypeName = function (_n0) {
-	var typeName = _n0.aq;
+	var typeName = _n0.as;
 	return typeName;
 };
 var author$project$EcsGenerator$ecsTypeName = author$project$EcsGenerator$Config$ecsTypeName;
+var author$project$EcsGenerator$Config$nodeComponents = function (_n0) {
+	var components = _n0._;
+	return components;
+};
+var author$project$EcsGenerator$nodeComponents = author$project$EcsGenerator$Config$nodeComponents;
+var author$project$EcsGenerator$Config$nodeName = function (_n0) {
+	var name = _n0.aZ;
+	return name;
+};
+var author$project$EcsGenerator$nodeName = author$project$EcsGenerator$Config$nodeName;
+var elm$core$Dict$foldl = F3(
+	function (func, acc, dict) {
+		foldl:
+		while (true) {
+			if (dict.$ === -2) {
+				return acc;
+			} else {
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var $temp$func = func,
+					$temp$acc = A3(
+					func,
+					key,
+					value,
+					A3(elm$core$Dict$foldl, func, acc, left)),
+					$temp$dict = right;
+				func = $temp$func;
+				acc = $temp$acc;
+				dict = $temp$dict;
+				continue foldl;
+			}
+		}
+	});
+var author$project$Main$findComponentKey = F2(
+	function (components, component) {
+		return A3(
+			elm$core$Dict$foldl,
+			F3(
+				function (key, value, found) {
+					return _Utils_eq(value, component) ? elm$core$Maybe$Just(key) : found;
+				}),
+			elm$core$Maybe$Nothing,
+			components);
+	});
 var author$project$EcsGenerator$Config$componentModuleName = function (_n0) {
-	var moduleName = _n0.aW;
+	var moduleName = _n0.aY;
 	return moduleName;
 };
 var author$project$EcsGenerator$componentModuleName = author$project$EcsGenerator$Config$componentModuleName;
 var author$project$EcsGenerator$Config$componentTypeName = function (_n0) {
-	var typeName = _n0.aq;
+	var typeName = _n0.as;
 	return typeName;
 };
 var author$project$EcsGenerator$componentTypeName = author$project$EcsGenerator$Config$componentTypeName;
@@ -5159,6 +5228,24 @@ var elm$core$List$foldr = F3(
 	function (fn, acc, ls) {
 		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
 	});
+var elm$core$List$maybeCons = F3(
+	function (f, mx, xs) {
+		var _n0 = f(mx);
+		if (!_n0.$) {
+			var x = _n0.a;
+			return A2(elm$core$List$cons, x, xs);
+		} else {
+			return xs;
+		}
+	});
+var elm$core$List$filterMap = F2(
+	function (f, xs) {
+		return A3(
+			elm$core$List$foldr,
+			elm$core$List$maybeCons(f),
+			_List_Nil,
+			xs);
+	});
 var elm$core$List$map = F2(
 	function (f, xs) {
 		return A3(
@@ -5176,8 +5263,8 @@ var elm$core$List$map = F2(
 var author$project$Main$initFromConfig = F2(
 	function (navigationKey, config) {
 		var ecs = _Utils_Tuple2(
-			author$project$EcsGenerator$ecsModuleName(config.bu),
-			author$project$EcsGenerator$ecsTypeName(config.bu));
+			author$project$EcsGenerator$ecsModuleName(config.bw),
+			author$project$EcsGenerator$ecsTypeName(config.bw));
 		var components = elm$core$Dict$fromList(
 			A2(
 				elm$core$List$indexedMap,
@@ -5185,14 +5272,38 @@ var author$project$Main$initFromConfig = F2(
 					function (i, v) {
 						return _Utils_Tuple2(i, v);
 					}),
-				A2(elm$core$List$map, author$project$Main$fromComponent, config.bs)));
+				A2(elm$core$List$map, author$project$Main$fromComponent, config._)));
+		var nodes = elm$core$Dict$fromList(
+			A2(
+				elm$core$List$indexedMap,
+				F2(
+					function (i, v) {
+						return _Utils_Tuple2(i, v);
+					}),
+				A2(
+					elm$core$List$map,
+					function (node) {
+						return {
+							_: A2(
+								elm$core$List$filterMap,
+								author$project$Main$findComponentKey(components),
+								A2(
+									elm$core$List$map,
+									author$project$Main$fromComponent,
+									author$project$EcsGenerator$nodeComponents(node))),
+							aZ: author$project$EcsGenerator$nodeName(node)
+						};
+					},
+					config.bI)));
 		return {
-			bs: components,
-			az: elm$core$Maybe$Nothing,
-			bu: ecs,
-			aA: '',
+			_: components,
+			aB: elm$core$Maybe$Nothing,
+			bw: ecs,
+			aC: '',
 			L: elm$core$Dict$size(components),
-			P: navigationKey
+			M: elm$core$Dict$size(nodes),
+			Q: navigationKey,
+			bI: nodes
 		};
 	});
 var elm$core$Platform$Cmd$batch = _Platform_batch;
@@ -5250,7 +5361,7 @@ var elm$core$Dict$get = F2(
 	});
 var author$project$Main$ensureComponent = F2(
 	function (key, model) {
-		var _n0 = A2(elm$core$Dict$get, key, model.bs);
+		var _n0 = A2(elm$core$Dict$get, key, model._);
 		if (_n0.$ === 1) {
 			return _Utils_Tuple2(
 				_Utils_Tuple2('', ''),
@@ -5264,6 +5375,22 @@ var author$project$Main$ensureComponent = F2(
 			return _Utils_Tuple2(compnent, model);
 		}
 	});
+var author$project$Main$ensureNode = F2(
+	function (key, model) {
+		var _n0 = A2(elm$core$Dict$get, key, model.bI);
+		if (_n0.$ === 1) {
+			return _Utils_Tuple2(
+				{_: _List_Nil, aZ: ''},
+				_Utils_update(
+					model,
+					{
+						M: (_Utils_cmp(key, model.M) > 0) ? key : model.M
+					}));
+		} else {
+			var node = _n0.a;
+			return _Utils_Tuple2(node, model);
+		}
+	});
 var elm$json$Json$Encode$list = F2(
 	function (func, entries) {
 		return _Json_wrap(
@@ -5275,8 +5402,8 @@ var elm$json$Json$Encode$list = F2(
 	});
 var elm$json$Json$Encode$string = _Json_wrap;
 var author$project$EcsGenerator$Config$encodeModuleAndTypeName = function (_n0) {
-	var moduleName = _n0.aW;
-	var typeName = _n0.aq;
+	var moduleName = _n0.aY;
+	var typeName = _n0.as;
 	return A2(
 		elm$json$Json$Encode$list,
 		elm$json$Json$Encode$string,
@@ -5304,16 +5431,33 @@ var elm$json$Json$Encode$object = function (pairs) {
 			_Json_emptyObject(0),
 			pairs));
 };
+var author$project$EcsGenerator$Config$encodeNode = function (_n0) {
+	var name = _n0.aZ;
+	var components = _n0._;
+	return elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'name',
+				elm$json$Json$Encode$string(name)),
+				_Utils_Tuple2(
+				'components',
+				A2(elm$json$Json$Encode$list, author$project$EcsGenerator$Config$encodeComponent, components))
+			]));
+};
 var author$project$EcsGenerator$Config$encode = function (config) {
 	return elm$json$Json$Encode$object(
 		_List_fromArray(
 			[
 				_Utils_Tuple2(
 				'ecs',
-				author$project$EcsGenerator$Config$encodeEcs(config.bu)),
+				author$project$EcsGenerator$Config$encodeEcs(config.bw)),
 				_Utils_Tuple2(
 				'components',
-				A2(elm$json$Json$Encode$list, author$project$EcsGenerator$Config$encodeComponent, config.bs))
+				A2(elm$json$Json$Encode$list, author$project$EcsGenerator$Config$encodeComponent, config._)),
+				_Utils_Tuple2(
+				'nodes',
+				A2(elm$json$Json$Encode$list, author$project$EcsGenerator$Config$encodeNode, config.bI))
 			]));
 };
 var author$project$EcsGenerator$Config$encodeString = function (config) {
@@ -5413,8 +5557,8 @@ var author$project$EcsGenerator$Validate$validateTypeName = F3(
 	});
 var author$project$EcsGenerator$Validate$validateComponent = F2(
 	function (components, component) {
-		var moduleName = component.aW;
-		var typeName = component.aq;
+		var moduleName = component.aY;
+		var typeName = component.as;
 		return A2(
 			elm$core$Basics$composeR,
 			A2(
@@ -5455,8 +5599,8 @@ var author$project$EcsGenerator$Error$InvalidEcsTypeName = function (a) {
 	return {$: 1, a: a};
 };
 var author$project$EcsGenerator$Validate$validateEcs = function (ecs) {
-	var moduleName = ecs.aW;
-	var typeName = ecs.aq;
+	var moduleName = ecs.aY;
+	var typeName = ecs.as;
 	return A2(
 		elm$core$Basics$composeR,
 		A2(
@@ -5468,11 +5612,90 @@ var author$project$EcsGenerator$Validate$validateEcs = function (ecs) {
 			author$project$EcsGenerator$Error$InvalidEcsTypeName(ecs),
 			typeName));
 };
+var author$project$EcsGenerator$Error$NodesEmpty = {$: 6};
+var author$project$EcsGenerator$Error$DuplicateNodeComponent = F2(
+	function (a, b) {
+		return {$: 10, a: a, b: b};
+	});
+var author$project$EcsGenerator$Error$NodeComponentsEmpty = function (a) {
+	return {$: 8, a: a};
+};
+var author$project$EcsGenerator$Error$UnknownNodeComponent = F2(
+	function (a, b) {
+		return {$: 9, a: a, b: b};
+	});
+var elm$core$List$member = F2(
+	function (x, xs) {
+		return A2(
+			elm$core$List$any,
+			function (a) {
+				return _Utils_eq(a, x);
+			},
+			xs);
+	});
+var author$project$EcsGenerator$Validate$validateNodeComponents = F3(
+	function (components, _n0, errors) {
+		var node = _n0;
+		return elm$core$List$isEmpty(node._) ? A2(
+			elm$core$List$cons,
+			author$project$EcsGenerator$Error$NodeComponentsEmpty(node),
+			errors) : A3(
+			elm$core$List$foldl,
+			F2(
+				function (nodeComponent, errs) {
+					return A4(
+						author$project$EcsGenerator$Validate$validateNoDuplicate,
+						A2(author$project$EcsGenerator$Error$DuplicateNodeComponent, node, nodeComponent),
+						nodeComponent,
+						node._,
+						(!A2(elm$core$List$member, nodeComponent, components)) ? A2(
+							elm$core$List$cons,
+							A2(author$project$EcsGenerator$Error$UnknownNodeComponent, node, nodeComponent),
+							errs) : errs);
+				}),
+			errors,
+			node._);
+	});
+var author$project$EcsGenerator$Error$NodeNameInvalid = function (a) {
+	return {$: 7, a: a};
+};
+var elm$core$Basics$always = F2(
+	function (a, _n0) {
+		return a;
+	});
+var author$project$EcsGenerator$Validate$validateNodeName = F2(
+	function (node, errors) {
+		var name = node.aZ;
+		return A2(
+			author$project$EcsGenerator$Validate$isValidName,
+			elm$core$Basics$always(true),
+			name) ? errors : A2(
+			elm$core$List$cons,
+			author$project$EcsGenerator$Error$NodeNameInvalid(node),
+			errors);
+	});
+var author$project$EcsGenerator$Validate$validateNodes = F3(
+	function (components, nodes, errors) {
+		return elm$core$List$isEmpty(nodes) ? A2(elm$core$List$cons, author$project$EcsGenerator$Error$NodesEmpty, errors) : A3(
+			elm$core$List$foldl,
+			function (node) {
+				return A2(
+					elm$core$Basics$composeR,
+					author$project$EcsGenerator$Validate$validateNodeName(node),
+					A2(author$project$EcsGenerator$Validate$validateNodeComponents, components, node));
+			},
+			errors,
+			nodes);
+	});
 var author$project$EcsGenerator$Validate$validate = function (config) {
-	var errors = A2(
-		author$project$EcsGenerator$Validate$validateComponents,
-		config.bs,
-		A2(author$project$EcsGenerator$Validate$validateEcs, config.bu, _List_Nil));
+	var errors = A3(
+		author$project$EcsGenerator$Validate$validateNodes,
+		config._,
+		config.bI,
+		A2(
+			author$project$EcsGenerator$Validate$validateComponents,
+			config._,
+			A2(author$project$EcsGenerator$Validate$validateEcs, config.bw, _List_Nil)));
 	if (!errors.b) {
 		return elm$core$Result$Ok(config);
 	} else {
@@ -5483,14 +5706,23 @@ var author$project$EcsGenerator$Validate$validate = function (config) {
 var author$project$EcsGenerator$validate = author$project$EcsGenerator$Validate$validate;
 var author$project$EcsGenerator$Config$component = F2(
 	function (moduleName, typeName) {
-		return {aW: moduleName, aq: typeName};
+		return {aY: moduleName, as: typeName};
 	});
 var author$project$EcsGenerator$component = author$project$EcsGenerator$Config$component;
 var author$project$EcsGenerator$Config$ecs = F2(
 	function (moduleName, typeName) {
-		return {aW: moduleName, aq: typeName};
+		return {aY: moduleName, as: typeName};
 	});
 var author$project$EcsGenerator$ecs = author$project$EcsGenerator$Config$ecs;
+var author$project$EcsGenerator$Config$node = F2(
+	function (name, components) {
+		return {_: components, aZ: name};
+	});
+var author$project$EcsGenerator$node = author$project$EcsGenerator$Config$node;
+var author$project$Main$findComponent = F2(
+	function (components, key) {
+		return A2(elm$core$Dict$get, key, components);
+	});
 var author$project$Main$tupleMap2 = F2(
 	function (mapper, _n0) {
 		var a = _n0.a;
@@ -5514,14 +5746,39 @@ var elm$core$Tuple$second = function (_n0) {
 };
 var author$project$Main$toConfig = function (model) {
 	return {
-		bs: A2(
+		_: A2(
 			elm$core$List$map,
 			author$project$Main$tupleMap2(author$project$EcsGenerator$component),
 			A2(
 				elm$core$List$sortBy,
 				elm$core$Tuple$second,
-				elm$core$Dict$values(model.bs))),
-		bu: A2(author$project$Main$tupleMap2, author$project$EcsGenerator$ecs, model.bu)
+				elm$core$Dict$values(model._))),
+		bw: A2(author$project$Main$tupleMap2, author$project$EcsGenerator$ecs, model.bw),
+		bI: A2(
+			elm$core$List$map,
+			function (_n0) {
+				var name = _n0.aZ;
+				var components = _n0._;
+				return A2(
+					author$project$EcsGenerator$node,
+					name,
+					A2(
+						elm$core$List$map,
+						author$project$Main$tupleMap2(author$project$EcsGenerator$component),
+						A2(
+							elm$core$List$sortBy,
+							elm$core$Tuple$second,
+							A2(
+								elm$core$List$filterMap,
+								author$project$Main$findComponent(model._),
+								components))));
+			},
+			A2(
+				elm$core$List$sortBy,
+				function ($) {
+					return $.aZ;
+				},
+				elm$core$Dict$values(model.bI)))
 	};
 };
 var elm$browser$Browser$External = function (a) {
@@ -5652,7 +5909,7 @@ var elm$core$String$contains = _String_contains;
 var elm$core$String$toInt = _String_toInt;
 var elm$url$Url$Url = F6(
 	function (protocol, host, port_, path, query, fragment) {
-		return {by: fragment, bz: host, bH: path, bJ: port_, bM: protocol, bN: query};
+		return {bA: fragment, bB: host, bK: path, bM: port_, bP: protocol, bQ: query};
 	});
 var elm$url$Url$chompBeforePath = F5(
 	function (protocol, path, params, frag, str) {
@@ -5790,12 +6047,47 @@ var author$project$Main$pushUrl = function (model) {
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{az: elm$core$Maybe$Nothing, aA: encodedConfig}),
-					A2(elm$browser$Browser$Navigation$pushUrl, model.P, '#' + encodedConfig));
+						{aB: elm$core$Maybe$Nothing, aC: encodedConfig}),
+					A2(elm$browser$Browser$Navigation$pushUrl, model.Q, '#' + encodedConfig));
 			},
 			author$project$EcsGenerator$validate(
 				author$project$Main$toConfig(model))));
 };
+var elm$core$Basics$neq = _Utils_notEqual;
+var elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var author$project$Main$updateNodeComponent = F4(
+	function (nodeKey, componentKey, checked, _n0) {
+		var node = _n0.a;
+		var model = _n0.b;
+		return _Utils_update(
+			model,
+			{
+				bI: A3(
+					elm$core$Dict$insert,
+					nodeKey,
+					_Utils_update(
+						node,
+						{
+							_: checked ? A2(elm$core$List$cons, componentKey, node._) : A2(
+								elm$core$List$filter,
+								function (key) {
+									return !_Utils_eq(key, componentKey);
+								},
+								node._)
+						}),
+					model.bI)
+			});
+	});
 var elm$browser$Browser$Navigation$load = _Browser_load;
 var elm$core$Dict$getMin = function (dict) {
 	getMin:
@@ -6182,7 +6474,7 @@ var elm$url$Url$addPrefixed = F3(
 	});
 var elm$url$Url$toString = function (url) {
 	var http = function () {
-		var _n0 = url.bM;
+		var _n0 = url.bP;
 		if (!_n0) {
 			return 'http://';
 		} else {
@@ -6192,17 +6484,17 @@ var elm$url$Url$toString = function (url) {
 	return A3(
 		elm$url$Url$addPrefixed,
 		'#',
-		url.by,
+		url.bA,
 		A3(
 			elm$url$Url$addPrefixed,
 			'?',
-			url.bN,
+			url.bQ,
 			_Utils_ap(
 				A2(
 					elm$url$Url$addPort,
-					url.bJ,
-					_Utils_ap(http, url.bz)),
-				url.bH)));
+					url.bM,
+					_Utils_ap(http, url.bB)),
+				url.bK)));
 };
 var author$project$Main$update = F2(
 	function (msg, model) {
@@ -6213,14 +6505,14 @@ var author$project$Main$update = F2(
 				var urlRequest = msg.a;
 				if (!urlRequest.$) {
 					var url = urlRequest.a;
-					return (A2(elm$core$String$endsWith, 'examples/demo/build/', url.bH) || A2(elm$core$String$endsWith, 'examples/basic/', url.bH)) ? _Utils_Tuple2(
+					return (A2(elm$core$String$endsWith, 'examples/demo/build/', url.bK) || A2(elm$core$String$endsWith, 'examples/basic/', url.bK)) ? _Utils_Tuple2(
 						model,
 						elm$browser$Browser$Navigation$load(
 							elm$url$Url$toString(url))) : _Utils_Tuple2(
 						model,
 						A2(
 							elm$browser$Browser$Navigation$pushUrl,
-							model.P,
+							model.Q,
 							elm$url$Url$toString(url)));
 				} else {
 					var url = urlRequest.a;
@@ -6231,20 +6523,20 @@ var author$project$Main$update = F2(
 			case 2:
 				var url = msg.a;
 				if (_Utils_eq(
-					url.by,
-					elm$core$Maybe$Just(model.aA))) {
+					url.bA,
+					elm$core$Maybe$Just(model.aC))) {
 					return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
 				} else {
 					var _n2 = author$project$Main$decodeFragment(url);
 					if (_n2.$ === 1) {
 						var decodeError = _n2.a;
 						return _Utils_Tuple2(
-							A2(author$project$Main$initEmpty, model.P, decodeError),
+							A2(author$project$Main$initEmpty, model.Q, decodeError),
 							elm$core$Platform$Cmd$none);
 					} else {
 						var config = _n2.a;
 						return _Utils_Tuple2(
-							A2(author$project$Main$initFromConfig, model.P, config),
+							A2(author$project$Main$initFromConfig, model.Q, config),
 							elm$core$Platform$Cmd$none);
 					}
 				}
@@ -6254,7 +6546,7 @@ var author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							bu: _Utils_Tuple2(name, model.bu.b)
+							bw: _Utils_Tuple2(name, model.bw.b)
 						}));
 			case 4:
 				var name = msg.a;
@@ -6262,7 +6554,7 @@ var author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							bu: _Utils_Tuple2(model.bu.a, name)
+							bw: _Utils_Tuple2(model.bw.a, name)
 						}));
 			case 5:
 				var key = msg.a;
@@ -6275,11 +6567,11 @@ var author$project$Main$update = F2(
 						return _Utils_update(
 							m,
 							{
-								bs: A3(
+								_: A3(
 									elm$core$Dict$insert,
 									key,
 									_Utils_Tuple2(moduleName, typeName),
-									model.bs)
+									model._)
 							});
 					}(
 						A2(author$project$Main$ensureComponent, key, model)));
@@ -6294,21 +6586,60 @@ var author$project$Main$update = F2(
 						return _Utils_update(
 							m,
 							{
-								bs: A3(
+								_: A3(
 									elm$core$Dict$insert,
 									key,
 									_Utils_Tuple2(moduleName, typeName),
-									model.bs)
+									model._)
 							});
 					}(
 						A2(author$project$Main$ensureComponent, key, model)));
+			case 7:
+				var key = msg.a;
+				return author$project$Main$pushUrl(
+					_Utils_update(
+						model,
+						{
+							_: A2(elm$core$Dict$remove, key, model._)
+						}));
+			case 8:
+				var key = msg.a;
+				var name = msg.b;
+				return author$project$Main$pushUrl(
+					function (_n7) {
+						var i = _n7.a;
+						var m = _n7.b;
+						return _Utils_update(
+							m,
+							{
+								bI: A3(
+									elm$core$Dict$insert,
+									key,
+									_Utils_update(
+										i,
+										{aZ: name}),
+									model.bI)
+							});
+					}(
+						A2(author$project$Main$ensureNode, key, model)));
+			case 9:
+				var nodeKey = msg.a;
+				var componentKey = msg.b;
+				var checked = msg.c;
+				return author$project$Main$pushUrl(
+					A4(
+						author$project$Main$updateNodeComponent,
+						nodeKey,
+						componentKey,
+						checked,
+						A2(author$project$Main$ensureNode, nodeKey, model)));
 			default:
 				var key = msg.a;
 				return author$project$Main$pushUrl(
 					_Utils_update(
 						model,
 						{
-							bs: A2(elm$core$Dict$remove, key, model.bs)
+							bI: A2(elm$core$Dict$remove, key, model.bI)
 						}));
 		}
 	});
@@ -6344,22 +6675,22 @@ var rtfeldman$elm_css$Css$Structure$Compatible = 0;
 var rtfeldman$elm_css$Css$Internal$lengthConverter = F3(
 	function (units, unitLabel, numericValue) {
 		return {
-			bg: 0,
-			bp: 0,
-			_: 0,
+			bj: 0,
+			bs: 0,
+			ab: 0,
 			k: 0,
-			aD: 0,
-			af: 0,
-			C: 0,
-			ag: 0,
+			aF: 0,
 			ah: 0,
-			M: 0,
+			C: 0,
+			ai: 0,
+			aj: 0,
 			N: 0,
+			O: 0,
 			t: 0,
 			F: numericValue,
-			ao: 0,
-			ar: unitLabel,
-			aN: units,
+			aq: 0,
+			at: unitLabel,
+			aP: units,
 			v: _Utils_ap(
 				elm$core$String$fromFloat(numericValue),
 				unitLabel)
@@ -6396,7 +6727,7 @@ var rtfeldman$elm_css$VirtualDom$Styled$Attribute = F3(
 	});
 var Skinney$murmur3$Murmur3$HashData = F4(
 	function (shift, seed, hash, charsProcessed) {
-		return {X: charsProcessed, ac: hash, R: seed, al: shift};
+		return {Y: charsProcessed, ae: hash, S: seed, an: shift};
 	});
 var Skinney$murmur3$Murmur3$c1 = 3432918353;
 var Skinney$murmur3$Murmur3$c2 = 461845907;
@@ -6412,17 +6743,16 @@ var Skinney$murmur3$Murmur3$rotlBy = F2(
 	function (b, a) {
 		return (a << b) | (a >>> (32 - b));
 	});
-var elm$core$Basics$neq = _Utils_notEqual;
 var elm$core$Bitwise$xor = _Bitwise_xor;
 var Skinney$murmur3$Murmur3$finalize = function (data) {
-	var acc = data.ac ? (data.R ^ A2(
+	var acc = data.ae ? (data.S ^ A2(
 		Skinney$murmur3$Murmur3$multiplyBy,
 		Skinney$murmur3$Murmur3$c2,
 		A2(
 			Skinney$murmur3$Murmur3$rotlBy,
 			15,
-			A2(Skinney$murmur3$Murmur3$multiplyBy, Skinney$murmur3$Murmur3$c1, data.ac)))) : data.R;
-	var h0 = acc ^ data.X;
+			A2(Skinney$murmur3$Murmur3$multiplyBy, Skinney$murmur3$Murmur3$c1, data.ae)))) : data.S;
+	var h0 = acc ^ data.Y;
 	var h1 = A2(Skinney$murmur3$Murmur3$multiplyBy, 2246822507, h0 ^ (h0 >>> 16));
 	var h2 = A2(Skinney$murmur3$Murmur3$multiplyBy, 3266489909, h1 ^ (h1 >>> 13));
 	return (h2 ^ (h2 >>> 16)) >>> 0;
@@ -6445,17 +6775,17 @@ var Skinney$murmur3$Murmur3$mix = F2(
 	});
 var Skinney$murmur3$Murmur3$hashFold = F2(
 	function (c, data) {
-		var res = data.ac | ((255 & elm$core$Char$toCode(c)) << data.al);
-		var _n0 = data.al;
+		var res = data.ae | ((255 & elm$core$Char$toCode(c)) << data.an);
+		var _n0 = data.an;
 		if (_n0 === 24) {
 			return {
-				X: data.X + 1,
-				ac: 0,
-				R: A2(Skinney$murmur3$Murmur3$mix, data.R, res),
-				al: 0
+				Y: data.Y + 1,
+				ae: 0,
+				S: A2(Skinney$murmur3$Murmur3$mix, data.S, res),
+				an: 0
 			};
 		} else {
-			return {X: data.X + 1, ac: res, R: data.R, al: data.al + 8};
+			return {Y: data.Y + 1, ae: res, S: data.S, an: data.an + 8};
 		}
 	});
 var elm$core$String$foldl = _String_foldl;
@@ -6474,7 +6804,7 @@ var elm$core$List$singleton = function (value) {
 };
 var elm$core$String$cons = _String_cons;
 var rtfeldman$elm_css$Css$Preprocess$stylesheet = function (snippets) {
-	return {br: elm$core$Maybe$Nothing, bA: _List_Nil, bF: _List_Nil, bS: snippets};
+	return {bu: elm$core$Maybe$Nothing, bC: _List_Nil, bH: _List_Nil, bV: snippets};
 };
 var elm$core$List$append = F2(
 	function (xs, ys) {
@@ -7489,7 +7819,7 @@ var rtfeldman$elm_css$Css$Preprocess$Resolve$applyStyles = F2(
 						_List_fromArray(
 							[
 								rtfeldman$elm_css$Css$Structure$Keyframes(
-								{b5: str, cg: name})
+								{b8: str, aZ: name})
 							]));
 				case 4:
 					var _n12 = styles.a;
@@ -7624,13 +7954,13 @@ var rtfeldman$elm_css$Css$Preprocess$Resolve$toDeclarations = function (snippetD
 	}
 };
 var rtfeldman$elm_css$Css$Preprocess$Resolve$toStructure = function (_n0) {
-	var charset = _n0.br;
-	var imports = _n0.bA;
-	var namespaces = _n0.bF;
-	var snippets = _n0.bS;
+	var charset = _n0.bu;
+	var imports = _n0.bC;
+	var namespaces = _n0.bH;
+	var snippets = _n0.bV;
 	var declarations = rtfeldman$elm_css$Css$Preprocess$Resolve$extract(
 		A2(elm$core$List$concatMap, rtfeldman$elm_css$Css$Preprocess$unwrapSnippet, snippets));
-	return {br: charset, b6: declarations, bA: imports, bF: namespaces};
+	return {bu: charset, b9: declarations, bC: imports, bH: namespaces};
 };
 var rtfeldman$elm_css$Css$Structure$compactHelp = F2(
 	function (declaration, _n0) {
@@ -7675,8 +8005,8 @@ var rtfeldman$elm_css$Css$Structure$compactHelp = F2(
 					A2(elm$core$List$cons, declaration, declarations));
 			case 6:
 				var record = declaration.a;
-				return elm$core$String$isEmpty(record.b5) ? _Utils_Tuple2(keyframesByName, declarations) : _Utils_Tuple2(
-					A3(elm$core$Dict$insert, record.cg, record.b5, keyframesByName),
+				return elm$core$String$isEmpty(record.b8) ? _Utils_Tuple2(keyframesByName, declarations) : _Utils_Tuple2(
+					A3(elm$core$Dict$insert, record.aZ, record.b8, keyframesByName),
 					declarations);
 			case 7:
 				var properties = declaration.a;
@@ -7711,16 +8041,16 @@ var rtfeldman$elm_css$Css$Structure$withKeyframeDeclarations = F2(
 					var name = _n0.a;
 					var decl = _n0.b;
 					return rtfeldman$elm_css$Css$Structure$Keyframes(
-						{b5: decl, cg: name});
+						{b8: decl, aZ: name});
 				},
 				elm$core$Dict$toList(keyframesByName)),
 			compactedDeclarations);
 	});
 var rtfeldman$elm_css$Css$Structure$compactStylesheet = function (_n0) {
-	var charset = _n0.br;
-	var imports = _n0.bA;
-	var namespaces = _n0.bF;
-	var declarations = _n0.b6;
+	var charset = _n0.bu;
+	var imports = _n0.bC;
+	var namespaces = _n0.bH;
+	var declarations = _n0.b9;
 	var _n1 = A3(
 		elm$core$List$foldr,
 		rtfeldman$elm_css$Css$Structure$compactHelp,
@@ -7729,19 +8059,8 @@ var rtfeldman$elm_css$Css$Structure$compactStylesheet = function (_n0) {
 	var keyframesByName = _n1.a;
 	var compactedDeclarations = _n1.b;
 	var finalDeclarations = A2(rtfeldman$elm_css$Css$Structure$withKeyframeDeclarations, keyframesByName, compactedDeclarations);
-	return {br: charset, b6: finalDeclarations, bA: imports, bF: namespaces};
+	return {bu: charset, b9: finalDeclarations, bC: imports, bH: namespaces};
 };
-var elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
 var rtfeldman$elm_css$Css$Structure$Output$charsetToString = function (charset) {
 	return A2(
 		elm$core$Maybe$withDefault,
@@ -7754,7 +8073,7 @@ var rtfeldman$elm_css$Css$Structure$Output$charsetToString = function (charset) 
 			charset));
 };
 var rtfeldman$elm_css$Css$Structure$Output$mediaExpressionToString = function (expression) {
-	return '(' + (expression.bx + (A2(
+	return '(' + (expression.bz + (A2(
 		elm$core$Maybe$withDefault,
 		'',
 		A2(
@@ -8002,8 +8321,8 @@ var rtfeldman$elm_css$Css$Structure$Output$prettyPrintDeclaration = function (de
 		case 5:
 			return 'TODO';
 		case 6:
-			var name = decl.a.cg;
-			var declaration = decl.a.b5;
+			var name = decl.a.aZ;
+			var declaration = decl.a.b8;
 			return '@keyframes ' + (name + (' {\n' + (declaration + '\n}')));
 		case 7:
 			return 'TODO';
@@ -8014,10 +8333,10 @@ var rtfeldman$elm_css$Css$Structure$Output$prettyPrintDeclaration = function (de
 	}
 };
 var rtfeldman$elm_css$Css$Structure$Output$prettyPrint = function (_n0) {
-	var charset = _n0.br;
-	var imports = _n0.bA;
-	var namespaces = _n0.bF;
-	var declarations = _n0.b6;
+	var charset = _n0.bu;
+	var imports = _n0.bC;
+	var namespaces = _n0.bH;
+	var declarations = _n0.b9;
 	return A2(
 		elm$core$String$join,
 		'\n\n',
@@ -8257,7 +8576,7 @@ var rtfeldman$elm_css$VirtualDom$Styled$keyedNode = rtfeldman$elm_css$VirtualDom
 var rtfeldman$elm_css$Html$Styled$Keyed$node = rtfeldman$elm_css$VirtualDom$Styled$keyedNode;
 var author$project$Main$viewComponents = function (_n0) {
 	var lastComponentKey = _n0.L;
-	var components = _n0.bs;
+	var components = _n0._;
 	return A3(
 		rtfeldman$elm_css$Html$Styled$Keyed$node,
 		'div',
@@ -8345,11 +8664,11 @@ var author$project$EcsGenerator$CodeBuilder$init = F3(
 	function (moduleName, topComment, topDocs) {
 		return {
 			y: elm$core$Dict$empty,
-			ae: elm$core$Set$empty,
-			aW: moduleName,
+			ag: elm$core$Set$empty,
+			aY: moduleName,
 			G: _List_Nil,
-			bW: elm$core$String$trim(topComment),
-			bX: elm$core$String$trim(topDocs)
+			bZ: elm$core$String$trim(topComment),
+			b_: elm$core$String$trim(topDocs)
 		};
 	});
 var author$project$EcsGenerator$Utils$replace = F2(
@@ -8376,31 +8695,6 @@ var elm$core$Dict$map = F2(
 				A2(func, key, value),
 				A2(elm$core$Dict$map, func, left),
 				A2(elm$core$Dict$map, func, right));
-		}
-	});
-var elm$core$Dict$foldl = F3(
-	function (func, acc, dict) {
-		foldl:
-		while (true) {
-			if (dict.$ === -2) {
-				return acc;
-			} else {
-				var key = dict.b;
-				var value = dict.c;
-				var left = dict.d;
-				var right = dict.e;
-				var $temp$func = func,
-					$temp$acc = A3(
-					func,
-					key,
-					value,
-					A3(elm$core$Dict$foldl, func, acc, left)),
-					$temp$dict = right;
-				func = $temp$func;
-				acc = $temp$acc;
-				dict = $temp$dict;
-				continue foldl;
-			}
 		}
 	});
 var elm$core$Set$foldl = F3(
@@ -8460,11 +8754,11 @@ var author$project$EcsGenerator$CodeBuilder$replace = F3(
 								A2(author$project$EcsGenerator$Utils$replace, from, to)));
 					},
 					model.y),
-				ae: A2(
+				ag: A2(
 					elm$core$Set$map,
 					A2(author$project$EcsGenerator$Utils$replace, from, to),
-					model.ae),
-				aW: A3(author$project$EcsGenerator$Utils$replace, from, to, model.aW),
+					model.ag),
+				aY: A3(author$project$EcsGenerator$Utils$replace, from, to, model.aY),
 				G: A2(
 					elm$core$List$map,
 					A2(author$project$EcsGenerator$Utils$replace, from, to),
@@ -8502,10 +8796,10 @@ var author$project$EcsGenerator$CodeBuilder$toString = function (_n0) {
 			'\n\n\n',
 			A2(
 				elm$core$List$cons,
-				model.bW,
+				model.bZ,
 				A2(
 					elm$core$List$cons,
-					'module ' + (model.aW + (' exposing\n    ( ' + (A2(
+					'module ' + (model.aY + (' exposing\n    ( ' + (A2(
 						elm$core$String$join,
 						'\n    , ',
 						A2(
@@ -8514,7 +8808,7 @@ var author$project$EcsGenerator$CodeBuilder$toString = function (_n0) {
 								elm$core$Basics$composeR,
 								elm$core$Tuple$second,
 								elm$core$String$join(', ')),
-							exposedValues)) + ('\n    )\n\n' + ('{-| ' + (model.bX + ('\n\n\n' + (A2(
+							exposedValues)) + ('\n    )\n\n' + ('{-| ' + (model.b_ + ('\n\n\n' + (A2(
 						author$project$EcsGenerator$Utils$append,
 						'\n\n-}\n\n',
 						A2(
@@ -8534,7 +8828,7 @@ var author$project$EcsGenerator$CodeBuilder$toString = function (_n0) {
 							elm$core$List$map,
 							elm$core$Basics$append('import '),
 							elm$core$List$sort(
-								elm$core$Set$toList(model.ae)))))))))))),
+								elm$core$Set$toList(model.ag)))))))))))),
 					elm$core$List$reverse(model.G)))));
 };
 var author$project$EcsGenerator$CodeBuilder$formatComment = function (value) {
@@ -8612,10 +8906,10 @@ var author$project$EcsGenerator$CodeBuilder$imported = F2(
 		return _Utils_update(
 			model,
 			{
-				ae: A2(
+				ag: A2(
 					elm$core$Set$insert,
 					elm$core$String$trim(moduleName),
-					model.ae)
+					model.ag)
 			});
 	});
 var author$project$EcsGenerator$CodeBuilder$InternalDeclaration = {$: 0};
@@ -8637,258 +8931,391 @@ var author$project$EcsGenerator$Generate$componentsFieldName = A2(
 		elm$core$Basics$composeR,
 		author$project$EcsGenerator$Utils$firstToLower,
 		author$project$EcsGenerator$Utils$append('Components')));
-var elm$core$List$drop = F2(
-	function (n, list) {
-		drop:
-		while (true) {
-			if (n <= 0) {
-				return list;
-			} else {
-				if (!list.b) {
-					return list;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs;
-					n = $temp$n;
-					list = $temp$list;
-					continue drop;
-				}
-			}
-		}
-	});
-var author$project$EcsGenerator$Generate$generateEntityIterator = F2(
-	function (n, builder) {
-		var range = A2(
-			elm$core$List$map,
-			elm$core$String$fromInt,
-			A2(elm$core$List$range, 1, n));
-		return A3(
-			author$project$EcsGenerator$CodeBuilder$declaration,
-			A2(
-				author$project$EcsGenerator$CodeBuilder$exposed,
-				'iterate' + elm$core$String$fromInt(n),
-				'Iterate Entities'),
-			'\niterate' + (elm$core$String$fromInt(n) + (' :\n    ' + (A2(
-				elm$core$String$join,
-				'\n    -> ',
-				A2(
-					elm$core$List$map,
-					function (i) {
-						return 'ComponentType c' + i;
-					},
-					range)) + ('\n    -> (EntityId -> ' + (A2(
-				elm$core$String$join,
-				' -> ',
-				A2(
-					elm$core$List$map,
-					function (i) {
-						return 'c' + i;
-					},
-					range)) + (' -> ( {Ecs}, x ) -> ( {Ecs}, x ))\n    -> ( {Ecs}, x )\n    -> ( {Ecs}, x )\niterate' + (elm$core$String$fromInt(n) + (' ' + (A2(
-				elm$core$String$join,
-				' ',
-				A2(
-					elm$core$List$map,
-					function (i) {
-						return '(ComponentType type' + (i + ')');
-					},
-					range)) + (' callback ( Ecs model, x ) =\n    let\n        ' + (A2(
-				elm$core$String$join,
-				'\n\n        ',
-				A2(
-					elm$core$List$map,
-					function (i) {
-						return 'components' + (i + (' =\n            type' + (i + '.getComponents model')));
-					},
-					range)) + ('\n    in\n    Dict.foldl\n        (\\entityId component1 result ->\n            callback (EntityId entityId) component1\n                |> next entityId components2\n                ' + (A2(
-				elm$core$String$join,
-				'',
-				A2(
-					elm$core$List$map,
-					function (i) {
-						return '|> Maybe.andThen (next entityId components' + (i + ')\n                ');
-					},
-					A2(elm$core$List$drop, 2, range))) + '|> Maybe.map ((|>) result)\n                |> Maybe.withDefault result\n        )\n        ( Ecs model, x )\n        components1\n'))))))))))))),
-			builder);
-	});
+var author$project$EcsGenerator$Generate$nodeEntitiesFieldName = A2(
+	elm$core$Basics$composeR,
+	author$project$EcsGenerator$Config$nodeName,
+	A2(
+		elm$core$Basics$composeR,
+		author$project$EcsGenerator$Utils$firstToLower,
+		author$project$EcsGenerator$Utils$append('Entities')));
 var author$project$EcsGenerator$Generate$generateApi = F2(
-	function (_n0, builder) {
-		var components = _n0.bs;
+	function (_n0, document) {
+		var components = _n0._;
+		var nodes = _n0.bI;
 		return A3(
 			author$project$EcsGenerator$CodeBuilder$declaration,
-			author$project$EcsGenerator$CodeBuilder$internal,
-			'\nnext : Int -> Dict.Dict Int a -> (a -> b) -> Maybe b\nnext entityId components callback =\n    Dict.get entityId components |> Maybe.map callback\n',
-			function (b) {
-				return A3(
-					elm$core$List$foldl,
-					author$project$EcsGenerator$Generate$generateEntityIterator,
-					b,
-					A2(
-						elm$core$List$range,
-						2,
-						elm$core$List$length(components)));
-			}(
+			A2(author$project$EcsGenerator$CodeBuilder$exposed, 'nodeSize', 'Nodes'),
+			'\nnodeSize : NodeType a -> Ecs -> Int\nnodeSize (NodeType nodeType) (Ecs model) =\n    Set.size (nodeType.getEntities model)\n',
+			A3(
+				author$project$EcsGenerator$CodeBuilder$declaration,
+				A2(author$project$EcsGenerator$CodeBuilder$exposed, 'iterate', 'Nodes'),
+				'\niterate :\n    NodeType node\n    -> (EntityId -> node -> ( Ecs, context ) -> ( Ecs, context ))\n    -> ( Ecs, context )\n    -> ( Ecs, context )\niterate (NodeType nodeType) callback ( Ecs model, context ) =\n    Set.foldl\n        (\\entityId result ->\n            case nodeType.getNode entityId model of\n                Nothing ->\n                    result\n\n                Just node ->\n                    callback (EntityId entityId) node result\n        )\n        ( Ecs model, context )\n        (nodeType.getEntities model)\n',
 				A3(
 					author$project$EcsGenerator$CodeBuilder$declaration,
-					A2(author$project$EcsGenerator$CodeBuilder$exposed, 'iterate', 'Iterate Entities'),
-					'\niterate :\n    ComponentType a\n    -> (EntityId -> a -> ( {Ecs}, x ) -> ( {Ecs}, x ))\n    -> ( {Ecs}, x )\n    -> ( {Ecs}, x )\niterate (ComponentType componentType) callback ( Ecs model, x ) =\n    Dict.foldl\n        (EntityId >> callback)\n        ( Ecs model, x )\n        (componentType.getComponents model)\n',
+					A2(author$project$EcsGenerator$CodeBuilder$exposed, 'NodeType', 'Nodes'),
+					'\ntype NodeType node\n    = NodeType\n        { getEntities : Model -> Set.Set Int\n        , getNode : Int -> Model -> Maybe node\n        }\n',
 					A2(
 						author$project$EcsGenerator$CodeBuilder$comment,
-						'-- ITERATE ENTITIES --',
+						'-- NODES --',
 						A3(
 							author$project$EcsGenerator$CodeBuilder$declaration,
-							A2(author$project$EcsGenerator$CodeBuilder$exposed, 'remove', 'Components'),
-							'\nremove : EntityId -> ComponentType a -> {Ecs} -> {Ecs}\nremove (EntityId entityId) (ComponentType componentType) (Ecs model) =\n    Ecs\n        (componentType.setComponents\n            (Dict.remove entityId (componentType.getComponents model))\n            model\n        )\n',
+							author$project$EcsGenerator$CodeBuilder$internal,
+							'\nremoveEntityFromSet : Int -> EntitySetType -> Model -> Model\nremoveEntityFromSet entityId entitySetType model =\n    entitySetType.setEntities\n        (Set.remove entityId (entitySetType.getEntities model))\n        model\n',
 							A3(
 								author$project$EcsGenerator$CodeBuilder$declaration,
-								A2(author$project$EcsGenerator$CodeBuilder$exposed, 'update', 'Components'),
-								'\nupdate : EntityId -> ComponentType a -> (Maybe a -> Maybe a) -> {Ecs} -> {Ecs}\nupdate (EntityId entityId) (ComponentType componentType) updater (Ecs model) =\n    Ecs\n        (componentType.setComponents\n            (Dict.update entityId updater (componentType.getComponents model))\n            model\n        )\n',
+								A2(author$project$EcsGenerator$CodeBuilder$exposed, 'remove', 'Components'),
+								'\nremove : EntityId -> ComponentType a -> {Ecs} -> {Ecs}\nremove (EntityId entityId) (ComponentType componentType) (Ecs model) =\n    componentType.entitySets\n        |> List.foldl (removeEntityFromSet entityId) model\n        |> componentType.setComponents\n            (Array.set entityId Nothing (componentType.getComponents model))\n        |> Ecs\n',
 								A3(
 									author$project$EcsGenerator$CodeBuilder$declaration,
-									A2(author$project$EcsGenerator$CodeBuilder$exposed, 'insert', 'Components'),
-									'\ninsert : EntityId -> ComponentType a -> a -> {Ecs} -> {Ecs}\ninsert (EntityId entityId) (ComponentType componentType) component (Ecs model) =\n    Ecs\n        (componentType.setComponents\n            (Dict.insert entityId component (componentType.getComponents model))\n            model\n        )\n',
+									A2(author$project$EcsGenerator$CodeBuilder$exposed, 'update', 'Components'),
+									'\nupdate : EntityId -> ComponentType a -> (Maybe a -> Maybe a) -> Ecs -> Ecs\nupdate entityId componentType updater ecs =\n    let\n        maybeComponent =\n            get entityId componentType ecs\n    in\n    case ( maybeComponent, updater maybeComponent ) of\n        ( _, Just component ) ->\n            insert entityId componentType component ecs\n\n        ( Just _, Nothing ) ->\n            remove entityId componentType ecs\n\n        ( Nothing, Nothing ) ->\n            ecs\n',
 									A3(
 										author$project$EcsGenerator$CodeBuilder$declaration,
-										A2(author$project$EcsGenerator$CodeBuilder$exposed, 'get', 'Components'),
-										'\nget : EntityId -> ComponentType a -> {Ecs} -> Maybe a\nget (EntityId entityId) (ComponentType { getComponents }) (Ecs model) =\n    Dict.get entityId (getComponents model)\n',
+										author$project$EcsGenerator$CodeBuilder$internal,
+										'\ninsertEntityInSet : Int -> EntitySetType -> Model -> Model\ninsertEntityInSet entityId entitySetType model =\n    if entitySetType.member entityId model then\n        entitySetType.setEntities\n            (Set.insert entityId (entitySetType.getEntities model))\n            model\n\n    else\n        model\n',
 										A3(
 											author$project$EcsGenerator$CodeBuilder$declaration,
-											A2(author$project$EcsGenerator$CodeBuilder$exposed, 'ComponentType', 'Components'),
-											'\ntype ComponentType a\n    = ComponentType\n        { getComponents : Model -> Dict.Dict Int a\n        , setComponents : Dict.Dict Int a -> Model -> Model\n        }\n',
-											A2(
-												author$project$EcsGenerator$CodeBuilder$comment,
-												'-- COMPONENTS --',
+											A2(author$project$EcsGenerator$CodeBuilder$exposed, 'insert', 'Components'),
+											'\ninsert : EntityId -> ComponentType a -> a -> {Ecs} -> {Ecs}\ninsert (EntityId entityId) (ComponentType componentType) component (Ecs model) =\n    let\n        updatedModel =\n            componentType.setComponents\n                (Array.set entityId (Just component) (componentType.getComponents model))\n                model\n    in\n    Ecs\n        (List.foldl (insertEntityInSet entityId) updatedModel componentType.entitySets)\n',
+											A3(
+												author$project$EcsGenerator$CodeBuilder$declaration,
+												A2(author$project$EcsGenerator$CodeBuilder$exposed, 'get', 'Components'),
+												'\nget : EntityId -> ComponentType a -> {Ecs} -> Maybe a\nget (EntityId entityId) (ComponentType componentType) (Ecs model) =\n    Array.get entityId (componentType.getComponents model)\n        |> Maybe.withDefault Nothing\n',
 												A3(
 													author$project$EcsGenerator$CodeBuilder$declaration,
-													A2(author$project$EcsGenerator$CodeBuilder$exposed, 'intToId', 'Entities'),
-													'\nintToId : Int -> {Ecs} -> Maybe EntityId\nintToId id ecs =\n    if id < size ecs then\n        Just (EntityId id)\n\n    else\n        Nothing\n',
-													A3(
-														author$project$EcsGenerator$CodeBuilder$declaration,
-														A2(author$project$EcsGenerator$CodeBuilder$exposed, 'idToInt', 'Entities'),
-														'\nidToInt : EntityId -> Int\nidToInt (EntityId id) =\n    id\n',
+													A2(author$project$EcsGenerator$CodeBuilder$exposed, 'ComponentType', 'Components'),
+													'\ntype ComponentType a\n    = ComponentType\n        { getComponents : Model -> Array.Array (Maybe a)\n        , setComponents : Array.Array (Maybe a) -> Model -> Model\n        , entitySets : List EntitySetType\n        }\n',
+													A2(
+														author$project$EcsGenerator$CodeBuilder$comment,
+														'-- COMPONENTS --',
 														A3(
 															author$project$EcsGenerator$CodeBuilder$declaration,
-															A2(author$project$EcsGenerator$CodeBuilder$exposed, 'activeSize', 'Entities'),
-															'\nactiveSize : {Ecs} -> Int\nactiveSize (Ecs model) =\n    model.numberOfCreatedEntities - List.length model.destroyedEntities\n',
+															A2(author$project$EcsGenerator$CodeBuilder$exposed, 'intToId', 'Entities'),
+															'\nintToId : Int -> Ecs -> Maybe EntityId\nintToId id ecs =\n    if id < size ecs then\n        Just (EntityId id)\n\n    else\n        Nothing\n',
 															A3(
 																author$project$EcsGenerator$CodeBuilder$declaration,
-																A2(author$project$EcsGenerator$CodeBuilder$exposed, 'size', 'Entities'),
-																'\nsize : {Ecs} -> Int\nsize (Ecs model) =\n    model.numberOfCreatedEntities\n',
+																A2(author$project$EcsGenerator$CodeBuilder$exposed, 'idToInt', 'Entities'),
+																'\nidToInt : EntityId -> Int\nidToInt (EntityId id) =\n    id\n',
 																A3(
 																	author$project$EcsGenerator$CodeBuilder$declaration,
 																	author$project$EcsGenerator$CodeBuilder$internal,
-																	'\nresetEntity : Int -> Model -> Model\nresetEntity entityId model =\n    { model\n        | ' + (A2(
-																		elm$core$String$join,
-																		'\n        , ',
-																		elm$core$List$concat(
-																			_List_fromArray(
-																				[
-																					A2(
-																					elm$core$List$map,
-																					A2(
-																						elm$core$Basics$composeR,
-																						author$project$EcsGenerator$Generate$componentsFieldName,
-																						function (field) {
-																							return field + (' = Dict.remove entityId model.' + field);
-																						}),
-																					components)
-																				]))) + '\n    }\n'),
+																	'\nentitiesSize : Model -> Int\nentitiesSize model =\n    ' + A2(
+																		elm$core$Maybe$withDefault,
+																		'0',
+																		A2(
+																			elm$core$Maybe$map,
+																			A2(
+																				elm$core$Basics$composeR,
+																				author$project$EcsGenerator$Generate$componentsFieldName,
+																				elm$core$Basics$append('Array.length model.')),
+																			elm$core$List$head(components))),
 																	A3(
 																		author$project$EcsGenerator$CodeBuilder$declaration,
-																		A2(author$project$EcsGenerator$CodeBuilder$exposed, 'reset', 'Entities'),
-																		'\nreset : EntityId -> {Ecs} -> {Ecs}\nreset (EntityId entityId) (Ecs model) =\n    Ecs (resetEntity entityId model)\n',
+																		A2(author$project$EcsGenerator$CodeBuilder$exposed, 'activeSize', 'Entities'),
+																		'\nactiveSize : Ecs -> Int\nactiveSize (Ecs model) =\n    entitiesSize model - List.length model.destroyedEntitiesCache\n',
 																		A3(
 																			author$project$EcsGenerator$CodeBuilder$declaration,
-																			A2(author$project$EcsGenerator$CodeBuilder$exposed, 'destroy', 'Entities'),
-																			'\ndestroy : EntityId -> {Ecs} -> {Ecs}\ndestroy (EntityId entityId) (Ecs model) =\n    { model | destroyedEntities = entityId :: model.destroyedEntities }\n        |> resetEntity entityId\n        |> Ecs\n',
+																			A2(author$project$EcsGenerator$CodeBuilder$exposed, 'size', 'Entities'),
+																			'\nsize : Ecs -> Int\nsize (Ecs model) =\n    entitiesSize model\n',
 																			A3(
 																				author$project$EcsGenerator$CodeBuilder$declaration,
-																				A2(author$project$EcsGenerator$CodeBuilder$exposed, 'create', 'Entities'),
-																				'\ncreate : {Ecs} -> ( {Ecs}, EntityId )\ncreate (Ecs model) =\n    case model.destroyedEntities of\n        [] ->\n            ( Ecs { model | numberOfCreatedEntities = model.numberOfCreatedEntities + 1 }\n            , EntityId model.numberOfCreatedEntities\n            )\n\n        head :: tail ->\n            ( Ecs { model | destroyedEntities = tail }\n            , EntityId head\n            )\n',
+																				author$project$EcsGenerator$CodeBuilder$internal,
+																				'\nresetEntity : Int -> Model -> Model\nresetEntity entityId model =\n    { model\n        | ' + (A2(
+																					elm$core$String$join,
+																					'\n        , ',
+																					elm$core$List$concat(
+																						_List_fromArray(
+																							[
+																								A2(
+																								elm$core$List$map,
+																								A2(
+																									elm$core$Basics$composeR,
+																									author$project$EcsGenerator$Generate$componentsFieldName,
+																									function (field) {
+																										return field + (' = Array.set entityId Nothing model.' + field);
+																									}),
+																								components),
+																								A2(
+																								elm$core$List$map,
+																								A2(
+																									elm$core$Basics$composeR,
+																									author$project$EcsGenerator$Generate$nodeEntitiesFieldName,
+																									function (field) {
+																										return field + (' = Set.remove entityId model.' + field);
+																									}),
+																								nodes)
+																							]))) + '\n    }\n'),
 																				A3(
 																					author$project$EcsGenerator$CodeBuilder$declaration,
-																					A2(author$project$EcsGenerator$CodeBuilder$exposed, 'EntityId', 'Entities'),
-																					'\ntype EntityId\n    = EntityId Int\n',
-																					A2(
-																						author$project$EcsGenerator$CodeBuilder$comment,
-																						'-- ENTITIES --',
+																					A2(author$project$EcsGenerator$CodeBuilder$exposed, 'reset', 'Entities'),
+																					'\nreset : EntityId -> {Ecs} -> {Ecs}\nreset (EntityId entityId) (Ecs model) =\n    Ecs (resetEntity entityId model)\n',
+																					A3(
+																						author$project$EcsGenerator$CodeBuilder$declaration,
+																						A2(author$project$EcsGenerator$CodeBuilder$exposed, 'destroy', 'Entities'),
+																						'\ndestroy : EntityId -> {Ecs} -> {Ecs}\ndestroy (EntityId entityId) (Ecs model) =\n    { model | destroyedEntitiesCache = entityId :: model.destroyedEntitiesCache }\n        |> resetEntity entityId\n        |> Ecs\n',
 																						A3(
 																							author$project$EcsGenerator$CodeBuilder$declaration,
-																							A2(author$project$EcsGenerator$CodeBuilder$exposed, 'empty', 'Model'),
-																							'\nempty : {Ecs}\nempty =\n    Ecs\n        { ' + (A2(
+																							A2(author$project$EcsGenerator$CodeBuilder$exposed, 'create', 'Entities'),
+																							'\ncreate : {Ecs} -> ( {Ecs}, EntityId )\ncreate (Ecs model) =\n    case model.destroyedEntitiesCache of\n        [] ->\n            ( Ecs\n                { model\n                    | ' + (A2(
 																								elm$core$String$join,
-																								'\n        , ',
-																								elm$core$List$concat(
-																									_List_fromArray(
-																										[
-																											A2(
-																											elm$core$List$map,
-																											A2(
-																												elm$core$Basics$composeR,
-																												author$project$EcsGenerator$Generate$componentsFieldName,
-																												author$project$EcsGenerator$Utils$append(' = Dict.empty')),
-																											components)
-																										]))) + '\n        , numberOfCreatedEntities = 0\n        , destroyedEntities = []\n        }\n'),
+																								'\n                    , ',
+																								A2(
+																									elm$core$List$map,
+																									A2(
+																										elm$core$Basics$composeR,
+																										author$project$EcsGenerator$Generate$componentsFieldName,
+																										function (field) {
+																											return field + (' = Array.push Nothing model.' + field);
+																										}),
+																									components)) + '\n                }\n            , EntityId (entitiesSize model)\n            )\n\n        head :: tail ->\n            ( Ecs { model | destroyedEntitiesCache = tail }\n            , EntityId head\n            )\n'),
 																							A3(
 																								author$project$EcsGenerator$CodeBuilder$declaration,
-																								author$project$EcsGenerator$CodeBuilder$internal,
-																								'\ntype alias Model =\n    { ' + (A2(
-																									elm$core$String$join,
-																									'\n    , ',
-																									elm$core$List$concat(
-																										_List_fromArray(
-																											[
+																								A2(author$project$EcsGenerator$CodeBuilder$exposed, 'EntityId', 'Entities'),
+																								'\ntype EntityId\n    = EntityId Int\n',
+																								A2(
+																									author$project$EcsGenerator$CodeBuilder$comment,
+																									'-- ENTITIES --',
+																									A3(
+																										author$project$EcsGenerator$CodeBuilder$declaration,
+																										A2(author$project$EcsGenerator$CodeBuilder$exposed, 'empty', 'Model'),
+																										'\nempty : {Ecs}\nempty =\n    Ecs\n        { ' + (A2(
+																											elm$core$String$join,
+																											'\n        , ',
+																											elm$core$List$concat(
+																												_List_fromArray(
+																													[
+																														A2(
+																														elm$core$List$map,
+																														A2(
+																															elm$core$Basics$composeR,
+																															author$project$EcsGenerator$Generate$componentsFieldName,
+																															author$project$EcsGenerator$Utils$append(' = Array.empty')),
+																														components),
+																														A2(
+																														elm$core$List$map,
+																														A2(
+																															elm$core$Basics$composeR,
+																															author$project$EcsGenerator$Generate$nodeEntitiesFieldName,
+																															author$project$EcsGenerator$Utils$append(' = Set.empty')),
+																														nodes)
+																													]))) + '\n        , destroyedEntitiesCache = []\n        }\n'),
+																										A3(
+																											author$project$EcsGenerator$CodeBuilder$declaration,
+																											author$project$EcsGenerator$CodeBuilder$internal,
+																											'\ntype alias Model =\n    { ' + (A2(
+																												elm$core$String$join,
+																												'\n    , ',
+																												elm$core$List$concat(
+																													_List_fromArray(
+																														[
+																															A2(
+																															elm$core$List$map,
+																															function (component) {
+																																return author$project$EcsGenerator$Generate$componentsFieldName(component) + (' : Array.Array (Maybe ' + (author$project$EcsGenerator$Generate$componentTypeReference(component) + ')'));
+																															},
+																															components),
+																															A2(
+																															elm$core$List$map,
+																															A2(
+																																elm$core$Basics$composeR,
+																																author$project$EcsGenerator$Generate$nodeEntitiesFieldName,
+																																author$project$EcsGenerator$Utils$append(' : Set.Set Int')),
+																															nodes)
+																														]))) + '\n    , destroyedEntitiesCache : List Int\n    }\n'),
+																											A3(
+																												author$project$EcsGenerator$CodeBuilder$declaration,
+																												A2(author$project$EcsGenerator$CodeBuilder$exposed, '{Ecs}', 'Model'),
+																												'\ntype {Ecs}\n    = Ecs Model\n',
 																												A2(
-																												elm$core$List$map,
-																												function (component) {
-																													return author$project$EcsGenerator$Generate$componentsFieldName(component) + (' : Dict.Dict Int ' + author$project$EcsGenerator$Generate$componentTypeReference(component));
-																												},
-																												components)
-																											]))) + '\n    , numberOfCreatedEntities : Int\n    , destroyedEntities : List Int\n    }\n'),
-																								A3(
-																									author$project$EcsGenerator$CodeBuilder$declaration,
-																									A2(author$project$EcsGenerator$CodeBuilder$exposed, '{Ecs}', 'Model'),
-																									'\ntype {Ecs}\n    = Ecs Model\n',
-																									A2(
-																										author$project$EcsGenerator$CodeBuilder$comment,
-																										'-- MODEL --',
-																										A2(author$project$EcsGenerator$CodeBuilder$imported, 'Dict', builder)))))))))))))))))))))))));
+																													author$project$EcsGenerator$CodeBuilder$comment,
+																													'-- MODEL --',
+																													A2(
+																														author$project$EcsGenerator$CodeBuilder$imported,
+																														'Set',
+																														A2(author$project$EcsGenerator$CodeBuilder$imported, 'Array', document)))))))))))))))))))))))))))));
 	});
 var author$project$EcsGenerator$Generate$generateComponentImports = F2(
-	function (_n0, builder) {
-		var components = _n0.bs;
+	function (_n0, document) {
+		var components = _n0._;
 		return A3(
 			elm$core$List$foldl,
 			function (component) {
 				return author$project$EcsGenerator$CodeBuilder$imported(
 					author$project$EcsGenerator$Config$componentModuleName(component));
 			},
-			builder,
+			document,
 			components);
 	});
-var author$project$EcsGenerator$Generate$generateComponentType = F2(
-	function (component, builder) {
+var author$project$EcsGenerator$Generate$entitySetVariableName = A2(
+	elm$core$Basics$composeR,
+	author$project$EcsGenerator$Config$nodeName,
+	A2(
+		elm$core$Basics$composeR,
+		author$project$EcsGenerator$Utils$firstToLower,
+		author$project$EcsGenerator$Utils$append('EntitySet')));
+var author$project$EcsGenerator$Generate$padIfNotEmpty = function (string) {
+	return elm$core$String$isEmpty(string) ? string : (' ' + (string + ' '));
+};
+var author$project$EcsGenerator$Generate$generateComponentType = F3(
+	function (nodes, component, document) {
+		var typeName = author$project$EcsGenerator$Generate$componentTypeReference(component);
 		var name = A2(
 			author$project$EcsGenerator$Utils$append,
 			'Component',
 			author$project$EcsGenerator$Utils$firstToLower(
 				author$project$EcsGenerator$Config$componentTypeName(component)));
 		var modelField = author$project$EcsGenerator$Generate$componentsFieldName(component);
+		var componentNodes = A2(
+			elm$core$List$filter,
+			A2(
+				elm$core$Basics$composeR,
+				author$project$EcsGenerator$Config$nodeComponents,
+				elm$core$List$member(component)),
+			nodes);
 		return A3(
 			author$project$EcsGenerator$CodeBuilder$declaration,
 			A2(author$project$EcsGenerator$CodeBuilder$exposed, name, 'Your Component Types'),
-			name + (' : ComponentType ' + (author$project$EcsGenerator$Generate$componentTypeReference(component) + ('\n' + (name + (' =\n    ComponentType\n        { getComponents = .' + (modelField + ('\n        , setComponents = \\components model -> { model | ' + (modelField + ' = components }\n        }\n')))))))),
-			builder);
+			name + (' : ComponentType ' + (typeName + ('\n' + (name + (' =\n    ComponentType\n        { getComponents = .' + (modelField + ('\n        , setComponents = \\components model -> { model | ' + (modelField + (' = components }\n        , entitySets = [' + (author$project$EcsGenerator$Generate$padIfNotEmpty(
+				A2(
+					elm$core$String$join,
+					', ',
+					A2(elm$core$List$map, author$project$EcsGenerator$Generate$entitySetVariableName, componentNodes))) + ']\n        }\n')))))))))),
+			document);
 	});
 var author$project$EcsGenerator$Generate$generateComponentTypes = F2(
-	function (_n0, builder) {
-		var components = _n0.bs;
-		return function (b) {
-			return A3(elm$core$List$foldl, author$project$EcsGenerator$Generate$generateComponentType, b, components);
+	function (_n0, document) {
+		var components = _n0._;
+		var nodes = _n0.bI;
+		return function (doc) {
+			return A3(
+				elm$core$List$foldl,
+				author$project$EcsGenerator$Generate$generateComponentType(nodes),
+				doc,
+				components);
 		}(
-			A2(author$project$EcsGenerator$CodeBuilder$comment, '-- YOUR COMPONENT TYPES --', builder));
+			A2(author$project$EcsGenerator$CodeBuilder$comment, '-- YOUR COMPONENT TYPES --', document));
+	});
+var author$project$EcsGenerator$Generate$generateEntitySetType = F2(
+	function (node, document) {
+		var name = author$project$EcsGenerator$Generate$entitySetVariableName(node);
+		var entitiesModelField = author$project$EcsGenerator$Generate$nodeEntitiesFieldName(node);
+		return A3(
+			author$project$EcsGenerator$CodeBuilder$declaration,
+			author$project$EcsGenerator$CodeBuilder$internal,
+			name + (' : EntitySetType\n' + (name + (' =\n    { getEntities = .' + (entitiesModelField + ('\n    , setEntities = \\entities model -> { model | ' + (entitiesModelField + (' = entities }\n    , member =\n        \\entityId model ->\n            ' + (A2(
+				elm$core$String$join,
+				'\n                && ',
+				A2(
+					elm$core$List$map,
+					A2(
+						elm$core$Basics$composeR,
+						author$project$EcsGenerator$Generate$componentsFieldName,
+						elm$core$Basics$append('isComponentsMember entityId model.')),
+					author$project$EcsGenerator$Config$nodeComponents(node))) + '\n    }\n    ')))))))),
+			document);
+	});
+var author$project$EcsGenerator$Generate$generateEntitySetTypes = F2(
+	function (_n0, document) {
+		var nodes = _n0.bI;
+		return A3(
+			author$project$EcsGenerator$CodeBuilder$declaration,
+			author$project$EcsGenerator$CodeBuilder$internal,
+			'\nisComponentsMember entityId components =\n    case Array.get entityId components of\n        Just (Just _) ->\n            True\n\n        _ ->\n            False\n',
+			function (doc) {
+				return A3(elm$core$List$foldl, author$project$EcsGenerator$Generate$generateEntitySetType, doc, nodes);
+			}(
+				A3(
+					author$project$EcsGenerator$CodeBuilder$declaration,
+					author$project$EcsGenerator$CodeBuilder$internal,
+					'\ntype alias EntitySetType =\n    { getEntities : Model -> Set.Set Int\n    , setEntities : Set.Set Int -> Model -> Model\n    , member : Int -> Model -> Bool\n    }\n',
+					A2(author$project$EcsGenerator$CodeBuilder$comment, '-- YOUR ENTITY SET TYPES --', document))));
+	});
+var elm$core$String$toUpper = _String_toUpper;
+var author$project$EcsGenerator$Utils$firstToUpper = function (string) {
+	return _Utils_ap(
+		elm$core$String$toUpper(
+			A2(elm$core$String$left, 1, string)),
+		A2(elm$core$String$dropLeft, 1, string));
+};
+var author$project$EcsGenerator$Generate$nodeTypeAliasName = A2(
+	elm$core$Basics$composeR,
+	author$project$EcsGenerator$Config$nodeName,
+	A2(
+		elm$core$Basics$composeR,
+		author$project$EcsGenerator$Utils$firstToUpper,
+		author$project$EcsGenerator$Utils$append('Node')));
+var author$project$EcsGenerator$Generate$nodeTypeVariableName = A2(
+	elm$core$Basics$composeR,
+	author$project$EcsGenerator$Config$nodeName,
+	A2(
+		elm$core$Basics$composeR,
+		author$project$EcsGenerator$Utils$firstToLower,
+		author$project$EcsGenerator$Utils$append('Node')));
+var author$project$EcsGenerator$Generate$wrapNextComponent = function (index) {
+	return (!index) ? elm$core$Basics$identity : function (a) {
+		return 'Maybe.andThen (' + (a + ')');
+	};
+};
+var author$project$EcsGenerator$Generate$generateNodeType = F2(
+	function (node, document) {
+		var name = author$project$EcsGenerator$Generate$nodeTypeVariableName(node);
+		return A3(
+			author$project$EcsGenerator$CodeBuilder$declaration,
+			A2(author$project$EcsGenerator$CodeBuilder$exposed, name, 'Your Node Types'),
+			name + (' : NodeType ' + (author$project$EcsGenerator$Generate$nodeTypeAliasName(node) + ('\n' + (name + (' =\n    NodeType\n        { getEntities = .' + (author$project$EcsGenerator$Generate$nodeEntitiesFieldName(node) + ('\n        , getNode =\n            \\entityId model ->\n                ' + (author$project$EcsGenerator$Generate$nodeTypeAliasName(node) + ('\n                    ' + (A2(
+				elm$core$String$join,
+				'\n                    ',
+				A2(
+					elm$core$List$indexedMap,
+					F2(
+						function (index, component) {
+							return '|> ' + A2(
+								author$project$EcsGenerator$Generate$wrapNextComponent,
+								index,
+								'nextComponent model.' + (author$project$EcsGenerator$Generate$componentsFieldName(component) + ' entityId'));
+						}),
+					author$project$EcsGenerator$Config$nodeComponents(node))) + '\n        }\n')))))))))),
+			document);
+	});
+var author$project$EcsGenerator$Generate$generateNodeTypes = F2(
+	function (_n0, document) {
+		var nodes = _n0.bI;
+		return A3(
+			author$project$EcsGenerator$CodeBuilder$declaration,
+			author$project$EcsGenerator$CodeBuilder$internal,
+			'\nnextComponent : Array.Array (Maybe a) -> Int -> (a -> b) -> Maybe b\nnextComponent components entityId callback =\n    Array.get entityId components\n        |> Maybe.withDefault Nothing\n        |> Maybe.map callback\n',
+			function (doc) {
+				return A3(elm$core$List$foldl, author$project$EcsGenerator$Generate$generateNodeType, doc, nodes);
+			}(
+				A2(author$project$EcsGenerator$CodeBuilder$comment, '-- YOUR NODE TYPES --', document)));
+	});
+var author$project$EcsGenerator$Generate$nodeComponentFieldName = A2(elm$core$Basics$composeR, author$project$EcsGenerator$Config$componentTypeName, author$project$EcsGenerator$Utils$firstToLower);
+var author$project$EcsGenerator$Generate$generateNode = F2(
+	function (node, document) {
+		return A3(
+			author$project$EcsGenerator$CodeBuilder$declaration,
+			A2(
+				author$project$EcsGenerator$CodeBuilder$exposed,
+				author$project$EcsGenerator$Generate$nodeTypeAliasName(node),
+				'Your Nodes'),
+			'\ntype alias ' + (author$project$EcsGenerator$Generate$nodeTypeAliasName(node) + (' =\n    { ' + (A2(
+				elm$core$String$join,
+				'\n    , ',
+				A2(
+					elm$core$List$map,
+					function (component) {
+						return author$project$EcsGenerator$Generate$nodeComponentFieldName(component) + (' : ' + author$project$EcsGenerator$Generate$componentTypeReference(component));
+					},
+					author$project$EcsGenerator$Config$nodeComponents(node))) + '\n    }\n'))),
+			document);
+	});
+var author$project$EcsGenerator$Generate$generateNodes = F2(
+	function (_n0, document) {
+		var nodes = _n0.bI;
+		return function (doc) {
+			return A3(elm$core$List$foldl, author$project$EcsGenerator$Generate$generateNode, doc, nodes);
+		}(
+			A2(author$project$EcsGenerator$CodeBuilder$comment, '-- YOUR NODES --', document));
 	});
 var author$project$EcsGenerator$Generate$generate = function (config) {
 	var topDocs = 'Your Entitiy-Component-System.';
@@ -8897,21 +9324,30 @@ var author$project$EcsGenerator$Generate$generate = function (config) {
 		A3(
 			author$project$EcsGenerator$CodeBuilder$replace,
 			'{Ecs}',
-			author$project$EcsGenerator$Config$ecsTypeName(config.bu),
+			author$project$EcsGenerator$Config$ecsTypeName(config.bw),
 			A2(
-				author$project$EcsGenerator$Generate$generateComponentTypes,
+				author$project$EcsGenerator$Generate$generateEntitySetTypes,
 				config,
 				A2(
-					author$project$EcsGenerator$Generate$generateApi,
+					author$project$EcsGenerator$Generate$generateNodeTypes,
 					config,
 					A2(
-						author$project$EcsGenerator$Generate$generateComponentImports,
+						author$project$EcsGenerator$Generate$generateNodes,
 						config,
-						A3(
-							author$project$EcsGenerator$CodeBuilder$init,
-							author$project$EcsGenerator$Config$ecsModuleName(config.bu),
-							topComment,
-							topDocs))))));
+						A2(
+							author$project$EcsGenerator$Generate$generateComponentTypes,
+							config,
+							A2(
+								author$project$EcsGenerator$Generate$generateApi,
+								config,
+								A2(
+									author$project$EcsGenerator$Generate$generateComponentImports,
+									config,
+									A3(
+										author$project$EcsGenerator$CodeBuilder$init,
+										author$project$EcsGenerator$Config$ecsModuleName(config.bw),
+										topComment,
+										topDocs)))))))));
 };
 var author$project$EcsGenerator$generate = A2(
 	elm$core$Basics$composeR,
@@ -8982,11 +9418,11 @@ var rtfeldman$elm_css$Css$cssFunction = F2(
 var rtfeldman$elm_css$Css$rgb = F3(
 	function (r, g, b) {
 		return {
-			av: 1,
-			ax: b,
+			ax: 1,
+			az: b,
 			s: 0,
-			aC: g,
-			aH: r,
+			aE: g,
+			aJ: r,
 			v: A2(
 				rtfeldman$elm_css$Css$cssFunction,
 				'rgb',
@@ -9020,9 +9456,25 @@ var author$project$Main$errorToString = function (error) {
 		case 4:
 			var component = error.a;
 			return 'invalid component type name: ' + author$project$EcsGenerator$componentTypeName(component);
-		default:
+		case 5:
 			var component = error.a;
 			return 'duplicate component: ' + (author$project$EcsGenerator$componentModuleName(component) + ('.' + author$project$EcsGenerator$componentTypeName(component)));
+		case 6:
+			return 'no nodes entered';
+		case 7:
+			var node = error.a;
+			return 'invalid node name: ' + author$project$EcsGenerator$nodeName(node);
+		case 8:
+			var node = error.a;
+			return 'components empty for node \'' + (author$project$EcsGenerator$nodeName(node) + '\'');
+		case 9:
+			var node = error.a;
+			var component = error.b;
+			return 'unkown component for node \'' + (author$project$EcsGenerator$nodeName(node) + ('\': ' + (author$project$EcsGenerator$componentModuleName(component) + ('.' + author$project$EcsGenerator$componentTypeName(component)))));
+		default:
+			var node = error.a;
+			var component = error.b;
+			return 'duplicate component for node \'' + (author$project$EcsGenerator$nodeName(node) + ('\': ' + (author$project$EcsGenerator$componentModuleName(component) + ('.' + author$project$EcsGenerator$componentTypeName(component)))));
 	}
 };
 var author$project$Main$viewErrors = F2(
@@ -9046,7 +9498,7 @@ var author$project$Main$viewErrors = F2(
 	});
 var author$project$Main$viewGeneratResult = function (model) {
 	var _n0 = _Utils_Tuple2(
-		model.az,
+		model.aB,
 		author$project$EcsGenerator$generate(
 			author$project$Main$toConfig(model)));
 	if (!_n0.a.$) {
@@ -9158,7 +9610,7 @@ var rtfeldman$elm_css$Css$textAlign = function (fn) {
 		fn(rtfeldman$elm_css$Css$Internal$lengthForOverloadedProperty));
 };
 var rtfeldman$elm_css$Css$UnitlessInteger = 0;
-var rtfeldman$elm_css$Css$zero = {aD: 0, af: 0, C: 0, ag: 0, ah: 0, M: 0, N: 0, aF: 0, F: 0, aY: 0, ar: '', aN: 0, v: '0'};
+var rtfeldman$elm_css$Css$zero = {aF: 0, ah: 0, C: 0, ai: 0, aj: 0, N: 0, O: 0, aH: 0, F: 0, a$: 0, at: '', aP: 0, v: '0'};
 var rtfeldman$elm_css$Html$Styled$a = rtfeldman$elm_css$Html$Styled$node('a');
 var rtfeldman$elm_css$Html$Styled$h1 = rtfeldman$elm_css$Html$Styled$node('h1');
 var rtfeldman$elm_css$Html$Styled$Attributes$href = function (url) {
@@ -9264,13 +9716,217 @@ var author$project$Main$viewHeading2 = function (heading) {
 				rtfeldman$elm_css$Html$Styled$text(heading)
 			]));
 };
-var rtfeldman$elm_css$Css$borderBox = {a4: 0, aQ: 0, v: 'border-box'};
+var author$project$Main$NodeNameChanged = F2(
+	function (a, b) {
+		return {$: 8, a: a, b: b};
+	});
+var author$project$Main$NodeRemoved = function (a) {
+	return {$: 10, a: a};
+};
+var author$project$Main$NodeComponentChanged = F3(
+	function (a, b, c) {
+		return {$: 9, a: a, b: b, c: c};
+	});
+var rtfeldman$elm_css$Css$backgroundColor = function (c) {
+	return A2(rtfeldman$elm_css$Css$property, 'background-color', c.v);
+};
+var rtfeldman$elm_css$Css$bold = {B: 0, v: 'bold'};
+var rtfeldman$elm_css$Css$fontWeight = function (_n0) {
+	var value = _n0.v;
+	return A2(rtfeldman$elm_css$Css$property, 'font-weight', value);
+};
+var rtfeldman$elm_css$Css$noWrap = {aD: 0, aV: 0, v: 'nowrap', I: 0};
+var rtfeldman$elm_css$Css$whiteSpace = rtfeldman$elm_css$Css$prop1('white-space');
+var rtfeldman$elm_css$Html$Styled$label = rtfeldman$elm_css$Html$Styled$node('label');
+var rtfeldman$elm_css$Html$Styled$Attributes$checked = rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('checked');
+var rtfeldman$elm_css$Html$Styled$Attributes$type_ = rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('type');
+var elm$json$Json$Decode$bool = _Json_decodeBool;
+var rtfeldman$elm_css$Html$Styled$Events$targetChecked = A2(
+	elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'checked']),
+	elm$json$Json$Decode$bool);
+var rtfeldman$elm_css$Html$Styled$Events$onCheck = function (tagger) {
+	return A2(
+		rtfeldman$elm_css$Html$Styled$Events$on,
+		'change',
+		A2(elm$json$Json$Decode$map, tagger, rtfeldman$elm_css$Html$Styled$Events$targetChecked));
+};
+var author$project$Main$viewNodeComponent = F2(
+	function (nodeKey, _n0) {
+		var isMember = _n0.a;
+		var componentKey = _n0.b;
+		var componentTypeName = _n0.c;
+		return A2(
+			rtfeldman$elm_css$Html$Styled$label,
+			_List_fromArray(
+				[
+					rtfeldman$elm_css$Html$Styled$Attributes$css(
+					elm$core$List$concat(
+						_List_fromArray(
+							[
+								_List_fromArray(
+								[
+									rtfeldman$elm_css$Css$display(rtfeldman$elm_css$Css$inlineBlock),
+									rtfeldman$elm_css$Css$whiteSpace(rtfeldman$elm_css$Css$noWrap),
+									rtfeldman$elm_css$Css$padding(
+									rtfeldman$elm_css$Css$px(4)),
+									rtfeldman$elm_css$Css$fontSize(
+									rtfeldman$elm_css$Css$px(14))
+								]),
+								isMember ? _List_fromArray(
+								[
+									rtfeldman$elm_css$Css$fontWeight(rtfeldman$elm_css$Css$bold),
+									rtfeldman$elm_css$Css$backgroundColor(
+									A3(rtfeldman$elm_css$Css$rgb, 0, 255, 0))
+								]) : _List_Nil
+							])))
+				]),
+			_List_fromArray(
+				[
+					A2(
+					rtfeldman$elm_css$Html$Styled$input,
+					_List_fromArray(
+						[
+							rtfeldman$elm_css$Html$Styled$Attributes$type_('checkbox'),
+							rtfeldman$elm_css$Html$Styled$Attributes$checked(isMember),
+							rtfeldman$elm_css$Html$Styled$Events$onCheck(
+							A2(author$project$Main$NodeComponentChanged, nodeKey, componentKey)),
+							rtfeldman$elm_css$Html$Styled$Attributes$css(
+							_List_fromArray(
+								[
+									rtfeldman$elm_css$Css$padding(
+									rtfeldman$elm_css$Css$px(4))
+								]))
+						]),
+					_List_Nil),
+					rtfeldman$elm_css$Html$Styled$text(componentTypeName)
+				]));
+	});
+var rtfeldman$elm_css$Css$prop2 = F3(
+	function (key, argA, argB) {
+		return A2(
+			rtfeldman$elm_css$Css$property,
+			key,
+			A2(
+				elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[argA.v, argB.v])));
+	});
+var rtfeldman$elm_css$Css$border2 = rtfeldman$elm_css$Css$prop2('border');
+var rtfeldman$elm_css$Css$displayFlex = A2(rtfeldman$elm_css$Css$property, 'display', 'flex');
+var rtfeldman$elm_css$Css$flexWrap = rtfeldman$elm_css$Css$prop1('flex-wrap');
+var rtfeldman$elm_css$Css$inset = {m: 0, v: 'inset'};
+var rtfeldman$elm_css$Css$wrap = {aD: 0, aV: 0, v: 'wrap'};
+var author$project$Main$viewNodeInputs = F2(
+	function (components, _n0) {
+		var nodeKey = _n0.a;
+		var node = _n0.b;
+		return _List_fromArray(
+			[
+				_Utils_Tuple2(
+				'nodeName' + elm$core$String$fromInt(nodeKey),
+				A2(
+					rtfeldman$elm_css$Html$Styled$input,
+					_List_fromArray(
+						[
+							rtfeldman$elm_css$Html$Styled$Attributes$value(node.aZ),
+							rtfeldman$elm_css$Html$Styled$Attributes$placeholder('name'),
+							rtfeldman$elm_css$Html$Styled$Events$onInput(
+							author$project$Main$NodeNameChanged(nodeKey)),
+							rtfeldman$elm_css$Html$Styled$Attributes$css(
+							_List_fromArray(
+								[
+									rtfeldman$elm_css$Css$padding(
+									rtfeldman$elm_css$Css$px(4))
+								]))
+						]),
+					_List_Nil)),
+				_Utils_Tuple2(
+				'nodeComponents' + elm$core$String$fromInt(nodeKey),
+				A2(
+					rtfeldman$elm_css$Html$Styled$div,
+					_List_fromArray(
+						[
+							rtfeldman$elm_css$Html$Styled$Attributes$css(
+							_List_fromArray(
+								[
+									A2(
+									rtfeldman$elm_css$Css$border2,
+									rtfeldman$elm_css$Css$px(1),
+									rtfeldman$elm_css$Css$inset),
+									rtfeldman$elm_css$Css$displayFlex,
+									rtfeldman$elm_css$Css$flexWrap(rtfeldman$elm_css$Css$wrap)
+								]))
+						]),
+					A2(
+						elm$core$List$map,
+						author$project$Main$viewNodeComponent(nodeKey),
+						A2(
+							elm$core$List$map,
+							function (_n1) {
+								var componentKey = _n1.a;
+								var _n2 = _n1.b;
+								var componentTypeName = _n2.b;
+								return _Utils_Tuple3(
+									A2(elm$core$List$member, componentKey, node._),
+									componentKey,
+									componentTypeName);
+							},
+							elm$core$List$sort(
+								elm$core$Dict$toList(components)))))),
+				_Utils_Tuple2(
+				'nodeRemoveButton' + elm$core$String$fromInt(nodeKey),
+				A2(
+					rtfeldman$elm_css$Html$Styled$button,
+					_List_fromArray(
+						[
+							rtfeldman$elm_css$Html$Styled$Events$onClick(
+							author$project$Main$NodeRemoved(nodeKey)),
+							rtfeldman$elm_css$Html$Styled$Attributes$tabindex(-1)
+						]),
+					_List_fromArray(
+						[
+							rtfeldman$elm_css$Html$Styled$text('remove')
+						])))
+			]);
+	});
+var author$project$Main$viewNodes = function (_n0) {
+	var lastNodeKey = _n0.M;
+	var components = _n0._;
+	var nodes = _n0.bI;
+	return A3(
+		rtfeldman$elm_css$Html$Styled$Keyed$node,
+		'div',
+		_List_fromArray(
+			[
+				rtfeldman$elm_css$Html$Styled$Attributes$css(
+				_List_fromArray(
+					[
+						A2(rtfeldman$elm_css$Css$property, 'display', 'inline-grid'),
+						A2(rtfeldman$elm_css$Css$property, 'grid-template-columns', 'auto auto auto')
+					]))
+			]),
+		elm$core$List$concat(
+			A2(
+				elm$core$List$map,
+				author$project$Main$viewNodeInputs(components),
+				_Utils_ap(
+					elm$core$Dict$toList(nodes),
+					_List_fromArray(
+						[
+							_Utils_Tuple2(
+							lastNodeKey + 1,
+							{_: _List_Nil, aZ: ''})
+						])))));
+};
+var rtfeldman$elm_css$Css$borderBox = {a7: 0, aS: 0, v: 'border-box'};
 var rtfeldman$elm_css$Css$boxSizing = rtfeldman$elm_css$Css$prop1('box-sizing');
-var rtfeldman$elm_css$Css$row = {a6: 0, aB: 0, v: 'row'};
+var rtfeldman$elm_css$Css$row = {a9: 0, aD: 0, v: 'row'};
 var rtfeldman$elm_css$Css$column = _Utils_update(
 	rtfeldman$elm_css$Css$row,
 	{v: 'column'});
-var rtfeldman$elm_css$Css$displayFlex = A2(rtfeldman$elm_css$Css$property, 'display', 'flex');
 var rtfeldman$elm_css$Css$flexDirection = rtfeldman$elm_css$Css$prop1('flex-direction');
 var rtfeldman$elm_css$Css$fontFamily = rtfeldman$elm_css$Css$prop1('font-family');
 var rtfeldman$elm_css$Css$justifyContent = function (fn) {
@@ -9796,7 +10452,7 @@ var rtfeldman$elm_css$VirtualDom$Styled$toUnstyled = function (vdom) {
 var rtfeldman$elm_css$Html$Styled$toUnstyled = rtfeldman$elm_css$VirtualDom$Styled$toUnstyled;
 var author$project$Main$view = function (model) {
 	return {
-		b3: A2(
+		b6: A2(
 			elm$core$List$map,
 			rtfeldman$elm_css$Html$Styled$toUnstyled,
 			_List_fromArray(
@@ -9847,20 +10503,22 @@ var author$project$Main$view = function (model) {
 							_List_fromArray(
 								[
 									author$project$Main$viewHeading2('ecs (module name | type name)'),
-									author$project$Main$viewEcsInputs(model.bu),
+									author$project$Main$viewEcsInputs(model.bw),
 									author$project$Main$viewHeading2('components (module name | type name)'),
-									author$project$Main$viewComponents(model)
+									author$project$Main$viewComponents(model),
+									author$project$Main$viewHeading2('nodes (name | components)'),
+									author$project$Main$viewNodes(model)
 								]))
 						])),
 					author$project$Main$viewHeading2('generated code'),
 					author$project$Main$viewGeneratResult(model)
 				])),
-		cp: 'ECS Generator'
+		cr: 'ECS Generator'
 	};
 };
 var elm$browser$Browser$application = _Browser_application;
 var author$project$Main$main = elm$browser$Browser$application(
-	{cd: author$project$Main$init, ch: author$project$Main$UrlChanged, ci: author$project$Main$LinkClicked, co: author$project$Main$subscriptions, cq: author$project$Main$update, ct: author$project$Main$view});
+	{cg: author$project$Main$init, cj: author$project$Main$UrlChanged, ck: author$project$Main$LinkClicked, cq: author$project$Main$subscriptions, cs: author$project$Main$update, cv: author$project$Main$view});
 _Platform_export({'Main':{'init':author$project$Main$main(
 	elm$json$Json$Decode$succeed(0))(0)}});}(this));
 

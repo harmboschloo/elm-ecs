@@ -1,22 +1,20 @@
 module Systems.Movement exposing (update)
 
-import Components exposing (Position, Velocity)
 import Context exposing (Context)
 import Ecs exposing (Ecs)
 
 
 update : ( Ecs, Context ) -> ( Ecs, Context )
 update =
-    Ecs.iterate2 Ecs.velocityComponent Ecs.positionComponent updateEntity
+    Ecs.iterate Ecs.movementNode updateEntity
 
 
 updateEntity :
     Ecs.EntityId
-    -> Velocity
-    -> Position
+    -> Ecs.MovementNode
     -> ( Ecs, Context )
     -> ( Ecs, Context )
-updateEntity entityId velocity position ( ecs, { deltaTime } as context ) =
+updateEntity entityId { position, velocity } ( ecs, { deltaTime } as context ) =
     ( Ecs.insert
         entityId
         Ecs.positionComponent

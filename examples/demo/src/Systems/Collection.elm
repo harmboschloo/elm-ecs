@@ -7,7 +7,7 @@ import Data.Animation as Animation
 import Data.Bounds as Bounds
 import Data.CollisionGrid as CollisionGrid exposing (CollisionGrid)
 import Ease
-import Ecs exposing (Ecs)
+import Ecs exposing (CollectableNode, CollectorNode, Ecs)
 
 
 type alias CollectorData =
@@ -34,16 +34,14 @@ update : ( Ecs, Context ) -> ( Ecs, Context )
 update ( ecs, context ) =
     let
         ( _, collectorGrid ) =
-            Ecs.iterate2
-                Ecs.collectorComponent
-                Ecs.positionComponent
+            Ecs.iterate
+                Ecs.collectorNode
                 insertCollector
                 ( ecs, CollisionGrid.empty gridConfig )
 
         ( _, collectableGrid ) =
-            Ecs.iterate2
-                Ecs.collectableComponent
-                Ecs.positionComponent
+            Ecs.iterate
+                Ecs.collectableNode
                 insertCollectable
                 ( ecs, CollisionGrid.empty gridConfig )
     in
@@ -55,11 +53,10 @@ update ( ecs, context ) =
 
 insertCollector :
     Ecs.EntityId
-    -> Collector
-    -> Position
+    -> CollectorNode
     -> ( Ecs, CollisionGrid CollectorData )
     -> ( Ecs, CollisionGrid CollectorData )
-insertCollector entityId collector position ( ecs, grid ) =
+insertCollector entityId { collector, position } ( ecs, grid ) =
     ( ecs
     , CollisionGrid.insert
         (Bounds.fromPositionAndRadius position.x position.y collector.radius)
@@ -70,11 +67,10 @@ insertCollector entityId collector position ( ecs, grid ) =
 
 insertCollectable :
     Ecs.EntityId
-    -> Collectable
-    -> Position
+    -> CollectableNode
     -> ( Ecs, CollisionGrid CollectableData )
     -> ( Ecs, CollisionGrid CollectableData )
-insertCollectable entityId _ position ( ecs, grid ) =
+insertCollectable entityId { position } ( ecs, grid ) =
     ( ecs
     , CollisionGrid.insertAtPoint
         ( position.x, position.y )

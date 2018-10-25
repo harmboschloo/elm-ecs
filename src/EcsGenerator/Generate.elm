@@ -1,7 +1,7 @@
 module EcsGenerator.Generate exposing (generate)
 
 import EcsGenerator.CodeBuilder as Builder exposing (Builder)
-import EcsGenerator.Config as Config exposing (Component, Config)
+import EcsGenerator.Config as Config exposing (Component, Config, Node)
 import EcsGenerator.Utils as Utils
 import Url exposing (percentEncode)
 
@@ -21,24 +21,28 @@ generate config =
         |> generateComponentImports config
         |> generateApi config
         |> generateComponentTypes config
+        |> generateNodes config
+        |> generateNodeTypes config
+        |> generateEntitySetTypes config
         |> Builder.replace "{Ecs}" (Config.ecsTypeName config.ecs)
         |> Builder.toString
 
 
 generateComponentImports : Config -> Builder -> Builder
-generateComponentImports { components } builder =
+generateComponentImports { components } document =
     List.foldl
         (\component ->
             Builder.imported (Config.componentModuleName component)
         )
-        builder
+        document
         components
 
 
 generateApi : Config -> Builder -> Builder
-generateApi { components } builder =
-    builder
-        |> Builder.imported "Dict"
+generateApi { components, nodes } document =
+    document
+        |> Builder.imported "Array"
+        |> Builder.imported "Set"
         |> Builder.comment "-- MODEL --"
         |> Builder.declaration (Builder.exposed "{Ecs}" "Model") """
 type {Ecs}
@@ -51,17 +55,22 @@ type alias Model =
                 ++ ([ List.map
                         (\component ->
                             componentsFieldName component
-                                ++ " : Dict.Dict Int "
+                                ++ " : Array.Array (Maybe "
                                 ++ componentTypeReference component
+                                ++ ")"
                         )
                         components
+                    , List.map
+                        (nodeEntitiesFieldName
+                            >> Utils.append " : Set.Set Int"
+                        )
+                        nodes
                     ]
                         |> List.concat
                         |> String.join "\n    , "
                    )
                 ++ """
-    , numberOfCreatedEntities : Int
-    , destroyedEntities : List Int
+    , destroyedEntitiesCache : List Int
     }
 """
             )
@@ -73,16 +82,20 @@ empty =
         { """
                 ++ ([ List.map
                         (componentsFieldName
-                            >> Utils.append " = Dict.empty"
+                            >> Utils.append " = Array.empty"
                         )
                         components
+                    , List.map
+                        (nodeEntitiesFieldName
+                            >> Utils.append " = Set.empty"
+                        )
+                        nodes
                     ]
                         |> List.concat
                         |> String.join "\n        , "
                    )
                 ++ """
-        , numberOfCreatedEntities = 0
-        , destroyedEntities = []
+        , destroyedEntitiesCache = []
         }
 """
             )
@@ -92,24 +105,40 @@ type EntityId
     = EntityId Int
 """
         |> Builder.declaration (Builder.exposed "create" "Entities")
-            """
+            ("""
 create : {Ecs} -> ( {Ecs}, EntityId )
 create (Ecs model) =
-    case model.destroyedEntities of
+    case model.destroyedEntitiesCache of
         [] ->
-            ( Ecs { model | numberOfCreatedEntities = model.numberOfCreatedEntities + 1 }
-            , EntityId model.numberOfCreatedEntities
+            ( Ecs
+                { model
+                    | """
+                ++ (List.map
+                        (componentsFieldName
+                            >> (\field ->
+                                    field
+                                        ++ " = Array.push Nothing model."
+                                        ++ field
+                               )
+                        )
+                        components
+                        |> String.join "\n                    , "
+                   )
+                ++ """
+                }
+            , EntityId (entitiesSize model)
             )
 
         head :: tail ->
-            ( Ecs { model | destroyedEntities = tail }
+            ( Ecs { model | destroyedEntitiesCache = tail }
             , EntityId head
             )
 """
+            )
         |> Builder.declaration (Builder.exposed "destroy" "Entities") """
 destroy : EntityId -> {Ecs} -> {Ecs}
 destroy (EntityId entityId) (Ecs model) =
-    { model | destroyedEntities = entityId :: model.destroyedEntities }
+    { model | destroyedEntitiesCache = entityId :: model.destroyedEntitiesCache }
         |> resetEntity entityId
         |> Ecs
 """
@@ -128,11 +157,20 @@ resetEntity entityId model =
                         (componentsFieldName
                             >> (\field ->
                                     field
-                                        ++ " = Dict.remove entityId model."
+                                        ++ " = Array.set entityId Nothing model."
                                         ++ field
                                )
                         )
                         components
+                    , List.map
+                        (nodeEntitiesFieldName
+                            >> (\field ->
+                                    field
+                                        ++ " = Set.remove entityId model."
+                                        ++ field
+                               )
+                        )
+                        nodes
                     ]
                         |> List.concat
                         |> String.join "\n        , "
@@ -142,22 +180,33 @@ resetEntity entityId model =
 """
             )
         |> Builder.declaration (Builder.exposed "size" "Entities") """
-size : {Ecs} -> Int
+size : Ecs -> Int
 size (Ecs model) =
-    model.numberOfCreatedEntities
+    entitiesSize model
 """
         |> Builder.declaration (Builder.exposed "activeSize" "Entities") """
-activeSize : {Ecs} -> Int
+activeSize : Ecs -> Int
 activeSize (Ecs model) =
-    model.numberOfCreatedEntities - List.length model.destroyedEntities
+    entitiesSize model - List.length model.destroyedEntitiesCache
 """
+        |> Builder.declaration Builder.internal
+            ("""
+entitiesSize : Model -> Int
+entitiesSize model =
+    """
+                ++ (List.head components
+                        |> Maybe.map
+                            (componentsFieldName >> (++) "Array.length model.")
+                        |> Maybe.withDefault "0"
+                   )
+            )
         |> Builder.declaration (Builder.exposed "idToInt" "Entities") """
 idToInt : EntityId -> Int
 idToInt (EntityId id) =
     id
 """
         |> Builder.declaration (Builder.exposed "intToId" "Entities") """
-intToId : Int -> {Ecs} -> Maybe EntityId
+intToId : Int -> Ecs -> Maybe EntityId
 intToId id ecs =
     if id < size ecs then
         Just (EntityId id)
@@ -169,150 +218,120 @@ intToId id ecs =
         |> Builder.declaration (Builder.exposed "ComponentType" "Components") """
 type ComponentType a
     = ComponentType
-        { getComponents : Model -> Dict.Dict Int a
-        , setComponents : Dict.Dict Int a -> Model -> Model
+        { getComponents : Model -> Array.Array (Maybe a)
+        , setComponents : Array.Array (Maybe a) -> Model -> Model
+        , entitySets : List EntitySetType
         }
 """
         |> Builder.declaration (Builder.exposed "get" "Components") """
 get : EntityId -> ComponentType a -> {Ecs} -> Maybe a
-get (EntityId entityId) (ComponentType { getComponents }) (Ecs model) =
-    Dict.get entityId (getComponents model)
+get (EntityId entityId) (ComponentType componentType) (Ecs model) =
+    Array.get entityId (componentType.getComponents model)
+        |> Maybe.withDefault Nothing
 """
         |> Builder.declaration (Builder.exposed "insert" "Components") """
 insert : EntityId -> ComponentType a -> a -> {Ecs} -> {Ecs}
 insert (EntityId entityId) (ComponentType componentType) component (Ecs model) =
+    let
+        updatedModel =
+            componentType.setComponents
+                (Array.set entityId (Just component) (componentType.getComponents model))
+                model
+    in
     Ecs
-        (componentType.setComponents
-            (Dict.insert entityId component (componentType.getComponents model))
+        (List.foldl (insertEntityInSet entityId) updatedModel componentType.entitySets)
+"""
+        |> Builder.declaration Builder.internal """
+insertEntityInSet : Int -> EntitySetType -> Model -> Model
+insertEntityInSet entityId entitySetType model =
+    if entitySetType.member entityId model then
+        entitySetType.setEntities
+            (Set.insert entityId (entitySetType.getEntities model))
             model
-        )
+
+    else
+        model
 """
         |> Builder.declaration (Builder.exposed "update" "Components") """
-update : EntityId -> ComponentType a -> (Maybe a -> Maybe a) -> {Ecs} -> {Ecs}
-update (EntityId entityId) (ComponentType componentType) updater (Ecs model) =
-    Ecs
-        (componentType.setComponents
-            (Dict.update entityId updater (componentType.getComponents model))
-            model
-        )
+update : EntityId -> ComponentType a -> (Maybe a -> Maybe a) -> Ecs -> Ecs
+update entityId componentType updater ecs =
+    let
+        maybeComponent =
+            get entityId componentType ecs
+    in
+    case ( maybeComponent, updater maybeComponent ) of
+        ( _, Just component ) ->
+            insert entityId componentType component ecs
+
+        ( Just _, Nothing ) ->
+            remove entityId componentType ecs
+
+        ( Nothing, Nothing ) ->
+            ecs
 """
         |> Builder.declaration (Builder.exposed "remove" "Components") """
 remove : EntityId -> ComponentType a -> {Ecs} -> {Ecs}
 remove (EntityId entityId) (ComponentType componentType) (Ecs model) =
-    Ecs
-        (componentType.setComponents
-            (Dict.remove entityId (componentType.getComponents model))
-            model
-        )
+    componentType.entitySets
+        |> List.foldl (removeEntityFromSet entityId) model
+        |> componentType.setComponents
+            (Array.set entityId Nothing (componentType.getComponents model))
+        |> Ecs
 """
-        |> Builder.comment "-- ITERATE ENTITIES --"
-        |> Builder.declaration (Builder.exposed "iterate" "Iterate Entities") """
+        |> Builder.declaration Builder.internal """
+removeEntityFromSet : Int -> EntitySetType -> Model -> Model
+removeEntityFromSet entityId entitySetType model =
+    entitySetType.setEntities
+        (Set.remove entityId (entitySetType.getEntities model))
+        model
+"""
+        |> Builder.comment "-- NODES --"
+        |> Builder.declaration (Builder.exposed "NodeType" "Nodes") """
+type NodeType node
+    = NodeType
+        { getEntities : Model -> Set.Set Int
+        , getNode : Int -> Model -> Maybe node
+        }
+"""
+        |> Builder.declaration (Builder.exposed "iterate" "Nodes") """
 iterate :
-    ComponentType a
-    -> (EntityId -> a -> ( {Ecs}, x ) -> ( {Ecs}, x ))
-    -> ( {Ecs}, x )
-    -> ( {Ecs}, x )
-iterate (ComponentType componentType) callback ( Ecs model, x ) =
-    Dict.foldl
-        (EntityId >> callback)
-        ( Ecs model, x )
-        (componentType.getComponents model)
-"""
-        |> (\b ->
-                List.foldl
-                    generateEntityIterator
-                    b
-                    (List.range 2 (List.length components))
-           )
-        |> Builder.declaration Builder.internal
-            """
-next : Int -> Dict.Dict Int a -> (a -> b) -> Maybe b
-next entityId components callback =
-    Dict.get entityId components |> Maybe.map callback
-"""
+    NodeType node
+    -> (EntityId -> node -> ( Ecs, context ) -> ( Ecs, context ))
+    -> ( Ecs, context )
+    -> ( Ecs, context )
+iterate (NodeType nodeType) callback ( Ecs model, context ) =
+    Set.foldl
+        (\\entityId result ->
+            case nodeType.getNode entityId model of
+                Nothing ->
+                    result
 
-
-generateEntityIterator : Int -> Builder -> Builder
-generateEntityIterator n builder =
-    let
-        range =
-            List.map String.fromInt (List.range 1 n)
-    in
-    builder
-        |> Builder.declaration
-            (Builder.exposed ("iterate" ++ String.fromInt n) "Iterate Entities")
-            ("""
-iterate"""
-                ++ String.fromInt n
-                ++ """ :
-    """
-                ++ (range
-                        |> List.map (\i -> "ComponentType c" ++ i)
-                        |> String.join "\n    -> "
-                   )
-                ++ """
-    -> (EntityId -> """
-                ++ (range |> List.map (\i -> "c" ++ i) |> String.join " -> ")
-                ++ """ -> ( {Ecs}, x ) -> ( {Ecs}, x ))
-    -> ( {Ecs}, x )
-    -> ( {Ecs}, x )
-iterate"""
-                ++ String.fromInt n
-                ++ " "
-                ++ (range
-                        |> List.map (\i -> "(ComponentType type" ++ i ++ ")")
-                        |> String.join " "
-                   )
-                ++ """ callback ( Ecs model, x ) =
-    let
-        """
-                ++ (range
-                        |> List.map
-                            (\i ->
-                                "components"
-                                    ++ i
-                                    ++ " =\n            type"
-                                    ++ i
-                                    ++ ".getComponents model"
-                            )
-                        |> String.join "\n\n        "
-                   )
-                ++ """
-    in
-    Dict.foldl
-        (\\entityId component1 result ->
-            callback (EntityId entityId) component1
-                |> next entityId components2
-                """
-                ++ (range
-                        |> List.drop 2
-                        |> List.map
-                            (\i ->
-                                "|> Maybe.andThen (next entityId components"
-                                    ++ i
-                                    ++ ")\n                "
-                            )
-                        |> String.join ""
-                   )
-                ++ """|> Maybe.map ((|>) result)
-                |> Maybe.withDefault result
+                Just node ->
+                    callback (EntityId entityId) node result
         )
-        ( Ecs model, x )
-        components1
+        ( Ecs model, context )
+        (nodeType.getEntities model)
 """
-            )
+        |> Builder.declaration (Builder.exposed "nodeSize" "Nodes") """
+nodeSize : NodeType a -> Ecs -> Int
+nodeSize (NodeType nodeType) (Ecs model) =
+    Set.size (nodeType.getEntities model)
+"""
 
 
 generateComponentTypes : Config -> Builder -> Builder
-generateComponentTypes { components } builder =
-    builder
+generateComponentTypes { components, nodes } document =
+    document
         |> Builder.comment "-- YOUR COMPONENT TYPES --"
-        |> (\b -> List.foldl generateComponentType b components)
+        |> (\doc -> List.foldl (generateComponentType nodes) doc components)
 
 
-generateComponentType : Component -> Builder -> Builder
-generateComponentType component builder =
+generateComponentType : List Node -> Component -> Builder -> Builder
+generateComponentType nodes component document =
     let
+        typeName =
+            componentTypeReference component
+
         modelField =
             componentsFieldName component
 
@@ -320,12 +339,17 @@ generateComponentType component builder =
             Config.componentTypeName component
                 |> Utils.firstToLower
                 |> Utils.append "Component"
+
+        componentNodes =
+            List.filter
+                (Config.nodeComponents >> List.member component)
+                nodes
     in
-    builder
+    document
         |> Builder.declaration (Builder.exposed name "Your Component Types")
             (name
                 ++ " : ComponentType "
-                ++ componentTypeReference component
+                ++ typeName
                 ++ "\n"
                 ++ name
                 ++ """ =
@@ -336,8 +360,181 @@ generateComponentType component builder =
         , setComponents = \\components model -> { model | """
                 ++ modelField
                 ++ """ = components }
+        , entitySets = ["""
+                ++ (List.map entitySetVariableName componentNodes
+                        |> String.join ", "
+                        |> padIfNotEmpty
+                   )
+                ++ """]
         }
 """
+            )
+
+
+padIfNotEmpty : String -> String
+padIfNotEmpty string =
+    if String.isEmpty string then
+        string
+
+    else
+        " " ++ string ++ " "
+
+
+generateNodes : Config -> Builder -> Builder
+generateNodes { nodes } document =
+    document
+        |> Builder.comment "-- YOUR NODES --"
+        |> (\doc -> List.foldl generateNode doc nodes)
+
+
+generateNode : Node -> Builder -> Builder
+generateNode node document =
+    document
+        |> Builder.declaration (Builder.exposed (nodeTypeAliasName node) "Your Nodes")
+            ("""
+type alias """
+                ++ nodeTypeAliasName node
+                ++ """ =
+    { """
+                ++ (List.map
+                        (\component ->
+                            nodeComponentFieldName component
+                                ++ " : "
+                                ++ componentTypeReference component
+                        )
+                        (Config.nodeComponents node)
+                        |> String.join """
+    , """
+                   )
+                ++ """
+    }
+"""
+            )
+
+
+generateNodeTypes : Config -> Builder -> Builder
+generateNodeTypes { nodes } document =
+    document
+        |> Builder.comment "-- YOUR NODE TYPES --"
+        |> (\doc -> List.foldl generateNodeType doc nodes)
+        |> Builder.declaration Builder.internal """
+nextComponent : Array.Array (Maybe a) -> Int -> (a -> b) -> Maybe b
+nextComponent components entityId callback =
+    Array.get entityId components
+        |> Maybe.withDefault Nothing
+        |> Maybe.map callback
+"""
+
+
+generateNodeType : Node -> Builder -> Builder
+generateNodeType node document =
+    let
+        name =
+            nodeTypeVariableName node
+    in
+    document
+        |> Builder.declaration (Builder.exposed name "Your Node Types")
+            (name
+                ++ " : NodeType "
+                ++ nodeTypeAliasName node
+                ++ "\n"
+                ++ name
+                ++ """ =
+    NodeType
+        { getEntities = ."""
+                ++ nodeEntitiesFieldName node
+                ++ """
+        , getNode =
+            \\entityId model ->
+                """
+                ++ nodeTypeAliasName node
+                ++ """
+                    """
+                ++ (List.indexedMap
+                        (\index component ->
+                            "|> "
+                                ++ wrapNextComponent index
+                                    ("nextComponent model."
+                                        ++ componentsFieldName component
+                                        ++ " entityId"
+                                    )
+                        )
+                        (Config.nodeComponents node)
+                        |> String.join """
+                    """
+                   )
+                ++ """
+        }
+"""
+            )
+
+
+wrapNextComponent : Int -> (String -> String)
+wrapNextComponent index =
+    if index == 0 then
+        identity
+
+    else
+        \a -> "Maybe.andThen (" ++ a ++ ")"
+
+
+generateEntitySetTypes : Config -> Builder -> Builder
+generateEntitySetTypes { nodes } document =
+    document
+        |> Builder.comment "-- YOUR ENTITY SET TYPES --"
+        |> Builder.declaration Builder.internal """
+type alias EntitySetType =
+    { getEntities : Model -> Set.Set Int
+    , setEntities : Set.Set Int -> Model -> Model
+    , member : Int -> Model -> Bool
+    }
+"""
+        |> (\doc -> List.foldl generateEntitySetType doc nodes)
+        |> Builder.declaration Builder.internal """
+isComponentsMember entityId components =
+    case Array.get entityId components of
+        Just (Just _) ->
+            True
+
+        _ ->
+            False
+"""
+
+
+generateEntitySetType : Node -> Builder -> Builder
+generateEntitySetType node document =
+    let
+        name =
+            entitySetVariableName node
+
+        entitiesModelField =
+            nodeEntitiesFieldName node
+    in
+    document
+        |> Builder.declaration Builder.internal
+            (name
+                ++ " : EntitySetType\n"
+                ++ name
+                ++ """ =
+    { getEntities = ."""
+                ++ entitiesModelField
+                ++ """
+    , setEntities = \\entities model -> { model | """
+                ++ entitiesModelField
+                ++ """ = entities }
+    , member =
+        \\entityId model ->
+            """
+                ++ (List.map
+                        (componentsFieldName
+                            >> (++) "isComponentsMember entityId model."
+                        )
+                        (Config.nodeComponents node)
+                        |> String.join "\n                && "
+                   )
+                ++ """
+    }
+    """
             )
 
 
@@ -357,3 +554,37 @@ componentsFieldName =
     Config.componentTypeName
         >> Utils.firstToLower
         >> Utils.append "Components"
+
+
+nodeEntitiesFieldName : Node -> String
+nodeEntitiesFieldName =
+    Config.nodeName
+        >> Utils.firstToLower
+        >> Utils.append "Entities"
+
+
+nodeTypeAliasName : Node -> String
+nodeTypeAliasName =
+    Config.nodeName
+        >> Utils.firstToUpper
+        >> Utils.append "Node"
+
+
+nodeComponentFieldName : Component -> String
+nodeComponentFieldName =
+    Config.componentTypeName
+        >> Utils.firstToLower
+
+
+nodeTypeVariableName : Node -> String
+nodeTypeVariableName =
+    Config.nodeName
+        >> Utils.firstToLower
+        >> Utils.append "Node"
+
+
+entitySetVariableName : Node -> String
+entitySetVariableName =
+    Config.nodeName
+        >> Utils.firstToLower
+        >> Utils.append "EntitySet"
