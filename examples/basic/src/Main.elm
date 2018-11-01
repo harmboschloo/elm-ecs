@@ -88,8 +88,8 @@ update msg model =
             ( { ecs =
                     ( model.ecs, deltaTime )
                         |> Systems.move
-                        |> Systems.bounce
-                        |> Systems.teleport
+                        |> Systems.checkBounce
+                        |> Systems.checkTeleport
                         |> Tuple.first
               }
             , Cmd.none

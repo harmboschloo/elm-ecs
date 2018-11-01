@@ -1,6 +1,6 @@
-module Systems exposing (bounce, move, render, teleport)
+module Systems exposing (checkBounce, checkTeleport, move, render)
 
-import Components exposing (Color, Position)
+import Components exposing (Bounce, Color, Position, Teleport, Velocity)
 import Ecs exposing (Ecs, EntityId)
 import Html exposing (Html)
 import Html.Attributes
@@ -22,11 +22,11 @@ worldHeight =
 
 move : ( Ecs, Float ) -> ( Ecs, Float )
 move =
-    Ecs.iterate Ecs.movementNode moveEntity
+    Ecs.iterate2 Ecs.velocityComponent Ecs.positionComponent moveEntity
 
 
-moveEntity : Ecs.EntityId -> Ecs.MovementNode -> ( Ecs, Float ) -> ( Ecs, Float )
-moveEntity entityId { position, velocity } ( ecs, deltaTime ) =
+moveEntity : Ecs.EntityId -> Velocity -> Position -> ( Ecs, Float ) -> ( Ecs, Float )
+moveEntity entityId velocity position ( ecs, deltaTime ) =
     ( Ecs.insert
         entityId
         Ecs.positionComponent
@@ -42,43 +42,45 @@ moveEntity entityId { position, velocity } ( ecs, deltaTime ) =
 --  BOUNDS CHECK --
 
 
-bounce : ( Ecs, Float ) -> ( Ecs, Float )
-bounce =
-    Ecs.iterate Ecs.boundsBounceNode checkEntityBoundsBounce
+checkBounce : ( Ecs, Float ) -> ( Ecs, Float )
+checkBounce =
+    Ecs.iterate3 Ecs.bounceComponent Ecs.velocityComponent Ecs.positionComponent checkEntityBoundsBounce
 
 
 checkEntityBoundsBounce :
     Ecs.EntityId
-    -> Ecs.BoundsBounceNode
+    -> Bounce
+    -> Velocity
+    -> Position
     -> ( Ecs, Float )
     -> ( Ecs, Float )
-checkEntityBoundsBounce entityId node ( ecs, deltaTime ) =
+checkEntityBoundsBounce entityId bounce velocity position ( ecs, deltaTime ) =
     let
         absNewVelocityX =
-            abs (node.velocity.x * node.bounce.damping)
+            abs (velocity.x * bounce.damping)
 
         absNewVelocityY =
-            abs (node.velocity.y * node.bounce.damping)
+            abs (velocity.y * bounce.damping)
 
         ( newX, newVelocityX, changedX ) =
-            if node.position.x < 0 then
+            if position.x < 0 then
                 ( 0, absNewVelocityX, True )
 
-            else if node.position.x > toFloat worldWidth then
+            else if position.x > toFloat worldWidth then
                 ( toFloat worldWidth, -absNewVelocityX, True )
 
             else
-                ( node.position.x, node.velocity.x, False )
+                ( position.x, velocity.x, False )
 
         ( newY, newVelocityY, changedY ) =
-            if node.position.y < 0 then
+            if position.y < 0 then
                 ( 0, absNewVelocityY, True )
 
-            else if node.position.y > toFloat worldHeight then
+            else if position.y > toFloat worldHeight then
                 ( toFloat worldHeight, -absNewVelocityY, True )
 
             else
-                ( node.position.y, node.velocity.y, False )
+                ( position.y, velocity.y, False )
     in
     if changedX || changedY then
         ( ecs
@@ -93,17 +95,18 @@ checkEntityBoundsBounce entityId node ( ecs, deltaTime ) =
         )
 
 
-teleport : ( Ecs, Float ) -> ( Ecs, Float )
-teleport =
-    Ecs.iterate Ecs.boundsTeleportNode checkEntityBoundsTeleport
+checkTeleport : ( Ecs, Float ) -> ( Ecs, Float )
+checkTeleport =
+    Ecs.iterate2 Ecs.teleportComponent Ecs.positionComponent checkEntityBoundsTeleport
 
 
 checkEntityBoundsTeleport :
     Ecs.EntityId
-    -> Ecs.BoundsTeleportNode
+    -> Teleport
+    -> Position
     -> ( Ecs, Float )
     -> ( Ecs, Float )
-checkEntityBoundsTeleport entityId { position } ( ecs, deltaTime ) =
+checkEntityBoundsTeleport entityId _ position ( ecs, deltaTime ) =
     let
         newX =
             if position.x < 0 then
@@ -150,13 +153,13 @@ render ecs =
         , Html.Attributes.style "background-color" "#aaa"
         ]
         (( ecs, [] )
-            |> Ecs.iterate Ecs.renderNode renderEntity
+            |> Ecs.iterate2 Ecs.colorComponent Ecs.positionComponent renderEntity
             |> Tuple.second
         )
 
 
-renderEntity : Ecs.EntityId -> Ecs.RenderNode -> ( Ecs, List (Html msg) ) -> ( Ecs, List (Html msg) )
-renderEntity entityId { position, color } ( ecs, elements ) =
+renderEntity : Ecs.EntityId -> Color -> Position -> ( Ecs, List (Html msg) ) -> ( Ecs, List (Html msg) )
+renderEntity entityId color position ( ecs, elements ) =
     ( ecs
     , Html.div
         [ Html.Attributes.style "position" "absolute"
