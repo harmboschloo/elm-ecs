@@ -7,6 +7,7 @@ module Apis exposing
     , ecs4b
     , ecs5
     , ecs5b
+    , ecs6
     )
 
 import Ecs1
@@ -16,6 +17,7 @@ import Ecs4
 import Ecs4b
 import Ecs5
 import Ecs5b
+import Ecs6
 
 
 
@@ -198,6 +200,28 @@ ecs5b =
     , iterateABCModifyA = Ecs5b.iterateAndUpdate Ecs5b.abcNode (\update _ ( ecs, x ) -> ( Ecs5b.apply (update |> Ecs5b.insert Ecs5b.aComponent ()) ecs, x )) |> withContext
     , iterateAModifyAB = Ecs5b.iterateAndUpdate Ecs5b.aNode (\update _ ( ecs, x ) -> ( Ecs5b.apply (update |> Ecs5b.insert Ecs5b.aComponent () |> Ecs5b.insert Ecs5b.bComponent ()) ecs, x )) |> withContext
     , iterateAModifyABC = Ecs5b.iterateAndUpdate Ecs5b.aNode (\update _ ( ecs, x ) -> ( Ecs5b.apply (update |> Ecs5b.insert Ecs5b.aComponent () |> Ecs5b.insert Ecs5b.bComponent () |> Ecs5b.insert Ecs5b.cComponent ()) ecs, x )) |> withContext
+    }
+
+
+ecs6 : EcsApi Ecs6.Ecs
+ecs6 =
+    { label = "Ecs6 record of dicts with nodes"
+    , empty = Ecs6.empty
+    , createA = createAndInsert Ecs6.create Ecs6.insert Ecs6.aComponent
+    , createB = createAndInsert Ecs6.create Ecs6.insert Ecs6.bComponent
+    , createC = createAndInsert Ecs6.create Ecs6.insert Ecs6.cComponent
+    , createAB = createAndInsert2 Ecs6.create Ecs6.insert Ecs6.aComponent Ecs6.bComponent
+    , createAC = createAndInsert2 Ecs6.create Ecs6.insert Ecs6.aComponent Ecs6.cComponent
+    , createBC = createAndInsert2 Ecs6.create Ecs6.insert Ecs6.bComponent Ecs6.cComponent
+    , createABC = createAndInsert3 Ecs6.create Ecs6.insert Ecs6.aComponent Ecs6.bComponent Ecs6.cComponent
+    , iterateA = Ecs6.iterate Ecs6.aNode (\_ _ x -> x) |> withContext
+    , iterateAB = Ecs6.iterate Ecs6.abNode (\_ _ x -> x) |> withContext
+    , iterateABC = Ecs6.iterate Ecs6.abcNode (\_ _ x -> x) |> withContext
+    , iterateAModifyA = Ecs6.iterate Ecs6.aNode (\entityId _ -> insert (Ecs6.insert entityId) Ecs6.aComponent) |> withContext
+    , iterateABModifyA = Ecs6.iterate Ecs6.abNode (\entityId _ -> insert (Ecs6.insert entityId) Ecs6.aComponent) |> withContext
+    , iterateABCModifyA = Ecs6.iterate Ecs6.abcNode (\entityId _ -> insert (Ecs6.insert entityId) Ecs6.aComponent) |> withContext
+    , iterateAModifyAB = Ecs6.iterate Ecs6.aNode (\entityId _ -> insert (Ecs6.insert entityId) Ecs6.aComponent >> insert (Ecs6.insert entityId) Ecs6.bComponent) |> withContext
+    , iterateAModifyABC = Ecs6.iterate Ecs6.aNode (\entityId _ -> insert (Ecs6.insert entityId) Ecs6.aComponent >> insert (Ecs6.insert entityId) Ecs6.bComponent >> insert (Ecs6.insert entityId) Ecs6.cComponent) |> withContext
     }
 
 
