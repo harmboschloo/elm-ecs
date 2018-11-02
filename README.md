@@ -19,6 +19,8 @@ ecs
 - https://github.com/kutuluk/js13k-ecs
 - https://www.richardlord.net/ash/
 - https://github.com/richardlord/Asteroids
+- http://robbinmarcus.blogspot.com/2016/07/the-next-step-in-entity-component.html
+- https://github.com/slide-rs/specs
 
 webgl
 
