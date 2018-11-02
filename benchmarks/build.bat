@@ -1,6 +1,8 @@
 call elm make src/CompareIterate.elm --output=build/CompareIterate.html --optimize
+call elm make src/CompareIterateBig.elm --output=build/CompareIterateBig.html --optimize
 call elm make src/CompareIterateSubset.elm --output=build/CompareIterateSubset.html --optimize
 call elm make src/CompareIterateAndModify.elm --output=build/CompareIterateAndModify.html --optimize
+call elm make src/CompareIterateAndModifyBig.elm --output=build/CompareIterateAndModifyBig.html --optimize
 call elm make src/CompareIterateAndModify2.elm --output=build/CompareIterateAndModify2.html --optimize
 call elm make src/CompareIterateAndModifySubset.elm --output=build/CompareIterateAndModifySubset.html --optimize
 call elm make src/ScaleIterate.elm --output=build/ScaleIterate.html --optimize
