@@ -4,8 +4,8 @@ import Apis
 
 
 ecsA =
-    Apis.ecs1b
+    Apis.ecs1
 
 
 ecsB =
-    Apis.ecs5b
+    Apis.ecs5

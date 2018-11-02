@@ -87,12 +87,24 @@ create : Ecs -> ( Ecs, EntityId )
 create (Ecs model) =
     case model.destroyedEntities of
         [] ->
-            ( Ecs { model | numberOfCreatedEntities = model.numberOfCreatedEntities + 1 }
+            ( Ecs
+                { aComponents = model.aComponents
+                , bComponents = model.bComponents
+                , cComponents = model.cComponents
+                , numberOfCreatedEntities = model.numberOfCreatedEntities + 1
+                , destroyedEntities = model.destroyedEntities
+                }
             , EntityId model.numberOfCreatedEntities
             )
 
         head :: tail ->
-            ( Ecs { model | destroyedEntities = tail }
+            ( Ecs
+                { aComponents = model.aComponents
+                , bComponents = model.bComponents
+                , cComponents = model.cComponents
+                , numberOfCreatedEntities = model.numberOfCreatedEntities
+                , destroyedEntities = tail
+                }
             , EntityId head
             )
 
@@ -100,24 +112,25 @@ create (Ecs model) =
 {-| -}
 destroy : EntityId -> Ecs -> Ecs
 destroy (EntityId entityId) (Ecs model) =
-    { model | destroyedEntities = entityId :: model.destroyedEntities }
-        |> resetEntity entityId
-        |> Ecs
+    Ecs
+        { aComponents = Dict.remove entityId model.aComponents
+        , bComponents = Dict.remove entityId model.bComponents
+        , cComponents = Dict.remove entityId model.cComponents
+        , numberOfCreatedEntities = model.numberOfCreatedEntities
+        , destroyedEntities = entityId :: model.destroyedEntities
+        }
 
 
 {-| -}
 reset : EntityId -> Ecs -> Ecs
 reset (EntityId entityId) (Ecs model) =
-    Ecs (resetEntity entityId model)
-
-
-resetEntity : Int -> Model -> Model
-resetEntity entityId model =
-    { model
-        | aComponents = Dict.remove entityId model.aComponents
+    Ecs
+        { aComponents = Dict.remove entityId model.aComponents
         , bComponents = Dict.remove entityId model.bComponents
         , cComponents = Dict.remove entityId model.cComponents
-    }
+        , numberOfCreatedEntities = model.numberOfCreatedEntities
+        , destroyedEntities = model.destroyedEntities
+        }
 
 
 {-| -}
@@ -284,7 +297,14 @@ aComponent : ComponentType Components.A
 aComponent =
     ComponentType
         { getComponents = .aComponents
-        , setComponents = \components model -> { model | aComponents = components }
+        , setComponents =
+            \components model ->
+                { aComponents = components
+                , bComponents = model.bComponents
+                , cComponents = model.cComponents
+                , numberOfCreatedEntities = model.numberOfCreatedEntities
+                , destroyedEntities = model.destroyedEntities
+                }
         }
 
 
@@ -293,7 +313,14 @@ bComponent : ComponentType Components.B
 bComponent =
     ComponentType
         { getComponents = .bComponents
-        , setComponents = \components model -> { model | bComponents = components }
+        , setComponents =
+            \components model ->
+                { aComponents = model.aComponents
+                , bComponents = components
+                , cComponents = model.cComponents
+                , numberOfCreatedEntities = model.numberOfCreatedEntities
+                , destroyedEntities = model.destroyedEntities
+                }
         }
 
 
@@ -302,5 +329,12 @@ cComponent : ComponentType Components.C
 cComponent =
     ComponentType
         { getComponents = .cComponents
-        , setComponents = \components model -> { model | cComponents = components }
+        , setComponents =
+            \components model ->
+                { aComponents = model.aComponents
+                , bComponents = model.bComponents
+                , cComponents = components
+                , numberOfCreatedEntities = model.numberOfCreatedEntities
+                , destroyedEntities = model.destroyedEntities
+                }
         }

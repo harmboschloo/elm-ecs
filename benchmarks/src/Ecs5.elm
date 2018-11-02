@@ -1,7 +1,9 @@
 module Ecs5 exposing
     ( Ecs, empty
-    , EntityId, Entity, emptyEntity, insert, remove, reset, get, set, update, size, activeSize, idToInt, intToId
-    , NodeType, iterate, nodeSize
+    , EntityId, Entity, create, destroy, reset, get, size, activeSize, idToInt, intToId
+    , EntityUpdate, apply, update, insert, remove, modify, entityId
+    , NodeType, iterate, iterateAndUpdate, nodeSize
+    , aComponent, bComponent, cComponent
     , ANode, AbNode, AbcNode
     , aNode, abNode, abcNode
     )
@@ -16,12 +18,22 @@ module Ecs5 exposing
 
 # Entities
 
-@docs EntityId, Entity, emptyEntity, insert, remove, reset, get, set, update, size, activeSize, idToInt, intToId
+@docs EntityId, Entity, create, destroy, reset, get, size, activeSize, idToInt, intToId
+
+
+# Entity Update
+
+@docs EntityUpdate, apply, update, insert, remove, modify, entityId, initialEnitity
 
 
 # Nodes
 
-@docs NodeType, iterate, nodeSize
+@docs NodeType, iterate, iterateAndUpdate, nodeSize
+
+
+# Your Component Types
+
+@docs aComponent, bComponent, cComponent
 
 
 # Your Nodes
@@ -71,8 +83,6 @@ empty =
 
 
 
---TODO
---emptyWith
 -- ENTITIES --
 
 
@@ -97,115 +107,116 @@ emptyEntity =
 
 
 {-| -}
-insert : Entity -> Ecs -> ( Ecs, EntityId )
-insert entity (Ecs model) =
-    case model.destroyedEntitiesCache of
-        [] ->
-            let
-                entityId =
-                    entitiesSize model
-            in
-            ( { model | entities = Array.push entity model.entities }
-                |> updateEntitySets (insertInEntitySet entityId entity)
-                |> Ecs
-            , EntityId entityId
-            )
+create : (EntityUpdate -> EntityUpdate) -> Ecs -> Ecs
+create updater (Ecs model) =
+    let
+        ( id, newModel ) =
+            case model.destroyedEntitiesCache of
+                [] ->
+                    ( entitiesSize model
+                    , { entities = Array.push emptyEntity model.entities
+                      , aEntities = model.aEntities
+                      , abEntities = model.abEntities
+                      , abcEntities = model.abcEntities
+                      , destroyedEntitiesCache = model.destroyedEntitiesCache
+                      }
+                    )
 
-        entityId :: others ->
-            ( { model
-                | entities = Array.set entityId entity model.entities
-                , destroyedEntitiesCache = others
-              }
-                |> updateEntitySets (insertInEntitySet entityId entity)
-                |> Ecs
-            , EntityId entityId
-            )
+                head :: tail ->
+                    ( head
+                    , { entities = model.entities
+                      , aEntities = model.aEntities
+                      , abEntities = model.abEntities
+                      , abcEntities = model.abcEntities
+                      , destroyedEntitiesCache = tail
+                      }
+                    )
+
+        entityUpdate =
+            EntityUpdate
+                { id = id
+                , entity = emptyEntity
+                , updates = []
+                }
+    in
+    Ecs (applyUpdate (updater entityUpdate) newModel)
 
 
 {-| -}
-remove : EntityId -> Ecs -> Ecs
-remove (EntityId entityId) (Ecs model) =
-    { model | destroyedEntitiesCache = entityId :: model.destroyedEntitiesCache }
-        |> resetEntity entityId
-        |> Ecs
+destroy : EntityId -> Ecs -> Ecs
+destroy (EntityId id) (Ecs model) =
+    Ecs
+        { entities = Array.set id emptyEntity model.entities
+        , aEntities = Set.remove id model.aEntities
+        , abEntities = Set.remove id model.abEntities
+        , abcEntities = Set.remove id model.abcEntities
+        , destroyedEntitiesCache = id :: model.destroyedEntitiesCache
+        }
 
 
 {-| -}
 reset : EntityId -> Ecs -> Ecs
-reset (EntityId entityId) (Ecs model) =
-    model
-        |> resetEntity entityId
-        |> Ecs
-
-
-resetEntity : Int -> Model -> Model
-resetEntity entityId model =
-    { model
-        | entities = Array.set entityId emptyEntity model.entities
-        , aEntities = Set.remove entityId model.aEntities
-        , abEntities = Set.remove entityId model.abEntities
-        , abcEntities = Set.remove entityId model.abcEntities
-    }
+reset (EntityId id) (Ecs model) =
+    Ecs
+        { entities = Array.set id emptyEntity model.entities
+        , aEntities = Set.remove id model.aEntities
+        , abEntities = Set.remove id model.abEntities
+        , abcEntities = Set.remove id model.abcEntities
+        , destroyedEntitiesCache = model.destroyedEntitiesCache
+        }
 
 
 {-| -}
 get : EntityId -> Ecs -> Entity
-get (EntityId entityId) (Ecs model) =
-    Array.get entityId model.entities |> Maybe.withDefault emptyEntity
+get (EntityId id) (Ecs model) =
+    getEntity id model
 
 
-{-| -}
-set : EntityId -> Entity -> Ecs -> Ecs
-set (EntityId entityId) entity (Ecs model) =
-    let
-        entitySetUpdater =
-            updateInEntitySet entityId entity
-    in
-    Ecs
-        { model
-            | entities = Array.set entityId entity model.entities
-            , aEntities = entitySetUpdater aEntitySet model.aEntities
-            , abEntities = entitySetUpdater abEntitySet model.abEntities
-            , abcEntities = entitySetUpdater abcEntitySet model.abcEntities
-        }
+getEntity : Int -> Model -> Entity
+getEntity id model =
+    Array.get id model.entities |> Maybe.withDefault emptyEntity
 
 
-updateEntitySets : (EntitySetType -> Set.Set Int -> Set.Set Int) -> Model -> Model
-updateEntitySets updater model =
-    { model
-        | aEntities = updater aEntitySet model.aEntities
-        , abEntities = updater abEntitySet model.abEntities
-        , abcEntities = updater abcEntitySet model.abcEntities
-    }
 
-
-insertInEntitySet : Int -> Entity -> EntitySetType -> Set.Set Int -> Set.Set Int
-insertInEntitySet entityId entity entitySetType entitySet =
-    if entitySetType.member entity then
-        Set.insert entityId entitySet
-
-    else
-        entitySet
-
-
-updateInEntitySet : Int -> Entity -> EntitySetType -> Set.Set Int -> Set.Set Int
-updateInEntitySet entityId entity entitySetType entitySet =
-    if entitySetType.member entity then
-        Set.insert entityId entitySet
-
-    else
-        Set.remove entityId entitySet
-
-
-{-| -}
-update : EntityId -> (Entity -> Entity) -> Ecs -> Ecs
-update (EntityId entityId) updater (Ecs model) =
-    case Array.get entityId model.entities of
-        Nothing ->
-            Ecs model
-
-        Just entity ->
-            set (EntityId entityId) (updater entity) (Ecs model)
+-- set : EntityId -> Entity -> Ecs -> Ecs
+-- set (EntityId entityId) entity (Ecs model) =
+--     let
+--         entitySetUpdater =
+--             updateInEntitySet entityId entity
+--     in
+--     Ecs
+--         { model
+--             | entities = Array.set entityId entity model.entities
+--             , aEntities = entitySetUpdater aEntitySet model.aEntities
+--             , abEntities = entitySetUpdater abEntitySet model.abEntities
+--             , abcEntities = entitySetUpdater abcEntitySet model.abcEntities
+--         }
+-- updateEntitySets : (EntitySetType -> Set.Set Int -> Set.Set Int) -> Model -> Model
+-- updateEntitySets updater model =
+--     { model
+--         | aEntities = updater aEntitySet model.aEntities
+--         , abEntities = updater abEntitySet model.abEntities
+--         , abcEntities = updater abcEntitySet model.abcEntities
+--     }
+-- insertInEntitySet : Int -> Entity -> EntitySetType -> Set.Set Int -> Set.Set Int
+-- insertInEntitySet entityId entity entitySetType entitySet =
+--     if entitySetType.member entity then
+--         Set.insert entityId entitySet
+--     else
+--         entitySet
+-- updateInEntitySet : Int -> Entity -> EntitySetType -> Set.Set Int -> Set.Set Int
+-- updateInEntitySet entityId entity entitySetType entitySet =
+--     if entitySetType.member entity then
+--         Set.insert entityId entitySet
+--     else
+--         Set.remove entityId entitySet
+-- modify : EntityId -> (Entity -> Entity) -> Ecs -> Ecs
+-- modify (EntityId entityId) updater (Ecs model) =
+--     case Array.get entityId model.entities of
+--         Nothing ->
+--             Ecs model
+--         Just entity ->
+--             set (EntityId entityId) (updater entity) (Ecs model)
 
 
 {-| -}
@@ -242,6 +253,213 @@ intToId id ecs =
 
 
 
+-- Entity Update --
+
+
+{-| -}
+type EntityUpdate
+    = EntityUpdate EntityUpdateModel
+
+
+type alias EntityUpdateModel =
+    { id : Int
+    , entity : Entity
+    , updates : List (( Entity, Model ) -> ( Entity, Model ))
+    }
+
+
+{-| -}
+apply : EntityUpdate -> Ecs -> Ecs
+apply entityUpdate (Ecs model) =
+    Ecs (applyUpdate entityUpdate model)
+
+
+applyUpdate : EntityUpdate -> Model -> Model
+applyUpdate (EntityUpdate { id, entity, updates }) model =
+    case updates of
+        [] ->
+            model
+
+        _ ->
+            let
+                ( newEntity, newModel ) =
+                    List.foldl (<|) ( entity, model ) updates
+            in
+            { entities = Array.set id newEntity newModel.entities
+            , aEntities = newModel.aEntities
+            , abEntities = newModel.abEntities
+            , abcEntities = newModel.abcEntities
+            , destroyedEntitiesCache = newModel.destroyedEntitiesCache
+            }
+
+
+{-| -}
+update : EntityId -> (EntityUpdate -> EntityUpdate) -> Ecs -> Ecs
+update (EntityId id) updater (Ecs model) =
+    let
+        entityUpdate =
+            EntityUpdate
+                { id = id
+                , entity = getEntity id model
+                , updates = []
+                }
+    in
+    Ecs (applyUpdate (updater entityUpdate) model)
+
+
+{-| -}
+insert : ComponentType a -> a -> EntityUpdate -> EntityUpdate
+insert componentType component (EntityUpdate entityUpdate) =
+    EntityUpdate
+        { id = entityUpdate.id
+        , entity = entityUpdate.entity
+        , updates =
+            insertComponent
+                entityUpdate.id
+                componentType
+                component
+                :: entityUpdate.updates
+        }
+
+
+insertComponent : Int -> ComponentType a -> a -> ( Entity, Model ) -> ( Entity, Model )
+insertComponent id (ComponentType componentType) component ( entity, model ) =
+    let
+        newEntity =
+            componentType.setComponent (Just component) entity
+    in
+    case componentType.getComponent entity of
+        Nothing ->
+            ( newEntity
+            , insertInEntitySets id newEntity componentType model
+            )
+
+        Just _ ->
+            ( newEntity, model )
+
+
+insertInEntitySets : Int -> Entity -> ComponentTypeModel a -> Model -> Model
+insertInEntitySets id entity componentType model =
+    List.foldl (insertInEntitySet id entity) model componentType.entitySets
+
+
+insertInEntitySet : Int -> Entity -> EntitySetType -> Model -> Model
+insertInEntitySet id entity entitySetType model =
+    if entitySetType.member entity then
+        entitySetType.setEntities
+            (Set.insert id (entitySetType.getEntities model))
+            model
+
+    else
+        model
+
+
+{-| -}
+remove : ComponentType a -> EntityUpdate -> EntityUpdate
+remove componentType (EntityUpdate entityUpdate) =
+    EntityUpdate
+        { id = entityUpdate.id
+        , entity = entityUpdate.entity
+        , updates =
+            removeComponent
+                entityUpdate.id
+                componentType
+                :: entityUpdate.updates
+        }
+
+
+removeComponent : Int -> ComponentType a -> ( Entity, Model ) -> ( Entity, Model )
+removeComponent id (ComponentType componentType) ( entity, model ) =
+    let
+        newEntity =
+            componentType.setComponent Nothing entity
+    in
+    case componentType.getComponent entity of
+        Nothing ->
+            ( newEntity, model )
+
+        Just _ ->
+            ( newEntity
+            , removeFromEntitySets id componentType model
+            )
+
+
+removeFromEntitySets : Int -> ComponentTypeModel a -> Model -> Model
+removeFromEntitySets id componentType model =
+    List.foldl (removeFromEntitySet id) model componentType.entitySets
+
+
+removeFromEntitySet : Int -> EntitySetType -> Model -> Model
+removeFromEntitySet id entitySetType model =
+    entitySetType.setEntities
+        (Set.remove id (entitySetType.getEntities model))
+        model
+
+
+{-| -}
+modify : ComponentType a -> (Maybe a -> Maybe a) -> EntityUpdate -> EntityUpdate
+modify componentType updater (EntityUpdate entityUpdate) =
+    EntityUpdate
+        { id = entityUpdate.id
+        , entity = entityUpdate.entity
+        , updates =
+            modifyComponent
+                entityUpdate.id
+                componentType
+                updater
+                :: entityUpdate.updates
+        }
+
+
+modifyComponent :
+    Int
+    -> ComponentType a
+    -> (Maybe a -> Maybe a)
+    -> ( Entity, Model )
+    -> ( Entity, Model )
+modifyComponent id (ComponentType componentType) updater ( entity, model ) =
+    let
+        component =
+            componentType.getComponent entity
+
+        newComponent =
+            updater component
+    in
+    case ( component, newComponent ) of
+        ( Nothing, Nothing ) ->
+            ( entity, model )
+
+        ( Nothing, Just _ ) ->
+            let
+                newEntity =
+                    componentType.setComponent newComponent entity
+            in
+            ( newEntity
+            , insertInEntitySets id newEntity componentType model
+            )
+
+        ( Just _, Nothing ) ->
+            ( componentType.setComponent newComponent entity
+            , removeFromEntitySets id componentType model
+            )
+
+        ( Just _, Just _ ) ->
+            ( componentType.setComponent newComponent entity
+            , model
+            )
+
+
+entityId : EntityUpdate -> EntityId
+entityId (EntityUpdate { id }) =
+    EntityId id
+
+
+intialEntity : EntityUpdate -> Entity
+intialEntity (EntityUpdate { entity }) =
+    entity
+
+
+
 -- NODES --
 
 
@@ -256,13 +474,39 @@ type NodeType node
 {-| -}
 iterate :
     NodeType node
-    -> (EntityId -> Entity -> node -> ( Ecs, context ) -> ( Ecs, context ))
-    -> ( Ecs, context )
-    -> ( Ecs, context )
-iterate (NodeType nodeType) callback ( Ecs model, context ) =
+    -> (EntityId -> Entity -> node -> context -> context)
+    -> Ecs
+    -> context
+    -> context
+iterate (NodeType nodeType) callback (Ecs model) context =
     Set.foldl
-        (\entityId result ->
-            case Array.get entityId model.entities of
+        (\id x ->
+            case Array.get id model.entities of
+                Nothing ->
+                    x
+
+                Just entity ->
+                    case nodeType.getNode entity of
+                        Nothing ->
+                            x
+
+                        Just node ->
+                            callback (EntityId id) entity node x
+        )
+        context
+        (nodeType.getEntities model)
+
+
+{-| -}
+iterateAndUpdate :
+    NodeType node
+    -> (EntityUpdate -> node -> ( Ecs, context ) -> ( Ecs, context ))
+    -> ( Ecs, context )
+    -> ( Ecs, context )
+iterateAndUpdate (NodeType nodeType) callback ( Ecs model, context ) =
+    Set.foldl
+        (\id result ->
+            case Array.get id model.entities of
                 Nothing ->
                     result
 
@@ -273,8 +517,12 @@ iterate (NodeType nodeType) callback ( Ecs model, context ) =
 
                         Just node ->
                             callback
-                                (EntityId entityId)
-                                entity
+                                (EntityUpdate
+                                    { id = id
+                                    , entity = entity
+                                    , updates = []
+                                    }
+                                )
                                 node
                                 result
         )
@@ -286,6 +534,67 @@ iterate (NodeType nodeType) callback ( Ecs model, context ) =
 nodeSize : NodeType a -> Ecs -> Int
 nodeSize (NodeType nodeType) (Ecs model) =
     Set.size (nodeType.getEntities model)
+
+
+
+-- YOUR COMPONENT TYPES --
+
+
+{-| -}
+type ComponentType a
+    = ComponentType (ComponentTypeModel a)
+
+
+type alias ComponentTypeModel a =
+    { getComponent : Entity -> Maybe a
+    , setComponent : Maybe a -> Entity -> Entity
+    , entitySets : List EntitySetType
+    }
+
+
+{-| -}
+aComponent : ComponentType Components.A
+aComponent =
+    ComponentType
+        { getComponent = .a
+        , setComponent =
+            \component entity ->
+                { a = component
+                , b = entity.b
+                , c = entity.c
+                }
+        , entitySets = [ aEntitySet, abEntitySet, abcEntitySet ]
+        }
+
+
+{-| -}
+bComponent : ComponentType Components.B
+bComponent =
+    ComponentType
+        { getComponent = .b
+        , setComponent =
+            \component entity ->
+                { a = entity.a
+                , b = component
+                , c = entity.c
+                }
+        , entitySets = [ abEntitySet, abcEntitySet ]
+        }
+
+
+{-| -}
+cComponent : ComponentType Components.C
+cComponent =
+    ComponentType
+        { getComponent = .c
+        , setComponent =
+            \component entity ->
+                { a = entity.a
+                , b = entity.b
+                , c = component
+                }
+        , entitySets = [ abcEntitySet ]
+        }
 
 
 
@@ -363,13 +672,24 @@ maybeAndMap =
 
 
 type alias EntitySetType =
-    { member : Entity -> Bool
+    { getEntities : Model -> Set.Set Int
+    , setEntities : Set.Set Int -> Model -> Model
+    , member : Entity -> Bool
     }
 
 
 aEntitySet : EntitySetType
 aEntitySet =
-    { member =
+    { getEntities = .aEntities
+    , setEntities =
+        \entities model ->
+            { entities = model.entities
+            , aEntities = entities
+            , abEntities = model.abEntities
+            , abcEntities = model.abcEntities
+            , destroyedEntitiesCache = model.destroyedEntitiesCache
+            }
+    , member =
         \entity ->
             entity.a /= Nothing
     }
@@ -377,7 +697,16 @@ aEntitySet =
 
 abEntitySet : EntitySetType
 abEntitySet =
-    { member =
+    { getEntities = .abEntities
+    , setEntities =
+        \entities model ->
+            { entities = model.entities
+            , aEntities = model.aEntities
+            , abEntities = entities
+            , abcEntities = model.abcEntities
+            , destroyedEntitiesCache = model.destroyedEntitiesCache
+            }
+    , member =
         \entity ->
             (entity.a /= Nothing)
                 && (entity.b /= Nothing)
@@ -386,7 +715,16 @@ abEntitySet =
 
 abcEntitySet : EntitySetType
 abcEntitySet =
-    { member =
+    { getEntities = .abcEntities
+    , setEntities =
+        \entities model ->
+            { entities = model.entities
+            , aEntities = model.aEntities
+            , abEntities = model.abEntities
+            , abcEntities = entities
+            , destroyedEntitiesCache = model.destroyedEntitiesCache
+            }
+    , member =
         \entity ->
             (entity.a /= Nothing)
                 && (entity.b /= Nothing)
