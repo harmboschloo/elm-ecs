@@ -101,12 +101,30 @@ create : Ecs -> ( Ecs, EntityId )
 create (Ecs model) =
     case model.destroyedEntities of
         [] ->
-            ( Ecs { model | numberOfCreatedEntities = model.numberOfCreatedEntities + 1 }
+            ( Ecs
+                { aComponents = model.aComponents
+                , bComponents = model.bComponents
+                , cComponents = model.cComponents
+                , aNodes = model.aNodes
+                , abNodes = model.abNodes
+                , abcNodes = model.abcNodes
+                , numberOfCreatedEntities = model.numberOfCreatedEntities + 1
+                , destroyedEntities = model.destroyedEntities
+                }
             , EntityId model.numberOfCreatedEntities
             )
 
         head :: tail ->
-            ( Ecs { model | destroyedEntities = tail }
+            ( Ecs
+                { aComponents = model.aComponents
+                , bComponents = model.bComponents
+                , cComponents = model.cComponents
+                , aNodes = model.aNodes
+                , abNodes = model.abNodes
+                , abcNodes = model.abcNodes
+                , numberOfCreatedEntities = model.numberOfCreatedEntities
+                , destroyedEntities = tail
+                }
             , EntityId head
             )
 
@@ -114,27 +132,31 @@ create (Ecs model) =
 {-| -}
 destroy : EntityId -> Ecs -> Ecs
 destroy (EntityId entityId) (Ecs model) =
-    { model | destroyedEntities = entityId :: model.destroyedEntities }
-        |> resetEntity entityId
-        |> Ecs
-
-
-{-| -}
-reset : EntityId -> Ecs -> Ecs
-reset (EntityId entityId) (Ecs model) =
-    Ecs (resetEntity entityId model)
-
-
-resetEntity : Int -> Model -> Model
-resetEntity entityId model =
-    { model
-        | aComponents = Dict.remove entityId model.aComponents
+    Ecs
+        { aComponents = Dict.remove entityId model.aComponents
         , bComponents = Dict.remove entityId model.bComponents
         , cComponents = Dict.remove entityId model.cComponents
         , aNodes = Dict.remove entityId model.aNodes
         , abNodes = Dict.remove entityId model.abNodes
         , abcNodes = Dict.remove entityId model.abcNodes
-    }
+        , numberOfCreatedEntities = model.numberOfCreatedEntities
+        , destroyedEntities = entityId :: model.destroyedEntities
+        }
+
+
+{-| -}
+reset : EntityId -> Ecs -> Ecs
+reset (EntityId entityId) (Ecs model) =
+    Ecs
+        { aComponents = Dict.remove entityId model.aComponents
+        , bComponents = Dict.remove entityId model.bComponents
+        , cComponents = Dict.remove entityId model.cComponents
+        , aNodes = Dict.remove entityId model.aNodes
+        , abNodes = Dict.remove entityId model.abNodes
+        , abcNodes = Dict.remove entityId model.abcNodes
+        , numberOfCreatedEntities = model.numberOfCreatedEntities
+        , destroyedEntities = model.destroyedEntities
+        }
 
 
 {-| -}
@@ -342,7 +364,17 @@ aComponent =
     ComponentType
         { id = 0
         , getComponents = .aComponents
-        , setComponents = \components model -> { model | aComponents = components }
+        , setComponents =
+            \components model ->
+                { aComponents = components
+                , bComponents = model.bComponents
+                , cComponents = model.cComponents
+                , aNodes = model.aNodes
+                , abNodes = model.abNodes
+                , abcNodes = model.abcNodes
+                , numberOfCreatedEntities = model.numberOfCreatedEntities
+                , destroyedEntities = model.destroyedEntities
+                }
         }
 
 
@@ -352,7 +384,17 @@ bComponent =
     ComponentType
         { id = 1
         , getComponents = .bComponents
-        , setComponents = \components model -> { model | bComponents = components }
+        , setComponents =
+            \components model ->
+                { aComponents = model.aComponents
+                , bComponents = components
+                , cComponents = model.cComponents
+                , aNodes = model.aNodes
+                , abNodes = model.abNodes
+                , abcNodes = model.abcNodes
+                , numberOfCreatedEntities = model.numberOfCreatedEntities
+                , destroyedEntities = model.destroyedEntities
+                }
         }
 
 
@@ -362,7 +404,17 @@ cComponent =
     ComponentType
         { id = 2
         , getComponents = .cComponents
-        , setComponents = \components model -> { model | cComponents = components }
+        , setComponents =
+            \components model ->
+                { aComponents = model.aComponents
+                , bComponents = components
+                , cComponents = model.cComponents
+                , aNodes = model.aNodes
+                , abNodes = model.abNodes
+                , abcNodes = model.abcNodes
+                , numberOfCreatedEntities = model.numberOfCreatedEntities
+                , destroyedEntities = model.destroyedEntities
+                }
         }
 
 
@@ -400,7 +452,17 @@ aNode : NodeType ANode
 aNode =
     NodeType
         { getNodes = .aNodes
-        , setNodes = \nodes model -> { model | aNodes = nodes }
+        , setNodes =
+            \nodes model ->
+                { aComponents = model.aComponents
+                , bComponents = model.bComponents
+                , cComponents = model.cComponents
+                , aNodes = nodes
+                , abNodes = model.abNodes
+                , abcNodes = model.abcNodes
+                , numberOfCreatedEntities = model.numberOfCreatedEntities
+                , destroyedEntities = model.destroyedEntities
+                }
         , getNode =
             \entityId model ->
                 Maybe.map ANode (Dict.get entityId model.aComponents)
@@ -413,7 +475,17 @@ abNode : NodeType AbNode
 abNode =
     NodeType
         { getNodes = .abNodes
-        , setNodes = \nodes model -> { model | abNodes = nodes }
+        , setNodes =
+            \nodes model ->
+                { aComponents = model.aComponents
+                , bComponents = model.bComponents
+                , cComponents = model.cComponents
+                , aNodes = model.aNodes
+                , abNodes = nodes
+                , abcNodes = model.abcNodes
+                , numberOfCreatedEntities = model.numberOfCreatedEntities
+                , destroyedEntities = model.destroyedEntities
+                }
         , getNode =
             \entityId model ->
                 Maybe.map AbNode (Dict.get entityId model.aComponents)
@@ -430,7 +502,17 @@ abcNode : NodeType AbcNode
 abcNode =
     NodeType
         { getNodes = .abcNodes
-        , setNodes = \nodes model -> { model | abcNodes = nodes }
+        , setNodes =
+            \nodes model ->
+                { aComponents = model.aComponents
+                , bComponents = model.bComponents
+                , cComponents = model.cComponents
+                , aNodes = model.aNodes
+                , abNodes = model.abNodes
+                , abcNodes = nodes
+                , numberOfCreatedEntities = model.numberOfCreatedEntities
+                , destroyedEntities = model.destroyedEntities
+                }
         , getNode =
             \entityId model ->
                 Maybe.map AbcNode (Dict.get entityId model.aComponents)

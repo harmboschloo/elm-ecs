@@ -114,12 +114,22 @@ create updater (Ecs model) =
             case model.destroyedEntitiesCache of
                 [] ->
                     ( entitiesSize model
-                    , { model | entities = Array.push emptyEntity model.entities }
+                    , { entities = Array.push emptyEntity model.entities
+                      , aEntities = model.aEntities
+                      , abEntities = model.abEntities
+                      , abcEntities = model.abcEntities
+                      , destroyedEntitiesCache = model.destroyedEntitiesCache
+                      }
                     )
 
                 head :: tail ->
                     ( head
-                    , { model | destroyedEntitiesCache = tail }
+                    , { entities = model.entities
+                      , aEntities = model.aEntities
+                      , abEntities = model.abEntities
+                      , abcEntities = model.abcEntities
+                      , destroyedEntitiesCache = tail
+                      }
                     )
 
         entityUpdate =
@@ -135,27 +145,25 @@ create updater (Ecs model) =
 {-| -}
 destroy : EntityId -> Ecs -> Ecs
 destroy (EntityId id) (Ecs model) =
-    { model | destroyedEntitiesCache = id :: model.destroyedEntitiesCache }
-        |> resetEntity id
-        |> Ecs
+    Ecs
+        { entities = Array.set id emptyEntity model.entities
+        , aEntities = Set.remove id model.aEntities
+        , abEntities = Set.remove id model.abEntities
+        , abcEntities = Set.remove id model.abcEntities
+        , destroyedEntitiesCache = id :: model.destroyedEntitiesCache
+        }
 
 
 {-| -}
 reset : EntityId -> Ecs -> Ecs
 reset (EntityId id) (Ecs model) =
-    model
-        |> resetEntity id
-        |> Ecs
-
-
-resetEntity : Int -> Model -> Model
-resetEntity id model =
-    { model
-        | entities = Array.set id emptyEntity model.entities
+    Ecs
+        { entities = Array.set id emptyEntity model.entities
         , aEntities = Set.remove id model.aEntities
         , abEntities = Set.remove id model.abEntities
         , abcEntities = Set.remove id model.abcEntities
-    }
+        , destroyedEntitiesCache = model.destroyedEntitiesCache
+        }
 
 
 {-| -}
@@ -277,7 +285,12 @@ applyUpdate (EntityUpdate { id, entity, updates }) model =
                 ( newEntity, newModel ) =
                     List.foldl (<|) ( entity, model ) updates
             in
-            { newModel | entities = Array.set id newEntity newModel.entities }
+            { entities = Array.set id newEntity newModel.entities
+            , aEntities = newModel.aEntities
+            , abEntities = newModel.abEntities
+            , abcEntities = newModel.abcEntities
+            , destroyedEntitiesCache = newModel.destroyedEntitiesCache
+            }
 
 
 {-| -}
@@ -298,13 +311,14 @@ update (EntityId id) updater (Ecs model) =
 insert : ComponentType a -> a -> EntityUpdate -> EntityUpdate
 insert componentType component (EntityUpdate entityUpdate) =
     EntityUpdate
-        { entityUpdate
-            | updates =
-                insertComponent
-                    entityUpdate.id
-                    componentType
-                    component
-                    :: entityUpdate.updates
+        { id = entityUpdate.id
+        , entity = entityUpdate.entity
+        , updates =
+            insertComponent
+                entityUpdate.id
+                componentType
+                component
+                :: entityUpdate.updates
         }
 
 
@@ -344,12 +358,13 @@ insertInEntitySet id entity entitySetType model =
 remove : ComponentType a -> EntityUpdate -> EntityUpdate
 remove componentType (EntityUpdate entityUpdate) =
     EntityUpdate
-        { entityUpdate
-            | updates =
-                removeComponent
-                    entityUpdate.id
-                    componentType
-                    :: entityUpdate.updates
+        { id = entityUpdate.id
+        , entity = entityUpdate.entity
+        , updates =
+            removeComponent
+                entityUpdate.id
+                componentType
+                :: entityUpdate.updates
         }
 
 
@@ -385,13 +400,14 @@ removeFromEntitySet id entitySetType model =
 modify : ComponentType a -> (Maybe a -> Maybe a) -> EntityUpdate -> EntityUpdate
 modify componentType updater (EntityUpdate entityUpdate) =
     EntityUpdate
-        { entityUpdate
-            | updates =
-                modifyComponent
-                    entityUpdate.id
-                    componentType
-                    updater
-                    :: entityUpdate.updates
+        { id = entityUpdate.id
+        , entity = entityUpdate.entity
+        , updates =
+            modifyComponent
+                entityUpdate.id
+                componentType
+                updater
+                :: entityUpdate.updates
         }
 
 
@@ -541,7 +557,12 @@ aComponent : ComponentType Components.A
 aComponent =
     ComponentType
         { getComponent = .a
-        , setComponent = \component entity -> { entity | a = component }
+        , setComponent =
+            \component entity ->
+                { a = component
+                , b = entity.b
+                , c = entity.c
+                }
         , entitySets = [ aEntitySet, abEntitySet, abcEntitySet ]
         }
 
@@ -551,7 +572,12 @@ bComponent : ComponentType Components.B
 bComponent =
     ComponentType
         { getComponent = .b
-        , setComponent = \component entity -> { entity | b = component }
+        , setComponent =
+            \component entity ->
+                { a = entity.a
+                , b = component
+                , c = entity.c
+                }
         , entitySets = [ abEntitySet, abcEntitySet ]
         }
 
@@ -561,7 +587,12 @@ cComponent : ComponentType Components.C
 cComponent =
     ComponentType
         { getComponent = .c
-        , setComponent = \component entity -> { entity | c = component }
+        , setComponent =
+            \component entity ->
+                { a = entity.a
+                , b = entity.b
+                , c = component
+                }
         , entitySets = [ abcEntitySet ]
         }
 
@@ -650,7 +681,14 @@ type alias EntitySetType =
 aEntitySet : EntitySetType
 aEntitySet =
     { getEntities = .aEntities
-    , setEntities = \entities model -> { model | aEntities = entities }
+    , setEntities =
+        \entities model ->
+            { entities = model.entities
+            , aEntities = entities
+            , abEntities = model.abEntities
+            , abcEntities = model.abcEntities
+            , destroyedEntitiesCache = model.destroyedEntitiesCache
+            }
     , member =
         \entity ->
             entity.a /= Nothing
@@ -660,7 +698,14 @@ aEntitySet =
 abEntitySet : EntitySetType
 abEntitySet =
     { getEntities = .abEntities
-    , setEntities = \entities model -> { model | abEntities = entities }
+    , setEntities =
+        \entities model ->
+            { entities = model.entities
+            , aEntities = model.aEntities
+            , abEntities = entities
+            , abcEntities = model.abcEntities
+            , destroyedEntitiesCache = model.destroyedEntitiesCache
+            }
     , member =
         \entity ->
             (entity.a /= Nothing)
@@ -671,7 +716,14 @@ abEntitySet =
 abcEntitySet : EntitySetType
 abcEntitySet =
     { getEntities = .abcEntities
-    , setEntities = \entities model -> { model | abcEntities = entities }
+    , setEntities =
+        \entities model ->
+            { entities = model.entities
+            , aEntities = model.aEntities
+            , abEntities = model.abEntities
+            , abcEntities = entities
+            , destroyedEntitiesCache = model.destroyedEntitiesCache
+            }
     , member =
         \entity ->
             (entity.a /= Nothing)
