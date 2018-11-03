@@ -53,11 +53,16 @@ type Ecs
 
 
 type alias Model =
-    { aComponents : Dict.Dict Int Components.A
-    , bComponents : Dict.Dict Int Components.B
-    , cComponents : Dict.Dict Int Components.C
+    { components : Components
     , numberOfCreatedEntities : Int
     , destroyedEntities : List Int
+    }
+
+
+type alias Components =
+    { a : Dict.Dict Int Components.A
+    , b : Dict.Dict Int Components.B
+    , c : Dict.Dict Int Components.C
     }
 
 
@@ -65,9 +70,11 @@ type alias Model =
 empty : Ecs
 empty =
     Ecs
-        { aComponents = Dict.empty
-        , bComponents = Dict.empty
-        , cComponents = Dict.empty
+        { components =
+            { a = Dict.empty
+            , b = Dict.empty
+            , c = Dict.empty
+            }
         , numberOfCreatedEntities = 0
         , destroyedEntities = []
         }
@@ -88,9 +95,7 @@ create (Ecs model) =
     case model.destroyedEntities of
         [] ->
             ( Ecs
-                { aComponents = model.aComponents
-                , bComponents = model.bComponents
-                , cComponents = model.cComponents
+                { components = model.components
                 , numberOfCreatedEntities = model.numberOfCreatedEntities + 1
                 , destroyedEntities = model.destroyedEntities
                 }
@@ -99,9 +104,7 @@ create (Ecs model) =
 
         head :: tail ->
             ( Ecs
-                { aComponents = model.aComponents
-                , bComponents = model.bComponents
-                , cComponents = model.cComponents
+                { components = model.components
                 , numberOfCreatedEntities = model.numberOfCreatedEntities
                 , destroyedEntities = tail
                 }
@@ -113,9 +116,7 @@ create (Ecs model) =
 destroy : EntityId -> Ecs -> Ecs
 destroy (EntityId entityId) (Ecs model) =
     Ecs
-        { aComponents = Dict.remove entityId model.aComponents
-        , bComponents = Dict.remove entityId model.bComponents
-        , cComponents = Dict.remove entityId model.cComponents
+        { components = resetComponents entityId model.components
         , numberOfCreatedEntities = model.numberOfCreatedEntities
         , destroyedEntities = entityId :: model.destroyedEntities
         }
@@ -125,12 +126,18 @@ destroy (EntityId entityId) (Ecs model) =
 reset : EntityId -> Ecs -> Ecs
 reset (EntityId entityId) (Ecs model) =
     Ecs
-        { aComponents = Dict.remove entityId model.aComponents
-        , bComponents = Dict.remove entityId model.bComponents
-        , cComponents = Dict.remove entityId model.cComponents
+        { components = resetComponents entityId model.components
         , numberOfCreatedEntities = model.numberOfCreatedEntities
         , destroyedEntities = model.destroyedEntities
         }
+
+
+resetComponents : Int -> Components -> Components
+resetComponents entityId components =
+    { a = Dict.remove entityId components.a
+    , b = Dict.remove entityId components.b
+    , c = Dict.remove entityId components.c
+    }
 
 
 {-| -}
@@ -168,45 +175,54 @@ intToId id ecs =
 {-| -}
 type ComponentType a
     = ComponentType
-        { getComponents : Model -> Dict.Dict Int a
-        , setComponents : Dict.Dict Int a -> Model -> Model
+        { getComponents : Components -> Dict.Dict Int a
+        , updateComponents : (Dict.Dict Int a -> Dict.Dict Int a) -> Components -> Components
         }
 
 
 {-| -}
 get : EntityId -> ComponentType a -> Ecs -> Maybe a
 get (EntityId entityId) (ComponentType { getComponents }) (Ecs model) =
-    Dict.get entityId (getComponents model)
+    Dict.get entityId (getComponents model.components)
 
 
 {-| -}
 insert : EntityId -> ComponentType a -> a -> Ecs -> Ecs
 insert (EntityId entityId) (ComponentType componentType) component (Ecs model) =
     Ecs
-        (componentType.setComponents
-            (Dict.insert entityId component (componentType.getComponents model))
-            model
-        )
+        { components =
+            componentType.updateComponents
+                (Dict.insert entityId component)
+                model.components
+        , numberOfCreatedEntities = model.numberOfCreatedEntities
+        , destroyedEntities = model.destroyedEntities
+        }
 
 
 {-| -}
 update : EntityId -> ComponentType a -> (Maybe a -> Maybe a) -> Ecs -> Ecs
 update (EntityId entityId) (ComponentType componentType) updater (Ecs model) =
     Ecs
-        (componentType.setComponents
-            (Dict.update entityId updater (componentType.getComponents model))
-            model
-        )
+        { components =
+            componentType.updateComponents
+                (Dict.update entityId updater)
+                model.components
+        , numberOfCreatedEntities = model.numberOfCreatedEntities
+        , destroyedEntities = model.destroyedEntities
+        }
 
 
 {-| -}
 remove : EntityId -> ComponentType a -> Ecs -> Ecs
 remove (EntityId entityId) (ComponentType componentType) (Ecs model) =
     Ecs
-        (componentType.setComponents
-            (Dict.remove entityId (componentType.getComponents model))
-            model
-        )
+        { components =
+            componentType.updateComponents
+                (Dict.remove entityId)
+                model.components
+        , numberOfCreatedEntities = model.numberOfCreatedEntities
+        , destroyedEntities = model.destroyedEntities
+        }
 
 
 
@@ -223,7 +239,7 @@ iterate (ComponentType componentType) callback ( Ecs model, x ) =
     Dict.foldl
         (EntityId >> callback)
         ( Ecs model, x )
-        (componentType.getComponents model)
+        (componentType.getComponents model.components)
 
 
 {-| -}
@@ -236,10 +252,10 @@ iterate2 :
 iterate2 (ComponentType type1) (ComponentType type2) callback ( Ecs model, x ) =
     let
         components1 =
-            type1.getComponents model
+            type1.getComponents model.components
 
         components2 =
-            type2.getComponents model
+            type2.getComponents model.components
     in
     Dict.foldl
         (\entityId component1 result ->
@@ -263,13 +279,13 @@ iterate3 :
 iterate3 (ComponentType type1) (ComponentType type2) (ComponentType type3) callback ( Ecs model, x ) =
     let
         components1 =
-            type1.getComponents model
+            type1.getComponents model.components
 
         components2 =
-            type2.getComponents model
+            type2.getComponents model.components
 
         components3 =
-            type3.getComponents model
+            type3.getComponents model.components
     in
     Dict.foldl
         (\entityId component1 result ->
@@ -296,14 +312,12 @@ next entityId components callback =
 aComponent : ComponentType Components.A
 aComponent =
     ComponentType
-        { getComponents = .aComponents
-        , setComponents =
-            \components model ->
-                { aComponents = components
-                , bComponents = model.bComponents
-                , cComponents = model.cComponents
-                , numberOfCreatedEntities = model.numberOfCreatedEntities
-                , destroyedEntities = model.destroyedEntities
+        { getComponents = .a
+        , updateComponents =
+            \updater components ->
+                { a = updater components.a
+                , b = components.b
+                , c = components.c
                 }
         }
 
@@ -312,14 +326,12 @@ aComponent =
 bComponent : ComponentType Components.B
 bComponent =
     ComponentType
-        { getComponents = .bComponents
-        , setComponents =
-            \components model ->
-                { aComponents = model.aComponents
-                , bComponents = components
-                , cComponents = model.cComponents
-                , numberOfCreatedEntities = model.numberOfCreatedEntities
-                , destroyedEntities = model.destroyedEntities
+        { getComponents = .b
+        , updateComponents =
+            \updater components ->
+                { a = components.a
+                , b = updater components.b
+                , c = components.c
                 }
         }
 
@@ -328,13 +340,11 @@ bComponent =
 cComponent : ComponentType Components.C
 cComponent =
     ComponentType
-        { getComponents = .cComponents
-        , setComponents =
-            \components model ->
-                { aComponents = model.aComponents
-                , bComponents = model.bComponents
-                , cComponents = components
-                , numberOfCreatedEntities = model.numberOfCreatedEntities
-                , destroyedEntities = model.destroyedEntities
+        { getComponents = .c
+        , updateComponents =
+            \updater components ->
+                { a = components.a
+                , b = components.b
+                , c = updater components.c
                 }
         }
