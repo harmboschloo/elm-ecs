@@ -17,7 +17,7 @@
 ## Demo System Operations
 
 - Animation: iterate (A)B -> insert A
-- Collection: iterate AB x iterate AC -> sometimes remove C, insert DE, update F
+- Collection: iterate AB + iterate AC -> sometimes remove C, insert DE, update F
 - KeyControls: iterate (A)B -> insert A
 - MotionControl: iterate ABCD -> insert A
 - Movement: iterate AB -> insert A

@@ -5,6 +5,7 @@ module Benchmarks exposing
     , compareIterateAndModify2
     , compareIterateAndModifySubset
     , compareIterateSubset
+    , compareUpdateX
     , scaleIterate
     , scaleIterateAndModify
     , scaleIterateAndModify2
@@ -155,6 +156,39 @@ compareIterateAndModifySubset n apiA apiB =
             (\_ -> apiA.iterateABCModifyA ecsA)
             apiB.label
             (\_ -> apiB.iterateABCModifyA ecsB)
+        ]
+
+
+compareUpdateX : Int -> Apis.EcsApi a -> Apis.EcsApi b -> Benchmark
+compareUpdateX n apiA apiB =
+    let
+        ( label, ecsA ) =
+            Data.initCompareEcs n apiA
+
+        ( _, ecsB ) =
+            Data.initCompareEcs n apiB
+    in
+    Benchmark.describe label
+        [ Benchmark.compare "update2_XX_X"
+            apiA.label
+            (\_ -> apiA.update2_XX_X ecsA)
+            apiB.label
+            (\_ -> apiB.update2_XX_X ecsB)
+        , Benchmark.compare "update3_XX_X"
+            apiA.label
+            (\_ -> apiA.update3_XX_X ecsA)
+            apiB.label
+            (\_ -> apiB.update3_XX_X ecsB)
+        , Benchmark.compare "update4_XX_X"
+            apiA.label
+            (\_ -> apiA.update4_XX_X ecsA)
+            apiB.label
+            (\_ -> apiB.update4_XX_X ecsB)
+        , Benchmark.compare "update5_XX_X"
+            apiA.label
+            (\_ -> apiA.update5_XX_X ecsA)
+            apiB.label
+            (\_ -> apiB.update5_XX_X ecsB)
         ]
 
 
