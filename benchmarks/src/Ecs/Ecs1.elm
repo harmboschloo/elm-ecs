@@ -2,9 +2,10 @@ module Ecs.Ecs1 exposing
     ( Ecs, empty
     , EntityId, create, size, activeSize, idToInt, intToId
     , Components, get, insert, update, remove
-    , iterate, iterate2, iterate3
-    , Specs, ContainerSpec, ComponentSpec
+    , iterate
+    , Specs, ContainerSpec, ComponentSpec, NodeSpec
     , specs3
+    , node1, node2, node3
     )
 
 {-| Entitiy-Component-System.
@@ -32,8 +33,9 @@ module Ecs.Ecs1 exposing
 
 # Specs
 
-@docs Specs, ContainerSpec, ComponentSpec
-@docs spec3
+@docs Specs, ContainerSpec, ComponentSpec, NodeSpec
+@docs specs3
+@docs node1, node2, node3
 
 -}
 
@@ -191,6 +193,7 @@ insert (EntityId entityId) (ComponentSpec spec) component (Ecs model) =
     Ecs
         { container =
             spec.updateComponents
+                -- FIXME unwrap/wrap, benchmark
                 (insertComponent entityId component)
                 model.container
         , numberOfCreatedEntities = model.numberOfCreatedEntities
@@ -262,29 +265,41 @@ removeComponent entityId (Components components) =
 
 {-| -}
 iterate :
-    ComponentSpec container component
-    -> (EntityId -> component -> ( Ecs container, x ) -> ( Ecs container, x ))
+    NodeSpec x container node
+    -> (EntityId -> node -> ( Ecs container, x ) -> ( Ecs container, x ))
     -> ( Ecs container, x )
     -> ( Ecs container, x )
-iterate (ComponentSpec spec) callback ( Ecs model, x ) =
+iterate (NodeSpec iterateNode) =
+    iterateNode
+
+
+iterate1 :
+    (component1 -> node)
+    -> ComponentSpec container component1
+    -> (EntityId -> node -> ( Ecs container, x ) -> ( Ecs container, x ))
+    -> ( Ecs container, x )
+    -> ( Ecs container, x )
+iterate1 createNode (ComponentSpec spec) callback ( Ecs model, x ) =
     let
         (Components components) =
             spec.getComponents model.container
     in
     Dict.foldl
-        (EntityId >> callback)
+        (\entityId component1 ->
+            callback (EntityId entityId) (createNode component1)
+        )
         ( Ecs model, x )
         components
 
 
-{-| -}
 iterate2 :
-    ComponentSpec container component1
+    (component1 -> component2 -> node)
+    -> ComponentSpec container component1
     -> ComponentSpec container component2
-    -> (EntityId -> component1 -> component2 -> ( Ecs container, x ) -> ( Ecs container, x ))
+    -> (EntityId -> node -> ( Ecs container, x ) -> ( Ecs container, x ))
     -> ( Ecs container, x )
     -> ( Ecs container, x )
-iterate2 (ComponentSpec componentSpec1) (ComponentSpec componentSpec2) callback ( Ecs model, x ) =
+iterate2 createNode (ComponentSpec componentSpec1) (ComponentSpec componentSpec2) callback ( Ecs model, x ) =
     let
         (Components components1) =
             componentSpec1.getComponents model.container
@@ -293,25 +308,30 @@ iterate2 (ComponentSpec componentSpec1) (ComponentSpec componentSpec2) callback 
             componentSpec2.getComponents model.container
     in
     Dict.foldl
-        (\entityId component1 result ->
-            callback (EntityId entityId) component1
-                |> next entityId components2
-                |> Maybe.map ((|>) result)
-                |> Maybe.withDefault result
+        (\entityId component1 state ->
+            case Dict.get entityId components2 of
+                Nothing ->
+                    state
+
+                Just component2 ->
+                    callback
+                        (EntityId entityId)
+                        (createNode component1 component2)
+                        state
         )
         ( Ecs model, x )
         components1
 
 
-{-| -}
 iterate3 :
-    ComponentSpec container component1
+    (component1 -> component2 -> component3 -> node)
+    -> ComponentSpec container component1
     -> ComponentSpec container component2
     -> ComponentSpec container component3
-    -> (EntityId -> component1 -> component2 -> component3 -> ( Ecs container, x ) -> ( Ecs container, x ))
+    -> (EntityId -> node -> ( Ecs container, x ) -> ( Ecs container, x ))
     -> ( Ecs container, x )
     -> ( Ecs container, x )
-iterate3 (ComponentSpec componentSpec1) (ComponentSpec componentSpec2) (ComponentSpec componentSpec3) callback ( Ecs model, x ) =
+iterate3 createNode (ComponentSpec componentSpec1) (ComponentSpec componentSpec2) (ComponentSpec componentSpec3) callback ( Ecs model, x ) =
     let
         (Components components1) =
             componentSpec1.getComponents model.container
@@ -323,20 +343,24 @@ iterate3 (ComponentSpec componentSpec1) (ComponentSpec componentSpec2) (Componen
             componentSpec3.getComponents model.container
     in
     Dict.foldl
-        (\entityId component1 result ->
-            callback (EntityId entityId) component1
-                |> next entityId components2
-                |> Maybe.andThen (next entityId components3)
-                |> Maybe.map ((|>) result)
-                |> Maybe.withDefault result
+        (\entityId component1 state ->
+            case Dict.get entityId components2 of
+                Nothing ->
+                    state
+
+                Just component2 ->
+                    case Dict.get entityId components3 of
+                        Nothing ->
+                            state
+
+                        Just component3 ->
+                            callback
+                                (EntityId entityId)
+                                (createNode component1 component2 component3)
+                                state
         )
         ( Ecs model, x )
         components1
-
-
-next : Int -> Dict Int component -> (component -> a) -> Maybe a
-next entityId components callback =
-    Dict.get entityId components |> Maybe.map callback
 
 
 
@@ -425,3 +449,41 @@ specs3 createContainer createComponentSpecs get1 get2 get3 =
                 }
             )
     }
+
+
+
+-- NODE SPECS --
+
+
+type NodeSpec x container node
+    = NodeSpec (IterateNode x container node)
+
+
+type alias IterateNode x container node =
+    (EntityId -> node -> ( Ecs container, x ) -> ( Ecs container, x ))
+    -> ( Ecs container, x )
+    -> ( Ecs container, x )
+
+
+node1 : (component1 -> node) -> ComponentSpec container component1 -> NodeSpec x container node
+node1 createNode spec1 =
+    NodeSpec (iterate1 createNode spec1)
+
+
+node2 :
+    (component1 -> component2 -> node)
+    -> ComponentSpec container component1
+    -> ComponentSpec container component2
+    -> NodeSpec x container node
+node2 createNode spec1 spec2 =
+    NodeSpec (iterate2 createNode spec1 spec2)
+
+
+node3 :
+    (component1 -> component2 -> component3 -> node)
+    -> ComponentSpec container component1
+    -> ComponentSpec container component2
+    -> ComponentSpec container component3
+    -> NodeSpec x container node
+node3 createNode spec1 spec2 spec3 =
+    NodeSpec (iterate3 createNode spec1 spec2 spec3)

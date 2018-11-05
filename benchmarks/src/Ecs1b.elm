@@ -1,7 +1,8 @@
-module Ecs1b exposing (Ecs, components, container)
+module Ecs1b exposing (Ecs, a, aNode, abNode, abcNode, b, c, container)
 
 import Components
 import Ecs.Ecs1 as Ecs
+import Nodes
 
 
 type alias Ecs =
@@ -32,6 +33,31 @@ container =
     specs.container
 
 
-components : ComponentSpecs
-components =
-    specs.components
+a : Ecs.ComponentSpec Container Components.A
+a =
+    specs.components.a
+
+
+b : Ecs.ComponentSpec Container Components.B
+b =
+    specs.components.b
+
+
+c : Ecs.ComponentSpec Container Components.C
+c =
+    specs.components.c
+
+
+aNode : Ecs.NodeSpec x Container Nodes.A
+aNode =
+    Ecs.node1 Nodes.A a
+
+
+abNode : Ecs.NodeSpec x Container Nodes.Ab
+abNode =
+    Ecs.node2 Nodes.Ab a b
+
+
+abcNode : Ecs.NodeSpec x Container Nodes.Abc
+abcNode =
+    Ecs.node3 Nodes.Abc a b c
