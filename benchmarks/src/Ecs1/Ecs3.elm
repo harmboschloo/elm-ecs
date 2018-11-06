@@ -71,7 +71,11 @@ type alias Container c1 c2 c3 =
 empty : Ecs c1 c2 c3
 empty =
     Ecs
-        { container = Container Dict.empty Dict.empty Dict.empty
+        { container =
+            { components1 = Dict.empty
+            , components2 = Dict.empty
+            , components3 = Dict.empty
+            }
         , numberOfCreatedEntities = 0
         , destroyedEntities = []
         }
@@ -358,10 +362,10 @@ component1 =
         { getComponents = .components1
         , updateComponents =
             \updater container ->
-                Container
-                    (.components1 container |> updater)
-                    (.components2 container)
-                    (.components3 container)
+                { components1 = updater container.components1
+                , components2 = container.components2
+                , components3 = container.components3
+                }
         }
 
 
@@ -371,10 +375,10 @@ component2 =
         { getComponents = .components2
         , updateComponents =
             \updater container ->
-                Container
-                    (.components1 container)
-                    (.components2 container |> updater)
-                    (.components3 container)
+                { components1 = container.components1
+                , components2 = updater container.components2
+                , components3 = container.components3
+                }
         }
 
 
@@ -384,10 +388,10 @@ component3 =
         { getComponents = .components3
         , updateComponents =
             \updater container ->
-                Container
-                    (.components1 container)
-                    (.components2 container)
-                    (.components3 container |> updater)
+                { components1 = container.components1
+                , components2 = container.components2
+                , components3 = updater container.components3
+                }
         }
 
 
