@@ -1,4 +1,4 @@
-module CompareUpdateX exposing (main)
+module Main.ScaleIterate exposing (main)
 
 import Benchmark.Runner exposing (BenchmarkProgram)
 import Benchmarks
@@ -8,4 +8,4 @@ import Config
 main : BenchmarkProgram
 main =
     Benchmark.Runner.program
-        (Benchmarks.compareUpdateX 20 Config.ecsA Config.ecsB)
+        (Benchmarks.scaleIterate 20 Config.ecsA Config.ecsB)

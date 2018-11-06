@@ -1,4 +1,4 @@
-module CompareIterateAndModify2 exposing (main)
+module Main.CompareIterateAndModifyBig exposing (main)
 
 import Benchmark.Runner exposing (BenchmarkProgram)
 import Benchmarks
@@ -8,4 +8,4 @@ import Config
 main : BenchmarkProgram
 main =
     Benchmark.Runner.program
-        (Benchmarks.compareIterateAndModify2 20 Config.ecsA Config.ecsB)
+        (Benchmarks.compareIterateAndModify 200 Config.ecsA Config.ecsB)

@@ -1,4 +1,4 @@
-module ScaleIterateAndModify2 exposing (main)
+module Main.ScaleIterateAndModify exposing (main)
 
 import Benchmark.Runner exposing (BenchmarkProgram)
 import Benchmarks
@@ -8,4 +8,4 @@ import Config
 main : BenchmarkProgram
 main =
     Benchmark.Runner.program
-        (Benchmarks.scaleIterateAndModify2 20 Config.ecsA Config.ecsB)
+        (Benchmarks.scaleIterateAndModify 20 Config.ecsA Config.ecsB)
