@@ -1,4 +1,4 @@
-module Ecs1.Ecs3 exposing
+module Ecs1.Dict3 exposing
     ( Ecs, empty
     , EntityId, create, size, activeSize, idToInt, intToId
     , get, insert, update, remove
