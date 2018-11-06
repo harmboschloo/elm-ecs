@@ -257,16 +257,12 @@ iterate1 :
     -> ( Ecs c1 c2 c3, x )
     -> ( Ecs c1 c2 c3, x )
 iterate1 createNode (ComponentSpec spec) callback ( Ecs model, x ) =
-    let
-        components =
-            spec.getComponents model.container
-    in
     Dict.foldl
-        (\entityId c1 ->
-            callback (EntityId entityId) (createNode c1)
+        (\entityId c1 state ->
+            callback (EntityId entityId) (createNode c1) state
         )
         ( Ecs model, x )
-        components
+        (spec.getComponents model.container)
 
 
 iterate2 :
