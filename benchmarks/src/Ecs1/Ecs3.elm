@@ -194,7 +194,7 @@ insert (EntityId entityId) (ComponentSpec spec) component (Ecs model) =
     Ecs
         { container =
             spec.updateComponents
-                (Dict.insert entityId component)
+                (\container -> Dict.insert entityId component container)
                 model.container
         , numberOfCreatedEntities = model.numberOfCreatedEntities
         , destroyedEntities = model.destroyedEntities
@@ -212,7 +212,7 @@ update (EntityId entityId) (ComponentSpec spec) updater (Ecs model) =
     Ecs
         { container =
             spec.updateComponents
-                (Dict.update entityId updater)
+                (\container -> Dict.update entityId updater container)
                 model.container
         , numberOfCreatedEntities = model.numberOfCreatedEntities
         , destroyedEntities = model.destroyedEntities
@@ -229,7 +229,7 @@ remove (EntityId entityId) (ComponentSpec spec) (Ecs model) =
     Ecs
         { container =
             spec.updateComponents
-                (Dict.remove entityId)
+                (\container -> Dict.remove entityId container)
                 model.container
         , numberOfCreatedEntities = model.numberOfCreatedEntities
         , destroyedEntities = model.destroyedEntities
