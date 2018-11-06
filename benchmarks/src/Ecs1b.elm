@@ -1,63 +1,47 @@
-module Ecs1b exposing (Ecs, a, aNode, abNode, abcNode, b, c, container)
+module Ecs1b exposing (Ecs, a, aNode, abNode, abcNode, b, c)
 
 import Components
-import Ecs.Ecs1 as Ecs
+import Ecs1.Ecs3 as Ecs
 import Nodes
 
 
 type alias Ecs =
-    Ecs.Ecs Container
+    Ecs.Ecs Components.A Components.B Components.C
 
 
-type alias Container =
-    { a : Ecs.Components Components.A
-    , b : Ecs.Components Components.B
-    , c : Ecs.Components Components.C
-    }
+type alias ComponentSpec a =
+    Ecs.ComponentSpec Components.A Components.B Components.C a
 
 
-type alias ComponentSpecs =
-    { a : Ecs.ComponentSpec Container Components.A
-    , b : Ecs.ComponentSpec Container Components.B
-    , c : Ecs.ComponentSpec Container Components.C
-    }
+type alias NodeSpec a x =
+    Ecs.NodeSpec Components.A Components.B Components.C a x
 
 
-specs : Ecs.Specs Container ComponentSpecs
-specs =
-    Ecs.specs3 Container ComponentSpecs .a .b .c
-
-
-container : Ecs.ContainerSpec Container
-container =
-    specs.container
-
-
-a : Ecs.ComponentSpec Container Components.A
+a : ComponentSpec Components.A
 a =
-    specs.components.a
+    Ecs.component1
 
 
-b : Ecs.ComponentSpec Container Components.B
+b : ComponentSpec Components.B
 b =
-    specs.components.b
+    Ecs.component2
 
 
-c : Ecs.ComponentSpec Container Components.C
+c : ComponentSpec Components.C
 c =
-    specs.components.c
+    Ecs.component3
 
 
-aNode : Ecs.NodeSpec x Container Nodes.A
+aNode : NodeSpec  Nodes.A x
 aNode =
     Ecs.node1 Nodes.A a
 
 
-abNode : Ecs.NodeSpec x Container Nodes.Ab
+abNode : NodeSpec  Nodes.Ab x
 abNode =
     Ecs.node2 Nodes.Ab a b
 
 
-abcNode : Ecs.NodeSpec x Container Nodes.Abc
+abcNode : NodeSpec Nodes.Abc x
 abcNode =
     Ecs.node3 Nodes.Abc a b c
