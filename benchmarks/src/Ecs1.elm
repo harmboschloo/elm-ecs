@@ -1,4 +1,4 @@
-module Ecs1 exposing (Ecs, a, aNode, abNode, abcNode, b, c)
+module Ecs1 exposing (Ecs, components, nodes)
 
 import Components
 import Ecs1.Dict3 as Ecs
@@ -17,31 +17,28 @@ type alias NodeSpec a x =
     Ecs.NodeSpec Components.A Components.B Components.C a x
 
 
-a : ComponentSpec Components.A
-a =
-    Ecs.component1
+type alias ComponentSpecs =
+    { a : ComponentSpec Components.A
+    , b : ComponentSpec Components.B
+    , c : ComponentSpec Components.C
+    }
 
 
-b : ComponentSpec Components.B
-b =
-    Ecs.component2
+type alias NodeSpecs x =
+    { a : NodeSpec Nodes.A x
+    , ab : NodeSpec Nodes.Ab x
+    , abc : NodeSpec Nodes.Abc x
+    }
 
 
-c : ComponentSpec Components.C
-c =
-    Ecs.component3
+components : ComponentSpecs
+components =
+    Ecs.componentSpecs ComponentSpecs
 
 
-aNode : NodeSpec Nodes.A x
-aNode =
-    Ecs.node1 Nodes.A a
-
-
-abNode : NodeSpec Nodes.Ab x
-abNode =
-    Ecs.node2 Nodes.Ab a b
-
-
-abcNode : NodeSpec Nodes.Abc x
-abcNode =
-    Ecs.node3 Nodes.Abc a b c
+nodes : NodeSpecs x
+nodes =
+    NodeSpecs
+        (Ecs.nodeSpec1 Nodes.A components.a)
+        (Ecs.nodeSpec2 Nodes.Ab components.a components.b)
+        (Ecs.nodeSpec3 Nodes.Abc components.a components.b components.c)

@@ -3,8 +3,8 @@ module Ecs1.Dict3 exposing
     , EntityId, create, size, activeSize, idToInt, intToId
     , get, insert, update, remove
     , iterate
-    , ComponentSpec, component1, component2, component3
-    , NodeSpec, node1, node2, node3
+    , ComponentSpec, componentSpecs
+    , NodeSpec, nodeSpec1, nodeSpec2, nodeSpec3
     )
 
 {-| Entitiy-Component-System.
@@ -32,12 +32,12 @@ module Ecs1.Dict3 exposing
 
 # Component Specs
 
-@docs ComponentSpec, component1, component2, component3
+@docs ComponentSpec, componentSpecs
 
 
 # Node Specs
 
-@docs NodeSpec, node1, node2, node3
+@docs NodeSpec, nodeSpec1, nodeSpec2, nodeSpec3
 
 -}
 
@@ -352,8 +352,19 @@ type ComponentSpec c1 c2 c3 component
 
 
 {-| -}
-component1 : ComponentSpec c1 c2 c3 c1
-component1 =
+componentSpecs :
+    (ComponentSpec c1 c2 c3 c1
+     -> ComponentSpec c1 c2 c3 c2
+     -> ComponentSpec c1 c2 c3 c3
+     -> a
+    )
+    -> a
+componentSpecs createSpecs =
+    createSpecs components1Spec components2Spec components3Spec
+
+
+components1Spec : ComponentSpec c1 c2 c3 c1
+components1Spec =
     ComponentSpec
         { getComponents = .components1
         , updateComponents =
@@ -365,8 +376,8 @@ component1 =
         }
 
 
-component2 : ComponentSpec c1 c2 c3 c2
-component2 =
+components2Spec : ComponentSpec c1 c2 c3 c2
+components2Spec =
     ComponentSpec
         { getComponents = .components2
         , updateComponents =
@@ -378,8 +389,8 @@ component2 =
         }
 
 
-component3 : ComponentSpec c1 c2 c3 c3
-component3 =
+components3Spec : ComponentSpec c1 c2 c3 c3
+components3Spec =
     ComponentSpec
         { getComponents = .components3
         , updateComponents =
@@ -405,28 +416,28 @@ type alias IterateNode c1 c2 c3 node x =
     -> ( Ecs c1 c2 c3, x )
 
 
-node1 :
+nodeSpec1 :
     (component1 -> node)
     -> ComponentSpec c1 c2 c3 component1
     -> NodeSpec c1 c2 c3 node x
-node1 createNode spec1 =
+nodeSpec1 createNode spec1 =
     NodeSpec (iterate1 createNode spec1)
 
 
-node2 :
+nodeSpec2 :
     (component1 -> component2 -> node)
     -> ComponentSpec c1 c2 c3 component1
     -> ComponentSpec c1 c2 c3 component2
     -> NodeSpec c1 c2 c3 node x
-node2 createNode spec1 spec2 =
+nodeSpec2 createNode spec1 spec2 =
     NodeSpec (iterate2 createNode spec1 spec2)
 
 
-node3 :
+nodeSpec3 :
     (component1 -> component2 -> component3 -> node)
     -> ComponentSpec c1 c2 c3 component1
     -> ComponentSpec c1 c2 c3 component2
     -> ComponentSpec c1 c2 c3 component3
     -> NodeSpec c1 c2 c3 node x
-node3 createNode spec1 spec2 spec3 =
+nodeSpec3 createNode spec1 spec2 spec3 =
     NodeSpec (iterate3 createNode spec1 spec2 spec3)

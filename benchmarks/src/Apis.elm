@@ -46,25 +46,25 @@ ecs1 : EcsApi Ecs1.Ecs
 ecs1 =
     let
         update_AB_A =
-            Ecs1.Dict3.iterate Ecs1.abNode (\entityId _ -> insert (Ecs1.Dict3.insert entityId) Ecs1.a) |> withContext
+            Ecs1.Dict3.iterate Ecs1.nodes.ab (\entityId _ -> insert (Ecs1.Dict3.insert entityId) Ecs1.components.a) |> withContext
     in
     { label = "Ecs1/Dict3 record of dicts"
     , empty = Ecs1.Dict3.empty
-    , createA = createAndInsert Ecs1.Dict3.create Ecs1.Dict3.insert Ecs1.a
-    , createB = createAndInsert Ecs1.Dict3.create Ecs1.Dict3.insert Ecs1.b
-    , createC = createAndInsert Ecs1.Dict3.create Ecs1.Dict3.insert Ecs1.c
-    , createAB = createAndInsert2 Ecs1.Dict3.create Ecs1.Dict3.insert Ecs1.a Ecs1.b
-    , createAC = createAndInsert2 Ecs1.Dict3.create Ecs1.Dict3.insert Ecs1.a Ecs1.c
-    , createBC = createAndInsert2 Ecs1.Dict3.create Ecs1.Dict3.insert Ecs1.b Ecs1.c
-    , createABC = createAndInsert3 Ecs1.Dict3.create Ecs1.Dict3.insert Ecs1.a Ecs1.b Ecs1.c
-    , iterateA = Ecs1.Dict3.iterate Ecs1.aNode (\_ _ x -> x) |> withContext
-    , iterateAB = Ecs1.Dict3.iterate Ecs1.abNode (\_ _ x -> x) |> withContext
-    , iterateABC = Ecs1.Dict3.iterate Ecs1.abcNode (\_ _ x -> x) |> withContext
-    , iterateAModifyA = Ecs1.Dict3.iterate Ecs1.aNode (\entityId _ -> insert (Ecs1.Dict3.insert entityId) Ecs1.a) |> withContext
+    , createA = createAndInsert Ecs1.Dict3.create Ecs1.Dict3.insert Ecs1.components.a
+    , createB = createAndInsert Ecs1.Dict3.create Ecs1.Dict3.insert Ecs1.components.b
+    , createC = createAndInsert Ecs1.Dict3.create Ecs1.Dict3.insert Ecs1.components.c
+    , createAB = createAndInsert2 Ecs1.Dict3.create Ecs1.Dict3.insert Ecs1.components.a Ecs1.components.b
+    , createAC = createAndInsert2 Ecs1.Dict3.create Ecs1.Dict3.insert Ecs1.components.a Ecs1.components.c
+    , createBC = createAndInsert2 Ecs1.Dict3.create Ecs1.Dict3.insert Ecs1.components.b Ecs1.components.c
+    , createABC = createAndInsert3 Ecs1.Dict3.create Ecs1.Dict3.insert Ecs1.components.a Ecs1.components.b Ecs1.components.c
+    , iterateA = Ecs1.Dict3.iterate Ecs1.nodes.a (\_ _ x -> x) |> withContext
+    , iterateAB = Ecs1.Dict3.iterate Ecs1.nodes.ab (\_ _ x -> x) |> withContext
+    , iterateABC = Ecs1.Dict3.iterate Ecs1.nodes.abc (\_ _ x -> x) |> withContext
+    , iterateAModifyA = Ecs1.Dict3.iterate Ecs1.nodes.a (\entityId _ -> insert (Ecs1.Dict3.insert entityId) Ecs1.components.a) |> withContext
     , iterateABModifyA = update_AB_A
-    , iterateABCModifyA = Ecs1.Dict3.iterate Ecs1.abcNode (\entityId _ -> insert (Ecs1.Dict3.insert entityId) Ecs1.a) |> withContext
-    , iterateAModifyAB = Ecs1.Dict3.iterate Ecs1.aNode (\entityId _ -> insert (Ecs1.Dict3.insert entityId) Ecs1.a >> insert (Ecs1.Dict3.insert entityId) Ecs1.b) |> withContext
-    , iterateAModifyABC = Ecs1.Dict3.iterate Ecs1.aNode (\entityId _ -> insert (Ecs1.Dict3.insert entityId) Ecs1.a >> insert (Ecs1.Dict3.insert entityId) Ecs1.b >> insert (Ecs1.Dict3.insert entityId) Ecs1.c) |> withContext
+    , iterateABCModifyA = Ecs1.Dict3.iterate Ecs1.nodes.abc (\entityId _ -> insert (Ecs1.Dict3.insert entityId) Ecs1.components.a) |> withContext
+    , iterateAModifyAB = Ecs1.Dict3.iterate Ecs1.nodes.a (\entityId _ -> insert (Ecs1.Dict3.insert entityId) Ecs1.components.a >> insert (Ecs1.Dict3.insert entityId) Ecs1.components.b) |> withContext
+    , iterateAModifyABC = Ecs1.Dict3.iterate Ecs1.nodes.a (\entityId _ -> insert (Ecs1.Dict3.insert entityId) Ecs1.components.a >> insert (Ecs1.Dict3.insert entityId) Ecs1.components.b >> insert (Ecs1.Dict3.insert entityId) Ecs1.components.c) |> withContext
     , update2_XX_X = update_AB_A >> update_AB_A
     , update3_XX_X = update_AB_A >> update_AB_A >> update_AB_A
     , update4_XX_X = update_AB_A >> update_AB_A >> update_AB_A >> update_AB_A
