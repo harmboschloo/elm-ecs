@@ -1,6 +1,6 @@
 module Ecs1.Dict3 exposing
     ( Ecs, empty
-    , EntityId, create, size, activeSize, idToInt, intToId
+    , EntityId, create, destroy, reset, size, activeSize, idToInt, intToId
     , get, insert, update, remove
     , iterate
     , ComponentSpec, componentSpecs
@@ -27,7 +27,7 @@ module Ecs1.Dict3 exposing
 
 # Iterate Entities
 
-@docs iterate, iterate2, iterate3
+@docs iterate
 
 
 # Component Specs
