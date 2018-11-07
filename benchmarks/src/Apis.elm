@@ -4,6 +4,7 @@ module Apis exposing
     , ecs5
     , ecs6
     , ecs7
+    , ecs8
     )
 
 import Ecs1
@@ -11,6 +12,8 @@ import Ecs1.Dict3
 import Ecs5
 import Ecs6
 import Ecs7
+import Ecs8
+import Ecs8.Entity3
 
 
 
@@ -180,6 +183,63 @@ ecs7 =
     , update3_XX_X = Ecs7.updateAll [ ab_aNode, ab_aNode, ab_aNode ] |> withContext
     , update4_XX_X = Ecs7.updateAll [ ab_aNode, ab_aNode, ab_aNode, ab_aNode ] |> withContext
     , update5_XX_X = Ecs7.updateAll [ ab_aNode, ab_aNode, ab_aNode, ab_aNode, ab_aNode ] |> withContext
+    }
+
+
+ecs8 : EcsApi Ecs8.Ecs
+ecs8 =
+    let
+        create =
+            \ecs -> Ecs8.Entity3.createWith ecs >> Tuple.first
+
+        set =
+            Ecs8.Entity3.set
+
+        updateAll =
+            Ecs8.Entity3.updateAll >> withContext
+
+        a =
+            Ecs8.components.a
+
+        b =
+            Ecs8.components.b
+
+        c =
+            Ecs8.components.c
+
+        aNode =
+            Ecs8.nodes.a
+
+        abNode =
+            Ecs8.nodes.ab
+
+        abcNode =
+            Ecs8.nodes.abc
+
+        ab_aNode =
+            abNode (\_ ( e, ecs, x ) -> ( e |> set a (), ecs, x ))
+    in
+    { label = "Ecs8/Entity3"
+    , empty = Ecs8.Entity3.empty
+    , createA = create (set a ())
+    , createB = create (set b ())
+    , createC = create (set c ())
+    , createAB = create (set a () >> set b ())
+    , createAC = create (set a () >> set c ())
+    , createBC = create (set b () >> set c ())
+    , createABC = create (set a () >> set b () >> set c ())
+    , iterateA = updateAll (aNode (\_ s -> s))
+    , iterateAB = updateAll (abNode (\_ s -> s))
+    , iterateABC = updateAll (abcNode (\_ s -> s))
+    , iterateAModifyA = updateAll (aNode (\_ ( e, ecs, x ) -> ( e |> set a (), ecs, x )))
+    , iterateABModifyA = updateAll (abNode (\_ ( e, ecs, x ) -> ( e |> set a (), ecs, x )))
+    , iterateABCModifyA = updateAll (abcNode (\_ ( e, ecs, x ) -> ( e |> set a (), ecs, x )))
+    , iterateAModifyAB = updateAll (aNode (\_ ( e, ecs, x ) -> ( e |> set a () |> set b (), ecs, x )))
+    , iterateAModifyABC = updateAll (aNode (\_ ( e, ecs, x ) -> ( e |> set a () |> set b () |> set c (), ecs, x )))
+    , update2_XX_X = updateAll (ab_aNode >> ab_aNode)
+    , update3_XX_X = updateAll (ab_aNode >> ab_aNode >> ab_aNode)
+    , update4_XX_X = updateAll (ab_aNode >> ab_aNode >> ab_aNode >> ab_aNode)
+    , update5_XX_X = updateAll (ab_aNode >> ab_aNode >> ab_aNode >> ab_aNode >> ab_aNode)
     }
 
 
