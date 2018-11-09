@@ -1,24 +1,46 @@
-module Ecs8 exposing (Ecs, components, nodes)
+module Ecs8 exposing
+    ( ComponentSpec
+    , Ecs
+    , EntitySpec
+    , NodeSpec
+    , SystemSpec
+    , components
+    , entity
+    , nodes
+    )
 
 import Components
-import Ecs8.Entity3 as Ecs
+import Ecs8.Ecs as Ecs
+import Ecs8.Ecs3 as Ecs
+import Ecs8.Nodes as Ecs
 import Nodes
 
 
 type alias Ecs =
-    Ecs.Ecs Components.A Components.B Components.C
+    Ecs.Ecs Components
+
+
+type alias EntitySpec =
+    Ecs.EntitySpec Components
 
 
 type alias ComponentSpec a =
-    Ecs.ComponentSpec Components.A Components.B Components.C a
+    Ecs.ComponentSpec Components a
 
 
-type alias EntityUpdate x =
-    Ecs.EntityUpdate Components.A Components.B Components.C x
+type alias SystemSpec a =
+    Ecs.SystemSpec Components a
 
 
-type alias NodeSpec node x =
-    (node -> EntityUpdate x) -> EntityUpdate x
+type alias NodeSpec a =
+    Ecs.NodeSpec Components a
+
+
+type alias Components =
+    { a : Maybe Components.A
+    , b : Maybe Components.B
+    , c : Maybe Components.C
+    }
 
 
 type alias ComponentSpecs =
@@ -28,21 +50,26 @@ type alias ComponentSpecs =
     }
 
 
-type alias NodeSpecs x =
-    { a : NodeSpec Nodes.A x
-    , ab : NodeSpec Nodes.Ab x
-    , abc : NodeSpec Nodes.Abc x
+type alias NodeSpecs =
+    { a : NodeSpec Nodes.A
+    , ab : NodeSpec Nodes.Ab
+    , abc : NodeSpec Nodes.Abc
     }
+
+
+entity : EntitySpec
+entity =
+    Ecs.entity Components
 
 
 components : ComponentSpecs
 components =
-    Ecs.componentSpecs ComponentSpecs
+    Ecs.components ComponentSpecs Components .a .b .c
 
 
-nodes : NodeSpecs x
+nodes : NodeSpecs
 nodes =
     NodeSpecs
-        (Ecs.nodeUpdate1 Nodes.A components.a)
-        (Ecs.nodeUpdate2 Nodes.Ab components.a components.b)
-        (Ecs.nodeUpdate3 Nodes.Abc components.a components.b components.c)
+        (Ecs.node1 Nodes.A components.a)
+        (Ecs.node2 Nodes.Ab components.a components.b)
+        (Ecs.node3 Nodes.Abc components.a components.b components.c)

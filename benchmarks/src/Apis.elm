@@ -13,7 +13,7 @@ import Ecs5
 import Ecs6
 import Ecs7
 import Ecs8
-import Ecs8.Entity3
+import Ecs8.Ecs
 
 
 
@@ -189,14 +189,14 @@ ecs7 =
 ecs8 : EcsApi Ecs8.Ecs
 ecs8 =
     let
-        create =
-            \ecs -> Ecs8.Entity3.createWith ecs >> Tuple.first
+        create updater ecs =
+            Ecs8.Ecs.create Ecs8.entity updater ecs |> Tuple.second
 
         set =
-            Ecs8.Entity3.set
+            Ecs8.Ecs.set
 
-        updateAll =
-            Ecs8.Entity3.updateAll >> withContext
+        process =
+            Ecs8.Ecs.process >> withContext
 
         a =
             Ecs8.components.a
@@ -216,11 +216,11 @@ ecs8 =
         abcNode =
             Ecs8.nodes.abc
 
-        ab_aNode =
-            abNode (\_ ( e, ecs, x ) -> ( e |> set a (), ecs, x ))
+        ab_aSystem =
+            Ecs8.Ecs.processor abNode (\_ ( e, x ) -> ( e |> set a (), x ))
     in
-    { label = "Ecs8/Entity3"
-    , empty = Ecs8.Entity3.empty
+    { label = "Ecs8"
+    , empty = Ecs8.Ecs.empty
     , createA = create (set a ())
     , createB = create (set b ())
     , createC = create (set c ())
@@ -228,18 +228,18 @@ ecs8 =
     , createAC = create (set a () >> set c ())
     , createBC = create (set b () >> set c ())
     , createABC = create (set a () >> set b () >> set c ())
-    , iterateA = updateAll (aNode (\_ s -> s))
-    , iterateAB = updateAll (abNode (\_ s -> s))
-    , iterateABC = updateAll (abcNode (\_ s -> s))
-    , iterateAModifyA = updateAll (aNode (\_ ( e, ecs, x ) -> ( e |> set a (), ecs, x )))
-    , iterateABModifyA = updateAll (abNode (\_ ( e, ecs, x ) -> ( e |> set a (), ecs, x )))
-    , iterateABCModifyA = updateAll (abcNode (\_ ( e, ecs, x ) -> ( e |> set a (), ecs, x )))
-    , iterateAModifyAB = updateAll (aNode (\_ ( e, ecs, x ) -> ( e |> set a () |> set b (), ecs, x )))
-    , iterateAModifyABC = updateAll (aNode (\_ ( e, ecs, x ) -> ( e |> set a () |> set b () |> set c (), ecs, x )))
-    , update2_XX_X = updateAll (ab_aNode >> ab_aNode)
-    , update3_XX_X = updateAll (ab_aNode >> ab_aNode >> ab_aNode)
-    , update4_XX_X = updateAll (ab_aNode >> ab_aNode >> ab_aNode >> ab_aNode)
-    , update5_XX_X = updateAll (ab_aNode >> ab_aNode >> ab_aNode >> ab_aNode >> ab_aNode)
+    , iterateA = process [ Ecs8.Ecs.processor aNode (\_ s -> s) ]
+    , iterateAB = process [ Ecs8.Ecs.processor abNode (\_ s -> s) ]
+    , iterateABC = process [ Ecs8.Ecs.processor abcNode (\_ s -> s) ]
+    , iterateAModifyA = process [ Ecs8.Ecs.processor aNode (\_ ( e, x ) -> ( e |> set a (), x )) ]
+    , iterateABModifyA = process [ Ecs8.Ecs.processor abNode (\_ ( e, x ) -> ( e |> set a (), x )) ]
+    , iterateABCModifyA = process [ Ecs8.Ecs.processor abcNode (\_ ( e, x ) -> ( e |> set a (), x )) ]
+    , iterateAModifyAB = process [ Ecs8.Ecs.processor aNode (\_ ( e, x ) -> ( e |> set a () |> set b (), x )) ]
+    , iterateAModifyABC = process [ Ecs8.Ecs.processor aNode (\_ ( e, x ) -> ( e |> set a () |> set b () |> set c (), x )) ]
+    , update2_XX_X = process [ ab_aSystem, ab_aSystem ]
+    , update3_XX_X = process [ ab_aSystem, ab_aSystem, ab_aSystem ]
+    , update4_XX_X = process [ ab_aSystem, ab_aSystem, ab_aSystem, ab_aSystem ]
+    , update5_XX_X = process [ ab_aSystem, ab_aSystem, ab_aSystem, ab_aSystem, ab_aSystem ]
     }
 
 
