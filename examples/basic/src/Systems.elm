@@ -1,40 +1,44 @@
-module Systems exposing (checkBounce, checkTeleport, move, render)
+module Systems exposing (update)
 
-import Components exposing (Bounce, Color, Position, Teleport, Velocity)
-import Ecs exposing (Ecs, EntityId)
-import Html exposing (Html)
-import Html.Attributes
-
-
-worldWidth : Int
-worldWidth =
-    400
+import Ecs
+import EcsSpecs exposing (Ecs, Entity, SystemSpec)
+import Model exposing (Model)
+import Nodes
 
 
-worldHeight : Int
-worldHeight =
-    300
+update : Model -> Model
+update model =
+    let
+        ( newEcs, newModel ) =
+            Ecs.process
+                [ move
+                , checkBounce
+                , checkTeleport
+                , render
+                ]
+                ( model.ecs, model )
+    in
+    { newModel | ecs = newEcs }
 
 
 
--- Move --
+-- MOVE --
 
 
-move : ( Ecs, Float ) -> ( Ecs, Float )
+move : SystemSpec Model
 move =
-    Ecs.iterate2 Ecs.velocityComponent Ecs.positionComponent moveEntity
+    Ecs.processor EcsSpecs.nodes.move moveEntity
 
 
-moveEntity : Ecs.EntityId -> Velocity -> Position -> ( Ecs, Float ) -> ( Ecs, Float )
-moveEntity entityId velocity position ( ecs, deltaTime ) =
-    ( Ecs.insert
-        entityId
-        Ecs.positionComponent
-        { x = position.x + velocity.x * deltaTime
-        , y = position.y + velocity.y * deltaTime
+moveEntity : Nodes.Move -> ( Entity, Model ) -> ( Entity, Model )
+moveEntity { position, velocity } ( entity, model ) =
+    ( Ecs.set
+        EcsSpecs.components.position
+        { x = position.x + velocity.x * model.deltaTime
+        , y = position.y + velocity.y * model.deltaTime
         }
-        ecs
-    , deltaTime
+        entity
+    , model
     )
 
 
@@ -42,19 +46,13 @@ moveEntity entityId velocity position ( ecs, deltaTime ) =
 --  BOUNDS CHECK --
 
 
-checkBounce : ( Ecs, Float ) -> ( Ecs, Float )
+checkBounce : SystemSpec Model
 checkBounce =
-    Ecs.iterate3 Ecs.bounceComponent Ecs.velocityComponent Ecs.positionComponent checkEntityBoundsBounce
+    Ecs.processor EcsSpecs.nodes.bounce checkEntityBoundsBounce
 
 
-checkEntityBoundsBounce :
-    Ecs.EntityId
-    -> Bounce
-    -> Velocity
-    -> Position
-    -> ( Ecs, Float )
-    -> ( Ecs, Float )
-checkEntityBoundsBounce entityId bounce velocity position ( ecs, deltaTime ) =
+checkEntityBoundsBounce : Nodes.Bounce -> ( Entity, Model ) -> ( Entity, Model )
+checkEntityBoundsBounce { position, velocity, bounce } ( entity, model ) =
     let
         absNewVelocityX =
             abs (velocity.x * bounce.damping)
@@ -66,8 +64,8 @@ checkEntityBoundsBounce entityId bounce velocity position ( ecs, deltaTime ) =
             if position.x < 0 then
                 ( 0, absNewVelocityX, True )
 
-            else if position.x > toFloat worldWidth then
-                ( toFloat worldWidth, -absNewVelocityX, True )
+            else if position.x > toFloat model.worldWidth then
+                ( toFloat model.worldWidth, -absNewVelocityX, True )
 
             else
                 ( position.x, velocity.x, False )
@@ -76,43 +74,45 @@ checkEntityBoundsBounce entityId bounce velocity position ( ecs, deltaTime ) =
             if position.y < 0 then
                 ( 0, absNewVelocityY, True )
 
-            else if position.y > toFloat worldHeight then
-                ( toFloat worldHeight, -absNewVelocityY, True )
+            else if position.y > toFloat model.worldHeight then
+                ( toFloat model.worldHeight, -absNewVelocityY, True )
 
             else
                 ( position.y, velocity.y, False )
     in
     if changedX || changedY then
-        ( ecs
-            |> Ecs.insert entityId Ecs.positionComponent { x = newX, y = newY }
-            |> Ecs.insert entityId Ecs.velocityComponent { x = newVelocityX, y = newVelocityY }
-        , deltaTime
+        ( entity
+            |> Ecs.set
+                EcsSpecs.components.position
+                { x = newX, y = newY }
+            |> Ecs.set
+                EcsSpecs.components.velocity
+                { x = newVelocityX, y = newVelocityY }
+        , model
         )
 
     else
-        ( ecs
-        , deltaTime
+        ( entity
+        , model
         )
 
 
-checkTeleport : ( Ecs, Float ) -> ( Ecs, Float )
+checkTeleport : SystemSpec Model
 checkTeleport =
-    Ecs.iterate2 Ecs.teleportComponent Ecs.positionComponent checkEntityBoundsTeleport
+    Ecs.processor EcsSpecs.nodes.teleport checkEntityBoundsTeleport
 
 
 checkEntityBoundsTeleport :
-    Ecs.EntityId
-    -> Teleport
-    -> Position
-    -> ( Ecs, Float )
-    -> ( Ecs, Float )
-checkEntityBoundsTeleport entityId _ position ( ecs, deltaTime ) =
+    Nodes.Teleport
+    -> ( Entity, Model )
+    -> ( Entity, Model )
+checkEntityBoundsTeleport { position } ( entity, model ) =
     let
         newX =
             if position.x < 0 then
-                toFloat worldWidth
+                toFloat model.worldWidth
 
-            else if position.x > toFloat worldWidth then
+            else if position.x > toFloat model.worldWidth then
                 0
 
             else
@@ -120,22 +120,22 @@ checkEntityBoundsTeleport entityId _ position ( ecs, deltaTime ) =
 
         newY =
             if position.y < 0 then
-                toFloat worldHeight
+                toFloat model.worldHeight
 
-            else if position.y > toFloat worldHeight then
+            else if position.y > toFloat model.worldHeight then
                 0
 
             else
                 position.y
     in
     if position.x /= newX || position.y /= newY then
-        ( Ecs.insert entityId Ecs.positionComponent { x = newX, y = newY } ecs
-        , deltaTime
+        ( Ecs.set EcsSpecs.components.position { x = newX, y = newY } entity
+        , model
         )
 
     else
-        ( ecs
-        , deltaTime
+        ( entity
+        , model
         )
 
 
@@ -143,33 +143,25 @@ checkEntityBoundsTeleport entityId _ position ( ecs, deltaTime ) =
 -- RENDER --
 
 
-render : Ecs -> Html msg
-render ecs =
-    Html.div
-        [ Html.Attributes.style "position" "relative"
-        , Html.Attributes.style "display" "inline-block"
-        , Html.Attributes.style "width" (String.fromInt worldWidth ++ "px")
-        , Html.Attributes.style "height" (String.fromInt worldHeight ++ "px")
-        , Html.Attributes.style "background-color" "#aaa"
-        ]
-        (( ecs, [] )
-            |> Ecs.iterate2 Ecs.colorComponent Ecs.positionComponent renderEntity
-            |> Tuple.second
-        )
+render : SystemSpec Model
+render =
+    Ecs.system
+        { node = EcsSpecs.nodes.render
+        , preProcess = preProcessRender
+        , process = processRenderEntity
+        , postProcess = identity
+        }
 
 
-renderEntity : Ecs.EntityId -> Color -> Position -> ( Ecs, List (Html msg) ) -> ( Ecs, List (Html msg) )
-renderEntity entityId color position ( ecs, elements ) =
+preProcessRender : ( Ecs, Model ) -> ( Ecs, Model )
+preProcessRender ( ecs, model ) =
     ( ecs
-    , Html.div
-        [ Html.Attributes.style "position" "absolute"
-        , Html.Attributes.style "display" "inline-block"
-        , Html.Attributes.style "left" (String.fromInt (round position.x - 2) ++ "px")
-        , Html.Attributes.style "top" (String.fromInt (round position.y - 2) ++ "px")
-        , Html.Attributes.style "width" "4px"
-        , Html.Attributes.style "height" "4px"
-        , Html.Attributes.style "background-color" color
-        ]
-        []
-        :: elements
+    , { model | viewElements = [] }
+    )
+
+
+processRenderEntity : Nodes.Render -> ( Entity, Model ) -> ( Entity, Model )
+processRenderEntity node ( entity, model ) =
+    ( entity
+    , { model | viewElements = node :: model.viewElements }
     )
