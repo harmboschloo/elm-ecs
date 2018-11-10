@@ -1,14 +1,16 @@
-module Ecs8.Nodes exposing (node1, node2, node3)
+module Ecs8.Nodes exposing
+    ( node1
+    , node2
+    , node3
+    )
 
-{-| Entity-Component-System node specs.
-
-@docs node1, node2, node3
-
+{-| ECS node specs.
 -}
 
 import Ecs8.Internal exposing (ComponentSpec(..), NodeSpec(..))
 
 
+{-| -}
 node1 :
     (component1 -> node)
     -> ComponentSpec components component1
@@ -29,6 +31,7 @@ node1 createNode (ComponentSpec spec1) =
         }
 
 
+{-| -}
 node2 :
     (component1 -> component2 -> node)
     -> ComponentSpec components component1
@@ -56,6 +59,7 @@ node2 createNode (ComponentSpec spec1) (ComponentSpec spec2) =
         }
 
 
+{-| -}
 node3 :
     (component1 -> component2 -> component3 -> node)
     -> ComponentSpec components component1

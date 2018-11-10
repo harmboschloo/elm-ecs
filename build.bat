@@ -1,6 +1,4 @@
-cd ui
-call build
-cd ../benchmarks
+cd benchmarks
 call build
 cd ../examples/basic
 call build

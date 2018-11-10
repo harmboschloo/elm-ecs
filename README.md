@@ -1,8 +1,7 @@
-# ECS Generator
+# ECS
 
-Generates elm code for an entity-component-system (ECS) given a list of components.
+An entity-component-system (ECS).
 
 Experimental / work in progress.
 
-- [generator ui](https://harmboschloo.github.io/elm-ecs-generator/ui/)
-- [demo](https://harmboschloo.github.io/elm-ecs-generator/examples/demo/build/)
+- [demo](https://harmboschloo.github.io/elm-ecs/examples/demo/build/)
