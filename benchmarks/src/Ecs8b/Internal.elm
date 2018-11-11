@@ -55,7 +55,7 @@ create :
 create (EntitySpec spec) updater (Ecs model) =
     let
         (Entity _ components status) =
-            updater (Entity invalidId spec.empty Unmodified)
+            updater (Entity invalidIndex spec.empty Unmodified)
     in
     case status of
         Unmodified ->
@@ -66,13 +66,13 @@ create (EntitySpec spec) updater (Ecs model) =
 
         Destroyed ->
             let
-                id =
+                index =
                     Array.length model.entities
             in
-            ( Entity id spec.empty Destroyed
+            ( Entity index spec.empty Destroyed
             , Ecs
                 { entities = Array.push Nothing model.entities
-                , destroyedEntities = id :: model.destroyedEntities
+                , destroyedEntities = index :: model.destroyedEntities
                 }
             )
 
@@ -81,7 +81,10 @@ addEntity : components -> Model components -> ( Entity components, Ecs component
 addEntity components model =
     case model.destroyedEntities of
         [] ->
-            ( Entity (Array.length model.entities) components Unmodified
+            ( Entity
+                (Array.length model.entities)
+                components
+                Unmodified
             , Ecs
                 { entities = Array.push (Just components) model.entities
                 , destroyedEntities = model.destroyedEntities
@@ -98,29 +101,29 @@ addEntity components model =
 
 
 insert : Entity components -> Ecs components -> Ecs components
-insert (Entity id components status) (Ecs model) =
+insert (Entity index components status) (Ecs model) =
     case status of
         Unmodified ->
             Ecs model
 
         Modified ->
             Ecs
-                { entities = Array.set id (Just components) model.entities
+                { entities = Array.set index (Just components) model.entities
                 , destroyedEntities = model.destroyedEntities
                 }
 
         Destroyed ->
             Ecs
-                { entities = Array.set id Nothing model.entities
-                , destroyedEntities = id :: model.destroyedEntities
+                { entities = Array.set index Nothing model.entities
+                , destroyedEntities = index :: model.destroyedEntities
                 }
 
 
-find : Entity components -> Ecs components -> Maybe (Entity components)
-find (Entity id _ _) (Ecs model) =
-    case Array.get id model.entities of
+find : EntityId -> Ecs components -> Maybe (Entity components)
+find (EntityId index) (Ecs model) =
+    case Array.get index model.entities of
         Just (Just components) ->
-            Just (Entity id components Unmodified)
+            Just (Entity index components Unmodified)
 
         _ ->
             Nothing
@@ -149,8 +152,12 @@ type Status
     | Destroyed
 
 
-invalidId : Int
-invalidId =
+type EntityId
+    = EntityId Int
+
+
+invalidIndex : Int
+invalidIndex =
     -1
 
 
@@ -168,18 +175,18 @@ modifyStatus status =
 
 
 clear : EntitySpec components -> Entity components -> Entity components
-clear (EntitySpec spec) (Entity id components status) =
-    Entity id spec.empty (modifyStatus status)
+clear (EntitySpec spec) (Entity index components status) =
+    Entity index spec.empty (modifyStatus status)
 
 
 destroy : Entity components -> Entity components
-destroy (Entity id components status) =
-    Entity id components Destroyed
+destroy (Entity index components status) =
+    Entity index components Destroyed
 
 
-getId : Entity components -> Int
-getId (Entity id _ _) =
-    id
+getId : Entity components -> EntityId
+getId (Entity index _ _) =
+    EntityId index
 
 
 
@@ -211,8 +218,8 @@ set :
     -> component
     -> Entity components
     -> Entity components
-set (ComponentSpec spec) component (Entity id components status) =
-    Entity id
+set (ComponentSpec spec) component (Entity index components status) =
+    Entity index
         (spec.setComponent (Just component) components)
         (modifyStatus status)
 
@@ -222,8 +229,8 @@ update :
     -> (Maybe component -> Maybe component)
     -> Entity components
     -> Entity components
-update (ComponentSpec spec) updater (Entity id components status) =
-    Entity id
+update (ComponentSpec spec) updater (Entity index components status) =
+    Entity index
         (spec.setComponent (updater (spec.getComponent components)) components)
         (modifyStatus status)
 
@@ -232,8 +239,8 @@ remove :
     ComponentSpec components component
     -> Entity components
     -> Entity components
-remove (ComponentSpec spec) (Entity id components status) =
-    Entity id
+remove (ComponentSpec spec) (Entity index components status) =
+    Entity index
         (spec.setComponent Nothing components)
         (modifyStatus status)
 
@@ -343,14 +350,17 @@ processEntity :
     -> Maybe components
     -> ( Int, Ecs components, a )
     -> ( Int, Ecs components, a )
-processEntity doProcess maybeComponents ( id, ecs, a ) =
+processEntity doProcess maybeComponents ( index, ecs, a ) =
     case maybeComponents of
         Nothing ->
-            ( id + 1, ecs, a )
+            ( index + 1, ecs, a )
 
         Just components ->
             let
                 ( newEntity, newX ) =
-                    doProcess ( Entity id components Unmodified, a )
+                    doProcess
+                        ( Entity index components Unmodified
+                        , a
+                        )
             in
-            ( id + 1, insert newEntity ecs, newX )
+            ( index + 1, insert newEntity ecs, newX )
