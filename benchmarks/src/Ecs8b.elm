@@ -1,4 +1,4 @@
-module Ecs8 exposing
+module Ecs8b exposing
     ( ComponentSpec
     , Ecs
     , EntitySpec
@@ -10,9 +10,9 @@ module Ecs8 exposing
     )
 
 import Components
-import Ecs8.Ecs as Ecs
-import Ecs8.Entity3 as Ecs
-import Ecs8.Nodes as Ecs
+import Ecs8b.Ecs as Ecs
+import Ecs8b.Entity3 as Ecs
+import Ecs8b.Nodes as Ecs
 import Nodes
 
 

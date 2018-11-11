@@ -1,4 +1,4 @@
-module Ecs8.Internal exposing
+module Ecs8b.Internal exposing
     ( ComponentSpec(..)
     , Ecs
     , Entity

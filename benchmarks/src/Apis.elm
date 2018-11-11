@@ -2,12 +2,15 @@ module Apis exposing
     ( EcsApi
     , ecs1
     , ecs8
+    , ecs8b
     )
 
 import Ecs1
 import Ecs1.Dict3
 import Ecs8
 import Ecs8.Ecs
+import Ecs8b
+import Ecs8b.Ecs
 
 
 
@@ -119,6 +122,63 @@ ecs8 =
     , iterateABCModifyA = process [ Ecs8.Ecs.processor abcNode (\_ ( e, x ) -> ( e |> set a (), x )) ]
     , iterateAModifyAB = process [ Ecs8.Ecs.processor aNode (\_ ( e, x ) -> ( e |> set a () |> set b (), x )) ]
     , iterateAModifyABC = process [ Ecs8.Ecs.processor aNode (\_ ( e, x ) -> ( e |> set a () |> set b () |> set c (), x )) ]
+    , update2_XX_X = process [ ab_aSystem, ab_aSystem ]
+    , update3_XX_X = process [ ab_aSystem, ab_aSystem, ab_aSystem ]
+    , update4_XX_X = process [ ab_aSystem, ab_aSystem, ab_aSystem, ab_aSystem ]
+    , update5_XX_X = process [ ab_aSystem, ab_aSystem, ab_aSystem, ab_aSystem, ab_aSystem ]
+    }
+
+
+ecs8b : EcsApi Ecs8b.Ecs
+ecs8b =
+    let
+        create updater ecs =
+            Ecs8b.Ecs.create Ecs8b.entity updater ecs |> Tuple.second
+
+        set =
+            Ecs8b.Ecs.set
+
+        process =
+            Ecs8b.Ecs.process >> withContext
+
+        a =
+            Ecs8b.components.a
+
+        b =
+            Ecs8b.components.b
+
+        c =
+            Ecs8b.components.c
+
+        aNode =
+            Ecs8b.nodes.a
+
+        abNode =
+            Ecs8b.nodes.ab
+
+        abcNode =
+            Ecs8b.nodes.abc
+
+        ab_aSystem =
+            Ecs8b.Ecs.processor abNode (\_ ( e, x ) -> ( e |> set a (), x ))
+    in
+    { label = "Ecs8b"
+    , empty = Ecs8b.Ecs.empty
+    , createA = create (set a ())
+    , createB = create (set b ())
+    , createC = create (set c ())
+    , createAB = create (set a () >> set b ())
+    , createAC = create (set a () >> set c ())
+    , createBC = create (set b () >> set c ())
+    , createABC = create (set a () >> set b () >> set c ())
+    , iterateA = process [ Ecs8b.Ecs.processor aNode (\_ s -> s) ]
+    , iterateAB = process [ Ecs8b.Ecs.processor abNode (\_ s -> s) ]
+    , iterateABC = process [ Ecs8b.Ecs.processor abcNode (\_ s -> s) ]
+    , iterateAModifyA = process [ Ecs8b.Ecs.processor aNode (\_ ( e, x ) -> ( e |> set a (), x )) ]
+    , iterateABModifyA = process [ Ecs8b.Ecs.processor abNode (\_ ( e, x ) -> ( e |> set a (), x )) ]
+    , iterateABCModifyA = process [ Ecs8b.Ecs.processor abcNode (\_ ( e, x ) -> ( e |> set a (), x )) ]
+    , iterateAModifyAB = process [ Ecs8b.Ecs.processor aNode (\_ ( e, x ) -> ( e |> set a () |> set b (), x )) ]
+    , iterateAModifyABC = process [ Ecs8b.Ecs.processor aNode (\_ ( e, x ) -> ( e |> set a () |> set b () |> set c (), x )) ]
     , update2_XX_X = process [ ab_aSystem, ab_aSystem ]
     , update3_XX_X = process [ ab_aSystem, ab_aSystem, ab_aSystem ]
     , update4_XX_X = process [ ab_aSystem, ab_aSystem, ab_aSystem, ab_aSystem ]

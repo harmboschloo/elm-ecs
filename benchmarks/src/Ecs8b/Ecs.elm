@@ -1,4 +1,4 @@
-module Ecs8.Ecs exposing
+module Ecs8b.Ecs exposing
     ( Ecs, empty, create, insert, find, size
     , EntitySpec, Entity, clear, destroy, getId
     , ComponentSpec, set, get, update, remove
@@ -29,7 +29,7 @@ module Ecs8.Ecs exposing
 
 -}
 
-import Ecs8.Internal as Internal
+import Ecs8b.Internal as Internal
 
 
 

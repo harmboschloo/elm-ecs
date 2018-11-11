@@ -1,4 +1,4 @@
-module Ecs8.Nodes exposing
+module Ecs8b.Nodes exposing
     ( node1
     , node2
     , node3
@@ -54,7 +54,7 @@ module Ecs8.Nodes exposing
 {-| ECS nodes.
 -}
 
-import Ecs8.Internal exposing (ComponentSpec(..), NodeSpec(..))
+import Ecs8b.Internal exposing (ComponentSpec(..), NodeSpec(..))
 
 
 {-| Create a node with 1 component.
