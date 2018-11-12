@@ -1,3 +1,16 @@
+# To do
+
+- Ecs.System modules with nodes
+- system (maybe pre) (maybe (node, process)) (maybe post)?
+- createWith components
+- getComponents
+- new entity -> in [] in Entity
+- sort out different system needs
+- canvas renderer for demo https://package.elm-lang.org/packages/joakin/elm-canvas/latest/
+- getNode entity
+- fromList [components]
+- toList [components]
+
 # Resources
 
 ecs
