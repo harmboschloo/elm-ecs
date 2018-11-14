@@ -132,11 +132,11 @@ ecs8 =
 ecs8b : EcsApi Ecs8b.Ecs
 ecs8b =
     let
-        create updater ecs =
-            Ecs8b.Ecs.create Ecs8b.entity updater ecs |> Tuple.second
+        create builder ecs =
+            Ecs8b.Ecs.createWith builder ecs |> Tuple.second
 
-        set =
-            Ecs8b.Ecs.set
+        andSet =
+            Ecs8b.Ecs.andSet
 
         process =
             Ecs8b.Ecs.process >> withContext
@@ -160,25 +160,25 @@ ecs8b =
             Ecs8b.nodes.abc
 
         ab_aSystem =
-            Ecs8b.Ecs.processor abNode (\_ ( e, x ) -> ( e |> set a (), x ))
+            Ecs8b.Ecs.processor abNode (\_ e ecs x -> ( ( e, ecs ) |> andSet a () |> Tuple.second, x ))
     in
     { label = "Ecs8b"
-    , empty = Ecs8b.Ecs.empty
-    , createA = create (set a ())
-    , createB = create (set b ())
-    , createC = create (set c ())
-    , createAB = create (set a () >> set b ())
-    , createAC = create (set a () >> set c ())
-    , createBC = create (set b () >> set c ())
-    , createABC = create (set a () >> set b () >> set c ())
-    , iterateA = process [ Ecs8b.Ecs.processor aNode (\_ s -> s) ]
-    , iterateAB = process [ Ecs8b.Ecs.processor abNode (\_ s -> s) ]
-    , iterateABC = process [ Ecs8b.Ecs.processor abcNode (\_ s -> s) ]
-    , iterateAModifyA = process [ Ecs8b.Ecs.processor aNode (\_ ( e, x ) -> ( e |> set a (), x )) ]
-    , iterateABModifyA = process [ Ecs8b.Ecs.processor abNode (\_ ( e, x ) -> ( e |> set a (), x )) ]
-    , iterateABCModifyA = process [ Ecs8b.Ecs.processor abcNode (\_ ( e, x ) -> ( e |> set a (), x )) ]
-    , iterateAModifyAB = process [ Ecs8b.Ecs.processor aNode (\_ ( e, x ) -> ( e |> set a () |> set b (), x )) ]
-    , iterateAModifyABC = process [ Ecs8b.Ecs.processor aNode (\_ ( e, x ) -> ( e |> set a () |> set b () |> set c (), x )) ]
+    , empty = Ecs8b.Ecs.empty Ecs8b.entity
+    , createA = create (andSet a ())
+    , createB = create (andSet b ())
+    , createC = create (andSet c ())
+    , createAB = create (andSet a () >> andSet b ())
+    , createAC = create (andSet a () >> andSet c ())
+    , createBC = create (andSet b () >> andSet c ())
+    , createABC = create (andSet a () >> andSet b () >> andSet c ())
+    , iterateA = process [ Ecs8b.Ecs.processor aNode (\_ _ ecs x -> ( ecs, x )) ]
+    , iterateAB = process [ Ecs8b.Ecs.processor abNode (\_ _ ecs x -> ( ecs, x )) ]
+    , iterateABC = process [ Ecs8b.Ecs.processor abcNode (\_ _ ecs x -> ( ecs, x )) ]
+    , iterateAModifyA = process [ Ecs8b.Ecs.processor aNode (\_ e ecs x -> ( ( e, ecs ) |> andSet a () |> Tuple.second, x )) ]
+    , iterateABModifyA = process [ Ecs8b.Ecs.processor abNode (\_ e ecs x -> ( ( e, ecs ) |> andSet a () |> Tuple.second, x )) ]
+    , iterateABCModifyA = process [ Ecs8b.Ecs.processor abcNode (\_ e ecs x -> ( ( e, ecs ) |> andSet a () |> Tuple.second, x )) ]
+    , iterateAModifyAB = process [ Ecs8b.Ecs.processor aNode (\_ e ecs x -> ( ( e, ecs ) |> andSet a () |> andSet b () |> Tuple.second, x )) ]
+    , iterateAModifyABC = process [ Ecs8b.Ecs.processor aNode (\_ e ecs x -> ( ( e, ecs ) |> andSet a () |> andSet b () |> andSet c () |> Tuple.second, x )) ]
     , update2_XX_X = process [ ab_aSystem, ab_aSystem ]
     , update3_XX_X = process [ ab_aSystem, ab_aSystem, ab_aSystem ]
     , update4_XX_X = process [ ab_aSystem, ab_aSystem, ab_aSystem, ab_aSystem ]

@@ -1,9 +1,9 @@
 module Ecs8b exposing
-    ( ComponentSpec
+    ( ComponentType
     , Ecs
-    , EntitySpec
-    , NodeSpec
-    , SystemSpec
+    , EntityType
+    , NodeType
+    , System
     , components
     , entity
     , nodes
@@ -11,8 +11,6 @@ module Ecs8b exposing
 
 import Components
 import Ecs8b.Ecs as Ecs
-import Ecs8b.Entity3 as Ecs
-import Ecs8b.Nodes as Ecs
 import Nodes
 
 
@@ -20,20 +18,20 @@ type alias Ecs =
     Ecs.Ecs Components
 
 
-type alias EntitySpec =
-    Ecs.EntitySpec Components
+type alias EntityType =
+    Ecs.EntityType Components
 
 
-type alias ComponentSpec a =
-    Ecs.ComponentSpec Components a
+type alias ComponentType a =
+    Ecs.ComponentType Components a
 
 
-type alias SystemSpec a =
-    Ecs.SystemSpec Components a
+type alias NodeType a =
+    Ecs.NodeType Components a
 
 
-type alias NodeSpec a =
-    Ecs.NodeSpec Components a
+type alias System a =
+    Ecs.System Components a
 
 
 type alias Components =
@@ -43,33 +41,33 @@ type alias Components =
     }
 
 
-type alias ComponentSpecs =
-    { a : ComponentSpec Components.A
-    , b : ComponentSpec Components.B
-    , c : ComponentSpec Components.C
+type alias ComponentTypes =
+    { a : ComponentType Components.A
+    , b : ComponentType Components.B
+    , c : ComponentType Components.C
     }
 
 
-type alias NodeSpecs =
-    { a : NodeSpec Nodes.A
-    , ab : NodeSpec Nodes.Ab
-    , abc : NodeSpec Nodes.Abc
+type alias NodeTypes =
+    { a : NodeType Nodes.A
+    , ab : NodeType Nodes.Ab
+    , abc : NodeType Nodes.Abc
     }
 
 
-entity : EntitySpec
+entity : EntityType
 entity =
-    Ecs.entity Components
+    Ecs.entity3 Components
 
 
-components : ComponentSpecs
+components : ComponentTypes
 components =
-    Ecs.components ComponentSpecs Components .a .b .c
+    Ecs.components3 ComponentTypes Components .a .b .c
 
 
-nodes : NodeSpecs
+nodes : NodeTypes
 nodes =
-    NodeSpecs
+    NodeTypes
         (Ecs.node1 Nodes.A components.a)
         (Ecs.node2 Nodes.Ab components.a components.b)
         (Ecs.node3 Nodes.Abc components.a components.b components.c)

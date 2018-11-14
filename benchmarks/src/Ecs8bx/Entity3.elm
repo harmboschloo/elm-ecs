@@ -1,6 +1,9 @@
 module Ecs8b.Entity3 exposing (entity, components)
 
 {-| ECS entities with 3 components.
+
+@docs entity, components
+
 -}
 
 import Ecs8b.Internal exposing (ComponentSpec(..), EntitySpec(..))

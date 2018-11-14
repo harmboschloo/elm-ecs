@@ -1,9 +1,10 @@
 module Ecs8b.Internal exposing
     ( ComponentSpec(..)
-    , Ecs
-    , Entity
+    , Ecs(..)
+    , Entity(..)
     , EntitySpec(..)
     , NodeSpec(..)
+    , Status(..)
     , SystemSpec
     , clear
     , create
@@ -149,7 +150,6 @@ type Entity components
 type Status
     = Unmodified
     | Modified
-    | Destroyed
 
 
 type EntityId
