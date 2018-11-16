@@ -1,14 +1,15 @@
 // @ts-check
 
+const fs = require("fs");
 const path = require("path");
-const elmjson = require("./elmjson");
-const entities = require("./entities");
-const nodes = require("./nodes");
+const types = require("./types");
 
-const n = 50;
-const root = path.resolve(__dirname, "..");
-const src = path.resolve(__dirname, "../src");
+const maxComponents = 50;
+const maxNodeComponents = 10;
+const output = path.resolve(__dirname, "output");
 
-elmjson.generate(n, root);
-entities.generate(n, src);
-nodes.generate(n, src);
+if (!fs.existsSync(output)) {
+  fs.mkdirSync(output);
+}
+
+types.generate(maxComponents, maxNodeComponents, output);
