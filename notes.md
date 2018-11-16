@@ -24,6 +24,7 @@
 - don't return entity? Mark current entity in ecs? (for fast insertions)
 - EntityType, NodeType, ComponentType modules. no entityx
 - Now createdId can work. (Without entity.destroy)
+- NodeType -> Node; ComponentType -> Component; EntityType -> ? (maybe integrte with empty, ect?)
 
 # Resources
 

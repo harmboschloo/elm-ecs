@@ -741,9 +741,10 @@ mapProcess ( NodeType type_, fn ) =
 
 process :
     List (System components a)
+    -> Ecs components
+    -> a
     -> ( Ecs components, a )
-    -> ( Ecs components, a )
-process systems ( Ecs model1, a1 ) =
+process systems (Ecs model1) a1 =
     let
         doPreProcess =
             compose .preProcess systems
@@ -806,8 +807,6 @@ processEntity doProcess maybeComponents ( id, model1, a1 ) =
                         )
             in
             ( id + 1, model2, a2 )
-
-
 
 
 {-| Create a entity type with 1 component.
