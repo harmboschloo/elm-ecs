@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Browser.Events
-import Ecs exposing (Entity)
+import Ecs exposing (EntityId)
 import Html exposing (Html)
 import Html.Attributes
 
@@ -33,26 +33,26 @@ type alias Color =
 
 
 type alias Ecs =
-    Ecs.Ecs Components
+    Ecs.Ecs Entity
 
 
-type alias EntityType =
-    Ecs.EntityType Components
+type alias Empty =
+    Ecs.Empty Entity
 
 
-type alias ComponentType a =
-    Ecs.ComponentType Components a
+type alias Component a =
+    Ecs.Component Entity a
 
 
-type alias NodeType a =
-    Ecs.NodeType Components a
+type alias Node a =
+    Ecs.Node Entity a
 
 
 type alias System =
-    Ecs.System Components State
+    Ecs.System Entity State
 
 
-type alias Components =
+type alias Entity =
     { position : Maybe Position
     , velocity : Maybe Velocity
     , outOfBoundsResolution : Maybe OutOfBoundsResolution
@@ -60,24 +60,24 @@ type alias Components =
     }
 
 
-type alias ComponentTypes =
-    { position : ComponentType Position
-    , velocity : ComponentType Velocity
-    , outOfBoundsResolution : ComponentType OutOfBoundsResolution
-    , color : ComponentType Color
+type alias Components =
+    { position : Component Position
+    , velocity : Component Velocity
+    , outOfBoundsResolution : Component OutOfBoundsResolution
+    , color : Component Color
     }
 
 
-entityType : EntityType
-entityType =
-    Ecs.entity4 Components
+empty : Empty
+empty =
+    Ecs.empty4 Entity
 
 
-componentTypes : ComponentTypes
-componentTypes =
+components : Components
+components =
     Ecs.components4
-        ComponentTypes
         Components
+        Entity
         .position
         .velocity
         .outOfBoundsResolution
@@ -106,17 +106,17 @@ spawnEntity ecs state =
         in
         ( Ecs.create ecs
             |> Ecs.andSet
-                componentTypes.position
+                components.position
                 { x = remainderBy state.worldWidth state.frameCount |> toFloat
                 , y = remainderBy state.worldHeight state.frameCount |> toFloat
                 }
             |> Ecs.andSet
-                componentTypes.velocity
+                components.velocity
                 { x = (remainderBy 5 n - 2) * 75 |> toFloat
                 , y = (remainderBy 7 n - 3) * 50 |> toFloat
                 }
             |> Ecs.andSet
-                componentTypes.outOfBoundsResolution
+                components.outOfBoundsResolution
                 (if remainderBy 2 n == 0 then
                     Teleport
 
@@ -124,7 +124,7 @@ spawnEntity ecs state =
                     Destroy
                 )
             |> Ecs.andSet
-                componentTypes.color
+                components.color
                 (colors
                     |> List.drop (remainderBy (List.length colors) n)
                     |> List.head
@@ -162,11 +162,11 @@ type alias Move =
     }
 
 
-moveNode : NodeType Move
+moveNode : Node Move
 moveNode =
     Ecs.node2 Move
-        componentTypes.position
-        componentTypes.velocity
+        components.position
+        components.velocity
 
 
 moveSystem : System
@@ -178,14 +178,14 @@ moveSystem =
         }
 
 
-moveEntity : Move -> Entity -> Ecs -> State -> ( Ecs, State )
-moveEntity { position, velocity } entity ecs state =
+moveEntity : Move -> EntityId -> Ecs -> State -> ( Ecs, State )
+moveEntity { position, velocity } entityId ecs state =
     ( Ecs.set
-        componentTypes.position
+        components.position
         { x = position.x + velocity.x * state.deltaTime
         , y = position.y + velocity.y * state.deltaTime
         }
-        entity
+        entityId
         ecs
     , state
     )
@@ -201,11 +201,11 @@ type alias BoundsCheck =
     }
 
 
-boundsCheckNode : NodeType BoundsCheck
+boundsCheckNode : Node BoundsCheck
 boundsCheckNode =
     Ecs.node2 BoundsCheck
-        componentTypes.position
-        componentTypes.outOfBoundsResolution
+        components.position
+        components.outOfBoundsResolution
 
 
 boundsCheckSystem : System
@@ -217,8 +217,8 @@ boundsCheckSystem =
         }
 
 
-boundsCheckEntity : BoundsCheck -> Entity -> Ecs -> State -> ( Ecs, State )
-boundsCheckEntity { position, resolution } entity ecs state =
+boundsCheckEntity : BoundsCheck -> EntityId -> Ecs -> State -> ( Ecs, State )
+boundsCheckEntity { position, resolution } entityId ecs state =
     case resolution of
         Teleport ->
             let
@@ -244,9 +244,9 @@ boundsCheckEntity { position, resolution } entity ecs state =
             in
             if position.x /= newX || position.y /= newY then
                 ( Ecs.set
-                    componentTypes.position
+                    components.position
                     { x = newX, y = newY }
-                    entity
+                    entityId
                     ecs
                 , state
                 )
@@ -261,7 +261,7 @@ boundsCheckEntity { position, resolution } entity ecs state =
                     || (position.y < 0)
                     || (position.y > toFloat state.worldHeight)
             then
-                ( Ecs.destroy entity ecs, state )
+                ( Ecs.destroy entityId ecs, state )
 
             else
                 ( ecs, state )
@@ -277,11 +277,11 @@ type alias Render =
     }
 
 
-renderNode : NodeType Render
+renderNode : Node Render
 renderNode =
     Ecs.node2 Render
-        componentTypes.position
-        componentTypes.color
+        components.position
+        components.color
 
 
 renderSystem : System
@@ -298,8 +298,8 @@ clearViewElement ecs state =
     ( ecs, { state | viewElements = [] } )
 
 
-renderEntity : Render -> Entity -> Ecs -> State -> ( Ecs, State )
-renderEntity data entity ecs state =
+renderEntity : Render -> EntityId -> Ecs -> State -> ( Ecs, State )
+renderEntity data _ ecs state =
     ( ecs, { state | viewElements = data :: state.viewElements } )
 
 
@@ -328,7 +328,7 @@ type alias ViewElement =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( ( Ecs.empty entityType
+    ( ( Ecs.empty empty
       , { worldWidth = 300
         , worldHeight = 300
         , deltaTime = 0

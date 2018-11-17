@@ -8,7 +8,7 @@ exports.generate = generate;
 function generate(maxComponents, maxNodeComponents, destination) {
   const file = path.resolve(destination, "Types.elm");
 
-  fs.writeFile(file, generateTypes(maxComponents, maxNodeComponents), error => {
+  fs.writeFile(file, generates(maxComponents, maxNodeComponents), error => {
     if (error) {
       console.error(error);
     } else {
@@ -17,29 +17,29 @@ function generate(maxComponents, maxNodeComponents, destination) {
   });
 }
 
-function generateTypes(n, nNodes) {
+function generates(n, nNodes) {
   const all = range(n);
 
   return `module Ecs.Types exposing
-    ( EntityType, ComponentType, NodeType
+    ( Empty, Component, Node
     , ${all
       .map(
-        i => `entity${i}, components${i}${i > nNodes ? "" : `, node${i}`}\n    `
+        i => `empty${i}, components${i}${i > nNodes ? "" : `, node${i}`}\n    `
       )
       .join(", ")})
 
 {-|
 
 
-# Types
+# Setting up your Ecs with empty, component and node specifications.
 
-@docs EntityType, ComponentType, NodeType
+@docs Empty, Component, Node
 
 
 ${all
     .map(
       i =>
-        `# Types with ${i} components.\n\n@docs entity${i}, components${i}${
+        `# Create specifications for ${i} components.\n\n@docs empty${i}, components${i}${
           i > nNodes ? "" : `, node${i}`
         }\n`
     )
@@ -47,22 +47,22 @@ ${all
 -}
 
 
-type EntityType components
-    = EntityType { empty : components }
+type Empty entity
+    = Empty entity
 
 
-type ComponentType components component
-    = ComponentType
-        { getComponent : components -> Maybe component
-        , setComponent : Maybe component -> components -> components
+type Component entity a
+    = Component
+        { get : entity -> Maybe a
+        , set : Maybe a -> entity -> entity
         }
 
 
-type NodeType components node
-    = NodeType
-        { getNode : components -> Maybe node
+type Node entity a
+    = Node
+        { get : entity -> Maybe a
 
-        -- TODO, setNode : node -> components -> components
+        -- TODO, set : a -> entity -> entity
         -- update, remove...
         }
 
@@ -71,45 +71,39 @@ ${all
       const components = range(i);
 
       return `
-{-| Create a entity type with ${i} component${i > 1 ? "s" : ""}.
+{-| Create an empty entity specification for ${i} component${i > 1 ? "s" : ""}.
 -}
-entity${i} :
-    (${components.map(x => `Maybe component${x}`).join(" -> ")} -> components)
-    -> EntityType components
-entity${i} createComponents =
-    EntityType { empty = createComponents ${components
-      .map(x => `Nothing`)
-      .join(" ")} }
+empty${i} :
+    (${components.map(x => `Maybe a${x}`).join(" -> ")} -> entity)
+    -> Empty entity
+empty${i} createEntity =
+    Empty (createEntity ${components.map(x => `Nothing`).join(" ")})
 
 
-{-| Create component types with ${i} component${i > 1 ? "s" : ""}.
+{-| Create entity component specifications for ${i} component${
+        i > 1 ? "s" : ""
+      }.
 -}
 components${i} :
     (${components
-      .map(x => `ComponentType components component${x}`)
-      .join(" -> ")} -> componentTypes)
-    -> (${components
-      .map(x => `Maybe component${x}`)
+      .map(x => `Component entity a${x}`)
       .join(" -> ")} -> components)
-    -> ${components
-      .map(x => `(components -> Maybe component${x})`)
-      .join("\n    -> ")}
-    -> componentTypes
-components${i} createComponentTypes createComponents ${components
+    -> (${components.map(x => `Maybe a${x}`).join(" -> ")} -> entity)
+    -> ${components.map(x => `(entity -> Maybe a${x})`).join("\n    -> ")}
+    -> components
+components${i} createComponents createEntity ${components
         .map(x => `get${x}`)
         .join(" ")} =
-    createComponentTypes
+    createComponents
         ${components
           .map(
-            x => `(ComponentType
-            { getComponent = get${x}
-            , setComponent =
-                \\component data ->
-                    createComponents
+            x => `(Component
+            { get = get${x}
+            , set =
+                \\a entity ->
+                    createEntity
                         ${components
-                          .map(x2 =>
-                            x2 == x ? "component" : `(get${x2} data)`
-                          )
+                          .map(x2 => (x2 == x ? "a" : `(get${x2} entity)`))
                           .join("\n                        ")}
             }
         )`
@@ -120,22 +114,18 @@ ${
           ? ""
           : `
 
-{-| Create a node with ${i} component${i > 1 ? "s" : ""}.
+{-| Create a node specification for ${i} component${i > 1 ? "s" : ""}.
 -}
 node${i} :
-    (${components.map(x => `component${x}`).join(" -> ")} -> node)
-    ${components
-      .map(x => `-> ComponentType components component${x}`)
-      .join("\n    ")}
-    -> NodeType components node
+    (${components.map(x => `a${x}`).join(" -> ")} -> b)
+    ${components.map(x => `-> Component entity a${x}`).join("\n    ")}
+    -> Node entity b
 node${i} createNode ${components
-              .map(x => `(ComponentType type${x})`)
+              .map(x => `(Component component${x})`)
               .join(" ")} =
-    NodeType
-        { getNode =
-            \\data ->${components.map(getComponent).join("")}${createNode(
-              components
-            )}
+    Node
+        { get =
+            \\entity ->${components.map(get).join("")}${createNode(components)}
         }
 `
       }`;
@@ -143,25 +133,23 @@ node${i} createNode ${components
     .join("\n")}`;
 }
 
-function getComponent(x) {
+function get(x) {
   const pad = padding(x * 2 + 2);
   return `
-${pad}case type${x}.getComponent data of
+${pad}case component${x}.get entity of
 ${pad}    Nothing ->
 ${pad}        Nothing
 
-${pad}    Just component${x} ->`;
+${pad}    Just a${x} ->`;
 }
 
 function createNode(components) {
   const pad = padding(components.length * 2 + 3);
   return `
-  ${pad}  Just
-  ${pad}      (createNode
-  ${pad}          ${components
-    .map(x => `component${x}`)
-    .join(`\n${pad}            `)}
-  ${pad}      )`;
+${pad}    Just
+${pad}        (createNode
+${pad}            ${components.map(x => `a${x}`).join(`\n${pad}            `)}
+${pad}        )`;
 }
 
 function padding(n) {

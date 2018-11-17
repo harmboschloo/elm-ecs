@@ -1,30 +1,12 @@
 # To do
 
-- Ecs.System modules with nodes
-- system (maybe pre) (maybe (node, process)) (maybe post)?
-- createWith components
-- getComponents
-- new entity -> in [] in Entity
-- sort out different system needs
+- getEntity
 - canvas renderer for demo https://package.elm-lang.org/packages/joakin/elm-canvas/latest/
-- getNode entity
-- setNode entity
 - fromList [components]
 - toList [components]
-- Process type for creating entities, and destroy by id? Destroy after process.
-- Entity.getNode, .setNode
-- Node.of1, ... or Entity.node1 ?
-- System in Ecs or Ecs.System?
-- Ecs.Component(s)?
-- Minimal in Internal
-- new entity always through ecs, ensure valid id when calling updater
-- processor |> preprocessor
-- make api without performance considerations, then try to make it quick.
-- process: node -> Entity -> Ecs -> a -> (Ecs,a) ?
-- don't return entity? Mark current entity in ecs? (for fast insertions)
-- EntityType, NodeType, ComponentType modules. no entityx
-- Now createdId can work. (Without entity.destroy)
-- NodeType -> Node; ComponentType -> Component; EntityType -> ? (maybe integrte with empty, ect?)
+- Node set/remove
+- EntityId id index
+- Can we get rit of Components type defined by user?
 
 # Resources
 

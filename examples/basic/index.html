@@ -780,11 +780,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.ag.U === region.al.U)
+	if (region.af.T === region.ak.T)
 	{
-		return 'on line ' + region.ag.U;
+		return 'on line ' + region.af.T;
 	}
-	return 'on lines ' + region.ag.U + ' through ' + region.al.U;
+	return 'on lines ' + region.af.T + ' through ' + region.ak.T;
 }
 
 
@@ -1851,9 +1851,9 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.aP,
-		impl.aX,
-		impl.aV,
+		impl.aO,
+		impl.aW,
+		impl.aU,
 		function() { return function() {} }
 	);
 });
@@ -2653,9 +2653,9 @@ var _VirtualDom_mapEventTuple = F2(function(func, tuple)
 var _VirtualDom_mapEventRecord = F2(function(func, record)
 {
 	return {
-		z: func(record.z),
-		ah: record.ah,
-		af: record.af
+		y: func(record.y),
+		ag: record.ag,
+		ae: record.ae
 	}
 });
 
@@ -2923,11 +2923,11 @@ function _VirtualDom_makeCallback(eventNode, initialHandler)
 		// 3 = Custom
 
 		var value = result.a;
-		var message = !tag ? value : tag < 3 ? value.a : value.z;
-		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.ah;
+		var message = !tag ? value : tag < 3 ? value.a : value.y;
+		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.ag;
 		var currentEventNode = (
 			stopPropagation && event.stopPropagation(),
-			(tag == 2 ? value.b : tag == 3 && value.af) && event.preventDefault(),
+			(tag == 2 ? value.b : tag == 3 && value.ae) && event.preventDefault(),
 			eventNode
 		);
 		var tagger;
@@ -3877,11 +3877,11 @@ var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debug
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.aP,
-		impl.aX,
-		impl.aV,
+		impl.aO,
+		impl.aW,
+		impl.aU,
 		function(sendToApp, initialModel) {
-			var view = impl.aZ;
+			var view = impl.aY;
 			/**/
 			var domNode = args['node'];
 			//*/
@@ -3913,12 +3913,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.aP,
-		impl.aX,
-		impl.aV,
+		impl.aO,
+		impl.aW,
+		impl.aU,
 		function(sendToApp, initialModel) {
-			var divertHrefToApp = impl.Z && impl.Z(sendToApp)
-			var view = impl.aZ;
+			var divertHrefToApp = impl.Y && impl.Y(sendToApp)
+			var view = impl.aY;
 			var title = _VirtualDom_doc.title;
 			var bodyNode = _VirtualDom_doc.body;
 			var currNode = _VirtualDom_virtualize(bodyNode);
@@ -3926,12 +3926,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 			{
 				_VirtualDom_divertHrefToApp = divertHrefToApp;
 				var doc = view(model);
-				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.aI);
+				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.aH);
 				var patches = _VirtualDom_diff(currNode, nextNode);
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.aW) && (_VirtualDom_doc.title = title = doc.aW);
+				(title !== doc.aV) && (_VirtualDom_doc.title = title = doc.aV);
 			});
 		}
 	);
@@ -3982,12 +3982,12 @@ function _Browser_makeAnimator(model, draw)
 
 function _Browser_application(impl)
 {
-	var onUrlChange = impl.aR;
-	var onUrlRequest = impl.aS;
+	var onUrlChange = impl.aQ;
+	var onUrlRequest = impl.aR;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
-		Z: function(sendToApp)
+		Y: function(sendToApp)
 		{
 			key.a = sendToApp;
 			_Browser_window.addEventListener('popstate', key);
@@ -4003,9 +4003,9 @@ function _Browser_application(impl)
 					var next = elm$url$Url$fromString(href).a;
 					sendToApp(onUrlRequest(
 						(next
-							&& curr.ax === next.ax
-							&& curr.ao === next.ao
-							&& curr.au.a === next.au.a
+							&& curr.aw === next.aw
+							&& curr.an === next.an
+							&& curr.at.a === next.at.a
 						)
 							? elm$browser$Browser$Internal(next)
 							: elm$browser$Browser$External(href)
@@ -4013,13 +4013,13 @@ function _Browser_application(impl)
 				}
 			});
 		},
-		aP: function(flags)
+		aO: function(flags)
 		{
-			return A3(impl.aP, flags, _Browser_getUrl(), key);
+			return A3(impl.aO, flags, _Browser_getUrl(), key);
 		},
-		aZ: impl.aZ,
-		aX: impl.aX,
-		aV: impl.aV
+		aY: impl.aY,
+		aW: impl.aW,
+		aU: impl.aU
 	});
 }
 
@@ -4085,17 +4085,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { aN: 'hidden', T: 'visibilitychange' }
+		? { aM: 'hidden', S: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { aN: 'mozHidden', T: 'mozvisibilitychange' }
+		? { aM: 'mozHidden', S: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { aN: 'msHidden', T: 'msvisibilitychange' }
+		? { aM: 'msHidden', S: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { aN: 'webkitHidden', T: 'webkitvisibilitychange' }
-		: { aN: 'hidden', T: 'visibilitychange' };
+		? { aM: 'webkitHidden', S: 'webkitvisibilitychange' }
+		: { aM: 'hidden', S: 'visibilitychange' };
 }
 
 
@@ -4176,12 +4176,12 @@ var _Browser_call = F2(function(functionName, id)
 function _Browser_getViewport()
 {
 	return {
-		aC: _Browser_getScene(),
-		aF: {
+		aB: _Browser_getScene(),
+		aE: {
 			n: _Browser_window.pageXOffset,
 			o: _Browser_window.pageYOffset,
-			R: _Browser_doc.documentElement.clientWidth,
-			L: _Browser_doc.documentElement.clientHeight
+			Q: _Browser_doc.documentElement.clientWidth,
+			K: _Browser_doc.documentElement.clientHeight
 		}
 	};
 }
@@ -4191,8 +4191,8 @@ function _Browser_getScene()
 	var body = _Browser_doc.body;
 	var elem = _Browser_doc.documentElement;
 	return {
-		R: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
-		L: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
+		Q: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
+		K: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
 	};
 }
 
@@ -4215,15 +4215,15 @@ function _Browser_getViewportOf(id)
 	return _Browser_withNode(id, function(node)
 	{
 		return {
-			aC: {
-				R: node.scrollWidth,
-				L: node.scrollHeight
+			aB: {
+				Q: node.scrollWidth,
+				K: node.scrollHeight
 			},
-			aF: {
+			aE: {
 				n: node.scrollLeft,
 				o: node.scrollTop,
-				R: node.clientWidth,
-				L: node.clientHeight
+				Q: node.clientWidth,
+				K: node.clientHeight
 			}
 		};
 	});
@@ -4253,18 +4253,18 @@ function _Browser_getElement(id)
 		var x = _Browser_window.pageXOffset;
 		var y = _Browser_window.pageYOffset;
 		return {
-			aC: _Browser_getScene(),
-			aF: {
+			aB: _Browser_getScene(),
+			aE: {
 				n: x,
 				o: y,
-				R: _Browser_doc.documentElement.clientWidth,
-				L: _Browser_doc.documentElement.clientHeight
+				Q: _Browser_doc.documentElement.clientWidth,
+				K: _Browser_doc.documentElement.clientHeight
 			},
-			aK: {
+			aJ: {
 				n: x + rect.left,
 				o: y + rect.top,
-				R: rect.width,
-				L: rect.height
+				Q: rect.width,
+				K: rect.height
 			}
 		};
 	});
@@ -4442,26 +4442,24 @@ var elm$core$Basics$identity = function (x) {
 	return x;
 };
 var author$project$Ecs$empty = function (_n0) {
-	var type_ = _n0;
+	var emptyEntity = _n0;
 	return {
-		d: elm$core$Array$empty,
-		e: {k: type_.c, f: author$project$Ecs$invalidId, s: false},
+		c: elm$core$Array$empty,
+		d: {k: emptyEntity, f: author$project$Ecs$invalidId, r: false},
 		h: _List_Nil,
-		c: type_.c
+		e: emptyEntity
 	};
 };
-var author$project$Ecs$EntityType = elm$core$Basics$identity;
+var author$project$Ecs$Empty = elm$core$Basics$identity;
 var elm$core$Maybe$Nothing = {$: 1};
-var author$project$Ecs$entity4 = function (createComponents) {
-	return {
-		c: A4(createComponents, elm$core$Maybe$Nothing, elm$core$Maybe$Nothing, elm$core$Maybe$Nothing, elm$core$Maybe$Nothing)
-	};
+var author$project$Ecs$empty4 = function (createEntity) {
+	return A4(createEntity, elm$core$Maybe$Nothing, elm$core$Maybe$Nothing, elm$core$Maybe$Nothing, elm$core$Maybe$Nothing);
 };
-var author$project$Main$Components = F4(
+var author$project$Main$Entity = F4(
 	function (position, velocity, outOfBoundsResolution, color) {
-		return {x: color, V: outOfBoundsResolution, m: position, F: velocity};
+		return {w: color, U: outOfBoundsResolution, m: position, E: velocity};
 	});
-var author$project$Main$entityType = author$project$Ecs$entity4(author$project$Main$Components);
+var author$project$Main$empty = author$project$Ecs$empty4(author$project$Main$Entity);
 var elm$core$Basics$True = 0;
 var elm$core$Result$isOk = function (result) {
 	if (!result.$) {
@@ -4844,8 +4842,8 @@ var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$init = function (_n0) {
 	return _Utils_Tuple2(
 		_Utils_Tuple2(
-			author$project$Ecs$empty(author$project$Main$entityType),
-			{J: 0, y: 0, Q: _List_Nil, H: 300, I: 300}),
+			author$project$Ecs$empty(author$project$Main$empty),
+			{I: 0, x: 0, P: _List_Nil, G: 300, H: 300}),
 		elm$core$Platform$Cmd$none);
 };
 var author$project$Main$OnAnimationFrameDelta = elm$core$Basics$identity;
@@ -4854,7 +4852,7 @@ var elm$browser$Browser$AnimationManager$Delta = function (a) {
 };
 var elm$browser$Browser$AnimationManager$State = F3(
 	function (subs, request, oldTime) {
-		return {ae: oldTime, aA: request, aD: subs};
+		return {ad: oldTime, az: request, aC: subs};
 	});
 var elm$core$Task$succeed = _Scheduler_succeed;
 var elm$browser$Browser$AnimationManager$init = elm$core$Task$succeed(
@@ -5058,7 +5056,7 @@ var elm$core$String$contains = _String_contains;
 var elm$core$String$toInt = _String_toInt;
 var elm$url$Url$Url = F6(
 	function (protocol, host, port_, path, query, fragment) {
-		return {an: fragment, ao: host, as: path, au: port_, ax: protocol, ay: query};
+		return {am: fragment, an: host, ar: path, at: port_, aw: protocol, ax: query};
 	});
 var elm$url$Url$chompBeforePath = F5(
 	function (protocol, path, params, frag, str) {
@@ -5169,8 +5167,8 @@ var elm$core$Process$kill = _Scheduler_kill;
 var elm$core$Process$spawn = _Scheduler_spawn;
 var elm$browser$Browser$AnimationManager$onEffects = F3(
 	function (router, subs, _n0) {
-		var request = _n0.aA;
-		var oldTime = _n0.ae;
+		var request = _n0.az;
+		var oldTime = _n0.ad;
 		var _n1 = _Utils_Tuple2(request, subs);
 		if (_n1.a.$ === 1) {
 			if (!_n1.b.b) {
@@ -5218,8 +5216,8 @@ var elm$time$Time$Posix = elm$core$Basics$identity;
 var elm$time$Time$millisToPosix = elm$core$Basics$identity;
 var elm$browser$Browser$AnimationManager$onSelfMsg = F3(
 	function (router, newTime, _n0) {
-		var subs = _n0.aD;
-		var oldTime = _n0.ae;
+		var subs = _n0.aC;
+		var oldTime = _n0.ad;
 		var send = function (sub) {
 			if (!sub.$) {
 				var tagger = sub.a;
@@ -5374,28 +5372,28 @@ var elm$core$Array$set = F3(
 	});
 var author$project$Ecs$insertCurrent = F2(
 	function (current, all) {
-		return current.s ? A3(
+		return current.r ? A3(
 			elm$core$Array$set,
 			current.f,
 			elm$core$Maybe$Just(current.k),
 			all) : all;
 	});
 var author$project$Ecs$processEntity = F3(
-	function (doProcess, maybeComponents, _n0) {
+	function (doProcess, maybeEntity, _n0) {
 		var id = _n0.a;
 		var model1 = _n0.b;
 		var a1 = _n0.c;
-		if (maybeComponents.$ === 1) {
+		if (maybeEntity.$ === 1) {
 			return _Utils_Tuple3(id + 1, model1, a1);
 		} else {
-			var components = maybeComponents.a;
+			var entity = maybeEntity.a;
 			var _n2 = doProcess(
 				_Utils_Tuple2(
 					{
-						d: A2(author$project$Ecs$insertCurrent, model1.e, model1.d),
-						e: {k: components, f: id, s: false},
+						c: A2(author$project$Ecs$insertCurrent, model1.d, model1.c),
+						d: {k: entity, f: id, r: false},
 						h: model1.h,
-						c: model1.c
+						e: model1.e
 					},
 					a1));
 			var model2 = _n2.a;
@@ -5430,19 +5428,19 @@ var author$project$Ecs$process = F3(
 		var doProcess = A2(
 			author$project$Ecs$compose,
 			function ($) {
-				return $.Y;
+				return $.X;
 			},
 			systems);
 		var doPreProcess = A2(
 			author$project$Ecs$compose,
 			function ($) {
-				return $.X;
+				return $.W;
 			},
 			systems);
 		var doPostProcess = A2(
 			author$project$Ecs$compose,
 			function ($) {
-				return $.W;
+				return $.V;
 			},
 			systems);
 		var _n1 = doPreProcess(
@@ -5452,11 +5450,11 @@ var author$project$Ecs$process = F3(
 		var _n2 = A3(
 			elm$core$Array$foldl,
 			F2(
-				function (components, state) {
-					return A3(author$project$Ecs$processEntity, doProcess, components, state);
+				function (entity, state) {
+					return A3(author$project$Ecs$processEntity, doProcess, entity, state);
 				}),
 			_Utils_Tuple3(0, model2, a2),
-			model2.d);
+			model2.c);
 		var model3 = _n2.b;
 		var a3 = _n2.c;
 		var _n3 = doPostProcess(
@@ -5476,7 +5474,7 @@ var author$project$Ecs$mapPreOrPostProcess = function (fn) {
 		return _Utils_Tuple2(model2, a2);
 	};
 };
-var author$project$Ecs$Entity = elm$core$Basics$identity;
+var author$project$Ecs$EntityId = elm$core$Basics$identity;
 var elm$core$Array$getHelp = F3(
 	function (shift, index, tree) {
 		getHelp:
@@ -5512,42 +5510,42 @@ var elm$core$Array$get = F2(
 	});
 var author$project$Ecs$makeCurrent = F2(
 	function (id, model) {
-		if (_Utils_eq(id, model.e.f)) {
-			return _Utils_Tuple2(model.e, model.d);
+		if (_Utils_eq(id, model.d.f)) {
+			return _Utils_Tuple2(model.d, model.c);
 		} else {
-			var _n0 = A2(elm$core$Array$get, id, model.d);
+			var _n0 = A2(elm$core$Array$get, id, model.c);
 			if ((!_n0.$) && (!_n0.a.$)) {
-				var components = _n0.a.a;
+				var entity = _n0.a.a;
 				return _Utils_Tuple2(
-					{k: components, f: id, s: false},
-					A2(author$project$Ecs$insertCurrent, model.e, model.d));
+					{k: entity, f: id, r: false},
+					A2(author$project$Ecs$insertCurrent, model.d, model.c));
 			} else {
 				return _Utils_Tuple2(
-					{k: model.c, f: author$project$Ecs$invalidId, s: false},
-					model.d);
+					{k: model.e, f: author$project$Ecs$invalidId, r: false},
+					model.c);
 			}
 		}
 	});
 var author$project$Ecs$mapProcess = function (_n0) {
-	var type_ = _n0.a;
+	var node = _n0.a;
 	var fn = _n0.b;
 	return function (_n1) {
 		var model1 = _n1.a;
-		var a1 = _n1.b;
-		var _n2 = type_.r(model1.e.k);
+		var b1 = _n1.b;
+		var _n2 = node.a(model1.d.k);
 		if (_n2.$ === 1) {
-			return _Utils_Tuple2(model1, a1);
+			return _Utils_Tuple2(model1, b1);
 		} else {
-			var node = _n2.a;
-			var _n3 = A4(fn, node, model1.e.f, model1, a1);
+			var a = _n2.a;
+			var _n3 = A4(fn, a, model1.d.f, model1, b1);
 			var model2 = _n3.a;
-			var a2 = _n3.b;
-			var _n4 = A2(author$project$Ecs$makeCurrent, model1.e.f, model2);
+			var b2 = _n3.b;
+			var _n4 = A2(author$project$Ecs$makeCurrent, model1.d.f, model2);
 			var current = _n4.a;
 			var all = _n4.b;
 			return _Utils_Tuple2(
-				{d: all, e: current, h: model2.h, c: model2.c},
-				a2);
+				{c: all, d: current, h: model2.h, e: model2.e},
+				b2);
 		}
 	};
 };
@@ -5563,164 +5561,164 @@ var elm$core$Maybe$map = F2(
 	});
 var author$project$Ecs$system = function (config) {
 	return {
+		V: A2(elm$core$Maybe$map, author$project$Ecs$mapPreOrPostProcess, config.V),
 		W: A2(elm$core$Maybe$map, author$project$Ecs$mapPreOrPostProcess, config.W),
-		X: A2(elm$core$Maybe$map, author$project$Ecs$mapPreOrPostProcess, config.X),
-		Y: A2(elm$core$Maybe$map, author$project$Ecs$mapProcess, config.Y)
+		X: A2(elm$core$Maybe$map, author$project$Ecs$mapProcess, config.X)
 	};
 };
 var author$project$Ecs$destroy = F2(
 	function (_n0, _n1) {
 		var id = _n0;
 		var model = _n1;
-		var _n2 = A2(elm$core$Array$get, id, model.d);
+		var _n2 = A2(elm$core$Array$get, id, model.c);
 		if ((!_n2.$) && (!_n2.a.$)) {
 			return {
-				d: A3(elm$core$Array$set, id, elm$core$Maybe$Nothing, model.d),
-				e: _Utils_eq(model.e.f, id) ? {k: model.c, f: author$project$Ecs$invalidId, s: false} : model.e,
+				c: A3(elm$core$Array$set, id, elm$core$Maybe$Nothing, model.c),
+				d: _Utils_eq(model.d.f, id) ? {k: model.e, f: author$project$Ecs$invalidId, r: false} : model.d,
 				h: A2(elm$core$List$cons, id, model.h),
-				c: model.c
+				e: model.e
 			};
 		} else {
 			return model;
 		}
 	});
 var author$project$Ecs$set = F4(
-	function (_n0, component, _n1, _n2) {
-		var type_ = _n0;
+	function (_n0, a, _n1, _n2) {
+		var component = _n0;
 		var id = _n1;
 		var model = _n2;
 		var _n3 = A2(author$project$Ecs$makeCurrent, id, model);
 		var current = _n3.a;
 		var all = _n3.b;
 		return {
-			d: all,
-			e: {
+			c: all,
+			d: {
 				k: A2(
-					type_.b,
-					elm$core$Maybe$Just(component),
+					component.b,
+					elm$core$Maybe$Just(a),
 					current.k),
 				f: current.f,
-				s: true
+				r: true
 			},
 			h: model.h,
-			c: model.c
+			e: model.e
 		};
 	});
-var author$project$Ecs$ComponentType = elm$core$Basics$identity;
+var author$project$Ecs$Component = elm$core$Basics$identity;
 var author$project$Ecs$components4 = F6(
-	function (createComponentTypes, createComponents, get1, get2, get3, get4) {
+	function (createComponents, createEntity, get1, get2, get3, get4) {
 		return A4(
-			createComponentTypes,
+			createComponents,
 			{
 				a: get1,
 				b: F2(
-					function (component, data) {
+					function (a, entity) {
 						return A4(
-							createComponents,
-							component,
-							get2(data),
-							get3(data),
-							get4(data));
+							createEntity,
+							a,
+							get2(entity),
+							get3(entity),
+							get4(entity));
 					})
 			},
 			{
 				a: get2,
 				b: F2(
-					function (component, data) {
+					function (a, entity) {
 						return A4(
-							createComponents,
-							get1(data),
-							component,
-							get3(data),
-							get4(data));
+							createEntity,
+							get1(entity),
+							a,
+							get3(entity),
+							get4(entity));
 					})
 			},
 			{
 				a: get3,
 				b: F2(
-					function (component, data) {
+					function (a, entity) {
 						return A4(
-							createComponents,
-							get1(data),
-							get2(data),
-							component,
-							get4(data));
+							createEntity,
+							get1(entity),
+							get2(entity),
+							a,
+							get4(entity));
 					})
 			},
 			{
 				a: get4,
 				b: F2(
-					function (component, data) {
+					function (a, entity) {
 						return A4(
-							createComponents,
-							get1(data),
-							get2(data),
-							get3(data),
-							component);
+							createEntity,
+							get1(entity),
+							get2(entity),
+							get3(entity),
+							a);
 					})
 			});
 	});
-var author$project$Main$ComponentTypes = F4(
+var author$project$Main$Components = F4(
 	function (position, velocity, outOfBoundsResolution, color) {
-		return {x: color, V: outOfBoundsResolution, m: position, F: velocity};
+		return {w: color, U: outOfBoundsResolution, m: position, E: velocity};
 	});
-var author$project$Main$componentTypes = A6(
+var author$project$Main$components = A6(
 	author$project$Ecs$components4,
-	author$project$Main$ComponentTypes,
 	author$project$Main$Components,
+	author$project$Main$Entity,
 	function ($) {
 		return $.m;
 	},
 	function ($) {
-		return $.F;
+		return $.E;
 	},
 	function ($) {
-		return $.V;
+		return $.U;
 	},
 	function ($) {
-		return $.x;
+		return $.w;
 	});
 var elm$core$Basics$neq = _Utils_notEqual;
 var author$project$Main$boundsCheckEntity = F4(
-	function (_n0, entity, ecs, state) {
+	function (_n0, entityId, ecs, state) {
 		var position = _n0.m;
-		var resolution = _n0.aB;
+		var resolution = _n0.aA;
 		if (!resolution) {
-			var newY = (position.o < 0) ? state.H : ((_Utils_cmp(position.o, state.H) > 0) ? 0 : position.o);
-			var newX = (position.n < 0) ? state.I : ((_Utils_cmp(position.n, state.I) > 0) ? 0 : position.n);
+			var newY = (position.o < 0) ? state.G : ((_Utils_cmp(position.o, state.G) > 0) ? 0 : position.o);
+			var newX = (position.n < 0) ? state.H : ((_Utils_cmp(position.n, state.H) > 0) ? 0 : position.n);
 			return ((!_Utils_eq(position.n, newX)) || (!_Utils_eq(position.o, newY))) ? _Utils_Tuple2(
 				A4(
 					author$project$Ecs$set,
-					author$project$Main$componentTypes.m,
+					author$project$Main$components.m,
 					{n: newX, o: newY},
-					entity,
+					entityId,
 					ecs),
 				state) : _Utils_Tuple2(ecs, state);
 		} else {
-			return ((position.n < 0) || ((_Utils_cmp(position.n, state.I) > 0) || ((position.o < 0) || (_Utils_cmp(position.o, state.H) > 0)))) ? _Utils_Tuple2(
-				A2(author$project$Ecs$destroy, entity, ecs),
+			return ((position.n < 0) || ((_Utils_cmp(position.n, state.H) > 0) || ((position.o < 0) || (_Utils_cmp(position.o, state.G) > 0)))) ? _Utils_Tuple2(
+				A2(author$project$Ecs$destroy, entityId, ecs),
 				state) : _Utils_Tuple2(ecs, state);
 		}
 	});
-var author$project$Ecs$NodeType = elm$core$Basics$identity;
+var author$project$Ecs$Node = elm$core$Basics$identity;
 var author$project$Ecs$node2 = F3(
 	function (createNode, _n0, _n1) {
-		var type1 = _n0;
-		var type2 = _n1;
+		var component1 = _n0;
+		var component2 = _n1;
 		return {
-			r: function (data) {
-				var _n2 = type1.a(data);
+			a: function (entity) {
+				var _n2 = component1.a(entity);
 				if (_n2.$ === 1) {
 					return elm$core$Maybe$Nothing;
 				} else {
-					var component1 = _n2.a;
-					var _n3 = type2.a(data);
+					var a1 = _n2.a;
+					var _n3 = component2.a(entity);
 					if (_n3.$ === 1) {
 						return elm$core$Maybe$Nothing;
 					} else {
-						var component2 = _n3.a;
+						var a2 = _n3.a;
 						return elm$core$Maybe$Just(
-							A2(createNode, component1, component2));
+							A2(createNode, a1, a2));
 					}
 				}
 			}
@@ -5728,39 +5726,39 @@ var author$project$Ecs$node2 = F3(
 	});
 var author$project$Main$BoundsCheck = F2(
 	function (position, resolution) {
-		return {m: position, aB: resolution};
+		return {m: position, aA: resolution};
 	});
-var author$project$Main$boundsCheckNode = A3(author$project$Ecs$node2, author$project$Main$BoundsCheck, author$project$Main$componentTypes.m, author$project$Main$componentTypes.V);
+var author$project$Main$boundsCheckNode = A3(author$project$Ecs$node2, author$project$Main$BoundsCheck, author$project$Main$components.m, author$project$Main$components.U);
 var author$project$Main$boundsCheckSystem = author$project$Ecs$system(
 	{
+		V: elm$core$Maybe$Nothing,
 		W: elm$core$Maybe$Nothing,
-		X: elm$core$Maybe$Nothing,
-		Y: elm$core$Maybe$Just(
+		X: elm$core$Maybe$Just(
 			_Utils_Tuple2(author$project$Main$boundsCheckNode, author$project$Main$boundsCheckEntity))
 	});
 var author$project$Main$moveEntity = F4(
-	function (_n0, entity, ecs, state) {
+	function (_n0, entityId, ecs, state) {
 		var position = _n0.m;
-		var velocity = _n0.F;
+		var velocity = _n0.E;
 		return _Utils_Tuple2(
 			A4(
 				author$project$Ecs$set,
-				author$project$Main$componentTypes.m,
-				{n: position.n + (velocity.n * state.J), o: position.o + (velocity.o * state.J)},
-				entity,
+				author$project$Main$components.m,
+				{n: position.n + (velocity.n * state.I), o: position.o + (velocity.o * state.I)},
+				entityId,
 				ecs),
 			state);
 	});
 var author$project$Main$Move = F2(
 	function (position, velocity) {
-		return {m: position, F: velocity};
+		return {m: position, E: velocity};
 	});
-var author$project$Main$moveNode = A3(author$project$Ecs$node2, author$project$Main$Move, author$project$Main$componentTypes.m, author$project$Main$componentTypes.F);
+var author$project$Main$moveNode = A3(author$project$Ecs$node2, author$project$Main$Move, author$project$Main$components.m, author$project$Main$components.E);
 var author$project$Main$moveSystem = author$project$Ecs$system(
 	{
+		V: elm$core$Maybe$Nothing,
 		W: elm$core$Maybe$Nothing,
-		X: elm$core$Maybe$Nothing,
-		Y: elm$core$Maybe$Just(
+		X: elm$core$Maybe$Just(
 			_Utils_Tuple2(author$project$Main$moveNode, author$project$Main$moveEntity))
 	});
 var author$project$Main$clearViewElement = F2(
@@ -5769,37 +5767,37 @@ var author$project$Main$clearViewElement = F2(
 			ecs,
 			_Utils_update(
 				state,
-				{Q: _List_Nil}));
+				{P: _List_Nil}));
 	});
 var author$project$Main$renderEntity = F4(
-	function (data, entity, ecs, state) {
+	function (data, _n0, ecs, state) {
 		return _Utils_Tuple2(
 			ecs,
 			_Utils_update(
 				state,
 				{
-					Q: A2(elm$core$List$cons, data, state.Q)
+					P: A2(elm$core$List$cons, data, state.P)
 				}));
 	});
 var author$project$Main$Render = F2(
 	function (position, color) {
-		return {x: color, m: position};
+		return {w: color, m: position};
 	});
-var author$project$Main$renderNode = A3(author$project$Ecs$node2, author$project$Main$Render, author$project$Main$componentTypes.m, author$project$Main$componentTypes.x);
+var author$project$Main$renderNode = A3(author$project$Ecs$node2, author$project$Main$Render, author$project$Main$components.m, author$project$Main$components.w);
 var author$project$Main$renderSystem = author$project$Ecs$system(
 	{
-		W: elm$core$Maybe$Nothing,
-		X: elm$core$Maybe$Just(author$project$Main$clearViewElement),
-		Y: elm$core$Maybe$Just(
+		V: elm$core$Maybe$Nothing,
+		W: elm$core$Maybe$Just(author$project$Main$clearViewElement),
+		X: elm$core$Maybe$Just(
 			_Utils_Tuple2(author$project$Main$renderNode, author$project$Main$renderEntity))
 	});
 var author$project$Ecs$andSet = F3(
-	function (type_, component, _n0) {
+	function (component, a, _n0) {
 		var entity = _n0.a;
 		var ecs = _n0.b;
 		return _Utils_Tuple2(
 			entity,
-			A4(author$project$Ecs$set, type_, component, entity, ecs));
+			A4(author$project$Ecs$set, component, a, entity, ecs));
 	});
 var elm$core$Array$length = function (_n0) {
 	var len = _n0.a;
@@ -5885,21 +5883,21 @@ var elm$core$Array$push = F2(
 	});
 var author$project$Ecs$create = function (_n0) {
 	var model = _n0;
-	var components = model.c;
+	var entity = model.e;
 	var _n1 = function () {
 		var _n2 = model.h;
 		if (!_n2.b) {
 			return _Utils_Tuple3(
-				elm$core$Array$length(model.d),
+				elm$core$Array$length(model.c),
 				A2(
 					elm$core$Array$push,
-					elm$core$Maybe$Just(components),
-					model.d),
+					elm$core$Maybe$Just(entity),
+					model.c),
 				model.h);
 		} else {
 			var head = _n2.a;
 			var tail = _n2.b;
-			return _Utils_Tuple3(head, model.d, tail);
+			return _Utils_Tuple3(head, model.c, tail);
 		}
 	}();
 	var id = _n1.a;
@@ -5908,10 +5906,10 @@ var author$project$Ecs$create = function (_n0) {
 	return _Utils_Tuple2(
 		id,
 		{
-			d: A2(author$project$Ecs$insertCurrent, model.e, all),
-			e: {k: components, f: id, s: true},
+			c: A2(author$project$Ecs$insertCurrent, model.d, all),
+			d: {k: entity, f: id, r: true},
 			h: destroyed,
-			c: model.c
+			e: model.e
 		});
 };
 var author$project$Main$Destroy = 1;
@@ -5963,12 +5961,12 @@ var elm$core$Tuple$second = function (_n0) {
 };
 var author$project$Main$spawnEntity = F2(
 	function (ecs, state) {
-		if (!(state.y % 10)) {
-			var n = (state.y / 10) | 0;
+		if (!(state.x % 10)) {
+			var n = (state.x / 10) | 0;
 			return _Utils_Tuple2(
 				A3(
 					author$project$Ecs$andSet,
-					author$project$Main$componentTypes.x,
+					author$project$Main$components.w,
 					A2(
 						elm$core$Maybe$withDefault,
 						'#f00',
@@ -5979,16 +5977,16 @@ var author$project$Main$spawnEntity = F2(
 								author$project$Main$colors))),
 					A3(
 						author$project$Ecs$andSet,
-						author$project$Main$componentTypes.V,
+						author$project$Main$components.U,
 						(!(n % 2)) ? 0 : 1,
 						A3(
 							author$project$Ecs$andSet,
-							author$project$Main$componentTypes.F,
+							author$project$Main$components.E,
 							{n: ((n % 5) - 2) * 75, o: ((n % 7) - 3) * 50},
 							A3(
 								author$project$Ecs$andSet,
-								author$project$Main$componentTypes.m,
-								{n: state.y % state.I, o: state.y % state.H},
+								author$project$Main$components.m,
+								{n: state.x % state.H, o: state.x % state.G},
 								author$project$Ecs$create(ecs))))).b,
 				state);
 		} else {
@@ -5997,9 +5995,9 @@ var author$project$Main$spawnEntity = F2(
 	});
 var author$project$Main$spawnSystem = author$project$Ecs$system(
 	{
-		W: elm$core$Maybe$Nothing,
-		X: elm$core$Maybe$Just(author$project$Main$spawnEntity),
-		Y: elm$core$Maybe$Nothing
+		V: elm$core$Maybe$Nothing,
+		W: elm$core$Maybe$Just(author$project$Main$spawnEntity),
+		X: elm$core$Maybe$Nothing
 	});
 var author$project$Main$update = F2(
 	function (msg, _n0) {
@@ -6014,12 +6012,12 @@ var author$project$Main$update = F2(
 				ecs,
 				_Utils_update(
 					state,
-					{J: deltaTimeMillis / 1000, y: state.y + 1})),
+					{I: deltaTimeMillis / 1000, x: state.x + 1})),
 			elm$core$Platform$Cmd$none);
 	});
 var author$project$Ecs$size = function (_n0) {
 	var model = _n0;
-	return elm$core$Array$length(model.d) - elm$core$List$length(model.h);
+	return elm$core$Array$length(model.c) - elm$core$List$length(model.h);
 };
 var elm$core$Basics$round = _Basics_round;
 var elm$html$Html$div = _VirtualDom_node('div');
@@ -6027,7 +6025,7 @@ var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
 var author$project$Main$viewElement = function (_n0) {
 	var position = _n0.m;
-	var color = _n0.x;
+	var color = _n0.w;
 	return A2(
 		elm$html$Html$div,
 		_List_fromArray(
@@ -6056,7 +6054,7 @@ var author$project$Main$view = function (_n0) {
 	var ecs = _n0.a;
 	var state = _n0.b;
 	return {
-		aI: _List_fromArray(
+		aH: _List_fromArray(
 			[
 				A2(
 				elm$html$Html$div,
@@ -6067,14 +6065,14 @@ var author$project$Main$view = function (_n0) {
 						A2(
 						elm$html$Html$Attributes$style,
 						'width',
-						elm$core$String$fromInt(state.I) + 'px'),
+						elm$core$String$fromInt(state.H) + 'px'),
 						A2(
 						elm$html$Html$Attributes$style,
 						'height',
-						elm$core$String$fromInt(state.H) + 'px'),
+						elm$core$String$fromInt(state.G) + 'px'),
 						A2(elm$html$Html$Attributes$style, 'background-color', '#aaa')
 					]),
-				A2(elm$core$List$map, author$project$Main$viewElement, state.Q)),
+				A2(elm$core$List$map, author$project$Main$viewElement, state.P)),
 				A2(
 				elm$html$Html$div,
 				_List_Nil,
@@ -6086,15 +6084,15 @@ var author$project$Main$view = function (_n0) {
 						elm$html$Html$text(' - '),
 						elm$html$Html$text(
 						'fps: ' + elm$core$String$fromInt(
-							elm$core$Basics$round(1 / state.J)))
+							elm$core$Basics$round(1 / state.I)))
 					]))
 			]),
-		aW: 'Ecs Basic Example'
+		aV: 'Ecs Basic Example'
 	};
 };
 var elm$browser$Browser$document = _Browser_document;
 var author$project$Main$main = elm$browser$Browser$document(
-	{aP: author$project$Main$init, aV: author$project$Main$subscriptions, aX: author$project$Main$update, aZ: author$project$Main$view});
+	{aO: author$project$Main$init, aU: author$project$Main$subscriptions, aW: author$project$Main$update, aY: author$project$Main$view});
 _Platform_export({'Main':{'init':author$project$Main$main(
 	elm$json$Json$Decode$succeed(0))(0)}});}(this));
 
