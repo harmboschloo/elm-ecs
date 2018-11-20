@@ -1,29 +1,43 @@
-module Systems.Movement exposing (update)
+module Systems.Movement exposing (system)
 
 import Components exposing (Position, Velocity)
-import Context exposing (Context)
 import Ecs exposing (Ecs)
+import Entity exposing (Entity, components)
+import State exposing (State)
 
 
-update : ( Ecs, Context ) -> ( Ecs, Context )
-update =
-    Ecs.iterate2 Ecs.velocityComponent Ecs.positionComponent updateEntity
+type alias Movement =
+    { position : Position
+    , velocity : Velocity
+    }
+
+
+node : Ecs.Node Entity Movement
+node =
+    Ecs.node2 Movement
+        components.position
+        components.velocity
+
+
+system : Ecs.System Entity State
+system =
+    Ecs.processor node updateEntity
 
 
 updateEntity :
-    Ecs.EntityId
-    -> Velocity
-    -> Position
-    -> ( Ecs, Context )
-    -> ( Ecs, Context )
-updateEntity entityId velocity position ( ecs, { deltaTime } as context ) =
-    ( Ecs.insert
-        entityId
-        Ecs.positionComponent
-        { x = position.x + velocity.velocityX * deltaTime
-        , y = position.y + velocity.velocityY * deltaTime
-        , angle = position.angle + velocity.angularVelocity * deltaTime
+    Movement
+    -> Ecs.EntityId
+    -> Ecs Entity
+    -> State
+    -> ( Ecs Entity, State )
+updateEntity { position, velocity } entityId ecs state =
+    ( Ecs.set
+        components.position
+        { x = position.x + velocity.velocityX * state.deltaTime
+        , y = position.y + velocity.velocityY * state.deltaTime
+        , angle = position.angle + velocity.angularVelocity * state.deltaTime
         }
+        entityId
         ecs
-    , context
+    , state
     )

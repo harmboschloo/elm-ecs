@@ -1,9 +1,9 @@
-module Systems.Spawn exposing (update)
+module Systems.Spawn exposing (system)
 
-import Context exposing (Context)
 import Ecs exposing (Ecs)
-import Entities
+import Entity exposing (Entity)
 import Random
+import State exposing (State)
 import Utils
 
 
@@ -19,24 +19,29 @@ testSpawnRate =
     50
 
 
-update : ( Ecs, Context ) -> ( Ecs, Context )
-update ( ecs, context ) =
+system : Ecs.System Entity State
+system =
+    Ecs.preProcessor update
+
+
+update : Ecs Entity -> State -> ( Ecs Entity, State )
+update ecs state =
     let
         rate =
-            if context.test then
+            if state.test then
                 testSpawnRate
 
             else
                 spawnRate
 
         spawn =
-            rate * context.deltaTime
+            rate * state.deltaTime
 
         fraction =
             spawn - toFloat (floor spawn)
 
-        ( probability, seed ) =
-            Random.step (Random.float 0 1) context.seed
+        ( probability, state2 ) =
+            State.randomStep (Random.float 0 1) state
 
         nFraction =
             if probability <= fraction then
@@ -48,5 +53,5 @@ update ( ecs, context ) =
         n =
             floor spawn + nFraction
     in
-    ( ecs, { context | seed = seed } )
-        |> Utils.times n Entities.createCollectable
+    ( ecs, state2 )
+        |> Utils.times n Entity.createStar

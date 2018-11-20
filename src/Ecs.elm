@@ -3,7 +3,7 @@ module Ecs exposing
     , EntityId, create, createWith, destroy
     , get, set, update, remove
     , andSet, andUpdate, andRemove
-    , System, system, processor, process
+    , System, system, preProcessor, processor, postProcessor, process
     , Empty, Component, Node
     , empty1, components1, node1
     , empty2, components2, node2
@@ -84,7 +84,7 @@ module Ecs exposing
 
 # Processing all entities using systems.
 
-@docs System, system, processor, process
+@docs System, system, preProcessor, processor, postProcessor, process
 
 
 # Setting up your Ecs with empty, component and node specifications.
@@ -675,6 +675,15 @@ system config =
         }
 
 
+preProcessor : (Ecs entity -> a -> ( Ecs entity, a )) -> System entity a
+preProcessor fn =
+    system
+        { preProcess = Just fn
+        , process = Nothing
+        , postProcess = Nothing
+        }
+
+
 processor :
     Node entity a
     -> (a -> EntityId -> Ecs entity -> b -> ( Ecs entity, b ))
@@ -684,6 +693,15 @@ processor node fn =
         { preProcess = Nothing
         , process = Just ( node, fn )
         , postProcess = Nothing
+        }
+
+
+postProcessor : (Ecs entity -> a -> ( Ecs entity, a )) -> System entity a
+postProcessor fn =
+    system
+        { preProcess = Nothing
+        , process = Nothing
+        , postProcess = Just fn
         }
 
 

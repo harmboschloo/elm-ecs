@@ -1,34 +1,47 @@
-module Systems.Animation exposing (update)
+module Systems.Animation exposing (system)
 
-import Components exposing (ScaleAnimation)
-import Context exposing (Context)
+import Components
 import Data.Animation as Animation exposing (Animation)
 import Ecs exposing (Ecs)
+import Entity exposing (Entity, components)
+import State exposing (State)
 
 
-update : ( Ecs, Context ) -> ( Ecs, Context )
-update =
-    Ecs.iterate Ecs.scaleAnimationComponent updateScale
+type alias ScaleAnimation =
+    { scaleAnimation : Components.ScaleAnimation
+    }
+
+
+node : Ecs.Node Entity ScaleAnimation
+node =
+    Ecs.node1 ScaleAnimation
+        components.scaleAnimation
+
+
+system : Ecs.System Entity State
+system =
+    Ecs.processor node updateScale
 
 
 updateScale :
-    Ecs.EntityId
-    -> ScaleAnimation
-    -> ( Ecs, Context )
-    -> ( Ecs, Context )
-updateScale entityId scaleAnimation ( ecs, context ) =
+    ScaleAnimation
+    -> Ecs.EntityId
+    -> Ecs Entity
+    -> State
+    -> ( Ecs Entity, State )
+updateScale { scaleAnimation } entityId ecs state =
     let
-        newEcs =
-            Ecs.insert
+        ecs2 =
+            Ecs.set
+                components.scale
+                (Animation.animate state.time scaleAnimation)
                 entityId
-                Ecs.scaleComponent
-                (Animation.animate context.time scaleAnimation)
                 ecs
     in
-    if Animation.hasEnded context.time scaleAnimation then
-        ( Ecs.remove entityId Ecs.scaleAnimationComponent newEcs
-        , context
+    if Animation.hasEnded state.time scaleAnimation then
+        ( Ecs.remove components.scaleAnimation entityId ecs2
+        , state
         )
 
     else
-        ( newEcs, context )
+        ( ecs2, state )

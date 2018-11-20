@@ -1,41 +1,52 @@
-module Systems.MotionControl exposing (update)
+module Systems.MotionControl exposing (system)
 
 import Components exposing (Motion, Position, Velocity)
 import Components.Controls as Controls exposing (Controls)
-import Context exposing (Context)
 import Ecs exposing (Ecs)
+import Entity exposing (Entity, components)
+import State exposing (State)
 
 
-update : ( Ecs, Context ) -> ( Ecs, Context )
-update =
-    Ecs.iterate4
-        Ecs.motionComponent
-        Ecs.controlsComponent
-        Ecs.velocityComponent
-        Ecs.positionComponent
-        updateEntity
+type alias MotionControl =
+    { controls : Controls
+    , motion : Motion
+    , position : Position
+    , velocity : Velocity
+    }
+
+
+node : Ecs.Node Entity MotionControl
+node =
+    Ecs.node4 MotionControl
+        components.controls
+        components.motion
+        components.position
+        components.velocity
+
+
+system : Ecs.System Entity State
+system =
+    Ecs.processor node updateEntity
 
 
 updateEntity :
-    Ecs.EntityId
-    -> Motion
-    -> Controls
-    -> Velocity
-    -> Position
-    -> ( Ecs, Context )
-    -> ( Ecs, Context )
-updateEntity entityId motion controls velocity position ( ecs, context ) =
-    ( Ecs.insert
+    MotionControl
+    -> Ecs.EntityId
+    -> Ecs Entity
+    -> State
+    -> ( Ecs Entity, State )
+updateEntity motionControl entityId ecs state =
+    ( Ecs.set
+        components.velocity
+        (applyControls motionControl state.deltaTime)
         entityId
-        Ecs.velocityComponent
-        (applyControls controls motion position velocity context.deltaTime)
         ecs
-    , context
+    , state
     )
 
 
-applyControls : Controls -> Motion -> Position -> Velocity -> Float -> Velocity
-applyControls controls motion position velocity deltaTime =
+applyControls : MotionControl -> Float -> Velocity
+applyControls { controls, motion, position, velocity } deltaTime =
     let
         accelerationControls =
             Controls.getAcceleration controls

@@ -1,8 +1,8 @@
-module Context exposing
-    ( Context
-    , Msg
+module State exposing
+    ( Msg
     , OutMsg(..)
     , Screen
+    , State
     , World
     , init
     , randomStep
@@ -23,6 +23,7 @@ import Html.Events
 import Json.Decode as Decode exposing (Decoder)
 import Random exposing (Generator, Seed)
 import Set exposing (Set)
+import Systems.Render.RenderElement exposing (RenderElement)
 import WebGL.Texture exposing (Texture)
 
 
@@ -30,7 +31,7 @@ import WebGL.Texture exposing (Texture)
 -- Model
 
 
-type alias Context =
+type alias State =
     { assets : Assets
     , seed : Seed
     , activeKeys : Set KeyCode
@@ -39,6 +40,7 @@ type alias Context =
     , time : Float
     , deltaTime : Float
     , test : Bool
+    , renderElements : List RenderElement
     }
 
 
@@ -54,21 +56,22 @@ type alias Screen =
     }
 
 
-init : Assets -> Seed -> { width : Int, height : Int } -> Context
+init : Assets -> Seed -> { width : Int, height : Int } -> State
 init assets seed screen =
     { assets = assets
     , seed = seed
     , activeKeys = Set.empty
     , screen = screen
-    , world = getWorld screen
+    , world = screenToWorld screen
     , time = 0
     , deltaTime = 0
     , test = False
+    , renderElements = []
     }
 
 
-getWorld : Screen -> World
-getWorld screen =
+screenToWorld : Screen -> World
+screenToWorld screen =
     { width = 2 * toFloat screen.width
     , height = 2 * toFloat screen.height
     }
@@ -94,11 +97,11 @@ type OutMsg
     | PauseToggled
 
 
-update : Msg -> Context -> ( Context, OutMsg )
-update msg context =
+update : Msg -> State -> ( State, OutMsg )
+update msg state =
     case msg of
         WindowSizeChanged width height ->
-            ( { context
+            ( { state
                 | screen =
                     { width = width
                     , height = height
@@ -108,19 +111,19 @@ update msg context =
             )
 
         KeyDown keyCode ->
-            ( { context | activeKeys = Set.insert keyCode context.activeKeys }
+            ( { state | activeKeys = Set.insert keyCode state.activeKeys }
             , NoOp
             )
 
         KeyUp keyCode ->
-            ( { context
-                | activeKeys = Set.remove keyCode context.activeKeys
+            ( { state
+                | activeKeys = Set.remove keyCode state.activeKeys
                 , test =
                     if keyCode == KeyCode.t then
-                        not context.test
+                        not state.test
 
                     else
-                        context.test
+                        state.test
               }
             , if keyCode == KeyCode.esc then
                 PauseToggled
@@ -130,21 +133,21 @@ update msg context =
             )
 
 
-randomStep : Generator a -> Context -> ( a, Context )
-randomStep generator context =
+randomStep : Generator a -> State -> ( a, State )
+randomStep generator state =
     let
         ( value, seed ) =
-            Random.step generator context.seed
+            Random.step generator state.seed
     in
-    ( value, { context | seed = seed } )
+    ( value, { state | seed = seed } )
 
 
 
 -- Subscriptions
 
 
-subscriptions : Context -> Sub Msg
-subscriptions context =
+subscriptions : State -> Sub Msg
+subscriptions state =
     Sub.batch
         [ onResize WindowSizeChanged
         , onKeyUp keyUpDecoder

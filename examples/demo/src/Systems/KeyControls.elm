@@ -1,31 +1,45 @@
-module Systems.KeyControls exposing (update)
+module Systems.KeyControls exposing (system)
 
 import Components exposing (KeyControlsMap)
 import Components.Controls exposing (Controls, controls)
-import Context exposing (Context)
 import Data.KeyCode exposing (KeyCode)
 import Ecs exposing (Ecs)
+import Entity exposing (Entity, components)
 import Set exposing (Set)
+import State exposing (State)
 
 
-update : ( Ecs, Context ) -> ( Ecs, Context )
-update =
-    Ecs.iterate2 Ecs.keyControlsMapComponent Ecs.controlsComponent updateEntity
+type alias KeyControls =
+    { keyControlsMap : KeyControlsMap
+    , controls : Controls
+    }
+
+
+node : Ecs.Node Entity KeyControls
+node =
+    Ecs.node2 KeyControls
+        components.keyControlsMap
+        components.controls
+
+
+system : Ecs.System Entity State
+system =
+    Ecs.processor node updateEntity
 
 
 updateEntity :
-    Ecs.EntityId
-    -> KeyControlsMap
-    -> Controls
-    -> ( Ecs, Context )
-    -> ( Ecs, Context )
-updateEntity entityId keyControlsMap controls ( ecs, context ) =
-    ( Ecs.insert
+    KeyControls
+    -> Ecs.EntityId
+    -> Ecs Entity
+    -> State
+    -> ( Ecs Entity, State )
+updateEntity { keyControlsMap } entityId ecs state =
+    ( Ecs.set
+        components.controls
+        (updateControls keyControlsMap state.activeKeys)
         entityId
-        Ecs.controlsComponent
-        (updateControls keyControlsMap context.activeKeys)
         ecs
-    , context
+    , state
     )
 
 

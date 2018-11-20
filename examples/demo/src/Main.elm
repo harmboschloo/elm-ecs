@@ -3,13 +3,13 @@ module Main exposing (main)
 import Assets exposing (Assets)
 import Browser exposing (Document)
 import Browser.Dom exposing (Viewport, getViewport)
-import Context exposing (Context)
 import Ecs exposing (Ecs)
-import Entities
+import Entity exposing (Entity)
 import Frame exposing (Frame)
 import History exposing (History)
 import Html exposing (Html, text)
 import Random
+import State exposing (State)
 import Systems
 import Task
 import Time exposing (Posix, posixToMillis)
@@ -20,24 +20,17 @@ import WebGL.Texture as Texture exposing (Error)
 -- MODEL --
 
 
-type InitState
+type Model
     = InitPending
-    | InitError Error
-    | InitOk Model
+    | InitFailure Error
+    | InitSuccess SuccessModel
 
 
-type alias Model =
-    { assets : Assets
-    , context : Context
-    , ecs : Ecs
+type alias SuccessModel =
+    { ecs : Ecs Entity
+    , state : State
     , frame : Frame
     , history : History
-    }
-
-
-type alias Screen =
-    { width : Int
-    , height : Int
     }
 
 
@@ -48,7 +41,7 @@ type alias InitData =
     }
 
 
-init : () -> ( InitState, Cmd Msg )
+init : () -> ( Model, Cmd Msg )
 init _ =
     ( InitPending
     , Task.map3 InitData
@@ -59,8 +52,8 @@ init _ =
     )
 
 
-initModel : InitData -> Model
-initModel { assets, posix, viewport } =
+initSuccess : InitData -> Model
+initSuccess { assets, posix, viewport } =
     let
         screen =
             { width = round viewport.viewport.width
@@ -70,15 +63,15 @@ initModel { assets, posix, viewport } =
         seed =
             Random.initialSeed (posixToMillis posix)
 
-        ( ecs, context ) =
-            Entities.init (Context.init assets seed screen)
+        ( ecs, state ) =
+            Entity.initEcs (State.init assets seed screen)
     in
-    { assets = assets
-    , context = context
-    , ecs = ecs
-    , frame = Frame.init (1.0 / 20.0)
-    , history = History.empty 500
-    }
+    InitSuccess
+        { ecs = ecs
+        , state = state
+        , frame = Frame.init (1.0 / 20.0)
+        , history = History.empty 500
+        }
 
 
 
@@ -87,73 +80,78 @@ initModel { assets, posix, viewport } =
 
 type Msg
     = InitReceived (Result Error InitData)
-    | ContextMsg Context.Msg
+    | StateMsg State.Msg
     | FrameMsg Frame.Msg
 
 
-update : Msg -> InitState -> ( InitState, Cmd Msg )
-update msg state =
-    case ( state, msg ) of
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case ( model, msg ) of
         ( InitPending, InitReceived (Err error) ) ->
-            ( InitError error, Cmd.none )
+            ( InitFailure error, Cmd.none )
 
         ( InitPending, InitReceived (Ok data) ) ->
-            ( InitOk (initModel data), Cmd.none )
+            ( initSuccess data, Cmd.none )
 
-        ( InitError error, _ ) ->
-            ( state, Cmd.none )
+        ( InitFailure error, _ ) ->
+            ( model, Cmd.none )
 
-        ( InitOk model, ContextMsg contextMsg ) ->
+        ( InitSuccess successModel, StateMsg stateMsg ) ->
             let
-                ( context, outMsg ) =
-                    Context.update contextMsg model.context
+                ( state, outMsg ) =
+                    State.update stateMsg successModel.state
             in
             case outMsg of
-                Context.NoOp ->
-                    ( InitOk { model | context = context }, Cmd.none )
+                State.NoOp ->
+                    ( InitSuccess { successModel | state = state }
+                    , Cmd.none
+                    )
 
-                Context.PauseToggled ->
-                    ( InitOk
-                        { model
-                            | context = context
-                            , frame = Frame.togglePaused model.frame
+                State.PauseToggled ->
+                    ( InitSuccess
+                        { successModel
+                            | state = state
+                            , frame = Frame.togglePaused successModel.frame
                         }
                     , Cmd.none
                     )
 
-        ( InitOk model, FrameMsg frameMsg ) ->
+        ( InitSuccess successModel, FrameMsg frameMsg ) ->
             let
                 ( frame, outMsg ) =
-                    Frame.update frameMsg model.frame
+                    Frame.update frameMsg successModel.frame
             in
             case outMsg of
                 Frame.NoOp ->
-                    ( InitOk { model | frame = frame }, Cmd.none )
+                    ( InitSuccess { successModel | frame = frame }
+                    , Cmd.none
+                    )
 
                 Frame.Update data maybeStats cmd ->
                     let
-                        ( ecs, context ) =
+                        ( ecs, state ) =
                             Systems.update
-                                (updateContext data model.context)
-                                model.ecs
+                                successModel.ecs
+                                (updateState data successModel.state)
 
                         history =
                             case maybeStats of
                                 Nothing ->
-                                    model.history
+                                    successModel.history
 
                                 Just stats ->
                                     History.add
                                         { index = stats.index
                                         , updateTime = stats.updateTime
                                         , frameTime = stats.frameTime
-                                        , entityCount = Ecs.activeSize model.ecs
+                                        , entityCount =
+                                            Ecs.size successModel.ecs
                                         }
-                                        model.history
+                                        successModel.history
 
                         newFrame =
                             if
-                                context.test
+                                state.test
                                     && not (Frame.isPaused frame)
                                     && (History.getFps history < 30)
                             then
@@ -162,23 +160,22 @@ update msg state =
                             else
                                 frame
                     in
-                    ( InitOk
-                        { model
-                            | context = context
-                            , ecs = ecs
-                            , frame = newFrame
-                            , history = history
+                    ( InitSuccess
+                        { ecs = ecs
+                        , state = state
+                        , frame = newFrame
+                        , history = history
                         }
                     , Cmd.map FrameMsg cmd
                     )
 
         _ ->
-            ( state, Cmd.none )
+            ( model, Cmd.none )
 
 
-updateContext : { deltaTime : Float, accumulatedTime : Float } -> Context -> Context
-updateContext data context =
-    { context
+updateState : { deltaTime : Float, accumulatedTime : Float } -> State -> State
+updateState data state =
+    { state
         | time = data.accumulatedTime
         , deltaTime = data.deltaTime
     }
@@ -188,13 +185,13 @@ updateContext data context =
 -- SUBSCRIPTIONS --
 
 
-subscriptions : InitState -> Sub Msg
-subscriptions state =
-    case state of
-        InitOk model ->
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    case model of
+        InitSuccess { state, frame } ->
             Sub.batch
-                [ Sub.map ContextMsg (Context.subscriptions model.context)
-                , Sub.map FrameMsg (Frame.subscriptions model.frame)
+                [ Sub.map StateMsg (State.subscriptions state)
+                , Sub.map FrameMsg (Frame.subscriptions frame)
                 ]
 
         _ ->
@@ -205,19 +202,19 @@ subscriptions state =
 -- VIEW --
 
 
-view : InitState -> Document Msg
-view state =
+view : Model -> Document Msg
+view model =
     { title = "Ecs Example"
     , body =
-        case state of
+        case model of
             InitPending ->
                 [ text "loading..." ]
 
-            InitError error ->
+            InitFailure error ->
                 viewError error
 
-            InitOk internalModel ->
-                viewOk internalModel
+            InitSuccess { ecs, state, frame, history } ->
+                [ Systems.view frame history ecs state ]
     }
 
 
@@ -236,16 +233,11 @@ viewError error =
             ]
 
 
-viewOk : Model -> List (Html Msg)
-viewOk model =
-    [ Systems.view model.frame model.history model.context model.ecs ]
-
-
 
 -- MAIN --
 
 
-main : Program () InitState Msg
+main : Program () Model Msg
 main =
     Browser.document
         { init = init
