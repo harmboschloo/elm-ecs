@@ -1,30 +1,14 @@
-module Data.Bounds exposing
+module Collision.Bounds exposing
     ( Bounds
-    , fromPoint
-    , fromPositionAndRadius
     , intersect
     )
 
 
 type alias Bounds =
     { left : Float
-    , right : Float
     , top : Float
+    , right : Float
     , bottom : Float
-    }
-
-
-fromPoint : Float -> Float -> Bounds
-fromPoint x y =
-    fromPositionAndRadius x y 0
-
-
-fromPositionAndRadius : Float -> Float -> Float -> Bounds
-fromPositionAndRadius x y radius =
-    { left = x - radius
-    , right = x + radius
-    , top = y - radius
-    , bottom = y + radius
     }
 
 
