@@ -1,9 +1,9 @@
 module Ecs exposing
-    ( Ecs, empty, size
+    ( Ecs, empty, fromList, toList, size
     , EntityId, create, createWith, destroy
     , get, set, update, remove
     , andSet, andUpdate, andRemove
-    , System, system, preProcessor, processor, postProcessor, process
+    , System, Events, system, preProcessor, processor, postProcessor, process
     , Empty, Component, Node
     , empty1, components1, node1
     , empty2, components2, node2
@@ -84,7 +84,7 @@ module Ecs exposing
 
 # Processing all entities using systems.
 
-@docs System, system, preProcessor, processor, postProcessor, process
+@docs System, Events, system, preProcessor, processor, postProcessor, process
 
 
 # Setting up your Ecs with empty, component and node specifications.
@@ -367,6 +367,7 @@ type Node entity a
 
         -- TODO, set : a -> entity -> entity
         -- update, remove...
+        -- not(=equals Nothing), value/equals, map to bool?
         }
 
 
@@ -379,6 +380,7 @@ type alias Model entity =
     , destroyed : List Int
     , empty : entity
     , current : Current entity
+    , events : Events
     }
 
 
@@ -386,6 +388,12 @@ type alias Current entity =
     { id : Int
     , entity : entity
     , modified : Bool
+    }
+
+
+type alias Events =
+    { created : List EntityId
+    , destroyed : List EntityId
     }
 
 
@@ -400,7 +408,7 @@ type System entity a
 type alias SystemModel entity a =
     { preProcess : Maybe (( Model entity, a ) -> ( Model entity, a ))
     , process : Maybe (( Model entity, a ) -> ( Model entity, a ))
-    , postProcess : Maybe (( Model entity, a ) -> ( Model entity, a ))
+    , postProcess : Maybe (( Events, Model entity, a ) -> ( Events, Model entity, a ))
     }
 
 
@@ -414,9 +422,14 @@ invalidId =
 
 
 empty : Empty entity -> Ecs entity
-empty (Empty emptyEntity) =
+empty emptyEntity =
+    fromArray Array.empty emptyEntity
+
+
+fromArray : Array (Maybe entity) -> Empty entity -> Ecs entity
+fromArray entities (Empty emptyEntity) =
     Ecs
-        { all = Array.empty
+        { all = entities
         , destroyed = []
         , empty = emptyEntity
         , current =
@@ -424,11 +437,28 @@ empty (Empty emptyEntity) =
             , entity = emptyEntity
             , modified = False
             }
+        , events =
+            { created = []
+            , destroyed = []
+            }
         }
 
 
+fromList : List entity -> Empty entity -> Ecs entity
+fromList entities emptyEntity =
+    fromArray
+        (entities
+            |> List.map Just
+            |> Array.fromList
+        )
+        emptyEntity
 
--- TODO fromList, toList
+
+toList : Ecs entity -> List entity
+toList (Ecs model) =
+    model.all
+        |> Array.toList
+        |> List.filterMap identity
 
 
 size : Ecs entity -> Int
@@ -459,8 +489,11 @@ create (Ecs model) =
                     , model.all
                     , tail
                     )
+
+        entityId =
+            EntityId id
     in
-    ( EntityId id
+    ( entityId
     , Ecs
         { all = insertCurrent model.current all
         , destroyed = destroyed
@@ -469,6 +502,10 @@ create (Ecs model) =
             { id = id
             , entity = entity
             , modified = True
+            }
+        , events =
+            { created = entityId :: model.events.created
+            , destroyed = model.events.destroyed
             }
         }
     )
@@ -499,6 +536,10 @@ destroy (EntityId id) (Ecs model) =
 
                     else
                         model.current
+                , events =
+                    { created = model.events.created
+                    , destroyed = EntityId id :: model.events.destroyed
+                    }
                 }
 
         _ ->
@@ -581,6 +622,7 @@ set (Component component) a (EntityId id) (Ecs model) =
             , entity = component.set (Just a) current.entity
             , modified = True
             }
+        , events = model.events
         }
 
 
@@ -607,6 +649,7 @@ update (Component component) updater (EntityId id) (Ecs model) =
             , entity = component.set a current.entity
             , modified = True
             }
+        , events = model.events
         }
 
 
@@ -625,6 +668,7 @@ remove (Component component) (EntityId id) (Ecs model) =
             , entity = component.set Nothing current.entity
             , modified = True
             }
+        , events = model.events
         }
 
 
@@ -662,16 +706,15 @@ andRemove component ( entity, ecs ) =
 
 system :
     { preProcess : Maybe (Ecs entity -> b -> ( Ecs entity, b ))
-    , process :
-        Maybe ( Node entity a, a -> EntityId -> Ecs entity -> b -> ( Ecs entity, b ) )
-    , postProcess : Maybe (Ecs entity -> b -> ( Ecs entity, b ))
+    , process : Maybe ( Node entity a, a -> EntityId -> Ecs entity -> b -> ( Ecs entity, b ) )
+    , postProcess : Maybe (Events -> Ecs entity -> b -> ( Ecs entity, b ))
     }
     -> System entity b
 system config =
     System
-        { preProcess = Maybe.map mapPreOrPostProcess config.preProcess
+        { preProcess = Maybe.map mapPreProcess config.preProcess
         , process = Maybe.map mapProcess config.process
-        , postProcess = Maybe.map mapPreOrPostProcess config.postProcess
+        , postProcess = Maybe.map mapPostProcess config.postProcess
         }
 
 
@@ -696,7 +739,9 @@ processor node fn =
         }
 
 
-postProcessor : (Ecs entity -> a -> ( Ecs entity, a )) -> System entity a
+postProcessor :
+    (Events -> Ecs entity -> a -> ( Ecs entity, a ))
+    -> System entity a
 postProcessor fn =
     system
         { preProcess = Nothing
@@ -705,10 +750,10 @@ postProcessor fn =
         }
 
 
-mapPreOrPostProcess :
+mapPreProcess :
     (Ecs entity -> a -> ( Ecs entity, a ))
     -> (( Model entity, a ) -> ( Model entity, a ))
-mapPreOrPostProcess fn =
+mapPreProcess fn =
     \( model1, a1 ) ->
         let
             ( Ecs model2, a2 ) =
@@ -738,9 +783,22 @@ mapProcess ( Node node, fn ) =
                   , destroyed = model2.destroyed
                   , empty = model2.empty
                   , current = current
+                  , events = model2.events
                   }
                 , b2
                 )
+
+
+mapPostProcess :
+    (Events -> Ecs entity -> a -> ( Ecs entity, a ))
+    -> (( Events, Model entity, a ) -> ( Events, Model entity, a ))
+mapPostProcess fn =
+    \( events, model1, a1 ) ->
+        let
+            ( Ecs model2, a2 ) =
+                fn events (Ecs model1) a1
+        in
+        ( events, model2, a2 )
 
 
 process :
@@ -768,8 +826,20 @@ process systems (Ecs model1) a1 =
                 ( 0, model2, a2 )
                 model2.all
 
-        ( model4, a4 ) =
-            doPostProcess ( model3, a3 )
+        ( _, model4, a4 ) =
+            doPostProcess
+                ( model3.events
+                , { all = model3.all
+                  , destroyed = model3.destroyed
+                  , empty = model3.empty
+                  , current = model3.current
+                  , events =
+                        { created = []
+                        , destroyed = []
+                        }
+                  }
+                , a3
+                )
     in
     ( Ecs model4, a4 )
 
@@ -806,6 +876,7 @@ processEntity doProcess maybeEntity ( id, model1, a1 ) =
                                 , entity = entity
                                 , modified = False
                                 }
+                          , events = model1.events
                           }
                         , a1
                         )
