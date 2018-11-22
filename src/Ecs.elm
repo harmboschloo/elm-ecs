@@ -849,9 +849,12 @@ compose :
     -> List (System entity a)
     -> (b -> b)
 compose getter list =
-    list
-        |> List.filterMap (\(System model) -> getter model)
-        |> List.foldl (<<) identity
+    case List.filterMap (\(System model) -> getter model) list of
+        [] ->
+            identity
+
+        head :: tail ->
+            List.foldl (<<) head tail
 
 
 processEntity :

@@ -9644,17 +9644,20 @@ var author$project$State$update = F2(
 	});
 var author$project$Ecs$compose = F2(
 	function (getter, list) {
-		return A3(
-			elm$core$List$foldl,
-			elm$core$Basics$composeL,
-			elm$core$Basics$identity,
-			A2(
-				elm$core$List$filterMap,
-				function (_n0) {
-					var model = _n0;
-					return getter(model);
-				},
-				list));
+		var _n0 = A2(
+			elm$core$List$filterMap,
+			function (_n1) {
+				var model = _n1;
+				return getter(model);
+			},
+			list);
+		if (!_n0.b) {
+			return elm$core$Basics$identity;
+		} else {
+			var head = _n0.a;
+			var tail = _n0.b;
+			return A3(elm$core$List$foldl, elm$core$Basics$composeL, head, tail);
+		}
 	});
 var author$project$Ecs$processEntity = F3(
 	function (doProcess, maybeEntity, _n0) {
