@@ -2,14 +2,15 @@
 
 const fs = require("fs");
 const path = require("path");
-const types = require("./types");
+const entity = require("./entity");
+const update = require("./update");
 
 const maxComponents = 50;
-const maxNodeComponents = 10;
-const output = path.resolve(__dirname, "output");
+const output = path.resolve(__dirname, "../src");
 
 if (!fs.existsSync(output)) {
   fs.mkdirSync(output);
 }
 
-types.generate(maxComponents, maxNodeComponents, output);
+entity.generate(maxComponents, output);
+update.generate(maxComponents, output);

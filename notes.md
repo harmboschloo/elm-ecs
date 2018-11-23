@@ -1,12 +1,8 @@
 # To do
 
-- getEntity
+- Process distinguish between functions with id and without (current)?
 - canvas renderer for demo https://package.elm-lang.org/packages/joakin/elm-canvas/latest/
-- fromList [components]
-- toList [components]
-- Node set/remove
-- EntityId id index
-- Can we get rit of Components type defined by user?
+- Can we get rit of Entity type defined by user?
 
 # Resources
 

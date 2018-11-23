@@ -1,7 +1,10 @@
 module Systems.Render exposing (system, view)
 
 import Components exposing (Position, Sprite)
-import Ecs exposing (Ecs)
+import Ecs
+import Ecs.Process
+import Ecs.Select
+import Ecs.System
 import Entity exposing (Entity, components)
 import Frame exposing (Frame)
 import History exposing (History)
@@ -22,47 +25,46 @@ type alias Renderable =
     }
 
 
-node : Ecs.Node Entity Renderable
-node =
-    Ecs.node2 Renderable
-        components.position
-        components.sprite
+select : Ecs.Select.Select Entity Renderable
+select =
+    Ecs.Select.map2 Renderable
+        .position
+        .sprite
 
 
-system : Ecs.System Entity State
+system : Ecs.System.System Entity State
 system =
-    Ecs.system
+    Ecs.System.system
         { preProcess = Just preProcess
-        , process = Just ( node, processEntity )
+        , process = Just ( select, processEntity )
         , postProcess = Nothing
         }
 
 
-preProcess : Ecs Entity -> State -> ( Ecs Entity, State )
+preProcess : Ecs.Ecs Entity -> State -> ( Ecs.Ecs Entity, State )
 preProcess ecs state =
     ( ecs, { state | renderElements = [] } )
 
 
 processEntity :
     Renderable
-    -> Ecs.EntityId
-    -> Ecs Entity
+    -> Ecs.Process.Process Entity
     -> State
-    -> ( Ecs Entity, State )
-processEntity renderable entityId ecs state =
-    ( ecs
+    -> ( Ecs.Process.Process Entity, State )
+processEntity renderable process state =
+    ( process
     , { state
         | renderElements =
             { position = renderable.position
             , sprite = renderable.sprite
-            , scale = Ecs.get components.scale entityId ecs
+            , scale = Ecs.Process.get .scale process
             }
                 :: state.renderElements
       }
     )
 
 
-view : Frame -> History -> Ecs Entity -> State -> Html msg
+view : Frame -> History -> Ecs.Ecs Entity -> State -> Html msg
 view frame history ecs state =
     div []
         [ div

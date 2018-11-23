@@ -3,7 +3,7 @@ module Main exposing (main)
 import Browser
 import Browser.Events
 import Ecs
-import Ecs.Entity
+import Ecs.Empty
 import Ecs.Process
 import Ecs.Select
 import Ecs.System
@@ -55,7 +55,7 @@ type alias ComponentUpdates =
 
 empty : Entity
 empty =
-    Ecs.Entity.empty4 Entity
+    Ecs.Empty.empty4 Entity
 
 
 componentUpdates : ComponentUpdates
@@ -88,32 +88,34 @@ spawnEntity ecs state =
         let
             n =
                 state.frameCount // 10
-
-            entity =
-                empty
-                    |> Ecs.Entity.set componentUpdates.position
-                        { x = remainderBy state.worldWidth state.frameCount |> toFloat
-                        , y = remainderBy state.worldHeight state.frameCount |> toFloat
-                        }
-                    |> Ecs.Entity.set componentUpdates.velocity
-                        { x = (remainderBy 5 n - 2) * 75 |> toFloat
-                        , y = (remainderBy 7 n - 3) * 50 |> toFloat
-                        }
-                    |> Ecs.Entity.set componentUpdates.outOfBoundsResolution
-                        (if remainderBy 2 n == 0 then
-                            Teleport
-
-                         else
-                            Destroy
-                        )
-                    |> Ecs.Entity.set componentUpdates.color
-                        (colors
-                            |> List.drop (remainderBy (List.length colors) n)
-                            |> List.head
-                            |> Maybe.withDefault "#f00"
-                        )
         in
-        ( Ecs.create entity ecs |> Tuple.second
+        ( Ecs.create ecs
+            |> Ecs.andSet
+                components.position
+                { x = remainderBy state.worldWidth state.frameCount |> toFloat
+                , y = remainderBy state.worldHeight state.frameCount |> toFloat
+                }
+            |> Ecs.andSet
+                components.velocity
+                { x = (remainderBy 5 n - 2) * 75 |> toFloat
+                , y = (remainderBy 7 n - 3) * 50 |> toFloat
+                }
+            |> Ecs.andSet
+                components.outOfBoundsResolution
+                (if remainderBy 2 n == 0 then
+                    Teleport
+
+                 else
+                    Destroy
+                )
+            |> Ecs.andSet
+                components.color
+                (colors
+                    |> List.drop (remainderBy (List.length colors) n)
+                    |> List.head
+                    |> Maybe.withDefault "#f00"
+                )
+            |> Tuple.second
         , state
         )
 
@@ -195,7 +197,7 @@ selectBoundsCheck =
 
 boundsCheckSystem : Ecs.System.System Entity State
 boundsCheckSystem =
-    Ecs.System.system
+    Ecs.system
         { preProcess = Nothing
         , process = Just ( selectBoundsCheck, boundsCheckEntity )
         , postProcess = Nothing
@@ -266,31 +268,31 @@ type alias Render =
 
 selectRender : Ecs.Select.Select Entity Render
 selectRender =
-    Ecs.Select.map2 Render
-        .position
-        .color
+    Ecs.node2 Render
+        components.position
+        components.color
 
 
 renderSystem : Ecs.System.System Entity State
 renderSystem =
-    Ecs.System.system
+    Ecs.system
         { preProcess = Just clearViewElements
         , process = Just ( selectRender, renderEntity )
         , postProcess = Nothing
         }
 
 
-clearViewElements : Ecs.Ecs Entity -> State -> ( Ecs.Ecs Entity, State )
+clearViewElements : Ecs -> State -> ( Ecs, State )
 clearViewElements ecs state =
     ( ecs, { state | viewElements = [] } )
 
 
 renderEntity :
     Render
-    -> Ecs.Process.Process Entity
+    -> Ecs.Process.Process
     -> State
-    -> ( Ecs.Process.Process Entity, State )
-renderEntity data ecs state =
+    -> ( Ecs.Process.Process, State )
+renderEntity data _ ecs state =
     ( ecs, { state | viewElements = data :: state.viewElements } )
 
 
@@ -319,7 +321,7 @@ type alias ViewElement =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( ( Ecs.empty
+    ( ( Ecs.empty empty
       , { worldWidth = 300
         , worldHeight = 300
         , deltaTime = 0
@@ -343,7 +345,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ( ecs, state ) =
     case msg of
         OnAnimationFrameDelta deltaTimeMillis ->
-            ( Ecs.processSystems
+            ( Ecs.process
                 [ spawnSystem
                 , moveSystem
                 , boundsCheckSystem
@@ -395,7 +397,7 @@ view ( ecs, state ) =
     }
 
 
-viewElement : ViewElement -> Html.Html msg
+viewElement : ViewElement -> Html msg
 viewElement { position, color } =
     Html.div
         [ Html.Attributes.style "position" "absolute"
