@@ -1,4 +1,4 @@
-module Ecs.Process exposing
+module Ecs.AR.Process exposing
     ( Process
     , getId, get, set, update, destroy
     , createEntity, destroyEntity, getEntity, updateEntity
@@ -12,10 +12,10 @@ module Ecs.Process exposing
 
 -}
 
-import Ecs
-import Ecs.Internal.Entity exposing (EntityId)
-import Ecs.Internal.Process as Process exposing (Status(..))
-import Ecs.Update exposing (Update)
+import Ecs.AR as Ecs
+import Ecs.AR.Internal.Entity exposing (EntityId)
+import Ecs.AR.Internal.Process as Process exposing (Status(..))
+import Ecs.AR.Update exposing (Update)
 
 
 {-| -}

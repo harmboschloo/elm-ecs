@@ -1,4 +1,4 @@
-module Ecs exposing
+module Ecs.AR exposing
     ( Ecs, empty, fromList, toList, size, isEmpty
     , EntityId, create, destroy
     , member, get, set, update
@@ -36,10 +36,10 @@ module Ecs exposing
 -}
 
 import Array exposing (Array)
-import Ecs.Internal.Ecs as Ecs exposing (Model, ProcessState)
-import Ecs.Internal.Entity as Entity exposing (Entity, Id, Index)
-import Ecs.Internal.Process as Process exposing (Process(..))
-import Ecs.Internal.System exposing (System(..), SystemModel)
+import Ecs.AR.Internal.Ecs as Ecs exposing (Model, ProcessState)
+import Ecs.AR.Internal.Entity as Entity exposing (Entity, Id, Index)
+import Ecs.AR.Internal.Process as Process exposing (Process(..))
+import Ecs.AR.Internal.System exposing (System(..), SystemModel)
 
 
 

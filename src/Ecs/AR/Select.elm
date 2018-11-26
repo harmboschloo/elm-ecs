@@ -1,4 +1,4 @@
-module Ecs.Select exposing
+module Ecs.AR.Select exposing
     ( Select
     , NoValue, noValue, isEqual, andThen
     , map, map2, map3, map4, map5

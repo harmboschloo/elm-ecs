@@ -1,4 +1,4 @@
-module Ecs.Entity exposing
+module Ecs.AR.Entity exposing
     ( member, get, set, remove, update
     , empty1, empty2, empty3, empty4, empty5, empty6, empty7, empty8, empty9, empty10, empty11, empty12, empty13, empty14, empty15, empty16, empty17, empty18, empty19, empty20, empty21, empty22, empty23, empty24, empty25, empty26, empty27, empty28, empty29, empty30, empty31, empty32, empty33, empty34, empty35, empty36, empty37, empty38, empty39, empty40, empty41, empty42, empty43, empty44, empty45, empty46, empty47, empty48, empty49, empty50
     )
@@ -10,7 +10,7 @@ module Ecs.Entity exposing
 
 -}
 
-import Ecs.Update exposing (Update)
+import Ecs.AR.Update exposing (Update)
 
 
 {-| -}

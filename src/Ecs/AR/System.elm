@@ -1,4 +1,4 @@
-module Ecs.System exposing
+module Ecs.AR.System exposing
     ( System
     , postProcessor
     , preProcessor
@@ -9,12 +9,12 @@ module Ecs.System exposing
 {-| -}
 
 import Array
-import Ecs.Internal.Ecs exposing (Ecs)
-import Ecs.Internal.Entity exposing (EntityId)
-import Ecs.Internal.Process exposing (Process)
-import Ecs.Internal.System as System
-import Ecs.Process as Process
-import Ecs.Select exposing (Select)
+import Ecs.AR.Internal.Ecs exposing (Ecs)
+import Ecs.AR.Internal.Entity exposing (EntityId)
+import Ecs.AR.Internal.Process exposing (Process)
+import Ecs.AR.Internal.System as System
+import Ecs.AR.Process as Process
+import Ecs.AR.Select exposing (Select)
 
 
 {-| -}

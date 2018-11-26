@@ -6,7 +6,7 @@ const path = require("path");
 exports.generate = generate;
 
 function generate(maxComponents, destination) {
-  const file = path.resolve(destination, "Ecs/Update.elm");
+  const file = path.resolve(destination, "Ecs/AR/Update.elm");
 
   fs.writeFile(file, generateCode(maxComponents), error => {
     if (error) {
@@ -20,7 +20,7 @@ function generate(maxComponents, destination) {
 function generateCode(n) {
   const all = range(n);
 
-  return `module Ecs.Update exposing
+  return `module Ecs.AR.Update exposing
     ( Update
     , ${all.map(i => `updates${i}`).join(", ")}
     )

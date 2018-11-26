@@ -6,7 +6,7 @@ const path = require("path");
 exports.generate = generate;
 
 function generate(maxComponents, destination) {
-  const file = path.resolve(destination, "Ecs/Entity.elm");
+  const file = path.resolve(destination, "Ecs/AR/Entity.elm");
 
   fs.writeFile(file, generateCode(maxComponents), error => {
     if (error) {
@@ -20,7 +20,7 @@ function generate(maxComponents, destination) {
 function generateCode(n) {
   const all = range(n);
 
-  return `module Ecs.Entity exposing
+  return `module Ecs.AR.Entity exposing
     ( member, get, set, remove, update
     , ${all.map(i => `empty${i}`).join(", ")}
     )
@@ -32,7 +32,7 @@ function generateCode(n) {
 
 -}
 
-import Ecs.Update exposing (Update)
+import Ecs.AR.Update exposing (Update)
 
 
 {-| -}

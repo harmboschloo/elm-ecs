@@ -1,4 +1,4 @@
-module Ecs.Internal.Entity exposing
+module Ecs.AR.Internal.Entity exposing
     ( Entity(..)
     , EntityId(..)
     , Id

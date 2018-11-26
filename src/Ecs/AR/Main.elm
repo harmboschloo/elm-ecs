@@ -2,12 +2,12 @@ module Main exposing (main)
 
 import Browser
 import Browser.Events
-import Ecs
-import Ecs.Empty
-import Ecs.Process
-import Ecs.Select
-import Ecs.System
-import Ecs.Update
+import Ecs.AR
+import Ecs.AR.Empty
+import Ecs.AR.Process
+import Ecs.AR.Select
+import Ecs.AR.System
+import Ecs.AR.Update
 import Html
 import Html.Attributes
 

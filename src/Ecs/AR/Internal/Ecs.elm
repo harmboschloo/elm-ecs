@@ -1,11 +1,11 @@
-module Ecs.Internal.Ecs exposing
+module Ecs.AR.Internal.Ecs exposing
     ( Ecs(..)
     , Model
     , ProcessState
     )
 
 import Array exposing (Array)
-import Ecs.Internal.Entity exposing (Entity, EntityId, Id, Index)
+import Ecs.AR.Internal.Entity exposing (Entity, EntityId, Id, Index)
 
 
 type Ecs a

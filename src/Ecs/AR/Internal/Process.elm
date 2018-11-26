@@ -1,11 +1,11 @@
-module Ecs.Internal.Process exposing
+module Ecs.AR.Internal.Process exposing
     ( Current
     , Process(..)
     , Status(..)
     )
 
-import Ecs.Internal.Ecs exposing (Ecs)
-import Ecs.Internal.Entity exposing (EntityId)
+import Ecs.AR.Internal.Ecs exposing (Ecs)
+import Ecs.AR.Internal.Entity exposing (EntityId)
 
 
 type Process a

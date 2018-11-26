@@ -1,11 +1,11 @@
-module Ecs.Internal.System exposing
+module Ecs.AR.Internal.System exposing
     ( System(..)
     , SystemModel
     )
 
-import Ecs.Internal.Ecs exposing (Ecs)
-import Ecs.Internal.Entity exposing (EntityId)
-import Ecs.Internal.Process exposing (Process)
+import Ecs.AR.Internal.Ecs exposing (Ecs)
+import Ecs.AR.Internal.Entity exposing (EntityId)
+import Ecs.AR.Internal.Process exposing (Process)
 
 
 type System a b
