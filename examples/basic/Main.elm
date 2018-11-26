@@ -2,12 +2,9 @@ module Main exposing (main)
 
 import Browser
 import Browser.Events
-import Ecs
-import Ecs.Entity
-import Ecs.Process
+import Ecs.Api
+import Ecs.Api4
 import Ecs.Select
-import Ecs.System
-import Ecs.Update
 import Html
 import Html.Attributes
 
@@ -37,88 +34,82 @@ type alias Color =
 -- ECS SETUP --
 
 
-type alias Entity =
-    { position : Maybe Position
-    , velocity : Maybe Velocity
-    , outOfBoundsResolution : Maybe OutOfBoundsResolution
-    , color : Maybe Color
+type alias EntityId =
+    Int
+
+
+type alias Ecs =
+    Ecs.Api4.Ecs EntityId Position Velocity OutOfBoundsResolution Color
+
+
+type alias ComponentTypes =
+    { position : Ecs.Api.ComponentType EntityId Ecs Position
+    , velocity : Ecs.Api.ComponentType EntityId Ecs Velocity
+    , outOfBoundsResolution : Ecs.Api.ComponentType EntityId Ecs OutOfBoundsResolution
+    , color : Ecs.Api.ComponentType EntityId Ecs Color
     }
 
 
-type alias ComponentUpdates =
-    { position : Ecs.Update.Update Entity Position
-    , velocity : Ecs.Update.Update Entity Velocity
-    , outOfBoundsResolution : Ecs.Update.Update Entity OutOfBoundsResolution
-    , color : Ecs.Update.Update Entity Color
-    }
+type alias Selector a =
+    Ecs.Select.Selector EntityId Ecs a
 
 
-empty : Entity
-empty =
-    Ecs.Entity.empty4 Entity
+ecsType : Ecs.Api.EcsType EntityId Ecs
+ecsType =
+    Ecs.Api4.ecs
 
 
-componentUpdates : ComponentUpdates
-componentUpdates =
-    Ecs.Update.updates4
-        ComponentUpdates
-        Entity
-        .position
-        .velocity
-        .outOfBoundsResolution
-        .color
+componentTypes : ComponentTypes
+componentTypes =
+    Ecs.Api4.components ComponentTypes
 
 
 
 --  SPAWN SYSTEM --
 
 
-spawnSystem : Ecs.System.System Entity State
-spawnSystem =
-    Ecs.System.system
-        { preProcess = Just spawnEntity
-        , process = Nothing
-        , postProcess = Nothing
-        }
-
-
-spawnEntity : Ecs.Ecs Entity -> State -> ( Ecs.Ecs Entity, State )
-spawnEntity ecs state =
+spawnEntities : ( State, Ecs ) -> ( State, Ecs )
+spawnEntities ( state, ecs ) =
     if remainderBy 10 state.frameCount == 0 then
         let
             n =
                 state.frameCount // 10
 
-            entity =
-                empty
-                    |> Ecs.Entity.set componentUpdates.position
+            ( id, newState ) =
+                nextId state
+
+            newEcs =
+                ecs
+                    |> Ecs.Api.insert componentTypes.position
+                        id
                         { x = remainderBy state.worldWidth state.frameCount |> toFloat
                         , y = remainderBy state.worldHeight state.frameCount |> toFloat
                         }
-                    |> Ecs.Entity.set componentUpdates.velocity
+                    |> Ecs.Api.insert componentTypes.velocity
+                        id
                         { x = (remainderBy 5 n - 2) * 75 |> toFloat
                         , y = (remainderBy 7 n - 3) * 50 |> toFloat
                         }
-                    |> Ecs.Entity.set componentUpdates.outOfBoundsResolution
+                    |> Ecs.Api.insert componentTypes.outOfBoundsResolution
+                        id
                         (if remainderBy 2 n == 0 then
                             Teleport
 
                          else
                             Destroy
                         )
-                    |> Ecs.Entity.set componentUpdates.color
+                    |> Ecs.Api.insert componentTypes.color
+                        id
                         (colors
                             |> List.drop (remainderBy (List.length colors) n)
                             |> List.head
                             |> Maybe.withDefault "#f00"
                         )
         in
-        ( Ecs.create entity ecs |> Tuple.second
-        , state
-        )
+        ( newState, newEcs )
 
     else
-        ( ecs, state )
+        ( state, ecs )
 
 
 colors : List String
@@ -145,35 +136,29 @@ type alias Move =
     }
 
 
-selectMove : Ecs.Select.Select Entity Move
-selectMove =
-    Ecs.Select.map2 Move
-        .position
-        .velocity
+moveSelector : Selector Move
+moveSelector =
+    Ecs.Select.select2 Move
+        componentTypes.position
+        componentTypes.velocity
 
 
-moveSystem : Ecs.System.System Entity State
-moveSystem =
-    Ecs.System.system
-        { preProcess = Nothing
-        , process = Just ( selectMove, moveEntity )
-        , postProcess = Nothing
-        }
-
-
-moveEntity :
-    Move
-    -> Ecs.Process.Process Entity
-    -> State
-    -> ( Ecs.Process.Process Entity, State )
-moveEntity { position, velocity } process state =
-    ( Ecs.Process.set componentUpdates.position
-        { x = position.x + velocity.x * state.deltaTime
-        , y = position.y + velocity.y * state.deltaTime
-        }
-        process
-    , state
+moveEntities : ( State, Ecs ) -> ( State, Ecs )
+moveEntities ( state, ecs ) =
+    ( state
+    , Ecs.Api.selectList moveSelector ecs
+        |> List.foldl (moveEntity state.deltaTime) ecs
     )
+
+
+moveEntity : Float -> ( EntityId, Move ) -> Ecs -> Ecs
+moveEntity deltaTime ( id, { position, velocity } ) ecs =
+    Ecs.Api.insert componentTypes.position
+        id
+        { x = position.x + velocity.x * deltaTime
+        , y = position.y + velocity.y * deltaTime
+        }
+        ecs
 
 
 
@@ -186,36 +171,36 @@ type alias BoundsCheck =
     }
 
 
-selectBoundsCheck : Ecs.Select.Select Entity BoundsCheck
-selectBoundsCheck =
-    Ecs.Select.map2 BoundsCheck
-        .position
-        .outOfBoundsResolution
+boundsCheckSelector : Selector BoundsCheck
+boundsCheckSelector =
+    Ecs.Select.select2 BoundsCheck
+        componentTypes.position
+        componentTypes.outOfBoundsResolution
 
 
-boundsCheckSystem : Ecs.System.System Entity State
-boundsCheckSystem =
-    Ecs.System.system
-        { preProcess = Nothing
-        , process = Just ( selectBoundsCheck, boundsCheckEntity )
-        , postProcess = Nothing
-        }
+boundsCheckEntities : ( State, Ecs ) -> ( State, Ecs )
+boundsCheckEntities ( state, ecs ) =
+    ( state
+    , Ecs.Api.selectList boundsCheckSelector ecs
+        |> List.foldl
+            (boundsCheckEntity
+                (toFloat state.worldWidth)
+                (toFloat state.worldHeight)
+            )
+            ecs
+    )
 
 
-boundsCheckEntity :
-    BoundsCheck
-    -> Ecs.Process.Process Entity
-    -> State
-    -> ( Ecs.Process.Process Entity, State )
-boundsCheckEntity { position, resolution } process state =
+boundsCheckEntity : Float -> Float -> ( EntityId, BoundsCheck ) -> Ecs -> Ecs
+boundsCheckEntity worldWidth worldHeight ( id, { position, resolution } ) ecs =
     case resolution of
         Teleport ->
             let
                 newX =
                     if position.x < 0 then
-                        toFloat state.worldWidth
+                        worldWidth
 
-                    else if position.x > toFloat state.worldWidth then
+                    else if position.x > worldWidth then
                         0
 
                     else
@@ -223,35 +208,34 @@ boundsCheckEntity { position, resolution } process state =
 
                 newY =
                     if position.y < 0 then
-                        toFloat state.worldHeight
+                        worldHeight
 
-                    else if position.y > toFloat state.worldHeight then
+                    else if position.y > worldHeight then
                         0
 
                     else
                         position.y
             in
             if position.x /= newX || position.y /= newY then
-                ( Ecs.Process.set componentUpdates.position
+                Ecs.Api.insert componentTypes.position
+                    id
                     { x = newX, y = newY }
-                    process
-                , state
-                )
+                    ecs
 
             else
-                ( process, state )
+                ecs
 
         Destroy ->
             if
                 (position.x < 0)
-                    || (position.x > toFloat state.worldWidth)
+                    || (position.x > worldWidth)
                     || (position.y < 0)
-                    || (position.y > toFloat state.worldHeight)
+                    || (position.y > worldHeight)
             then
-                ( Ecs.Process.destroy process, state )
+                Ecs.Api.clear ecsType id ecs
 
             else
-                ( process, state )
+                ecs
 
 
 
@@ -264,34 +248,33 @@ type alias Render =
     }
 
 
-selectRender : Ecs.Select.Select Entity Render
-selectRender =
-    Ecs.Select.map2 Render
-        .position
-        .color
+renderSelector : Selector Render
+renderSelector =
+    Ecs.Select.select2 Render
+        componentTypes.position
+        componentTypes.color
 
 
-renderSystem : Ecs.System.System Entity State
-renderSystem =
-    Ecs.System.system
-        { preProcess = Just clearViewElements
-        , process = Just ( selectRender, renderEntity )
-        , postProcess = Nothing
-        }
+renderEntities : Ecs -> List (Html.Html msg)
+renderEntities ecs =
+    Ecs.Api.selectList renderSelector ecs
+        |> List.map renderEntity
 
 
-clearViewElements : Ecs.Ecs Entity -> State -> ( Ecs.Ecs Entity, State )
-clearViewElements ecs state =
-    ( ecs, { state | viewElements = [] } )
-
-
-renderEntity :
-    Render
-    -> Ecs.Process.Process Entity
-    -> State
-    -> ( Ecs.Process.Process Entity, State )
-renderEntity data ecs state =
-    ( ecs, { state | viewElements = data :: state.viewElements } )
+renderEntity : ( EntityId, Render ) -> Html.Html msg
+renderEntity ( _, { position, color } ) =
+    Html.div
+        [ Html.Attributes.style "position" "absolute"
+        , Html.Attributes.style "display" "inline-block"
+        , Html.Attributes.style "left"
+            (String.fromInt (round position.x - 2) ++ "px")
+        , Html.Attributes.style "top"
+            (String.fromInt (round position.y - 2) ++ "px")
+        , Html.Attributes.style "width" "4px"
+        , Html.Attributes.style "height" "4px"
+        , Html.Attributes.style "background-color" color
+        ]
+        []
 
 
 
@@ -299,36 +282,35 @@ renderEntity data ecs state =
 
 
 type alias Model =
-    ( Ecs.Ecs Entity, State )
+    ( State, Ecs )
 
 
 type alias State =
-    { worldWidth : Int
+    { nextId : EntityId
+    , worldWidth : Int
     , worldHeight : Int
     , deltaTime : Float
     , frameCount : Int
-    , viewElements : List ViewElement
-    }
-
-
-type alias ViewElement =
-    { position : Position
-    , color : Color
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( ( Ecs.empty
-      , { worldWidth = 300
+    ( ( { nextId = 0
+        , worldWidth = 300
         , worldHeight = 300
         , deltaTime = 0
         , frameCount = 0
-        , viewElements = []
         }
+      , Ecs.Api.empty ecsType
       )
     , Cmd.none
     )
+
+
+nextId : State -> ( EntityId, State )
+nextId state =
+    ( state.nextId, { state | nextId = state.nextId + 1 } )
 
 
 
@@ -340,20 +322,18 @@ type Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ( ecs, state ) =
+update msg ( state, ecs ) =
     case msg of
         OnAnimationFrameDelta deltaTimeMillis ->
-            ( Ecs.processSystems
-                [ spawnSystem
-                , moveSystem
-                , boundsCheckSystem
-                , renderSystem
-                ]
-                ecs
-                { state
+            ( ( { state
                     | deltaTime = deltaTimeMillis / 1000
                     , frameCount = state.frameCount + 1
                 }
+              , ecs
+              )
+                |> spawnEntities
+                |> moveEntities
+                |> boundsCheckEntities
             , Cmd.none
             )
 
@@ -372,7 +352,7 @@ subscriptions state =
 
 
 view : Model -> Browser.Document Msg
-view ( ecs, state ) =
+view ( state, ecs ) =
     { title = "Ecs Basic Example"
     , body =
         [ Html.div
@@ -384,31 +364,15 @@ view ( ecs, state ) =
                 (String.fromInt state.worldHeight ++ "px")
             , Html.Attributes.style "background-color" "#aaa"
             ]
-            (List.map viewElement state.viewElements)
+            (renderEntities ecs)
         , Html.div []
-            [ Html.text ("entities: " ++ (Ecs.size ecs |> String.fromInt))
+            [ Html.text ("entities: " ++ (Ecs.Api.entityCount ecsType ecs |> String.fromInt))
             , Html.text " - "
             , Html.text
                 ("fps: " ++ (1 / state.deltaTime |> round |> String.fromInt))
             ]
         ]
     }
-
-
-viewElement : ViewElement -> Html.Html msg
-viewElement { position, color } =
-    Html.div
-        [ Html.Attributes.style "position" "absolute"
-        , Html.Attributes.style "display" "inline-block"
-        , Html.Attributes.style "left"
-            (String.fromInt (round position.x - 2) ++ "px")
-        , Html.Attributes.style "top"
-            (String.fromInt (round position.y - 2) ++ "px")
-        , Html.Attributes.style "width" "4px"
-        , Html.Attributes.style "height" "4px"
-        , Html.Attributes.style "background-color" color
-        ]
-        []
 
 
 

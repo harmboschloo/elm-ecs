@@ -5,12 +5,9 @@
     "license": "BSD-3-Clause",
     "version": "1.0.0",
     "exposed-modules": [
-        "Ecs.AR",
-        "Ecs.AR.Entity",
-        "Ecs.AR.Process",
-        "Ecs.AR.Select",
-        "Ecs.AR.System",
-        "Ecs.AR.Update"
+        "Ecs.Api",
+        "Ecs.Api4",
+        "Ecs.Select"
     ],
     "elm-version": "0.19.0 <= v < 0.20.0",
     "dependencies": {
