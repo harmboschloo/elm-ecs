@@ -11,7 +11,7 @@ module Ecs.Select exposing
 -}
 
 import Dict
-import Ecs.Internal as Internal exposing (ComponentType(..))
+import Ecs.Internal as Internal exposing (ComponentSpec(..))
 
 
 
@@ -24,73 +24,73 @@ type alias Selector comparable model a =
 
 
 {-| -}
-component : ComponentType comparable model a -> Selector comparable model a
-component (ComponentType c) =
+component : ComponentSpec comparable model a -> Selector comparable model a
+component (ComponentSpec spec) =
     Internal.Selector
-        { select = \id model -> Dict.get id (c.get model)
+        { select = \id model -> Dict.get id (spec.get model)
 
         -- TODO check foldl/r
-        , selectList = \model -> Dict.toList (c.get model)
+        , selectList = \model -> Dict.toList (spec.get model)
         }
 
 
 select1 :
     (a -> b)
-    -> ComponentType comparable model a
+    -> ComponentSpec comparable model a
     -> Selector comparable model b
-select1 fn aType =
-    map fn (component aType)
+select1 fn aSpec =
+    map fn (component aSpec)
 
 
 select2 :
     (a -> b -> c)
-    -> ComponentType comparable model a
-    -> ComponentType comparable model b
+    -> ComponentSpec comparable model a
+    -> ComponentSpec comparable model b
     -> Selector comparable model c
-select2 fn aType bType =
-    map2 fn (component aType) (component bType)
+select2 fn aSpec bSpec =
+    map2 fn (component aSpec) (component bSpec)
 
 
 select3 :
     (a -> b -> c -> d)
-    -> ComponentType comparable model a
-    -> ComponentType comparable model b
-    -> ComponentType comparable model c
+    -> ComponentSpec comparable model a
+    -> ComponentSpec comparable model b
+    -> ComponentSpec comparable model c
     -> Selector comparable model d
-select3 fn aType bType cType =
-    map3 fn (component aType) (component bType) (component cType)
+select3 fn aSpec bSpec cSpec =
+    map3 fn (component aSpec) (component bSpec) (component cSpec)
 
 
 select4 :
     (a -> b -> c -> d -> e)
-    -> ComponentType comparable model a
-    -> ComponentType comparable model b
-    -> ComponentType comparable model c
-    -> ComponentType comparable model d
+    -> ComponentSpec comparable model a
+    -> ComponentSpec comparable model b
+    -> ComponentSpec comparable model c
+    -> ComponentSpec comparable model d
     -> Selector comparable model e
-select4 fn aType bType cType dType =
+select4 fn aSpec bSpec cSpec dSpec =
     map4 fn
-        (component aType)
-        (component bType)
-        (component cType)
-        (component dType)
+        (component aSpec)
+        (component bSpec)
+        (component cSpec)
+        (component dSpec)
 
 
 select5 :
     (a -> b -> c -> d -> e -> f)
-    -> ComponentType comparable model a
-    -> ComponentType comparable model b
-    -> ComponentType comparable model c
-    -> ComponentType comparable model d
-    -> ComponentType comparable model e
+    -> ComponentSpec comparable model a
+    -> ComponentSpec comparable model b
+    -> ComponentSpec comparable model c
+    -> ComponentSpec comparable model d
+    -> ComponentSpec comparable model e
     -> Selector comparable model f
-select5 fn aType bType cType dType eType =
+select5 fn aSpec bSpec cSpec dSpec eSpec =
     map5 fn
-        (component aType)
-        (component bType)
-        (component cType)
-        (component dType)
-        (component eType)
+        (component aSpec)
+        (component bSpec)
+        (component cSpec)
+        (component dSpec)
+        (component eSpec)
 
 
 

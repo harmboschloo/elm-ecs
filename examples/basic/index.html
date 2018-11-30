@@ -4299,12 +4299,12 @@ function _Browser_load(url)
 		}
 	}));
 }
-var author$project$Ecs$Api$empty = function (_n0) {
+var author$project$Ecs$empty = function (_n0) {
 	var root = _n0;
 	return root.aG;
 };
-var author$project$Ecs$Api4$Ecs = elm$core$Basics$identity;
-var author$project$Ecs$Internal$EcsType = elm$core$Basics$identity;
+var author$project$Ecs$Internal$EcsSpec = elm$core$Basics$identity;
+var author$project$Ecs$Spec$Model4 = elm$core$Basics$identity;
 var elm$core$Basics$EQ = 1;
 var elm$core$Basics$GT = 2;
 var elm$core$Basics$LT = 0;
@@ -5007,7 +5007,7 @@ var elm$core$Set$union = F2(
 		var dict2 = _n1;
 		return A2(elm$core$Dict$union, dict1, dict2);
 	});
-var author$project$Ecs$Api4$ecs = {
+var author$project$Ecs$Spec$ecs4 = {
 	aD: F2(
 		function (id, _n0) {
 			var model = _n0;
@@ -5050,7 +5050,7 @@ var author$project$Ecs$Api4$ecs = {
 			return A2(elm$core$Dict$member, id, model.e) || (A2(elm$core$Dict$member, id, model.f) || (A2(elm$core$Dict$member, id, model.g) || A2(elm$core$Dict$member, id, model.h)));
 		})
 };
-var author$project$Main$ecsType = author$project$Ecs$Api4$ecs;
+var author$project$Main$ecsSpec = author$project$Ecs$Spec$ecs4;
 var elm$core$Result$isOk = function (result) {
 	if (!result.$) {
 		return true;
@@ -5418,7 +5418,7 @@ var author$project$Main$init = function (_n0) {
 	return _Utils_Tuple2(
 		_Utils_Tuple2(
 			{J: 0, r: 0, L: 0, S: 300, T: 300},
-			author$project$Ecs$Api$empty(author$project$Main$ecsType)),
+			author$project$Ecs$empty(author$project$Main$ecsSpec)),
 		elm$core$Platform$Cmd$none);
 };
 var author$project$Main$OnAnimationFrameDelta = elm$core$Basics$identity;
@@ -5861,17 +5861,17 @@ var elm$browser$Browser$Events$onAnimationFrameDelta = elm$browser$Browser$Anima
 var author$project$Main$subscriptions = function (state) {
 	return elm$browser$Browser$Events$onAnimationFrameDelta(elm$core$Basics$identity);
 };
-var author$project$Ecs$Api$selectList = F2(
+var author$project$Ecs$selectList = F2(
 	function (_n0, model) {
 		var selector = _n0;
 		return selector.aV(model);
 	});
-var author$project$Ecs$Api$clear = F3(
+var author$project$Ecs$clear = F3(
 	function (_n0, id, model) {
 		var root = _n0;
 		return A2(root.aD, id, model);
 	});
-var author$project$Ecs$Api$insert = F4(
+var author$project$Ecs$insert = F4(
 	function (_n0, id, data, model) {
 		var component = _n0;
 		return A2(
@@ -5881,8 +5881,8 @@ var author$project$Ecs$Api$insert = F4(
 			},
 			model);
 	});
-var author$project$Ecs$Internal$ComponentType = elm$core$Basics$identity;
-var author$project$Ecs$Api4$components = function (fn) {
+var author$project$Ecs$Internal$ComponentSpec = elm$core$Basics$identity;
+var author$project$Ecs$Spec$components4 = function (fn) {
 	return A4(
 		fn,
 		{
@@ -5950,11 +5950,11 @@ var author$project$Ecs$Api4$components = function (fn) {
 				})
 		});
 };
-var author$project$Main$ComponentTypes = F4(
+var author$project$Main$ComponentSpecs = F4(
 	function (position, velocity, outOfBoundsResolution, color) {
 		return {I: color, W: outOfBoundsResolution, l: position, R: velocity};
 	});
-var author$project$Main$componentTypes = author$project$Ecs$Api4$components(author$project$Main$ComponentTypes);
+var author$project$Main$componentSpecs = author$project$Ecs$Spec$components4(author$project$Main$ComponentSpecs);
 var elm$core$Basics$neq = _Utils_notEqual;
 var author$project$Main$boundsCheckEntity = F4(
 	function (worldWidth, worldHeight, _n0, ecs) {
@@ -5965,29 +5965,29 @@ var author$project$Main$boundsCheckEntity = F4(
 			var newY = (position.j < 0) ? worldHeight : ((_Utils_cmp(position.j, worldHeight) > 0) ? 0 : position.j);
 			var newX = (position.i < 0) ? worldWidth : ((_Utils_cmp(position.i, worldWidth) > 0) ? 0 : position.i);
 			return ((!_Utils_eq(position.i, newX)) || (!_Utils_eq(position.j, newY))) ? A4(
-				author$project$Ecs$Api$insert,
-				author$project$Main$componentTypes.l,
+				author$project$Ecs$insert,
+				author$project$Main$componentSpecs.l,
 				id,
 				{i: newX, j: newY},
 				ecs) : ecs;
 		} else {
-			return ((position.i < 0) || ((_Utils_cmp(position.i, worldWidth) > 0) || ((position.j < 0) || (_Utils_cmp(position.j, worldHeight) > 0)))) ? A3(author$project$Ecs$Api$clear, author$project$Main$ecsType, id, ecs) : ecs;
+			return ((position.i < 0) || ((_Utils_cmp(position.i, worldWidth) > 0) || ((position.j < 0) || (_Utils_cmp(position.j, worldHeight) > 0)))) ? A3(author$project$Ecs$clear, author$project$Main$ecsSpec, id, ecs) : ecs;
 		}
 	});
 var author$project$Ecs$Internal$Selector = elm$core$Basics$identity;
 var author$project$Ecs$Select$component = function (_n0) {
-	var c = _n0;
+	var spec = _n0;
 	return {
 		aU: F2(
 			function (id, model) {
 				return A2(
 					elm$core$Dict$get,
 					id,
-					c.ag(model));
+					spec.ag(model));
 			}),
 		aV: function (model) {
 			return elm$core$Dict$toList(
-				c.ag(model));
+				spec.ag(model));
 		}
 	};
 };
@@ -6075,18 +6075,18 @@ var author$project$Ecs$Select$map2 = F3(
 		};
 	});
 var author$project$Ecs$Select$select2 = F3(
-	function (fn, aType, bType) {
+	function (fn, aSpec, bSpec) {
 		return A3(
 			author$project$Ecs$Select$map2,
 			fn,
-			author$project$Ecs$Select$component(aType),
-			author$project$Ecs$Select$component(bType));
+			author$project$Ecs$Select$component(aSpec),
+			author$project$Ecs$Select$component(bSpec));
 	});
 var author$project$Main$BoundsCheck = F2(
 	function (position, resolution) {
 		return {l: position, au: resolution};
 	});
-var author$project$Main$boundsCheckSelector = A3(author$project$Ecs$Select$select2, author$project$Main$BoundsCheck, author$project$Main$componentTypes.l, author$project$Main$componentTypes.W);
+var author$project$Main$boundsCheckSelector = A3(author$project$Ecs$Select$select2, author$project$Main$BoundsCheck, author$project$Main$componentSpecs.l, author$project$Main$componentSpecs.W);
 var author$project$Main$boundsCheckEntities = function (_n0) {
 	var state = _n0.a;
 	var ecs = _n0.b;
@@ -6096,7 +6096,7 @@ var author$project$Main$boundsCheckEntities = function (_n0) {
 			elm$core$List$foldl,
 			A2(author$project$Main$boundsCheckEntity, state.T, state.S),
 			ecs,
-			A2(author$project$Ecs$Api$selectList, author$project$Main$boundsCheckSelector, ecs)));
+			A2(author$project$Ecs$selectList, author$project$Main$boundsCheckSelector, ecs)));
 };
 var author$project$Main$moveEntity = F3(
 	function (deltaTime, _n0, ecs) {
@@ -6104,8 +6104,8 @@ var author$project$Main$moveEntity = F3(
 		var position = _n0.b.l;
 		var velocity = _n0.b.R;
 		return A4(
-			author$project$Ecs$Api$insert,
-			author$project$Main$componentTypes.l,
+			author$project$Ecs$insert,
+			author$project$Main$componentSpecs.l,
 			id,
 			{i: position.i + (velocity.i * deltaTime), j: position.j + (velocity.j * deltaTime)},
 			ecs);
@@ -6114,7 +6114,7 @@ var author$project$Main$Move = F2(
 	function (position, velocity) {
 		return {l: position, R: velocity};
 	});
-var author$project$Main$moveSelector = A3(author$project$Ecs$Select$select2, author$project$Main$Move, author$project$Main$componentTypes.l, author$project$Main$componentTypes.R);
+var author$project$Main$moveSelector = A3(author$project$Ecs$Select$select2, author$project$Main$Move, author$project$Main$componentSpecs.l, author$project$Main$componentSpecs.R);
 var author$project$Main$moveEntities = function (_n0) {
 	var state = _n0.a;
 	var ecs = _n0.b;
@@ -6124,7 +6124,7 @@ var author$project$Main$moveEntities = function (_n0) {
 			elm$core$List$foldl,
 			author$project$Main$moveEntity(state.J),
 			ecs,
-			A2(author$project$Ecs$Api$selectList, author$project$Main$moveSelector, ecs)));
+			A2(author$project$Ecs$selectList, author$project$Main$moveSelector, ecs)));
 };
 var author$project$Main$Destroy = 1;
 var author$project$Main$Teleport = 0;
@@ -6185,8 +6185,8 @@ var author$project$Main$spawnEntities = function (_n0) {
 		var id = _n1.a;
 		var newState = _n1.b;
 		var newEcs = A4(
-			author$project$Ecs$Api$insert,
-			author$project$Main$componentTypes.I,
+			author$project$Ecs$insert,
+			author$project$Main$componentSpecs.I,
 			id,
 			A2(
 				elm$core$Maybe$withDefault,
@@ -6197,18 +6197,18 @@ var author$project$Main$spawnEntities = function (_n0) {
 						n % elm$core$List$length(author$project$Main$colors),
 						author$project$Main$colors))),
 			A4(
-				author$project$Ecs$Api$insert,
-				author$project$Main$componentTypes.W,
+				author$project$Ecs$insert,
+				author$project$Main$componentSpecs.W,
 				id,
 				(!(n % 2)) ? 0 : 1,
 				A4(
-					author$project$Ecs$Api$insert,
-					author$project$Main$componentTypes.R,
+					author$project$Ecs$insert,
+					author$project$Main$componentSpecs.R,
 					id,
 					{i: ((n % 5) - 2) * 75, j: ((n % 7) - 3) * 50},
 					A4(
-						author$project$Ecs$Api$insert,
-						author$project$Main$componentTypes.l,
+						author$project$Ecs$insert,
+						author$project$Main$componentSpecs.l,
 						id,
 						{i: state.r % state.T, j: state.r % state.S},
 						ecs))));
@@ -6233,7 +6233,7 @@ var author$project$Main$update = F2(
 							ecs)))),
 			elm$core$Platform$Cmd$none);
 	});
-var author$project$Ecs$Api$ids = F2(
+var author$project$Ecs$ids = F2(
 	function (_n0, model) {
 		var root = _n0;
 		return root.aK(model);
@@ -6242,10 +6242,10 @@ var elm$core$Set$size = function (_n0) {
 	var dict = _n0;
 	return elm$core$Dict$size(dict);
 };
-var author$project$Ecs$Api$entityCount = F2(
+var author$project$Ecs$entityCount = F2(
 	function (root, model) {
 		return elm$core$Set$size(
-			A2(author$project$Ecs$Api$ids, root, model));
+			A2(author$project$Ecs$ids, root, model));
 	});
 var elm$core$Basics$round = _Basics_round;
 var elm$html$Html$div = _VirtualDom_node('div');
@@ -6280,12 +6280,12 @@ var author$project$Main$Render = F2(
 	function (position, color) {
 		return {I: color, l: position};
 	});
-var author$project$Main$renderSelector = A3(author$project$Ecs$Select$select2, author$project$Main$Render, author$project$Main$componentTypes.l, author$project$Main$componentTypes.I);
+var author$project$Main$renderSelector = A3(author$project$Ecs$Select$select2, author$project$Main$Render, author$project$Main$componentSpecs.l, author$project$Main$componentSpecs.I);
 var author$project$Main$renderEntities = function (ecs) {
 	return A2(
 		elm$core$List$map,
 		author$project$Main$renderEntity,
-		A2(author$project$Ecs$Api$selectList, author$project$Main$renderSelector, ecs));
+		A2(author$project$Ecs$selectList, author$project$Main$renderSelector, ecs));
 };
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
@@ -6319,7 +6319,7 @@ var author$project$Main$view = function (_n0) {
 					[
 						elm$html$Html$text(
 						'entities: ' + elm$core$String$fromInt(
-							A2(author$project$Ecs$Api$entityCount, author$project$Main$ecsType, ecs))),
+							A2(author$project$Ecs$entityCount, author$project$Main$ecsSpec, ecs))),
 						elm$html$Html$text(' - '),
 						elm$html$Html$text(
 						'fps: ' + elm$core$String$fromInt(

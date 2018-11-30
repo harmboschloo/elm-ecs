@@ -1,11 +1,11 @@
-module Ecs.Internal exposing (ComponentType(..), EcsType(..), Selector(..))
+module Ecs.Internal exposing (ComponentSpec(..), EcsSpec(..), Selector(..))
 
 import Dict exposing (Dict)
 import Set exposing (Set)
 
 
-type EcsType comparable model
-    = EcsType
+type EcsSpec comparable model
+    = EcsSpec
         { empty : model
         , clear : comparable -> model -> model
         , isEmpty : model -> Bool
@@ -15,8 +15,8 @@ type EcsType comparable model
         }
 
 
-type ComponentType comparable model data
-    = ComponentType
+type ComponentSpec comparable model data
+    = ComponentSpec
         { get : model -> Dict comparable data
         , update : (Dict comparable data -> Dict comparable data) -> model -> model
         }
