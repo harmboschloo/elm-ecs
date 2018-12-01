@@ -1,20 +1,15 @@
-module Systems.Render exposing (system, view)
+module Systems.Render exposing (view)
 
-import Components exposing (Position, Sprite)
-import Ecs
-import Ecs.Process
+import Components exposing (Position, Scale, Sprite)
 import Ecs.Select
-import Ecs.System
-import Entity exposing (Entity, components)
 import Frame exposing (Frame)
+import Game exposing (EntityId, Game)
 import History exposing (History)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (height, style, width)
 import Math.Matrix4 as Mat4 exposing (Mat4, makeOrtho2D)
 import Math.Vector2 exposing (Vec2, vec2)
 import Math.Vector3 exposing (Vec3, vec3)
-import State exposing (State)
-import Systems.Render.RenderElement as RenderElement exposing (RenderElement)
 import WebGL exposing (Mesh, Shader)
 import WebGL.Texture as Texture exposing (Texture)
 
@@ -22,50 +17,20 @@ import WebGL.Texture as Texture exposing (Texture)
 type alias Renderable =
     { position : Position
     , sprite : Sprite
+    , maybeScale : Maybe Scale
     }
 
 
-select : Ecs.Select.Select Entity Renderable
-select =
-    Ecs.Select.map2 Renderable
-        .position
-        .sprite
+renderableSelector : Game.Selector Renderable
+renderableSelector =
+    Ecs.Select.select2 Renderable
+        Game.components.position
+        Game.components.sprite
+        |> Ecs.Select.andGet Game.components.scale
 
 
-system : Ecs.System.System Entity State
-system =
-    Ecs.System.system
-        { preProcess = Just preProcess
-        , process = Just ( select, processEntity )
-        , postProcess = Nothing
-        }
-
-
-preProcess : Ecs.Ecs Entity -> State -> ( Ecs.Ecs Entity, State )
-preProcess ecs state =
-    ( ecs, { state | renderElements = [] } )
-
-
-processEntity :
-    Renderable
-    -> Ecs.Process.Process Entity
-    -> State
-    -> ( Ecs.Process.Process Entity, State )
-processEntity renderable process state =
-    ( process
-    , { state
-        | renderElements =
-            { position = renderable.position
-            , sprite = renderable.sprite
-            , scale = Ecs.Process.get .scale process
-            }
-                :: state.renderElements
-      }
-    )
-
-
-view : Frame -> History -> Ecs.Ecs Entity -> State -> Html msg
-view frame history ecs state =
+view : Frame -> History -> Game -> Html msg
+view frame history game =
     div []
         [ div
             [ style "color" "#fff"
@@ -88,10 +53,13 @@ view frame history ecs state =
                     ++ String.fromInt (round <| History.getFps history)
             , text <|
                 " - entities: "
-                    ++ String.fromInt (Ecs.size ecs)
+                    ++ String.fromInt (Game.entityCount game)
+            , text <|
+                " - components: "
+                    ++ String.fromInt (Game.componentCount game)
             , text <|
                 " - test "
-                    ++ (if state.test then
+                    ++ (if Game.isTestEnabled game then
                             "1"
 
                         else
@@ -104,7 +72,7 @@ view frame history ecs state =
                 , style "left" "0"
                 , style "z-index" "-1"
                 ]
-                [ viewWebGL state
+                [ viewWebGL (Game.getScreen game) game
                 ]
             ]
         , if Frame.isPaused frame then
@@ -117,43 +85,48 @@ view frame history ecs state =
         ]
 
 
-viewWebGL : State -> Html msg
-viewWebGL state =
+viewWebGL : Game.Screen -> Game -> Html msg
+viewWebGL screen game =
     WebGL.toHtmlWith
         [ WebGL.antialias
         , WebGL.depth 1
         ]
-        [ width state.screen.width
-        , height state.screen.height
+        [ width screen.width
+        , height screen.height
         ]
-        (renderEntities state (getCameraTransform state))
+        (renderEntities game (getCameraTransform (Game.getWorld game)))
 
 
-getCameraTransform : State -> Mat4
-getCameraTransform { world } =
+getCameraTransform : Game.World -> Mat4
+getCameraTransform world =
     makeOrtho2D 0 world.width 0 world.height
 
 
-renderEntities : State -> Mat4 -> List WebGL.Entity
-renderEntities state cameraTransform =
+renderEntities : Game -> Mat4 -> List WebGL.Entity
+renderEntities game cameraTransform =
     let
         background =
-            renderBackground state cameraTransform
+            renderBackground game cameraTransform
 
         elements =
-            List.map (\e -> renderSprite cameraTransform e) state.renderElements
+            List.map
+                (renderSprite cameraTransform)
+                (Game.selectList renderableSelector game)
     in
     background :: elements
 
 
-renderBackground : State -> Mat4 -> WebGL.Entity
-renderBackground state cameraTransform =
+renderBackground : Game -> Mat4 -> WebGL.Entity
+renderBackground game cameraTransform =
     let
         { width, height } =
-            state.world
+            Game.getWorld game
+
+        assets =
+            Game.getAssets game
 
         ( textureWidth, textureHeight ) =
-            Texture.size state.assets.background
+            Texture.size assets.background
     in
     WebGL.entity
         texturedVertexShader
@@ -168,22 +141,19 @@ renderBackground state cameraTransform =
             vec2
                 (width / toFloat textureWidth)
                 (height / toFloat textureHeight)
-        , texture = state.assets.background
+        , texture = assets.background
         }
 
 
-renderSprite : Mat4 -> RenderElement -> WebGL.Entity
-renderSprite cameraTransform element =
+renderSprite : Mat4 -> ( EntityId, Renderable ) -> WebGL.Entity
+renderSprite cameraTransform ( entityId, { sprite, position, maybeScale } ) =
     let
-        { sprite, position } =
-            element
-
         spriteTransform =
             Mat4.makeScale3 sprite.width sprite.height 1
                 |> Mat4.translate3 -sprite.pivotX -sprite.pivotY 0
 
         scalekMat =
-            case element.scale of
+            case maybeScale of
                 Nothing ->
                     identity
 

@@ -3,13 +3,12 @@ module Main exposing (main)
 import Assets exposing (Assets)
 import Browser exposing (Document)
 import Browser.Dom exposing (Viewport, getViewport)
-import Ecs exposing (Ecs)
-import Entity exposing (Entity)
+import Entities
 import Frame exposing (Frame)
+import Game exposing (Game)
 import History exposing (History)
 import Html exposing (Html, text)
 import Random
-import State exposing (State)
 import Systems
 import Task
 import Time exposing (Posix, posixToMillis)
@@ -27,8 +26,7 @@ type Model
 
 
 type alias SuccessModel =
-    { ecs : Ecs Entity
-    , state : State
+    { game : Game
     , frame : Frame
     , history : History
     }
@@ -63,12 +61,11 @@ initSuccess { assets, posix, viewport } =
         seed =
             Random.initialSeed (posixToMillis posix)
 
-        ( ecs, state ) =
-            Entity.initEcs (State.init assets seed screen)
+        game =
+            Entities.init (Game.init assets seed screen)
     in
     InitSuccess
-        { ecs = ecs
-        , state = state
+        { game = game
         , frame = Frame.init (1.0 / 20.0)
         , history = History.empty 500
         }
@@ -80,7 +77,7 @@ initSuccess { assets, posix, viewport } =
 
 type Msg
     = InitReceived (Result Error InitData)
-    | StateMsg State.Msg
+    | GameMsg Game.Msg
     | FrameMsg Frame.Msg
 
 
@@ -96,25 +93,28 @@ update msg model =
         ( InitFailure error, _ ) ->
             ( model, Cmd.none )
 
-        ( InitSuccess successModel, StateMsg stateMsg ) ->
+        ( InitSuccess successModel, GameMsg gameMsg ) ->
             let
-                ( state, outMsg ) =
-                    State.update stateMsg successModel.state
-            in
-            case outMsg of
-                State.NoOp ->
-                    ( InitSuccess { successModel | state = state }
-                    , Cmd.none
-                    )
+                game =
+                    Game.updateMsg gameMsg successModel.game
 
-                State.PauseToggled ->
-                    ( InitSuccess
-                        { successModel
-                            | state = state
-                            , frame = Frame.togglePaused successModel.frame
-                        }
-                    , Cmd.none
-                    )
+                frame =
+                    if
+                        Game.isPaused game
+                            /= Frame.isPaused successModel.frame
+                    then
+                        Frame.togglePaused successModel.frame
+
+                    else
+                        successModel.frame
+            in
+            ( InitSuccess
+                { successModel
+                    | game = game
+                    , frame = frame
+                }
+            , Cmd.none
+            )
 
         ( InitSuccess successModel, FrameMsg frameMsg ) ->
             let
@@ -129,10 +129,10 @@ update msg model =
 
                 Frame.Update data maybeStats cmd ->
                     let
-                        ( ecs, state ) =
-                            Systems.update
-                                successModel.ecs
-                                (updateState data successModel.state)
+                        game =
+                            successModel.game
+                                |> Game.setTiming data
+                                |> Systems.update
 
                         history =
                             case maybeStats of
@@ -145,13 +145,13 @@ update msg model =
                                         , updateTime = stats.updateTime
                                         , frameTime = stats.frameTime
                                         , entityCount =
-                                            Ecs.size successModel.ecs
+                                            Game.entityCount successModel.game
                                         }
                                         successModel.history
 
                         newFrame =
                             if
-                                state.test
+                                Game.isTestEnabled game
                                     && not (Frame.isPaused frame)
                                     && (History.getFps history < 30)
                             then
@@ -161,8 +161,7 @@ update msg model =
                                 frame
                     in
                     ( InitSuccess
-                        { ecs = ecs
-                        , state = state
+                        { game = game
                         , frame = newFrame
                         , history = history
                         }
@@ -173,14 +172,6 @@ update msg model =
             ( model, Cmd.none )
 
 
-updateState : { deltaTime : Float, accumulatedTime : Float } -> State -> State
-updateState data state =
-    { state
-        | time = data.accumulatedTime
-        , deltaTime = data.deltaTime
-    }
-
-
 
 -- SUBSCRIPTIONS --
 
@@ -188,9 +179,9 @@ updateState data state =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     case model of
-        InitSuccess { state, frame } ->
+        InitSuccess { game, frame } ->
             Sub.batch
-                [ Sub.map StateMsg (State.subscriptions state)
+                [ Sub.map GameMsg (Game.subscriptions game)
                 , Sub.map FrameMsg (Frame.subscriptions frame)
                 ]
 
@@ -213,8 +204,8 @@ view model =
             InitFailure error ->
                 viewError error
 
-            InitSuccess { ecs, state, frame, history } ->
-                [ Systems.view frame history ecs state ]
+            InitSuccess { game, frame, history } ->
+                [ Systems.view frame history game ]
     }
 
 

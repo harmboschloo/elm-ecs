@@ -1,9 +1,8 @@
-module Systems.Movement exposing (system)
+module Systems.Movement exposing (update)
 
 import Components exposing (Position, Velocity)
-import Ecs exposing (Ecs)
-import Entity exposing (Entity, components)
-import State exposing (State)
+import Ecs.Select
+import Game exposing (EntityId, Game)
 
 
 type alias Movement =
@@ -12,32 +11,28 @@ type alias Movement =
     }
 
 
-node : Ecs.Node Entity Movement
-node =
-    Ecs.node2 Movement
-        components.position
-        components.velocity
+movementSelector : Game.Selector Movement
+movementSelector =
+    Ecs.Select.select2 Movement
+        Game.components.position
+        Game.components.velocity
 
 
-system : Ecs.System Entity State
-system =
-    Ecs.processor node updateEntity
+update : Game -> Game
+update =
+    Game.process movementSelector updateEntity
 
 
-updateEntity :
-    Movement
-    -> Ecs.EntityId
-    -> Ecs Entity
-    -> State
-    -> ( Ecs Entity, State )
-updateEntity { position, velocity } entityId ecs state =
-    ( Ecs.set
-        components.position
-        { x = position.x + velocity.velocityX * state.deltaTime
-        , y = position.y + velocity.velocityY * state.deltaTime
-        , angle = position.angle + velocity.angularVelocity * state.deltaTime
-        }
+updateEntity : ( EntityId, Movement ) -> Game -> Game
+updateEntity ( entityId, { position, velocity } ) game =
+    let
+        deltaTime =
+            Game.getDeltaTime game
+    in
+    Game.insert Game.components.position
         entityId
-        ecs
-    , state
-    )
+        { x = position.x + velocity.velocityX * deltaTime
+        , y = position.y + velocity.velocityY * deltaTime
+        , angle = position.angle + velocity.angularVelocity * deltaTime
+        }
+        game

@@ -1,46 +1,31 @@
-module Systems.KeyControls exposing (system)
+module Systems.KeyControls exposing (update)
 
 import Components exposing (KeyControlsMap)
 import Components.Controls exposing (Controls, controls)
 import Data.KeyCode exposing (KeyCode)
-import Ecs exposing (Ecs)
-import Entity exposing (Entity, components)
+import Ecs.Select
+import Game exposing (EntityId, Game)
 import Set exposing (Set)
-import State exposing (State)
 
 
-type alias KeyControls =
-    { keyControlsMap : KeyControlsMap
-    , controls : Controls
-    }
+keyControlsSelector : Game.Selector KeyControlsMap
+keyControlsSelector =
+    Ecs.Select.component Game.components.keyControlsMap
+        |> Ecs.Select.andHas Game.components.controls
 
 
-node : Ecs.Node Entity KeyControls
-node =
-    Ecs.node2 KeyControls
-        components.keyControlsMap
-        components.controls
+update : Game -> Game
+update =
+    Game.process keyControlsSelector updateEntity
 
 
-system : Ecs.System Entity State
-system =
-    Ecs.processor node updateEntity
-
-
-updateEntity :
-    KeyControls
-    -> Ecs.EntityId
-    -> Ecs Entity
-    -> State
-    -> ( Ecs Entity, State )
-updateEntity { keyControlsMap } entityId ecs state =
-    ( Ecs.set
-        components.controls
-        (updateControls keyControlsMap state.activeKeys)
+updateEntity : ( EntityId, KeyControlsMap ) -> Game -> Game
+updateEntity ( entityId, keyControlsMap ) game =
+    Game.insert
+        Game.components.controls
         entityId
-        ecs
-    , state
-    )
+        (updateControls keyControlsMap (Game.getActiveKeys game))
+        game
 
 
 updateControls : KeyControlsMap -> Set KeyCode -> Controls

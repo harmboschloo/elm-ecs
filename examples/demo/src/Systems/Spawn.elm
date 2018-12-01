@@ -1,9 +1,8 @@
-module Systems.Spawn exposing (system)
+module Systems.Spawn exposing (update)
 
-import Ecs exposing (Ecs)
-import Entity exposing (Entity)
+import Entities
+import Game exposing (Game)
 import Random
-import State exposing (State)
 import Utils
 
 
@@ -19,29 +18,24 @@ testSpawnRate =
     50
 
 
-system : Ecs.System Entity State
-system =
-    Ecs.preProcessor update
-
-
-update : Ecs Entity -> State -> ( Ecs Entity, State )
-update ecs state =
+update : Game -> Game
+update game1 =
     let
         rate =
-            if state.test then
+            if Game.isTestEnabled game1 then
                 testSpawnRate
 
             else
                 spawnRate
 
         spawn =
-            rate * state.deltaTime
+            rate * Game.getDeltaTime game1
 
         fraction =
             spawn - toFloat (floor spawn)
 
-        ( probability, state2 ) =
-            State.randomStep (Random.float 0 1) state
+        ( probability, game2 ) =
+            Game.randomStep (Random.float 0 1) game1
 
         nFraction =
             if probability <= fraction then
@@ -53,5 +47,4 @@ update ecs state =
         n =
             floor spawn + nFraction
     in
-    ( ecs, state2 )
-        |> Utils.times n Entity.createStar
+    Utils.times n Entities.createStar game2

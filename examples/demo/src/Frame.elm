@@ -22,14 +22,14 @@ import Time exposing (Posix)
 
 type Frame
     = Model
-        { state : State
+        { state : Game
         , maxDeltaTime : Float
         , index : Int
         , accumulatedTime : Float
         }
 
 
-type State
+type Game
     = Paused
     | Initializing
     | NextFramePending

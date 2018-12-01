@@ -2,12 +2,10 @@ module Systems exposing (update, view)
 
 -- import Systems.Collection as Collection
 
-import Ecs exposing (Ecs)
-import Entity exposing (Entity)
 import Frame exposing (Frame)
+import Game exposing (Game)
 import History exposing (History)
 import Html exposing (Html)
-import State exposing (State)
 import Systems.Animation as Animation
 import Systems.KeyControls as KeyControls
 import Systems.MotionControl as MotionControl
@@ -17,23 +15,21 @@ import Systems.Spawn as Spawn
 import Systems.Transform as Transform
 
 
-update : Ecs Entity -> State -> ( Ecs Entity, State )
-update ecs state =
-    Ecs.process
-        [ Transform.system
-        , Spawn.system
-        , KeyControls.system
-        , MotionControl.system
-        , Movement.system
-        , Animation.system
-
-        -- , Collection.system
-        , Render.system
-        ]
-        ecs
-        state
+update : Game -> Game
+update game =
+    game
+        |> Transform.update
+        |> Spawn.update
+        |> KeyControls.update
+        |> MotionControl.update
+        |> Movement.update
+        |> Animation.update
 
 
-view : Frame -> History -> Ecs Entity -> State -> Html msg
+
+-- |> Collection.update
+
+
+view : Frame -> History -> Game -> Html msg
 view =
     Render.view

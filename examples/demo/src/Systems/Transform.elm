@@ -1,66 +1,56 @@
-module Systems.Transform exposing (system)
+module Systems.Transform exposing (update)
 
 import Components.Transforms as Transforms exposing (Transform, Transforms)
-import Ecs exposing (Ecs)
-import Entity exposing (Entity, components)
-import State exposing (State)
+import Ecs.Select
+import Game exposing (EntityId, Game)
 
 
-node : Ecs.Node Entity Transforms
-node =
-    Ecs.node1 identity components.transforms
+transformsSelector : Game.Selector Transforms
+transformsSelector =
+    Ecs.Select.component Game.components.transforms
 
 
-system : Ecs.System Entity State
-system =
-    Ecs.processor node updateEntity
+update : Game -> Game
+update =
+    Game.process transformsSelector updateEntity
 
 
-updateEntity :
-    Transforms
-    -> Ecs.EntityId
-    -> Ecs Entity
-    -> State
-    -> ( Ecs Entity, State )
-updateEntity transforms1 entityId ecs1 state =
+updateEntity : ( EntityId, Transforms ) -> Game -> Game
+updateEntity ( entityId, transforms1 ) game1 =
     let
-        ( transforms2, ecs2 ) =
+        ( transforms2, game2 ) =
             List.foldr
-                (updateTransform state.time entityId)
-                ( [], ecs1 )
+                (updateTransform (Game.getTime game1) entityId)
+                ( [], game1 )
                 transforms1
     in
     case transforms2 of
         [] ->
-            ( Ecs.remove components.transforms entityId ecs2
-            , state
-            )
+            Game.remove Game.components.transforms entityId game2
 
         _ ->
-            ( Ecs.set components.transforms transforms2 entityId ecs2
-            , state
-            )
+            Game.insert Game.components.transforms entityId transforms2 game2
 
 
 updateTransform :
     Float
-    -> Ecs.EntityId
+    -> EntityId
     -> Transform
-    -> ( Transforms, Ecs Entity )
-    -> ( Transforms, Ecs Entity )
-updateTransform time entityId transform ( transforms, ecs ) =
+    -> ( Transforms, Game )
+    -> ( Transforms, Game )
+updateTransform time entityId transform ( transforms, game ) =
     if transform.time > time then
-        ( transform :: transforms, ecs )
+        ( transform :: transforms, game )
 
     else
-        ( transforms, handleTransform entityId transform ecs )
+        ( transforms, handleTransform entityId transform game )
 
 
-handleTransform : Ecs.EntityId -> Transform -> Ecs Entity -> Ecs Entity
-handleTransform entityId transform ecs =
+handleTransform : EntityId -> Transform -> Game -> Game
+handleTransform entityId transform game =
     case transform.type_ of
         Transforms.DestroyEntity ->
-            Ecs.destroy entityId ecs
+            Game.removeEntity entityId game
 
         Transforms.InsertCollectable collectable ->
-            Ecs.set components.collectable collectable entityId ecs
+            Game.insert Game.components.collectable entityId collectable game

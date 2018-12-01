@@ -1,12 +1,12 @@
 module Ecs.Select exposing
     ( Selector, component, select1, select2, select3, select4, select5
-    , andThen, andHas, andNot, andFilter
+    , andGet, andThen, andHas, andNot, andFilter
     )
 
 {-|
 
 @docs Selector, component, select1, select2, select3, select4, select5
-@docs andThen, andHas, andNot, andFilter
+@docs andGet, andThen, andHas, andNot, andFilter
 
 -}
 
@@ -268,6 +268,31 @@ map5 fn (Internal.Selector aSelector) bSelector cSelector dSelector eSelector =
 
 
 {-| -}
+andGet :
+    ComponentSpec comparable model a
+    -> Selector comparable model (Maybe a -> b)
+    -> Selector comparable model b
+andGet (ComponentSpec spec) (Internal.Selector selector) =
+    Internal.Selector
+        { select =
+            \id model ->
+                case selector.select id model of
+                    Nothing ->
+                        Nothing
+
+                    Just fn ->
+                        Just (fn (Dict.get id (spec.get model)))
+        , selectList =
+            \model ->
+                selector.selectList model
+                    |> List.map
+                        (\( id, fn ) ->
+                            ( id, fn (Dict.get id (spec.get model)) )
+                        )
+        }
+
+
+{-| -}
 andThen :
     (a -> Maybe b)
     -> Selector comparable model a
@@ -299,10 +324,10 @@ andThen fn (Internal.Selector selector) =
 
 {-| -}
 andHas :
-    Internal.Selector comparable model b
+    ComponentSpec comparable model b
     -> Selector comparable model a
     -> Selector comparable model a
-andHas (Internal.Selector hasSelector) (Internal.Selector selector) =
+andHas (ComponentSpec spec) (Internal.Selector selector) =
     Internal.Selector
         { select =
             \id model ->
@@ -311,33 +336,25 @@ andHas (Internal.Selector hasSelector) (Internal.Selector selector) =
                         Nothing
 
                     Just a ->
-                        case hasSelector.select id model of
-                            Nothing ->
-                                Nothing
+                        if Dict.member id (spec.get model) then
+                            Just a
 
-                            Just _ ->
-                                Just a
+                        else
+                            Nothing
         , selectList =
             \model ->
                 selector.selectList model
                     |> List.filter
-                        (\( id, _ ) ->
-                            case hasSelector.select id model of
-                                Nothing ->
-                                    False
-
-                                Just _ ->
-                                    True
-                        )
+                        (\( id, _ ) -> Dict.member id (spec.get model))
         }
 
 
 {-| -}
 andNot :
-    Internal.Selector comparable model b
+    ComponentSpec comparable model b
     -> Selector comparable model a
     -> Selector comparable model a
-andNot (Internal.Selector notSelector) (Internal.Selector selector) =
+andNot (ComponentSpec spec) (Internal.Selector selector) =
     Internal.Selector
         { select =
             \id model ->
@@ -346,24 +363,16 @@ andNot (Internal.Selector notSelector) (Internal.Selector selector) =
                         Nothing
 
                     Just a ->
-                        case notSelector.select id model of
-                            Nothing ->
-                                Just a
+                        if Dict.member id (spec.get model) then
+                            Nothing
 
-                            Just _ ->
-                                Nothing
+                        else
+                            Just a
         , selectList =
             \model ->
                 selector.selectList model
                     |> List.filter
-                        (\( id, _ ) ->
-                            case notSelector.select id model of
-                                Nothing ->
-                                    True
-
-                                Just _ ->
-                                    False
-                        )
+                        (\( id, _ ) -> not (Dict.member id (spec.get model)))
         }
 
 
