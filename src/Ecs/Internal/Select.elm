@@ -1,96 +1,111 @@
-module Ecs.Select exposing
-    ( Selector, component, select1, select2, select3, select4, select5
-    , andGet, andThen, andHas, andNot, andFilter
+module Ecs.Internal.Select exposing
+    ( Selector(..)
+    , andFilter
+    , andGet
+    , andHas
+    , andNot
+    , andThen
+    , component
+    , select1
+    , select2
+    , select3
+    , select4
+    , select5
     )
 
-{-|
-
-@docs Selector, component, select1, select2, select3, select4, select5
-@docs andGet, andThen, andHas, andNot, andFilter
-
--}
-
 import Dict
-import Ecs.Internal as Internal exposing (ComponentSpec(..))
+import Ecs.Internal as Internal exposing (ComponentSpec(..), Spec(..))
 
 
-
--- CREATION --
-
-
-{-| -}
-type alias Selector comparable model a =
-    Internal.Selector comparable model a
+type Selector comparable model a
+    = Selector
+        { select : comparable -> model -> Maybe a
+        , selectList : model -> List ( comparable, a )
+        }
 
 
-{-| -}
-component : ComponentSpec comparable model a -> Selector comparable model a
-component (ComponentSpec spec) =
-    Internal.Selector
-        { select = \id model -> Dict.get id (spec.get model)
-
-        -- TODO check foldl/r
-        , selectList = \model -> Dict.toList (spec.get model)
+component :
+    Spec componentSpecs comparable model
+    -> (componentSpecs -> ComponentSpec comparable model a)
+    -> Selector comparable model a
+component (Spec spec) getComponentSpec =
+    let
+        (ComponentSpec componentSpec) =
+            getComponentSpec spec.components
+    in
+    Selector
+        { select = \id model -> Dict.get id (componentSpec.get model)
+        , selectList = \model -> Dict.toList (componentSpec.get model)
         }
 
 
 select1 :
-    (a -> b)
-    -> ComponentSpec comparable model a
+    Spec componentSpecs comparable model
+    -> (a -> b)
+    -> (componentSpecs -> ComponentSpec comparable model a)
     -> Selector comparable model b
-select1 fn aSpec =
-    map fn (component aSpec)
+select1 spec fn getASpec =
+    map fn (component spec getASpec)
 
 
 select2 :
-    (a -> b -> c)
-    -> ComponentSpec comparable model a
-    -> ComponentSpec comparable model b
+    Spec componentSpecs comparable model
+    -> (a -> b -> c)
+    -> (componentSpecs -> ComponentSpec comparable model a)
+    -> (componentSpecs -> ComponentSpec comparable model b)
     -> Selector comparable model c
-select2 fn aSpec bSpec =
-    map2 fn (component aSpec) (component bSpec)
+select2 spec fn getASpec getBSpec =
+    map2 fn
+        (component spec getASpec)
+        (component spec getBSpec)
 
 
 select3 :
-    (a -> b -> c -> d)
-    -> ComponentSpec comparable model a
-    -> ComponentSpec comparable model b
-    -> ComponentSpec comparable model c
+    Spec componentSpecs comparable model
+    -> (a -> b -> c -> d)
+    -> (componentSpecs -> ComponentSpec comparable model a)
+    -> (componentSpecs -> ComponentSpec comparable model b)
+    -> (componentSpecs -> ComponentSpec comparable model c)
     -> Selector comparable model d
-select3 fn aSpec bSpec cSpec =
-    map3 fn (component aSpec) (component bSpec) (component cSpec)
+select3 spec fn getASpec getBSpec getCSpec =
+    map3 fn
+        (component spec getASpec)
+        (component spec getBSpec)
+        (component spec getCSpec)
 
 
 select4 :
-    (a -> b -> c -> d -> e)
-    -> ComponentSpec comparable model a
-    -> ComponentSpec comparable model b
-    -> ComponentSpec comparable model c
-    -> ComponentSpec comparable model d
+    Spec componentSpecs comparable model
+    -> (a -> b -> c -> d -> e)
+    -> (componentSpecs -> ComponentSpec comparable model a)
+    -> (componentSpecs -> ComponentSpec comparable model b)
+    -> (componentSpecs -> ComponentSpec comparable model c)
+    -> (componentSpecs -> ComponentSpec comparable model d)
     -> Selector comparable model e
-select4 fn aSpec bSpec cSpec dSpec =
+select4 spec fn getASpec getBSpec getCSpec getDSpec =
     map4 fn
-        (component aSpec)
-        (component bSpec)
-        (component cSpec)
-        (component dSpec)
+        (component spec getASpec)
+        (component spec getBSpec)
+        (component spec getCSpec)
+        (component spec getDSpec)
 
 
 select5 :
-    (a -> b -> c -> d -> e -> f)
-    -> ComponentSpec comparable model a
-    -> ComponentSpec comparable model b
-    -> ComponentSpec comparable model c
-    -> ComponentSpec comparable model d
-    -> ComponentSpec comparable model e
+    Spec componentSpecs comparable model
+    -> (a -> b -> c -> d -> e -> f)
+    -> (componentSpecs -> ComponentSpec comparable model a)
+    -> (componentSpecs -> ComponentSpec comparable model b)
+    -> (componentSpecs -> ComponentSpec comparable model c)
+    -> (componentSpecs -> ComponentSpec comparable model d)
+    -> (componentSpecs -> ComponentSpec comparable model e)
     -> Selector comparable model f
-select5 fn aSpec bSpec cSpec dSpec eSpec =
+select5 spec fn getASpec getBSpec getCSpec getDSpec getESpec =
     map5 fn
-        (component aSpec)
-        (component bSpec)
-        (component cSpec)
-        (component dSpec)
-        (component eSpec)
+        (component spec getASpec)
+        (component spec getBSpec)
+        (component spec getCSpec)
+        (component spec getDSpec)
+        (component spec getESpec)
 
 
 
@@ -98,12 +113,12 @@ select5 fn aSpec bSpec cSpec dSpec eSpec =
 
 
 map : (a -> b) -> Selector comparable model a -> Selector comparable model b
-map fn (Internal.Selector selector) =
-    Internal.Selector
+map fn (Selector selector) =
+    Selector
         { select =
             \id model ->
                 selectAndMap1 fn
-                    (Internal.Selector selector)
+                    (Selector selector)
                     id
                     model
         , selectList =
@@ -119,12 +134,12 @@ map2 :
     -> Selector comparable model a
     -> Selector comparable model b
     -> Selector comparable model c
-map2 fn (Internal.Selector aSelector) bSelector =
-    Internal.Selector
+map2 fn (Selector aSelector) bSelector =
+    Selector
         { select =
             \id model ->
                 selectAndMap2 fn
-                    (Internal.Selector aSelector)
+                    (Selector aSelector)
                     bSelector
                     id
                     model
@@ -149,12 +164,12 @@ map3 :
     -> Selector comparable model b
     -> Selector comparable model c
     -> Selector comparable model d
-map3 fn (Internal.Selector aSelector) bSelector cSelector =
-    Internal.Selector
+map3 fn (Selector aSelector) bSelector cSelector =
+    Selector
         { select =
             \id model ->
                 selectAndMap3 fn
-                    (Internal.Selector aSelector)
+                    (Selector aSelector)
                     bSelector
                     cSelector
                     id
@@ -187,12 +202,12 @@ map4 :
     -> Selector comparable model c
     -> Selector comparable model d
     -> Selector comparable model e
-map4 fn (Internal.Selector aSelector) bSelector cSelector dSelector =
-    Internal.Selector
+map4 fn (Selector aSelector) bSelector cSelector dSelector =
+    Selector
         { select =
             \id model ->
                 selectAndMap4 fn
-                    (Internal.Selector aSelector)
+                    (Selector aSelector)
                     bSelector
                     cSelector
                     dSelector
@@ -228,12 +243,12 @@ map5 :
     -> Selector comparable model d
     -> Selector comparable model e
     -> Selector comparable model f
-map5 fn (Internal.Selector aSelector) bSelector cSelector dSelector eSelector =
-    Internal.Selector
+map5 fn (Selector aSelector) bSelector cSelector dSelector eSelector =
+    Selector
         { select =
             \id model ->
                 selectAndMap5 fn
-                    (Internal.Selector aSelector)
+                    (Selector aSelector)
                     bSelector
                     cSelector
                     dSelector
@@ -267,13 +282,17 @@ map5 fn (Internal.Selector aSelector) bSelector cSelector dSelector eSelector =
 -- MODIFIERS --
 
 
-{-| -}
 andGet :
-    ComponentSpec comparable model a
+    Spec componentSpecs comparable model
+    -> (componentSpecs -> ComponentSpec comparable model a)
     -> Selector comparable model (Maybe a -> b)
     -> Selector comparable model b
-andGet (ComponentSpec spec) (Internal.Selector selector) =
-    Internal.Selector
+andGet (Spec spec) getComponentSpec (Selector selector) =
+    let
+        (ComponentSpec componentSpec) =
+            getComponentSpec spec.components
+    in
+    Selector
         { select =
             \id model ->
                 case selector.select id model of
@@ -281,24 +300,23 @@ andGet (ComponentSpec spec) (Internal.Selector selector) =
                         Nothing
 
                     Just fn ->
-                        Just (fn (Dict.get id (spec.get model)))
+                        Just (fn (Dict.get id (componentSpec.get model)))
         , selectList =
             \model ->
                 selector.selectList model
                     |> List.map
                         (\( id, fn ) ->
-                            ( id, fn (Dict.get id (spec.get model)) )
+                            ( id, fn (Dict.get id (componentSpec.get model)) )
                         )
         }
 
 
-{-| -}
 andThen :
     (a -> Maybe b)
     -> Selector comparable model a
     -> Selector comparable model b
-andThen fn (Internal.Selector selector) =
-    Internal.Selector
+andThen fn (Selector selector) =
+    Selector
         { select =
             \id model ->
                 case selector.select id model of
@@ -322,13 +340,17 @@ andThen fn (Internal.Selector selector) =
         }
 
 
-{-| -}
 andHas :
-    ComponentSpec comparable model b
+    Spec componentSpecs comparable model
+    -> (componentSpecs -> ComponentSpec comparable model b)
     -> Selector comparable model a
     -> Selector comparable model a
-andHas (ComponentSpec spec) (Internal.Selector selector) =
-    Internal.Selector
+andHas (Spec spec) getComponentSpec (Selector selector) =
+    let
+        (ComponentSpec componentSpec) =
+            getComponentSpec spec.components
+    in
+    Selector
         { select =
             \id model ->
                 case selector.select id model of
@@ -336,7 +358,7 @@ andHas (ComponentSpec spec) (Internal.Selector selector) =
                         Nothing
 
                     Just a ->
-                        if Dict.member id (spec.get model) then
+                        if Dict.member id (componentSpec.get model) then
                             Just a
 
                         else
@@ -345,17 +367,21 @@ andHas (ComponentSpec spec) (Internal.Selector selector) =
             \model ->
                 selector.selectList model
                     |> List.filter
-                        (\( id, _ ) -> Dict.member id (spec.get model))
+                        (\( id, _ ) -> Dict.member id (componentSpec.get model))
         }
 
 
-{-| -}
 andNot :
-    ComponentSpec comparable model b
+    Spec componentSpecs comparable model
+    -> (componentSpecs -> ComponentSpec comparable model b)
     -> Selector comparable model a
     -> Selector comparable model a
-andNot (ComponentSpec spec) (Internal.Selector selector) =
-    Internal.Selector
+andNot (Spec spec) getComponentSpec (Selector selector) =
+    let
+        (ComponentSpec componentSpec) =
+            getComponentSpec spec.components
+    in
+    Selector
         { select =
             \id model ->
                 case selector.select id model of
@@ -363,7 +389,7 @@ andNot (ComponentSpec spec) (Internal.Selector selector) =
                         Nothing
 
                     Just a ->
-                        if Dict.member id (spec.get model) then
+                        if Dict.member id (componentSpec.get model) then
                             Nothing
 
                         else
@@ -372,17 +398,18 @@ andNot (ComponentSpec spec) (Internal.Selector selector) =
             \model ->
                 selector.selectList model
                     |> List.filter
-                        (\( id, _ ) -> not (Dict.member id (spec.get model)))
+                        (\( id, _ ) ->
+                            not (Dict.member id (componentSpec.get model))
+                        )
         }
 
 
-{-| -}
 andFilter :
     (a -> Bool)
     -> Selector comparable model a
     -> Selector comparable model a
-andFilter fn (Internal.Selector selector) =
-    Internal.Selector
+andFilter fn (Selector selector) =
+    Selector
         { select =
             \id model ->
                 case selector.select id model of
@@ -412,7 +439,7 @@ selectAndMap1 :
     -> comparable
     -> model
     -> Maybe b
-selectAndMap1 fn (Internal.Selector aSelector) id model =
+selectAndMap1 fn (Selector aSelector) id model =
     case aSelector.select id model of
         Nothing ->
             Nothing
@@ -428,7 +455,7 @@ selectAndMap2 :
     -> comparable
     -> model
     -> Maybe c
-selectAndMap2 fn (Internal.Selector aSelector) (Internal.Selector bSelector) id model =
+selectAndMap2 fn (Selector aSelector) (Selector bSelector) id model =
     case aSelector.select id model of
         Nothing ->
             Nothing
@@ -450,7 +477,7 @@ selectAndMap3 :
     -> comparable
     -> model
     -> Maybe d
-selectAndMap3 fn (Internal.Selector aSelector) (Internal.Selector bSelector) (Internal.Selector cSelector) id model =
+selectAndMap3 fn (Selector aSelector) (Selector bSelector) (Selector cSelector) id model =
     case aSelector.select id model of
         Nothing ->
             Nothing
@@ -478,7 +505,7 @@ selectAndMap4 :
     -> comparable
     -> model
     -> Maybe e
-selectAndMap4 fn (Internal.Selector aSelector) (Internal.Selector bSelector) (Internal.Selector cSelector) (Internal.Selector dSelector) id model =
+selectAndMap4 fn (Selector aSelector) (Selector bSelector) (Selector cSelector) (Selector dSelector) id model =
     case aSelector.select id model of
         Nothing ->
             Nothing
@@ -512,7 +539,7 @@ selectAndMap5 :
     -> comparable
     -> model
     -> Maybe f
-selectAndMap5 fn (Internal.Selector aSelector) (Internal.Selector bSelector) (Internal.Selector cSelector) (Internal.Selector dSelector) (Internal.Selector eSelector) id model =
+selectAndMap5 fn (Selector aSelector) (Selector bSelector) (Selector cSelector) (Selector dSelector) (Selector eSelector) id model =
     case aSelector.select id model of
         Nothing ->
             Nothing
