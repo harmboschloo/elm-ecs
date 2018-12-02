@@ -1,7 +1,8 @@
 module Systems.Spawn exposing (update)
 
+import Ecs exposing (Ecs)
 import Entities
-import Game exposing (Game)
+import Global exposing (Global)
 import Random
 import Utils
 
@@ -18,24 +19,24 @@ testSpawnRate =
     50
 
 
-update : Game -> Game
-update game1 =
+update : ( Global, Ecs ) -> ( Global, Ecs )
+update ( global1, ecs ) =
     let
         rate =
-            if Game.isTestEnabled game1 then
+            if Global.isTestEnabled global1 then
                 testSpawnRate
 
             else
                 spawnRate
 
         spawn =
-            rate * Game.getDeltaTime game1
+            rate * Global.getDeltaTime global1
 
         fraction =
             spawn - toFloat (floor spawn)
 
-        ( probability, game2 ) =
-            Game.randomStep (Random.float 0 1) game1
+        ( probability, global2 ) =
+            Global.randomStep (Random.float 0 1) global1
 
         nFraction =
             if probability <= fraction then
@@ -47,4 +48,4 @@ update game1 =
         n =
             floor spawn + nFraction
     in
-    Utils.times n Entities.createStar game2
+    Utils.times n Entities.createStar ( global2, ecs )

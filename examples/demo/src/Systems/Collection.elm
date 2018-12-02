@@ -6,7 +6,7 @@
 -- import Data.CollisionGrid as CollisionGrid exposing (CollisionGrid)
 -- import Ease
 -- import Ecs exposing (Ecs)
--- import Game exposing (Game)
+-- import Global exposing (Global)
 -- import Entity exposing (Entity)
 -- type alias CollectorData =
 --     { id : Ecs.EntityId
@@ -22,7 +22,7 @@
 --     { cellWidth = 60
 --     , cellHeight = 60
 --     }
--- update : ( Ecs, Game ) -> ( Ecs, Game )
+-- update : ( Ecs, Global ) -> ( Ecs, Global )
 -- update ( ecs, state ) =
 --     let
 --         ( _, collectorGrid ) =
@@ -70,8 +70,8 @@
 --     )
 -- checkCollection :
 --     ( CollectableData, CollectorData )
---     -> ( Ecs, Game )
---     -> ( Ecs, Game )
+--     -> ( Ecs, Global )
+--     -> ( Ecs, Global )
 -- checkCollection ( collectable, collector ) ( ecs, state ) =
 --     let
 --         deltaX =

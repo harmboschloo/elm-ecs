@@ -3,29 +3,33 @@ module Systems.KeyControls exposing (update)
 import Components exposing (KeyControlsMap)
 import Components.Controls exposing (Controls, controls)
 import Data.KeyCode exposing (KeyCode)
-import Ecs.Select
-import Game exposing (EntityId, Game)
+import Ecs exposing (Ecs)
+import Global exposing (Global)
 import Set exposing (Set)
 
 
-keyControlsSelector : Game.Selector KeyControlsMap
+keyControlsSelector : Ecs.Selector KeyControlsMap
 keyControlsSelector =
-    Ecs.Select.component Game.components.keyControlsMap
-        |> Ecs.Select.andHas Game.components.controls
+    Ecs.component .keyControlsMap
+        |> Ecs.andHas .controls
 
 
-update : Game -> Game
+update : ( Global, Ecs ) -> ( Global, Ecs )
 update =
-    Game.process keyControlsSelector updateEntity
+    Ecs.process keyControlsSelector updateEntity
 
 
-updateEntity : ( EntityId, KeyControlsMap ) -> Game -> Game
-updateEntity ( entityId, keyControlsMap ) game =
-    Game.insert
-        Game.components.controls
+updateEntity :
+    ( Ecs.EntityId, KeyControlsMap )
+    -> ( Global, Ecs )
+    -> ( Global, Ecs )
+updateEntity ( entityId, keyControlsMap ) ( global, ecs ) =
+    ( global
+    , Ecs.insert .controls
         entityId
-        (updateControls keyControlsMap (Game.getActiveKeys game))
-        game
+        (updateControls keyControlsMap (Global.getActiveKeys global))
+        ecs
+    )
 
 
 updateControls : KeyControlsMap -> Set KeyCode -> Controls

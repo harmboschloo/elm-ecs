@@ -2,8 +2,9 @@ module Systems exposing (update, view)
 
 -- import Systems.Collection as Collection
 
+import Ecs exposing (Ecs)
 import Frame exposing (Frame)
-import Game exposing (Game)
+import Global exposing (Global)
 import History exposing (History)
 import Html exposing (Html)
 import Systems.Animation as Animation
@@ -15,9 +16,9 @@ import Systems.Spawn as Spawn
 import Systems.Transform as Transform
 
 
-update : Game -> Game
-update game =
-    game
+update : ( Global, Ecs ) -> ( Global, Ecs )
+update state =
+    state
         |> Transform.update
         |> Spawn.update
         |> KeyControls.update
@@ -30,6 +31,6 @@ update game =
 -- |> Collection.update
 
 
-view : Frame -> History -> Game -> Html msg
+view : Frame -> History -> Global -> Ecs -> Html msg
 view =
     Render.view

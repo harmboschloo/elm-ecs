@@ -23,7 +23,8 @@ import Components.Controls exposing (Controls, controls)
 import Components.Transforms as Transforms exposing (Transforms)
 import Data.Animation as Animation
 import Data.KeyCode as KeyCode
-import Game exposing (EntityId, Game)
+import Ecs exposing (Ecs)
+import Global exposing (Global)
 import Random exposing (Generator)
 import Utils exposing (times)
 
@@ -32,9 +33,9 @@ import Utils exposing (times)
 -- INIT --
 
 
-init : Game -> Game
-init game =
-    game
+init : ( Global, Ecs ) -> ( Global, Ecs )
+init state =
+    state
         |> times 10 createAiShip
         |> createPlayerShip
         |> times 30 createStar
@@ -53,22 +54,23 @@ shipMotion =
     }
 
 
-createPlayerShip : Game -> Game
-createPlayerShip game1 =
+createPlayerShip : ( Global, Ecs ) -> ( Global, Ecs )
+createPlayerShip ( global1, ecs ) =
     let
         assets =
-            Game.getAssets game1
+            Global.getAssets global1
 
         world =
-            Game.getWorld game1
+            Global.getWorld global1
 
-        ( angle, game2 ) =
-            Game.randomStep angleGenerator game1
+        ( angle, global2 ) =
+            Global.randomStep angleGenerator global1
 
-        ( entityId, game3 ) =
-            Game.addEntity game2
+        ( entityId, global3 ) =
+            Global.addEntity global2
     in
-    game3
+    ( global3
+    , ecs
         |> setShipComponents
             entityId
             assets.sprites.playerShip
@@ -76,80 +78,84 @@ createPlayerShip game1 =
             , y = world.height / 2
             , angle = angle
             }
-        |> Game.insert Game.components.keyControlsMap
+        |> Ecs.insert .keyControlsMap
             entityId
             { accelerate = KeyCode.arrowUp
             , decelerate = KeyCode.arrowDown
             , rotateLeft = KeyCode.arrowLeft
             , rotateRight = KeyCode.arrowRight
             }
+    )
 
 
-createAiShip : Game -> Game
-createAiShip game1 =
+createAiShip : ( Global, Ecs ) -> ( Global, Ecs )
+createAiShip ( global1, ecs ) =
     let
         assets =
-            Game.getAssets game1
+            Global.getAssets global1
 
         world =
-            Game.getWorld game1
+            Global.getWorld global1
 
-        ( position, game2 ) =
-            Game.randomStep (positionGenerator world) game1
+        ( position, global2 ) =
+            Global.randomStep (positionGenerator world) global1
 
-        ( entityId, game3 ) =
-            Game.addEntity game2
+        ( entityId, global3 ) =
+            Global.addEntity global2
     in
-    game3
+    ( global3
+    , ecs
         |> setShipComponents
             entityId
             assets.sprites.aiShip
             position
-        |> Game.insert Game.components.ai entityId ()
+        |> Ecs.insert .ai entityId ()
+    )
 
 
 setShipComponents :
-    EntityId
+    Ecs.EntityId
     -> Sprite
     -> Position
-    -> Game
-    -> Game
+    -> Ecs
+    -> Ecs
 setShipComponents entityId sprite position =
-    Game.insert Game.components.sprite entityId sprite
-        >> Game.insert Game.components.position entityId position
-        >> Game.insert Game.components.controls entityId (controls 0 0)
-        >> Game.insert Game.components.motion entityId shipMotion
-        >> Game.insert Game.components.velocity entityId (Velocity 0 0 0)
-        >> Game.insert Game.components.collector entityId (Collector 30)
+    Ecs.insert .sprite entityId sprite
+        >> Ecs.insert .position entityId position
+        >> Ecs.insert .controls entityId (controls 0 0)
+        >> Ecs.insert .motion entityId shipMotion
+        >> Ecs.insert .velocity entityId (Velocity 0 0 0)
+        >> Ecs.insert .collector entityId (Collector 30)
 
 
-createStar : Game -> Game
-createStar game1 =
+createStar : ( Global, Ecs ) -> ( Global, Ecs )
+createStar ( global1, ecs ) =
     let
         assets =
-            Game.getAssets game1
+            Global.getAssets global1
 
         world =
-            Game.getWorld game1
+            Global.getWorld global1
 
         time =
-            Game.getTime game1
+            Global.getTime global1
 
-        ( position, game2 ) =
-            Game.randomStep (positionGenerator world) game1
+        ( position, global2 ) =
+            Global.randomStep (positionGenerator world) global1
 
-        ( delay, game3 ) =
-            Game.randomStep (Random.float 0 1) game2
+        ( delay, global3 ) =
+            Global.randomStep (Random.float 0 1) global2
 
-        ( entityId, game4 ) =
-            Game.addEntity game3
+        ( entityId, global4 ) =
+            Global.addEntity global3
     in
-    game4
-        |> Game.insert Game.components.sprite entityId assets.sprites.star
-        |> Game.insert Game.components.position entityId position
-        |> Game.insert Game.components.velocity entityId (Velocity 0 0 (pi / 4))
-        |> Game.insert Game.components.scale entityId 0
-        |> Game.insert Game.components.scaleAnimation
+    ( global4
+    , ecs
+        |> Ecs.insert .sprite entityId assets.sprites.star
+        |> Ecs.insert .position entityId position
+        |> Ecs.insert .velocity entityId (Velocity 0 0 (pi / 4))
+        |> Ecs.insert .scale entityId 0
+        |> Ecs.insert .scaleAnimation
             entityId
             (Animation.animation
                 { startTime = time
@@ -159,20 +165,20 @@ createStar game1 =
                 }
                 |> Animation.delay delay
             )
-        |> Game.update
-            Game.components.transforms
+        |> Ecs.update .transforms
             entityId
             (Transforms.add
                 (time + delay + 0.5)
                 (Transforms.InsertCollectable ())
             )
+    )
 
 
 
 -- GENERATORS --
 
 
-positionGenerator : Game.World -> Generator Position
+positionGenerator : Global.World -> Generator Position
 positionGenerator world =
     Random.map3 Position
         (Random.float 0 world.width)

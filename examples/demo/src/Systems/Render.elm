@@ -1,9 +1,9 @@
 module Systems.Render exposing (view)
 
 import Components exposing (Position, Scale, Sprite)
-import Ecs.Select
+import Ecs exposing (Ecs)
 import Frame exposing (Frame)
-import Game exposing (EntityId, Game)
+import Global exposing (Global)
 import History exposing (History)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (height, style, width)
@@ -21,16 +21,16 @@ type alias Renderable =
     }
 
 
-renderableSelector : Game.Selector Renderable
+renderableSelector : Ecs.Selector Renderable
 renderableSelector =
-    Ecs.Select.select2 Renderable
-        Game.components.position
-        Game.components.sprite
-        |> Ecs.Select.andGet Game.components.scale
+    Ecs.select2 Renderable
+        .position
+        .sprite
+        |> Ecs.andGet .scale
 
 
-view : Frame -> History -> Game -> Html msg
-view frame history game =
+view : Frame -> History -> Global -> Ecs -> Html msg
+view frame history global ecs =
     div []
         [ div
             [ style "color" "#fff"
@@ -53,13 +53,13 @@ view frame history game =
                     ++ String.fromInt (round <| History.getFps history)
             , text <|
                 " - entities: "
-                    ++ String.fromInt (Game.entityCount game)
+                    ++ String.fromInt (Global.getEntityCount global)
             , text <|
                 " - components: "
-                    ++ String.fromInt (Game.componentCount game)
+                    ++ String.fromInt (Ecs.componentCount ecs)
             , text <|
                 " - test "
-                    ++ (if Game.isTestEnabled game then
+                    ++ (if Global.isTestEnabled global then
                             "1"
 
                         else
@@ -72,7 +72,7 @@ view frame history game =
                 , style "left" "0"
                 , style "z-index" "-1"
                 ]
-                [ viewWebGL (Game.getScreen game) game
+                [ viewWebGL (Global.getScreen global) global ecs
                 ]
             ]
         , if Frame.isPaused frame then
@@ -85,8 +85,8 @@ view frame history game =
         ]
 
 
-viewWebGL : Game.Screen -> Game -> Html msg
-viewWebGL screen game =
+viewWebGL : Global.Screen -> Global -> Ecs -> Html msg
+viewWebGL screen global ecs =
     WebGL.toHtmlWith
         [ WebGL.antialias
         , WebGL.depth 1
@@ -94,36 +94,36 @@ viewWebGL screen game =
         [ width screen.width
         , height screen.height
         ]
-        (renderEntities game (getCameraTransform (Game.getWorld game)))
+        (renderEntities global ecs (getCameraTransform (Global.getWorld global)))
 
 
-getCameraTransform : Game.World -> Mat4
+getCameraTransform : Global.World -> Mat4
 getCameraTransform world =
     makeOrtho2D 0 world.width 0 world.height
 
 
-renderEntities : Game -> Mat4 -> List WebGL.Entity
-renderEntities game cameraTransform =
+renderEntities : Global -> Ecs -> Mat4 -> List WebGL.Entity
+renderEntities global ecs cameraTransform =
     let
         background =
-            renderBackground game cameraTransform
+            renderBackground global cameraTransform
 
         elements =
             List.map
                 (renderSprite cameraTransform)
-                (Game.selectList renderableSelector game)
+                (Ecs.selectList renderableSelector ecs)
     in
     background :: elements
 
 
-renderBackground : Game -> Mat4 -> WebGL.Entity
-renderBackground game cameraTransform =
+renderBackground : Global -> Mat4 -> WebGL.Entity
+renderBackground global cameraTransform =
     let
         { width, height } =
-            Game.getWorld game
+            Global.getWorld global
 
         assets =
-            Game.getAssets game
+            Global.getAssets global
 
         ( textureWidth, textureHeight ) =
             Texture.size assets.background
@@ -145,7 +145,7 @@ renderBackground game cameraTransform =
         }
 
 
-renderSprite : Mat4 -> ( EntityId, Renderable ) -> WebGL.Entity
+renderSprite : Mat4 -> ( Ecs.EntityId, Renderable ) -> WebGL.Entity
 renderSprite cameraTransform ( entityId, { sprite, position, maybeScale } ) =
     let
         spriteTransform =

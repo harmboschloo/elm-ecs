@@ -1,56 +1,62 @@
 module Systems.Transform exposing (update)
 
 import Components.Transforms as Transforms exposing (Transform, Transforms)
-import Ecs.Select
-import Game exposing (EntityId, Game)
+import Ecs exposing (Ecs)
+import Global exposing (Global)
 
 
-transformsSelector : Game.Selector Transforms
+transformsSelector : Ecs.Selector Transforms
 transformsSelector =
-    Ecs.Select.component Game.components.transforms
+    Ecs.component .transforms
 
 
-update : Game -> Game
+update : ( Global, Ecs ) -> ( Global, Ecs )
 update =
-    Game.process transformsSelector updateEntity
+    Ecs.process transformsSelector updateEntity
 
 
-updateEntity : ( EntityId, Transforms ) -> Game -> Game
-updateEntity ( entityId, transforms1 ) game1 =
+updateEntity : ( Ecs.EntityId, Transforms ) -> ( Global, Ecs ) -> ( Global, Ecs )
+updateEntity ( entityId, transforms1 ) ( global1, ecs1 ) =
     let
-        ( transforms2, game2 ) =
+        ( transforms2, global2, ecs2 ) =
             List.foldr
-                (updateTransform (Game.getTime game1) entityId)
-                ( [], game1 )
+                (updateTransform (Global.getTime global1) entityId)
+                ( [], global1, ecs1 )
                 transforms1
     in
-    case transforms2 of
+    ( global2
+    , case transforms2 of
         [] ->
-            Game.remove Game.components.transforms entityId game2
+            Ecs.remove .transforms entityId ecs2
 
         _ ->
-            Game.insert Game.components.transforms entityId transforms2 game2
+            Ecs.insert .transforms entityId transforms2 ecs2
+    )
 
 
 updateTransform :
     Float
-    -> EntityId
+    -> Ecs.EntityId
     -> Transform
-    -> ( Transforms, Game )
-    -> ( Transforms, Game )
-updateTransform time entityId transform ( transforms, game ) =
+    -> ( Transforms, Global, Ecs )
+    -> ( Transforms, Global, Ecs )
+updateTransform time entityId transform ( transforms, global1, ecs1 ) =
     if transform.time > time then
-        ( transform :: transforms, game )
+        ( transform :: transforms, global1, ecs1 )
 
     else
-        ( transforms, handleTransform entityId transform game )
+        let
+            ( global2, ecs2 ) =
+                handleTransform entityId transform global1 ecs1
+        in
+        ( transforms, global2, ecs2 )
 
 
-handleTransform : EntityId -> Transform -> Game -> Game
-handleTransform entityId transform game =
+handleTransform : Ecs.EntityId -> Transform -> Global -> Ecs -> ( Global, Ecs )
+handleTransform entityId transform global ecs =
     case transform.type_ of
         Transforms.DestroyEntity ->
-            Game.removeEntity entityId game
+            Global.removeEntity entityId ( global, ecs )
 
         Transforms.InsertCollectable collectable ->
-            Game.insert Game.components.collectable entityId collectable game
+            ( global, Ecs.insert .collectable entityId collectable ecs )

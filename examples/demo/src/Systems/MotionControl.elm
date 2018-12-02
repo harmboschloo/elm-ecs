@@ -2,8 +2,8 @@ module Systems.MotionControl exposing (update)
 
 import Components exposing (Motion, Position, Velocity)
 import Components.Controls as Controls exposing (Controls)
-import Ecs.Select
-import Game exposing (EntityId, Game)
+import Ecs exposing (Ecs)
+import Global exposing (Global)
 
 
 type alias MotionControl =
@@ -14,26 +14,31 @@ type alias MotionControl =
     }
 
 
-motionControlSelector : Game.Selector MotionControl
+motionControlSelector : Ecs.Selector MotionControl
 motionControlSelector =
-    Ecs.Select.select4 MotionControl
-        Game.components.controls
-        Game.components.motion
-        Game.components.position
-        Game.components.velocity
+    Ecs.select4 MotionControl
+        .controls
+        .motion
+        .position
+        .velocity
 
 
-update : Game -> Game
+update : ( Global, Ecs ) -> ( Global, Ecs )
 update =
-    Game.process motionControlSelector updateEntity
+    Ecs.process motionControlSelector updateEntity
 
 
-updateEntity : ( EntityId, MotionControl ) -> Game -> Game
-updateEntity ( entityId, motionControl ) game =
-    Game.insert Game.components.velocity
+updateEntity :
+    ( Ecs.EntityId, MotionControl )
+    -> ( Global, Ecs )
+    -> ( Global, Ecs )
+updateEntity ( entityId, motionControl ) ( global, ecs ) =
+    ( global
+    , Ecs.insert .velocity
         entityId
-        (applyControls motionControl (Game.getDeltaTime game))
-        game
+        (applyControls motionControl (Global.getDeltaTime global))
+        ecs
+    )
 
 
 applyControls : MotionControl -> Float -> Velocity

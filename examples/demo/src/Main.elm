@@ -3,9 +3,10 @@ module Main exposing (main)
 import Assets exposing (Assets)
 import Browser exposing (Document)
 import Browser.Dom exposing (Viewport, getViewport)
+import Ecs exposing (Ecs)
 import Entities
 import Frame exposing (Frame)
-import Game exposing (Game)
+import Global exposing (Global)
 import History exposing (History)
 import Html exposing (Html, text)
 import Random
@@ -26,7 +27,8 @@ type Model
 
 
 type alias SuccessModel =
-    { game : Game
+    { global : Global
+    , ecs : Ecs
     , frame : Frame
     , history : History
     }
@@ -61,11 +63,12 @@ initSuccess { assets, posix, viewport } =
         seed =
             Random.initialSeed (posixToMillis posix)
 
-        game =
-            Entities.init (Game.init assets seed screen)
+        ( global, ecs ) =
+            Entities.init ( Global.init assets seed screen, Ecs.empty )
     in
     InitSuccess
-        { game = game
+        { global = global
+        , ecs = ecs
         , frame = Frame.init (1.0 / 20.0)
         , history = History.empty 500
         }
@@ -77,7 +80,7 @@ initSuccess { assets, posix, viewport } =
 
 type Msg
     = InitReceived (Result Error InitData)
-    | GameMsg Game.Msg
+    | GlobalMsg Global.Msg
     | FrameMsg Frame.Msg
 
 
@@ -93,14 +96,14 @@ update msg model =
         ( InitFailure error, _ ) ->
             ( model, Cmd.none )
 
-        ( InitSuccess successModel, GameMsg gameMsg ) ->
+        ( InitSuccess successModel, GlobalMsg globalMsg ) ->
             let
-                game =
-                    Game.updateMsg gameMsg successModel.game
+                global =
+                    Global.update globalMsg successModel.global
 
                 frame =
                     if
-                        Game.isPaused game
+                        Global.isPaused global
                             /= Frame.isPaused successModel.frame
                     then
                         Frame.togglePaused successModel.frame
@@ -110,7 +113,7 @@ update msg model =
             in
             ( InitSuccess
                 { successModel
-                    | game = game
+                    | global = global
                     , frame = frame
                 }
             , Cmd.none
@@ -129,10 +132,11 @@ update msg model =
 
                 Frame.Update data maybeStats cmd ->
                     let
-                        game =
-                            successModel.game
-                                |> Game.setTiming data
-                                |> Systems.update
+                        ( global, ecs ) =
+                            Systems.update
+                                ( Global.setTiming data successModel.global
+                                , successModel.ecs
+                                )
 
                         history =
                             case maybeStats of
@@ -145,13 +149,13 @@ update msg model =
                                         , updateTime = stats.updateTime
                                         , frameTime = stats.frameTime
                                         , entityCount =
-                                            Game.entityCount successModel.game
+                                            Global.getEntityCount successModel.global
                                         }
                                         successModel.history
 
                         newFrame =
                             if
-                                Game.isTestEnabled game
+                                Global.isTestEnabled global
                                     && not (Frame.isPaused frame)
                                     && (History.getFps history < 30)
                             then
@@ -161,7 +165,8 @@ update msg model =
                                 frame
                     in
                     ( InitSuccess
-                        { game = game
+                        { global = global
+                        , ecs = ecs
                         , frame = newFrame
                         , history = history
                         }
@@ -179,9 +184,9 @@ update msg model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     case model of
-        InitSuccess { game, frame } ->
+        InitSuccess { global, frame } ->
             Sub.batch
-                [ Sub.map GameMsg (Game.subscriptions game)
+                [ Sub.map GlobalMsg (Global.subscriptions global)
                 , Sub.map FrameMsg (Frame.subscriptions frame)
                 ]
 
@@ -204,8 +209,8 @@ view model =
             InitFailure error ->
                 viewError error
 
-            InitSuccess { game, frame, history } ->
-                [ Systems.view frame history game ]
+            InitSuccess { global, ecs, frame, history } ->
+                [ Systems.view frame history global ecs ]
     }
 
 
