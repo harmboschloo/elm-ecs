@@ -4,15 +4,15 @@ exports.generate = function(n) {
   const specs = range(n);
 
   return `module Ecs.Spec exposing
-    ( EcsSpec, ComponentSpec
-    , ${specs.map(i => `Model${i}, ecs${i}, components${i}`).join(`
+    ( Spec, ComponentSpec
+    , ${specs.map(i => `Ecs${i}, spec${i}`).join(`
     , `)}
     )
 
 {-|
 
-@docs EcsSpec, ComponentSpec
-${specs.map(i => `@docs Model${i}, ecs${i}, components${i}`).join(`
+@docs Spec, ComponentSpec
+${specs.map(i => `@docs Ecs${i}, spec${i}`).join(`
 `)}
 
 -}
@@ -23,8 +23,8 @@ import Set
 
 
 {-| -}
-type alias EcsSpec comparable model =
-    Internal.EcsSpec comparable model
+type alias Spec componentSpecs comparable model =
+    Internal.Spec componentSpecs comparable model
 
 
 {-| -}
@@ -33,7 +33,7 @@ type alias ComponentSpec comparable model data =
 ${specs.map(iSpec => {
     const components = range(iSpec);
 
-    const model = `Model${iSpec} comparable ${components
+    const model = `Ecs${iSpec} comparable ${components
       .map(i => `a${i}`)
       .join(" ")}`;
 
@@ -41,39 +41,44 @@ ${specs.map(iSpec => {
 
 {-| -}
 type ${model}
-    = Model${iSpec}
+    = Ecs${iSpec}
         { ${components.map(i => `data${i} : Dict comparable a${i}`).join(`
         , `)}
         }
 
 
 {-| -}
-ecs${iSpec} : EcsSpec comparable (${model})
-ecs${iSpec} =
-    Internal.EcsSpec
+spec${iSpec} :
+    (${components.map(i => `ComponentSpec comparable (${model}) a${i}`).join(`
+     -> `)}
+     -> componentSpecs
+    )
+    -> Spec componentSpecs comparable (${model})
+spec${iSpec} fn =
+    Internal.Spec
         { empty =
-            Model${iSpec}
+            Ecs${iSpec}
                 { ${components.map(i => `data${i} = Dict.empty`).join(`
                 , `)}
                 }
         , clear =
-            \\id (Model${iSpec} model) ->
-                Model${iSpec}
+            \\id (Ecs${iSpec} model) ->
+                Ecs${iSpec}
                     { ${components.map(
                       i => `data${i} = Dict.remove id model.data${i}`
                     ).join(`
                     , `)}
                     }
         , isEmpty =
-            \\(Model${iSpec} model) ->
+            \\(Ecs${iSpec} model) ->
                 ${components.map(i => `Dict.isEmpty model.data${i}`).join(`
                     && `)}
         , componentCount =
-            \\(Model${iSpec} model) ->
+            \\(Ecs${iSpec} model) ->
                 ${components.map(i => `Dict.size model.data${i}`).join(`
                     + `)}
         , ids =
-            \\(Model${iSpec} model) ->
+            \\(Ecs${iSpec} model) ->
                 [ ${components.map(i => `Dict.keys model.data${i}`).join(`
                 , `)}
                 ]
@@ -83,27 +88,27 @@ ecs${iSpec} =
                         )
                         Set.empty
         , member =
-            \\id (Model${iSpec} model) ->
+            \\id (Ecs${iSpec} model) ->
                 ${components.map(i => `Dict.member id model.data${i}`).join(`
                     || `)}
+        , components = components${iSpec} fn
         }
 
 
-{-| -}
 components${iSpec} :
     (${components.map(i => `ComponentSpec comparable (${model}) a${i}`).join(`
      -> `)}
-     -> b
+     -> componentSpecs
     )
-    -> b
+    -> componentSpecs
 components${iSpec} fn =
     fn
         ${components.map(
           iComponent => `(Internal.ComponentSpec
-            { get = \\(Model${iSpec} model) -> model.data${iComponent}
+            { get = \\(Ecs${iSpec} model) -> model.data${iComponent}
             , update =
-                \\updateFn (Model${iSpec} model) ->
-                    Model${iSpec}
+                \\updateFn (Ecs${iSpec} model) ->
+                    Ecs${iSpec}
                         { ${components.map(
                           i =>
                             `data${i} =${
