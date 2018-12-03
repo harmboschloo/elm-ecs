@@ -6,11 +6,10 @@ module Entities exposing
     )
 
 import Assets exposing (Assets, Spritesheet)
+import Collision.Shape as Shape
 import Components
     exposing
         ( Ai
-        , Collectable
-        , Collector
         , KeyControlsMap
         , Motion
         , Position
@@ -19,6 +18,7 @@ import Components
         , Sprite
         , Velocity
         )
+import Components.CollisionShape as CollisionShape exposing (CollisionShape)
 import Components.Controls exposing (Controls, controls)
 import Components.Transforms as Transforms exposing (Transforms)
 import Data.Animation as Animation
@@ -125,7 +125,12 @@ setShipComponents entityId sprite position =
         >> Ecs.insert .controls entityId (controls 0 0)
         >> Ecs.insert .motion entityId shipMotion
         >> Ecs.insert .velocity entityId (Velocity 0 0 0)
-        >> Ecs.insert .collector entityId (Collector 30)
+        >> Ecs.insert .collisionShape
+            entityId
+            (CollisionShape
+                (Shape.circle 30)
+                CollisionShape.shipScoop
+            )
 
 
 createStar : ( Global, Ecs ) -> ( Global, Ecs )
@@ -169,7 +174,9 @@ createStar ( global1, ecs ) =
             entityId
             (Transforms.add
                 (time + delay + 0.5)
-                (Transforms.InsertCollectable ())
+                (Transforms.InsertCollisionShape
+                    (CollisionShape Shape.point CollisionShape.starCenter)
+                )
             )
     )
 

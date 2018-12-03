@@ -1,5 +1,5 @@
 module Collision.Grid exposing
-    ( CollisionGrid
+    ( CollisionGrid, Item
     , empty
     , insert, clear
     , collisions
@@ -7,7 +7,7 @@ module Collision.Grid exposing
 
 {-|
 
-@docs CollisionGrid
+@docs CollisionGrid, Item
 @docs empty
 @docs insert, clear
 @docs collisions
@@ -15,6 +15,8 @@ module Collision.Grid exposing
 -}
 
 import Collision.Bounds as Bounds exposing (Bounds)
+import Collision.Position exposing (Position)
+import Collision.Shape as Shape exposing (Shape)
 import Dict exposing (Dict)
 
 
@@ -36,11 +38,18 @@ type alias Category c a =
 
 
 type alias Cells a =
-    Dict ( Int, Int ) (List ( Id, Bounds, a ))
+    Dict ( Int, Int ) (List ( Id, Bounds, Item a ))
 
 
 type alias Id =
     Int
+
+
+type alias Item a =
+    { position : Position
+    , shape : Shape
+    , data : a
+    }
 
 
 empty : Float -> Float -> CollisionGrid c a
@@ -56,13 +65,22 @@ emptyCategory type_ =
     }
 
 
-insert : Bounds -> a -> c -> CollisionGrid c a -> CollisionGrid c a
-insert bounds data categoryType (CollisionGrid cellSize categories) =
+insert : Position -> Shape -> a -> c -> CollisionGrid c a -> CollisionGrid c a
+insert position shape data categoryType (CollisionGrid cellSize categories) =
     CollisionGrid
         cellSize
         (updateCategory
             categoryType
-            (\category -> insertItem bounds data cellSize category)
+            (\category ->
+                insertItem
+                    (Shape.bounds position shape)
+                    { position = position
+                    , shape = shape
+                    , data = data
+                    }
+                    cellSize
+                    category
+            )
             categories
         )
 
@@ -92,8 +110,8 @@ updateCategory type_ updater categories =
                 head :: updateCategory type_ updater tail
 
 
-insertItem : Bounds -> a -> Size -> Category c a -> Category c a
-insertItem bounds data cellSize category =
+insertItem : Bounds -> Item a -> Size -> Category c a -> Category c a
+insertItem bounds item cellSize category =
     let
         xRange =
             List.range
@@ -105,12 +123,12 @@ insertItem bounds data cellSize category =
                 (toCellIndex bounds.top cellSize.height)
                 (toCellIndex bounds.bottom cellSize.height)
 
-        item =
-            ( category.nextId, bounds, data )
+        entry =
+            ( category.nextId, bounds, item )
 
         cells =
             foldAxB
-                (\x y -> insertAt ( x, y ) item)
+                (\x y -> insertAt ( x, y ) entry)
                 category.cells
                 xRange
                 yRange
@@ -121,16 +139,16 @@ insertItem bounds data cellSize category =
     }
 
 
-insertAt : ( Int, Int ) -> ( Id, Bounds, a ) -> Cells a -> Cells a
-insertAt key item cells =
+insertAt : ( Int, Int ) -> ( Id, Bounds, Item a ) -> Cells a -> Cells a
+insertAt key entry cells =
     Dict.update key
         (\maybeItems ->
             case maybeItems of
                 Nothing ->
-                    Just [ item ]
+                    Just [ entry ]
 
-                Just items ->
-                    Just (item :: items)
+                Just entries ->
+                    Just (entry :: entries)
         )
         cells
 
@@ -150,7 +168,7 @@ foldAxB process initial aList bList =
         aList
 
 
-collisions : c -> c -> CollisionGrid c a -> List ( a, a )
+collisions : c -> c -> CollisionGrid c a -> List ( Item a, Item a )
 collisions categoryTypeA categoryTypeB (CollisionGrid size categories) =
     if categoryTypeA == categoryTypeB then
         case findCategory categoryTypeA categories of
@@ -174,7 +192,7 @@ collisions categoryTypeA categoryTypeB (CollisionGrid size categories) =
                 []
 
 
-collisionsAB : Size -> Category c a -> Category c a -> List ( a, a )
+collisionsAB : Size -> Category c a -> Category c a -> List ( Item a, Item a )
 collisionsAB cellSize categoryA categoryB =
     categoryA.cells
         |> Dict.foldl
@@ -185,9 +203,13 @@ collisionsAB cellSize categoryA categoryB =
 
                     Just dataListB ->
                         foldAxB
-                            (\( idA, boundsA, a ) ( idB, boundsB, b ) ->
+                            (\( idA, boundsA, itemA ) ( idB, boundsB, itemB ) ->
                                 if Bounds.intersect boundsA boundsB then
-                                    Dict.insert ( idA, idB ) ( a, b )
+                                    if shapeIntersect itemA itemB then
+                                        Dict.insert ( idA, idB ) ( itemA, itemB )
+
+                                    else
+                                        identity
 
                                 else
                                     identity
@@ -198,6 +220,11 @@ collisionsAB cellSize categoryA categoryB =
             )
             Dict.empty
         |> Dict.values
+
+
+shapeIntersect : Item a -> Item a -> Bool
+shapeIntersect itemA itemB =
+    Shape.intersect itemA.position itemA.shape itemB.position itemB.shape
 
 
 findCategory : c -> List (Category c a) -> Maybe (Category c a)

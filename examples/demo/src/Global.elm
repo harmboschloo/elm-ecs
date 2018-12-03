@@ -34,6 +34,7 @@ import Html.Events
 import Json.Decode as Decode exposing (Decoder)
 import Random exposing (Generator, Seed)
 import Set exposing (Set)
+import Systems.Collision.Grid as CollisionGrid exposing (CollisionGrid)
 
 
 

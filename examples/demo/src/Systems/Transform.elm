@@ -58,5 +58,5 @@ handleTransform entityId transform global ecs =
         Transforms.DestroyEntity ->
             Global.removeEntity entityId ( global, ecs )
 
-        Transforms.InsertCollectable collectable ->
-            ( global, Ecs.insert .collectable entityId collectable ecs )
+        Transforms.InsertCollisionShape collisionShape ->
+            ( global, Ecs.insert .collisionShape entityId collisionShape ecs )

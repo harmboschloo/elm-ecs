@@ -1,13 +1,12 @@
 module Systems exposing (update, view)
 
--- import Systems.Collection as Collection
-
 import Ecs exposing (Ecs)
 import Frame exposing (Frame)
 import Global exposing (Global)
 import History exposing (History)
 import Html exposing (Html)
 import Systems.Animation as Animation
+import Systems.Collision as Collision
 import Systems.KeyControls as KeyControls
 import Systems.MotionControl as MotionControl
 import Systems.Movement as Movement
@@ -25,10 +24,7 @@ update state =
         |> MotionControl.update
         |> Movement.update
         |> Animation.update
-
-
-
--- |> Collection.update
+        |> Collision.update
 
 
 view : Frame -> History -> Global -> Ecs -> Html msg

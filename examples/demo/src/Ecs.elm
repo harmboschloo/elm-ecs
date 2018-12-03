@@ -23,8 +23,6 @@ module Ecs exposing
 import Components
     exposing
         ( Ai
-        , Collectable
-        , Collector
         , KeyControlsMap
         , Motion
         , Position
@@ -33,6 +31,7 @@ import Components
         , Sprite
         , Velocity
         )
+import Components.CollisionShape exposing (CollisionShape)
 import Components.Controls exposing (Controls)
 import Components.Transforms exposing (Transforms)
 import Ecs.Api
@@ -52,8 +51,7 @@ type alias EntityId =
 {-| -}
 type alias ComponentSpecs =
     { ai : ComponentSpec Ai
-    , collectable : ComponentSpec Collectable
-    , collector : ComponentSpec Collector
+    , collisionShape : ComponentSpec CollisionShape
     , controls : ComponentSpec Controls
     , keyControlsMap : ComponentSpec KeyControlsMap
     , motion : ComponentSpec Motion
@@ -73,12 +71,12 @@ type alias ComponentSpec a =
 
 {-| -}
 type alias Ecs =
-    Ecs.Spec.Ecs12 EntityId Ai Collectable Collector Controls KeyControlsMap Motion Position Scale ScaleAnimation Sprite Transforms Velocity
+    Ecs.Spec.Ecs11 EntityId Ai CollisionShape Controls KeyControlsMap Motion Position Scale ScaleAnimation Sprite Transforms Velocity
 
 
 spec : Ecs.Spec.Spec ComponentSpecs EntityId Ecs
 spec =
-    Ecs.Spec.spec12 ComponentSpecs
+    Ecs.Spec.spec11 ComponentSpecs
 
 
 

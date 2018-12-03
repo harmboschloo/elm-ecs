@@ -1,7 +1,5 @@
 module Components exposing
     ( Ai
-    , Collectable
-    , Collector
     , KeyControlsMap
     , Motion
     , Position
@@ -19,13 +17,6 @@ import WebGL.Texture exposing (Texture)
 type alias Ai =
     ()
 
-
-type alias Collectable =
-    ()
-
-
-type alias Collector =
-    { radius : Float }
 
 
 type alias KeyControlsMap =

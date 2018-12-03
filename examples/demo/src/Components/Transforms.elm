@@ -5,7 +5,7 @@ module Components.Transforms exposing
     , add
     )
 
-import Components
+import Components.CollisionShape exposing (CollisionShape)
 
 
 type alias Transforms =
@@ -18,7 +18,7 @@ type alias Transform =
 
 type TransformType
     = DestroyEntity
-    | InsertCollectable Components.Collectable
+    | InsertCollisionShape CollisionShape
 
 
 add : Float -> TransformType -> Maybe Transforms -> Maybe Transforms
