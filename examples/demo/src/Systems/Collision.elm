@@ -2,7 +2,7 @@ module Systems.Collision exposing (update)
 
 import Components exposing (Position, Velocity)
 import Components.CollisionShape as CollisionShape exposing (CollisionShape)
-import Components.Transforms as Transforms
+import Components.DelayedOperations as DelayedOperations
 import Data.Animation as Animation
 import Ecs exposing (Ecs)
 import Global exposing (Global)
@@ -71,7 +71,7 @@ handleStarShipCollisions ( starItem, _ ) ( global, ecs ) =
                         }
                     )
             )
-        |> Ecs.update .transforms
+        |> Ecs.update .delayedOperations
             starEntityId
-            (Transforms.add (time + 1) Transforms.DestroyEntity)
+            (DelayedOperations.add (time + 1) DelayedOperations.RemoveEntity)
     )

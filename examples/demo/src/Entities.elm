@@ -20,7 +20,10 @@ import Components
         )
 import Components.CollisionShape as CollisionShape exposing (CollisionShape)
 import Components.Controls exposing (Controls, controls)
-import Components.Transforms as Transforms exposing (Transforms)
+import Components.DelayedOperations as DelayedOperations
+    exposing
+        ( DelayedOperations
+        )
 import Data.Animation as Animation
 import Data.KeyCode as KeyCode
 import Ecs exposing (Ecs)
@@ -170,11 +173,11 @@ createStar ( global1, ecs ) =
                 }
                 |> Animation.delay delay
             )
-        |> Ecs.update .transforms
+        |> Ecs.update .delayedOperations
             entityId
-            (Transforms.add
+            (DelayedOperations.add
                 (time + delay + 0.5)
-                (Transforms.InsertCollisionShape
+                (DelayedOperations.InsertCollisionShape
                     (CollisionShape Shape.point CollisionShape.starCenter)
                 )
             )

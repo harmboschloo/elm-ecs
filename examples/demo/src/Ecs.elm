@@ -33,7 +33,7 @@ import Components
         )
 import Components.CollisionShape exposing (CollisionShape)
 import Components.Controls exposing (Controls)
-import Components.Transforms exposing (Transforms)
+import Components.DelayedOperations exposing (DelayedOperations)
 import Ecs.Api
 import Ecs.Spec
 import Set exposing (Set)
@@ -53,13 +53,13 @@ type alias ComponentSpecs =
     { ai : ComponentSpec Ai
     , collisionShape : ComponentSpec CollisionShape
     , controls : ComponentSpec Controls
+    , delayedOperations : ComponentSpec DelayedOperations
     , keyControlsMap : ComponentSpec KeyControlsMap
     , motion : ComponentSpec Motion
     , position : ComponentSpec Position
     , scale : ComponentSpec Scale
     , scaleAnimation : ComponentSpec ScaleAnimation
     , sprite : ComponentSpec Sprite
-    , transforms : ComponentSpec Transforms
     , velocity : ComponentSpec Velocity
     }
 
@@ -71,7 +71,7 @@ type alias ComponentSpec a =
 
 {-| -}
 type alias Ecs =
-    Ecs.Spec.Ecs11 EntityId Ai CollisionShape Controls KeyControlsMap Motion Position Scale ScaleAnimation Sprite Transforms Velocity
+    Ecs.Spec.Ecs11 EntityId Ai CollisionShape Controls DelayedOperations KeyControlsMap Motion Position Scale ScaleAnimation Sprite Velocity
 
 
 spec : Ecs.Spec.Spec ComponentSpecs EntityId Ecs
