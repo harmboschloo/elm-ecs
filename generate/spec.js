@@ -5,14 +5,14 @@ exports.generate = function(n) {
 
   return `module Ecs.Spec exposing
     ( Spec, ComponentSpec
-    , ${specs.map(i => `Ecs${i}, spec${i}`).join(`
+    , ${specs.map(i => `Ecs${i}, spec${i}, components${i}`).join(`
     , `)}
     )
 
 {-|
 
 @docs Spec, ComponentSpec
-${specs.map(i => `@docs Ecs${i}, spec${i}`).join(`
+${specs.map(i => `@docs Ecs${i}, spec${i}, components${i}`).join(`
 `)}
 
 -}
@@ -23,24 +23,24 @@ import Set
 
 
 {-| -}
-type alias Spec componentSpecs comparable model =
-    Internal.Spec componentSpecs comparable model
+type alias Spec comparable ecs =
+    Internal.Spec comparable ecs
 
 
 {-| -}
-type alias ComponentSpec comparable model data =
-    Internal.ComponentSpec comparable model data
+type alias ComponentSpec comparable ecs a =
+    Internal.ComponentSpec comparable ecs a
 ${specs.map(iSpec => {
     const components = range(iSpec);
 
-    const model = `Ecs${iSpec} comparable ${components
+    const ecs = `Ecs${iSpec} comparable ${components
       .map(i => `a${i}`)
       .join(" ")}`;
 
     return `
 
 {-| -}
-type ${model}
+type ${ecs}
     = Ecs${iSpec}
         { ${components.map(i => `data${i} : Dict comparable a${i}`).join(`
         , `)}
@@ -48,13 +48,8 @@ type ${model}
 
 
 {-| -}
-spec${iSpec} :
-    (${components.map(i => `ComponentSpec comparable (${model}) a${i}`).join(`
-     -> `)}
-     -> componentSpecs
-    )
-    -> Spec componentSpecs comparable (${model})
-spec${iSpec} fn =
+spec${iSpec} : Spec comparable (${ecs})
+spec${iSpec} =
     Internal.Spec
         { empty =
             Ecs${iSpec}
@@ -62,24 +57,24 @@ spec${iSpec} fn =
                 , `)}
                 }
         , clear =
-            \\id (Ecs${iSpec} model) ->
+            \\id (Ecs${iSpec} ecs) ->
                 Ecs${iSpec}
                     { ${components.map(
-                      i => `data${i} = Dict.remove id model.data${i}`
+                      i => `data${i} = Dict.remove id ecs.data${i}`
                     ).join(`
                     , `)}
                     }
         , isEmpty =
-            \\(Ecs${iSpec} model) ->
-                ${components.map(i => `Dict.isEmpty model.data${i}`).join(`
+            \\(Ecs${iSpec} ecs) ->
+                ${components.map(i => `Dict.isEmpty ecs.data${i}`).join(`
                     && `)}
         , componentCount =
-            \\(Ecs${iSpec} model) ->
-                ${components.map(i => `Dict.size model.data${i}`).join(`
+            \\(Ecs${iSpec} ecs) ->
+                ${components.map(i => `Dict.size ecs.data${i}`).join(`
                     + `)}
         , ids =
-            \\(Ecs${iSpec} model) ->
-                [ ${components.map(i => `Dict.keys model.data${i}`).join(`
+            \\(Ecs${iSpec} ecs) ->
+                [ ${components.map(i => `Dict.keys ecs.data${i}`).join(`
                 , `)}
                 ]
                     |> List.foldl
@@ -88,15 +83,15 @@ spec${iSpec} fn =
                         )
                         Set.empty
         , member =
-            \\id (Ecs${iSpec} model) ->
-                ${components.map(i => `Dict.member id model.data${i}`).join(`
+            \\id (Ecs${iSpec} ecs) ->
+                ${components.map(i => `Dict.member id ecs.data${i}`).join(`
                     || `)}
-        , components = components${iSpec} fn
         }
 
 
+{-| -}
 components${iSpec} :
-    (${components.map(i => `ComponentSpec comparable (${model}) a${i}`).join(`
+    (${components.map(i => `ComponentSpec comparable (${ecs}) a${i}`).join(`
      -> `)}
      -> componentSpecs
     )
@@ -105,15 +100,15 @@ components${iSpec} fn =
     fn
         ${components.map(
           iComponent => `(Internal.ComponentSpec
-            { get = \\(Ecs${iSpec} model) -> model.data${iComponent}
+            { get = \\(Ecs${iSpec} ecs) -> ecs.data${iComponent}
             , update =
-                \\updateFn (Ecs${iSpec} model) ->
+                \\updateFn (Ecs${iSpec} ecs) ->
                     Ecs${iSpec}
                         { ${components.map(
                           i =>
                             `data${i} =${
                               i === iComponent ? " updateFn" : ""
-                            } model.data${i}`
+                            } ecs.data${i}`
                         ).join(`
                         , `)}
                         }

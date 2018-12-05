@@ -1,23 +1,29 @@
-module Ecs.Internal exposing (ComponentSpec(..), Spec(..))
+module Ecs.Internal exposing (ComponentSpec(..), Selector(..), Spec(..))
 
 import Dict exposing (Dict)
 import Set exposing (Set)
 
 
-type Spec componentSpecs comparable model
+type Spec comparable ecs
     = Spec
-        { empty : model
-        , clear : comparable -> model -> model
-        , isEmpty : model -> Bool
-        , componentCount : model -> Int
-        , ids : model -> Set comparable
-        , member : comparable -> model -> Bool
-        , components : componentSpecs
+        { empty : ecs
+        , clear : comparable -> ecs -> ecs
+        , isEmpty : ecs -> Bool
+        , componentCount : ecs -> Int
+        , ids : ecs -> Set comparable
+        , member : comparable -> ecs -> Bool
         }
 
 
-type ComponentSpec comparable model data
+type ComponentSpec comparable ecs a
     = ComponentSpec
-        { get : model -> Dict comparable data
-        , update : (Dict comparable data -> Dict comparable data) -> model -> model
+        { get : ecs -> Dict comparable a
+        , update : (Dict comparable a -> Dict comparable a) -> ecs -> ecs
+        }
+
+
+type Selector comparable ecs a
+    = Selector
+        { select : comparable -> ecs -> Maybe a
+        , selectList : ecs -> List ( comparable, a )
         }
