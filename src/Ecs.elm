@@ -1,7 +1,7 @@
 module Ecs exposing
     ( empty, isEmpty, entityCount, componentCount, ids
     , member, clear
-    , has, get, insert, update, remove
+    , has, get, insert, update, remove, size
     , select, selectList
     )
 
@@ -9,7 +9,7 @@ module Ecs exposing
 
 @docs empty, isEmpty, entityCount, componentCount, ids
 @docs member, clear
-@docs has, get, insert, update, remove
+@docs has, get, insert, update, remove, size
 @docs select, selectList
 
 -}
@@ -106,6 +106,12 @@ update (ComponentSpec spec) id fn ecs =
 remove : ComponentSpec comparable ecs a -> comparable -> ecs -> ecs
 remove (ComponentSpec spec) id ecs =
     spec.update (\dict -> Dict.remove id dict) ecs
+
+
+{-| -}
+size : ComponentSpec comparable ecs a -> ecs -> Int
+size (ComponentSpec spec) ecs =
+    Dict.size (spec.get ecs)
 
 
 
