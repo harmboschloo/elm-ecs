@@ -1,7 +1,7 @@
 module Systems.Render exposing (view)
 
 import Components exposing (Position, Scale, Sprite)
-import Ecs exposing (Ecs)
+import Entities exposing (Entities, EntityId, Selector)
 import Frame exposing (Frame)
 import Global exposing (Global)
 import History exposing (History)
@@ -21,16 +21,16 @@ type alias Renderable =
     }
 
 
-renderableSelector : Ecs.Selector Renderable
+renderableSelector : Selector Renderable
 renderableSelector =
-    Ecs.select2 Renderable
+    Entities.select2 Renderable
         .position
         .sprite
-        |> Ecs.andGet .scale
+        |> Entities.andGet .scale
 
 
-view : Frame -> History -> Global -> Ecs -> Html msg
-view frame history global ecs =
+view : Frame -> History -> Global -> Entities -> Html msg
+view frame history global entities =
     div []
         [ div
             [ style "color" "#fff"
@@ -49,14 +49,14 @@ view frame history global ecs =
                 else
                     "running"
             , text <|
-                " (ecs) - fps: "
+                " (esc) - fps: "
                     ++ String.fromInt (round <| History.getFps history)
             , text <|
                 " - entities: "
-                    ++ String.fromInt (Global.getEntityCount global)
+                    ++ String.fromInt (Entities.getEntityCount entities)
             , text <|
                 " - components: "
-                    ++ String.fromInt (Ecs.componentCount ecs)
+                    ++ String.fromInt (Entities.getComponentCount entities)
             , text <|
                 " - test "
                     ++ (if Global.isTestEnabled global then
@@ -72,7 +72,7 @@ view frame history global ecs =
                 , style "left" "0"
                 , style "z-index" "-1"
                 ]
-                [ viewWebGL (Global.getScreen global) global ecs
+                [ viewWebGL (Global.getScreen global) global entities
                 ]
             ]
         , if Frame.isPaused frame then
@@ -85,8 +85,8 @@ view frame history global ecs =
         ]
 
 
-viewWebGL : Global.Screen -> Global -> Ecs -> Html msg
-viewWebGL screen global ecs =
+viewWebGL : Global.Screen -> Global -> Entities -> Html msg
+viewWebGL screen global entities =
     WebGL.toHtmlWith
         [ WebGL.antialias
         , WebGL.depth 1
@@ -94,7 +94,7 @@ viewWebGL screen global ecs =
         [ width screen.width
         , height screen.height
         ]
-        (renderEntities global ecs (getCameraTransform (Global.getWorld global)))
+        (renderEntities global entities (getCameraTransform (Global.getWorld global)))
 
 
 getCameraTransform : Global.World -> Mat4
@@ -102,8 +102,8 @@ getCameraTransform world =
     makeOrtho2D 0 world.width 0 world.height
 
 
-renderEntities : Global -> Ecs -> Mat4 -> List WebGL.Entity
-renderEntities global ecs cameraTransform =
+renderEntities : Global -> Entities -> Mat4 -> List WebGL.Entity
+renderEntities global entities cameraTransform =
     let
         background =
             renderBackground global cameraTransform
@@ -111,7 +111,7 @@ renderEntities global ecs cameraTransform =
         elements =
             List.map
                 (renderSprite cameraTransform)
-                (Ecs.selectList renderableSelector ecs)
+                (Entities.selectList renderableSelector entities)
     in
     background :: elements
 
@@ -145,7 +145,7 @@ renderBackground global cameraTransform =
         }
 
 
-renderSprite : Mat4 -> ( Ecs.EntityId, Renderable ) -> WebGL.Entity
+renderSprite : Mat4 -> ( EntityId, Renderable ) -> WebGL.Entity
 renderSprite cameraTransform ( entityId, { sprite, position, maybeScale } ) =
     let
         spriteTransform =

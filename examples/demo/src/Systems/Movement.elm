@@ -1,7 +1,7 @@
 module Systems.Movement exposing (update)
 
 import Components exposing (Position, Velocity)
-import Ecs exposing (Ecs)
+import Entities exposing (Entities, EntityId, Selector)
 import Global exposing (Global)
 
 
@@ -11,30 +11,37 @@ type alias Movement =
     }
 
 
-movementSelector : Ecs.Selector Movement
+movementSelector : Selector Movement
 movementSelector =
-    Ecs.select2 Movement
+    Entities.select2 Movement
         .position
         .velocity
 
 
-update : ( Global, Ecs ) -> ( Global, Ecs )
+update : ( Global, Entities ) -> ( Global, Entities )
 update =
-    Ecs.process movementSelector updateEntity
+    Entities.process movementSelector updateEntity
 
 
-updateEntity : ( Ecs.EntityId, Movement ) -> ( Global, Ecs ) -> ( Global, Ecs )
-updateEntity ( entityId, { position, velocity } ) ( global, ecs ) =
+updateEntity :
+    ( EntityId, Movement )
+    -> ( Global, Entities )
+    -> ( Global, Entities )
+updateEntity ( entityId, { position, velocity } ) ( global, entities ) =
     let
         deltaTime =
             Global.getDeltaTime global
     in
     ( global
-    , Ecs.insert .position
-        entityId
-        { x = position.x + velocity.velocityX * deltaTime
-        , y = position.y + velocity.velocityY * deltaTime
-        , angle = position.angle + velocity.angularVelocity * deltaTime
-        }
-        ecs
+    , Entities.updateEcs
+        (\ecs ->
+            Entities.insert .position
+                entityId
+                { x = position.x + velocity.velocityX * deltaTime
+                , y = position.y + velocity.velocityY * deltaTime
+                , angle = position.angle + velocity.angularVelocity * deltaTime
+                }
+                ecs
+        )
+        entities
     )

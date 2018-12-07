@@ -1,12 +1,26 @@
 module Entities exposing
-    ( createAiShip
-    , createPlayerShip
-    , createStar
-    , init
+    ( Ecs
+    , Entities
+    , EntityId
+    , Selector
+    , addEntity
+    , andGet
+    , andHas
+    , empty
+    , getComponentCount
+    , getEntityCount
+    , insert
+    , process
+    , remove
+    , removeEntity
+    , select2
+    , select4
+    , selectComponent
+    , selectList
+    , update
+    , updateEcs
     )
 
-import Assets exposing (Assets, Spritesheet)
-import Collision.Shape as Shape
 import Components
     exposing
         ( Ai
@@ -19,183 +33,204 @@ import Components
         , Velocity
         )
 import Components.CollisionShape as CollisionShape exposing (CollisionShape)
-import Components.Controls exposing (Controls, controls)
-import Components.DelayedOperations as DelayedOperations
-    exposing
-        ( DelayedOperations
-        )
-import Data.Animation as Animation
-import Data.KeyCode as KeyCode
-import Ecs exposing (Ecs)
-import Global exposing (Global)
-import Random exposing (Generator)
-import Utils exposing (times)
+import Components.Controls exposing (Controls)
+import Components.DelayedOperations exposing (DelayedOperations)
+import Ecs
+import Ecs.Select
+import Ecs.Spec
 
 
 
--- INIT --
+-- ECS SPEC --
 
 
-init : ( Global, Ecs ) -> ( Global, Ecs )
-init state =
-    state
-        |> times 10 createAiShip
-        |> createPlayerShip
-        |> times 30 createStar
+type alias EntityId =
+    Int
 
 
-
--- CREATE ENTITIES --
-
-
-shipMotion : Motion
-shipMotion =
-    { maxAcceleration = 600
-    , maxDeceleration = 400
-    , maxAngularAcceleration = 20
-    , maxAngularVelocity = 5
+type alias ComponentSpecs =
+    { ai : ComponentSpec Ai
+    , collisionShape : ComponentSpec CollisionShape
+    , controls : ComponentSpec Controls
+    , delayedOperations : ComponentSpec DelayedOperations
+    , keyControlsMap : ComponentSpec KeyControlsMap
+    , motion : ComponentSpec Motion
+    , position : ComponentSpec Position
+    , scale : ComponentSpec Scale
+    , scaleAnimation : ComponentSpec ScaleAnimation
+    , sprite : ComponentSpec Sprite
+    , velocity : ComponentSpec Velocity
     }
 
 
-createPlayerShip : ( Global, Ecs ) -> ( Global, Ecs )
-createPlayerShip ( global1, ecs ) =
-    let
-        assets =
-            Global.getAssets global1
+type alias ComponentSpec a =
+    Ecs.Spec.ComponentSpec EntityId Ecs a
 
-        world =
-            Global.getWorld global1
 
-        ( angle, global2 ) =
-            Global.randomStep angleGenerator global1
+type alias Ecs =
+    Ecs.Spec.Ecs11 EntityId Ai CollisionShape Controls DelayedOperations KeyControlsMap Motion Position Scale ScaleAnimation Sprite Velocity
 
-        ( entityId, global3 ) =
-            Global.addEntity global2
-    in
-    ( global3
-    , ecs
-        |> setShipComponents
-            entityId
-            assets.sprites.playerShip
-            { x = world.width / 2
-            , y = world.height / 2
-            , angle = angle
-            }
-        |> Ecs.insert .keyControlsMap
-            entityId
-            { accelerate = KeyCode.arrowUp
-            , decelerate = KeyCode.arrowDown
-            , rotateLeft = KeyCode.arrowLeft
-            , rotateRight = KeyCode.arrowRight
-            }
+
+type alias Selector a =
+    Ecs.Select.Selector EntityId Ecs a
+
+
+spec : Ecs.Spec.Spec EntityId Ecs
+spec =
+    Ecs.Spec.spec11
+
+
+componentSpecs : ComponentSpecs
+componentSpecs =
+    Ecs.Spec.components11 ComponentSpecs
+
+
+
+-- MODEL --
+
+
+type Entities
+    = Entities Model
+
+
+type alias Model =
+    { ecs : Ecs
+    , nextId : EntityId
+    , entityCount : Int
+    }
+
+
+empty : Entities
+empty =
+    Entities
+        { ecs = Ecs.empty spec
+        , nextId = 0
+        , entityCount = 0
+        }
+
+
+getEntityCount : Entities -> Int
+getEntityCount (Entities model) =
+    model.entityCount
+
+
+getComponentCount : Entities -> Int
+getComponentCount (Entities model) =
+    Ecs.componentCount spec model.ecs
+
+
+
+-- UPDATE --
+
+
+addEntity : Entities -> ( EntityId, Entities )
+addEntity (Entities model) =
+    ( model.nextId + 1
+    , Entities
+        { ecs = model.ecs
+        , nextId = model.nextId + 1
+        , entityCount = model.entityCount + 1
+        }
     )
 
 
-createAiShip : ( Global, Ecs ) -> ( Global, Ecs )
-createAiShip ( global1, ecs ) =
-    let
-        assets =
-            Global.getAssets global1
-
-        world =
-            Global.getWorld global1
-
-        ( position, global2 ) =
-            Global.randomStep (positionGenerator world) global1
-
-        ( entityId, global3 ) =
-            Global.addEntity global2
-    in
-    ( global3
-    , ecs
-        |> setShipComponents
-            entityId
-            assets.sprites.aiShip
-            position
-        |> Ecs.insert .ai entityId ()
-    )
+removeEntity : EntityId -> Entities -> Entities
+removeEntity entityId (Entities model) =
+    Entities
+        { ecs = Ecs.clear spec entityId model.ecs
+        , nextId = model.nextId
+        , entityCount = model.entityCount - 1
+        }
 
 
-setShipComponents :
-    Ecs.EntityId
-    -> Sprite
-    -> Position
+updateEcs : (Ecs -> Ecs) -> Entities -> Entities
+updateEcs fn (Entities model) =
+    Entities
+        { ecs = fn model.ecs
+        , nextId = model.nextId
+        , entityCount = model.entityCount
+        }
+
+
+
+-- UPDATE COMPONENTS --
+
+
+insert : (ComponentSpecs -> ComponentSpec a) -> EntityId -> a -> Ecs -> Ecs
+insert getSpec =
+    Ecs.insert (getSpec componentSpecs)
+
+
+update :
+    (ComponentSpecs -> ComponentSpec a)
+    -> EntityId
+    -> (Maybe a -> Maybe a)
     -> Ecs
     -> Ecs
-setShipComponents entityId sprite position =
-    Ecs.insert .sprite entityId sprite
-        >> Ecs.insert .position entityId position
-        >> Ecs.insert .controls entityId (controls 0 0)
-        >> Ecs.insert .motion entityId shipMotion
-        >> Ecs.insert .velocity entityId (Velocity 0 0 0)
-        >> Ecs.insert .collisionShape
-            entityId
-            (CollisionShape
-                (Shape.circle 30)
-                CollisionShape.shipScoop
-            )
+update getSpec =
+    Ecs.update (getSpec componentSpecs)
 
 
-createStar : ( Global, Ecs ) -> ( Global, Ecs )
-createStar ( global1, ecs ) =
-    let
-        assets =
-            Global.getAssets global1
-
-        world =
-            Global.getWorld global1
-
-        time =
-            Global.getTime global1
-
-        ( position, global2 ) =
-            Global.randomStep (positionGenerator world) global1
-
-        ( delay, global3 ) =
-            Global.randomStep (Random.float 0 1) global2
-
-        ( entityId, global4 ) =
-            Global.addEntity global3
-    in
-    ( global4
-    , ecs
-        |> Ecs.insert .sprite entityId assets.sprites.star
-        |> Ecs.insert .position entityId position
-        |> Ecs.insert .velocity entityId (Velocity 0 0 (pi / 4))
-        |> Ecs.insert .scale entityId 0
-        |> Ecs.insert .scaleAnimation
-            entityId
-            (Animation.animation
-                { startTime = time
-                , duration = 0.5
-                , from = 0
-                , to = 1
-                }
-                |> Animation.delay delay
-            )
-        |> Ecs.update .delayedOperations
-            entityId
-            (DelayedOperations.add
-                (time + delay + 0.5)
-                (DelayedOperations.InsertCollisionShape
-                    (CollisionShape Shape.point CollisionShape.starCenter)
-                )
-            )
-    )
+remove : (ComponentSpecs -> ComponentSpec a) -> EntityId -> Ecs -> Ecs
+remove getSpec =
+    Ecs.remove (getSpec componentSpecs)
 
 
 
--- GENERATORS --
+-- SELECT --
 
 
-positionGenerator : Global.World -> Generator Position
-positionGenerator world =
-    Random.map3 Position
-        (Random.float 0 world.width)
-        (Random.float 0 world.height)
-        angleGenerator
+selectComponent : (ComponentSpecs -> ComponentSpec a) -> Selector a
+selectComponent getSpec =
+    Ecs.Select.component (getSpec componentSpecs)
 
 
-angleGenerator : Generator Float
-angleGenerator =
-    Random.float 0 (2 * pi)
+select2 :
+    (a -> b -> c)
+    -> (ComponentSpecs -> ComponentSpec a)
+    -> (ComponentSpecs -> ComponentSpec b)
+    -> Selector c
+select2 fn getSpecA getSpecB =
+    Ecs.Select.select2 fn (getSpecA componentSpecs) (getSpecB componentSpecs)
+
+
+select4 :
+    (a -> b -> c -> d -> e)
+    -> (ComponentSpecs -> ComponentSpec a)
+    -> (ComponentSpecs -> ComponentSpec b)
+    -> (ComponentSpecs -> ComponentSpec c)
+    -> (ComponentSpecs -> ComponentSpec d)
+    -> Selector e
+select4 fn getSpecA getSpecB getSpecC getSpecD =
+    Ecs.Select.select4 fn
+        (getSpecA componentSpecs)
+        (getSpecB componentSpecs)
+        (getSpecC componentSpecs)
+        (getSpecD componentSpecs)
+
+
+andGet :
+    (ComponentSpecs -> ComponentSpec a)
+    -> Selector (Maybe a -> b)
+    -> Selector b
+andGet getSpec =
+    Ecs.Select.andGet (getSpec componentSpecs)
+
+
+andHas : (ComponentSpecs -> ComponentSpec b) -> Selector a -> Selector a
+andHas getSpec =
+    Ecs.Select.andHas (getSpec componentSpecs)
+
+
+selectList : Selector a -> Entities -> List ( EntityId, a )
+selectList selector (Entities model) =
+    Ecs.selectList selector model.ecs
+
+
+process :
+    Selector a
+    -> (( EntityId, a ) -> ( b, Entities ) -> ( b, Entities ))
+    -> ( b, Entities )
+    -> ( b, Entities )
+process selector fn ( b, Entities model ) =
+    List.foldl fn ( b, Entities model ) (Ecs.selectList selector model.ecs)

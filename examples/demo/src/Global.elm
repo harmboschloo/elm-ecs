@@ -3,11 +3,9 @@ module Global exposing
     , Msg
     , Screen
     , World
-    , addEntity
     , getActiveKeys
     , getAssets
     , getDeltaTime
-    , getEntityCount
     , getScreen
     , getTime
     , getWorld
@@ -15,7 +13,6 @@ module Global exposing
     , isPaused
     , isTestEnabled
     , randomStep
-    , removeEntity
     , setTiming
     , subscriptions
     , update
@@ -29,12 +26,10 @@ import Browser.Events
         , onResize
         )
 import Data.KeyCode as KeyCode exposing (KeyCode)
-import Ecs exposing (Ecs)
 import Html.Events
 import Json.Decode as Decode exposing (Decoder)
 import Random exposing (Generator, Seed)
 import Set exposing (Set)
-import Systems.Collision.Grid as CollisionGrid exposing (CollisionGrid)
 
 
 
@@ -55,8 +50,6 @@ type alias Model =
     , time : Float
     , deltaTime : Float
     , test : Bool
-    , nextId : Ecs.EntityId
-    , entityCount : Int
     }
 
 
@@ -84,8 +77,6 @@ init assets seed screen =
         , time = 0
         , deltaTime = 0
         , test = False
-        , nextId = 0
-        , entityCount = 0
         }
 
 
@@ -94,11 +85,6 @@ screenToWorld screen =
     { width = 2 * toFloat screen.width
     , height = 2 * toFloat screen.height
     }
-
-
-getEntityCount : Global -> Int
-getEntityCount (Global model) =
-    model.entityCount
 
 
 getAssets : Global -> Assets
@@ -200,24 +186,6 @@ toggleKey keyCode keyCodePressed currentValue =
 
     else
         currentValue
-
-
-addEntity : Global -> ( Ecs.EntityId, Global )
-addEntity (Global model) =
-    ( model.nextId + 1
-    , Global
-        { model
-            | nextId = model.nextId + 1
-            , entityCount = model.entityCount + 1
-        }
-    )
-
-
-removeEntity : Ecs.EntityId -> ( Global, Ecs ) -> ( Global, Ecs )
-removeEntity entityId ( Global model, ecs ) =
-    ( Global { model | entityCount = model.entityCount - 1 }
-    , Ecs.clear entityId ecs
-    )
 
 
 randomStep : Generator a -> Global -> ( a, Global )

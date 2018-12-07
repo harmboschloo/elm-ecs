@@ -1,6 +1,6 @@
 module Systems exposing (update, view)
 
-import Ecs exposing (Ecs)
+import Entities exposing (Entities)
 import Frame exposing (Frame)
 import Global exposing (Global)
 import History exposing (History)
@@ -15,7 +15,7 @@ import Systems.Render as Render
 import Systems.Spawn as Spawn
 
 
-update : ( Global, Ecs ) -> ( Global, Ecs )
+update : ( Global, Entities ) -> ( Global, Entities )
 update state =
     state
         |> DelayedOperations.update
@@ -27,6 +27,6 @@ update state =
         |> Collision.update
 
 
-view : Frame -> History -> Global -> Ecs -> Html msg
+view : Frame -> History -> Global -> Entities -> Html msg
 view =
     Render.view

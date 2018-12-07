@@ -2,7 +2,7 @@ module Systems.MotionControl exposing (update)
 
 import Components exposing (Motion, Position, Velocity)
 import Components.Controls as Controls exposing (Controls)
-import Ecs exposing (Ecs)
+import Entities exposing (Entities, EntityId, Selector)
 import Global exposing (Global)
 
 
@@ -14,30 +14,34 @@ type alias MotionControl =
     }
 
 
-motionControlSelector : Ecs.Selector MotionControl
+motionControlSelector : Selector MotionControl
 motionControlSelector =
-    Ecs.select4 MotionControl
+    Entities.select4 MotionControl
         .controls
         .motion
         .position
         .velocity
 
 
-update : ( Global, Ecs ) -> ( Global, Ecs )
+update : ( Global, Entities ) -> ( Global, Entities )
 update =
-    Ecs.process motionControlSelector updateEntity
+    Entities.process motionControlSelector updateEntity
 
 
 updateEntity :
-    ( Ecs.EntityId, MotionControl )
-    -> ( Global, Ecs )
-    -> ( Global, Ecs )
-updateEntity ( entityId, motionControl ) ( global, ecs ) =
+    ( EntityId, MotionControl )
+    -> ( Global, Entities )
+    -> ( Global, Entities )
+updateEntity ( entityId, motionControl ) ( global, entities ) =
     ( global
-    , Ecs.insert .velocity
-        entityId
-        (applyControls motionControl (Global.getDeltaTime global))
-        ecs
+    , Entities.updateEcs
+        (\ecs ->
+            Entities.insert .velocity
+                entityId
+                (applyControls motionControl (Global.getDeltaTime global))
+                ecs
+        )
+        entities
     )
 
 

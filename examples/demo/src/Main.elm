@@ -3,8 +3,8 @@ module Main exposing (main)
 import Assets exposing (Assets)
 import Browser exposing (Document)
 import Browser.Dom exposing (Viewport, getViewport)
-import Ecs exposing (Ecs)
-import Entities
+import Builder
+import Entities exposing (Entities)
 import Frame exposing (Frame)
 import Global exposing (Global)
 import History exposing (History)
@@ -28,7 +28,7 @@ type Model
 
 type alias SuccessModel =
     { global : Global
-    , ecs : Ecs
+    , entities : Entities
     , frame : Frame
     , history : History
     }
@@ -63,12 +63,13 @@ initSuccess { assets, posix, viewport } =
         seed =
             Random.initialSeed (posixToMillis posix)
 
-        ( global, ecs ) =
-            Entities.init ( Global.init assets seed screen, Ecs.empty )
+        ( global, entities ) =
+            Builder.createInitalEntities
+                ( Global.init assets seed screen, Entities.empty )
     in
     InitSuccess
         { global = global
-        , ecs = ecs
+        , entities = entities
         , frame = Frame.init (1.0 / 20.0)
         , history = History.empty 500
         }
@@ -132,10 +133,10 @@ update msg model =
 
                 Frame.Update data maybeStats cmd ->
                     let
-                        ( global, ecs ) =
+                        ( global, entities ) =
                             Systems.update
                                 ( Global.setTiming data successModel.global
-                                , successModel.ecs
+                                , successModel.entities
                                 )
 
                         history =
@@ -149,7 +150,8 @@ update msg model =
                                         , updateTime = stats.updateTime
                                         , frameTime = stats.frameTime
                                         , entityCount =
-                                            Global.getEntityCount successModel.global
+                                            Entities.getEntityCount
+                                                successModel.entities
                                         }
                                         successModel.history
 
@@ -166,7 +168,7 @@ update msg model =
                     in
                     ( InitSuccess
                         { global = global
-                        , ecs = ecs
+                        , entities = entities
                         , frame = newFrame
                         , history = history
                         }
@@ -209,8 +211,8 @@ view model =
             InitFailure error ->
                 viewError error
 
-            InitSuccess { global, ecs, frame, history } ->
-                [ Systems.view frame history global ecs ]
+            InitSuccess { global, entities, frame, history } ->
+                [ Systems.view frame history global entities ]
     }
 
 

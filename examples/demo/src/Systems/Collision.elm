@@ -4,7 +4,7 @@ import Components exposing (Position, Velocity)
 import Components.CollisionShape as CollisionShape exposing (CollisionShape)
 import Components.DelayedOperations as DelayedOperations
 import Data.Animation as Animation
-import Ecs exposing (Ecs)
+import Entities exposing (Entities, EntityId, Selector)
 import Global exposing (Global)
 import Systems.Collision.Grid as Grid exposing (CollisionGrid)
 
@@ -15,22 +15,22 @@ type alias Collidable =
     }
 
 
-collidableSelector : Ecs.Selector Collidable
+collidableSelector : Selector Collidable
 collidableSelector =
-    Ecs.select2 Collidable
+    Entities.select2 Collidable
         .collisionShape
         .position
 
 
-update : ( Global, Ecs ) -> ( Global, Ecs )
-update ( global, ecs ) =
-    Ecs.selectList collidableSelector ecs
+update : ( Global, Entities ) -> ( Global, Entities )
+update ( global, entities ) =
+    Entities.selectList collidableSelector entities
         |> List.foldl insertEntity Grid.empty
         |> Grid.collisions Grid.starCenter Grid.shipScoop
-        |> List.foldl handleStarShipCollisions ( global, ecs )
+        |> List.foldl handleStarShipCollisions ( global, entities )
 
 
-insertEntity : ( Ecs.EntityId, Collidable ) -> CollisionGrid -> CollisionGrid
+insertEntity : ( EntityId, Collidable ) -> CollisionGrid -> CollisionGrid
 insertEntity ( entityId, { collisionShape, position } ) grid =
     Grid.insert
         position
@@ -42,9 +42,9 @@ insertEntity ( entityId, { collisionShape, position } ) grid =
 
 handleStarShipCollisions :
     ( Grid.Item, Grid.Item )
-    -> ( Global, Ecs )
-    -> ( Global, Ecs )
-handleStarShipCollisions ( starItem, _ ) ( global, ecs ) =
+    -> ( Global, Entities )
+    -> ( Global, Entities )
+handleStarShipCollisions ( starItem, _ ) ( global, entities ) =
     let
         time =
             Global.getTime global
@@ -53,25 +53,34 @@ handleStarShipCollisions ( starItem, _ ) ( global, ecs ) =
             starItem.data
     in
     ( global
-    , ecs
-        |> Ecs.remove .collisionShape starEntityId
-        |> Ecs.insert .velocity starEntityId (Velocity 0 0 (2 * pi))
-        |> Ecs.insert .scaleAnimation
-            starEntityId
-            (Animation.animation
-                { startTime = time
-                , duration = 0.5
-                , from = 1
-                , to = 1.5
-                }
-                |> Animation.andNext
-                    (Animation.nextAnimation
-                        { duration = 0.5
-                        , to = 0
+    , Entities.updateEcs
+        (\ecs ->
+            ecs
+                |> Entities.remove .collisionShape starEntityId
+                |> Entities.insert .velocity
+                    starEntityId
+                    (Velocity 0 0 (2 * pi))
+                |> Entities.insert .scaleAnimation
+                    starEntityId
+                    (Animation.animation
+                        { startTime = time
+                        , duration = 0.5
+                        , from = 1
+                        , to = 1.5
                         }
+                        |> Animation.andNext
+                            (Animation.nextAnimation
+                                { duration = 0.5
+                                , to = 0
+                                }
+                            )
                     )
-            )
-        |> Ecs.update .delayedOperations
-            starEntityId
-            (DelayedOperations.add (time + 1) DelayedOperations.RemoveEntity)
+                |> Entities.update .delayedOperations
+                    starEntityId
+                    (DelayedOperations.add
+                        (time + 1)
+                        DelayedOperations.RemoveEntity
+                    )
+        )
+        entities
     )

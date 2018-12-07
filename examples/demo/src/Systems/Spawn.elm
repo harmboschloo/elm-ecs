@@ -1,7 +1,7 @@
 module Systems.Spawn exposing (update)
 
-import Ecs exposing (Ecs)
-import Entities
+import Builder
+import Entities exposing (Entities)
 import Global exposing (Global)
 import Random
 import Utils
@@ -19,8 +19,8 @@ testSpawnRate =
     50
 
 
-update : ( Global, Ecs ) -> ( Global, Ecs )
-update ( global1, ecs ) =
+update : ( Global, Entities ) -> ( Global, Entities )
+update ( global1, entities ) =
     let
         rate =
             if Global.isTestEnabled global1 then
@@ -48,4 +48,4 @@ update ( global1, ecs ) =
         n =
             floor spawn + nFraction
     in
-    Utils.times n Entities.createStar ( global2, ecs )
+    Utils.times n Builder.createStar ( global2, entities )
