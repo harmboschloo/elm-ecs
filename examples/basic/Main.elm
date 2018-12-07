@@ -3,9 +3,71 @@ module Main exposing (main)
 import Array exposing (Array)
 import Browser
 import Browser.Events
-import Ecs exposing (Ecs)
+import Ecs
+import Ecs.Select
+import Ecs.Spec
 import Html
 import Html.Attributes
+
+
+
+-- COMPONENTS --
+
+
+type alias Position =
+    { x : Float, y : Float }
+
+
+type alias Velocity =
+    { x : Float, y : Float }
+
+
+type OutOfBoundsResolution
+    = Teleport
+    | Destroy
+
+
+type Display
+    = Circle { radius : Float, color : String }
+    | Image
+        { src : String
+        , width : Int
+        , height : Int
+        }
+
+
+
+-- ECS SPEC --
+
+
+type alias EntityId =
+    Int
+
+
+type alias ComponentSpecs =
+    { position : ComponentSpec Position
+    , velocity : ComponentSpec Velocity
+    , outOfBoundsResolution : ComponentSpec OutOfBoundsResolution
+    , display : ComponentSpec Display
+    }
+
+
+type alias ComponentSpec a =
+    Ecs.Spec.ComponentSpec EntityId Ecs a
+
+
+type alias Ecs =
+    Ecs.Spec.Ecs4 EntityId Position Velocity OutOfBoundsResolution Display
+
+
+spec : Ecs.Spec.Spec EntityId Ecs
+spec =
+    Ecs.Spec.spec4
+
+
+components : ComponentSpecs
+components =
+    Ecs.Spec.components4 ComponentSpecs
 
 
 
@@ -25,14 +87,14 @@ spawnEntities ( state, ecs ) =
 
         display =
             if remainderBy 6 state.frameCount == 0 then
-                Ecs.Image
+                Image
                     { src = "./h.png"
                     , width = 16
                     , height = 16
                     }
 
             else
-                Ecs.Circle
+                Circle
                     { radius = 5
                     , color = getColor state.frameCount
                     }
@@ -40,8 +102,8 @@ spawnEntities ( state, ecs ) =
     if remainderBy 10 state.frameCount == 0 then
         ( newState
         , ecs
-            |> Ecs.insert .position id position
-            |> Ecs.insert .display id display
+            |> Ecs.insert components.position id position
+            |> Ecs.insert components.display id display
         )
 
     else
@@ -53,17 +115,17 @@ spawnEntities ( state, ecs ) =
 
             outOfBoundsResolution =
                 if remainderBy 4 state.frameCount == 0 then
-                    Ecs.Destroy
+                    Destroy
 
                 else
-                    Ecs.Teleport
+                    Teleport
         in
         ( newState
         , ecs
-            |> Ecs.insert .position id position
-            |> Ecs.insert .velocity id velocity
-            |> Ecs.insert .outOfBoundsResolution id outOfBoundsResolution
-            |> Ecs.insert .display id display
+            |> Ecs.insert components.position id position
+            |> Ecs.insert components.velocity id velocity
+            |> Ecs.insert components.outOfBoundsResolution id outOfBoundsResolution
+            |> Ecs.insert components.display id display
         )
 
 
@@ -94,16 +156,16 @@ colors =
 
 
 type alias Move =
-    { position : Ecs.Position
-    , velocity : Ecs.Velocity
+    { position : Position
+    , velocity : Velocity
     }
 
 
-moveSelector : Ecs.Selector Move
+moveSelector : Ecs.Select.Selector EntityId Ecs Move
 moveSelector =
-    Ecs.select2 Move
-        .position
-        .velocity
+    Ecs.Select.select2 Move
+        components.position
+        components.velocity
 
 
 moveEntities : ( State, Ecs ) -> ( State, Ecs )
@@ -114,9 +176,9 @@ moveEntities ( state, ecs ) =
     )
 
 
-moveEntity : Float -> ( Ecs.EntityId, Move ) -> Ecs -> Ecs
+moveEntity : Float -> ( EntityId, Move ) -> Ecs -> Ecs
 moveEntity deltaTime ( id, { position, velocity } ) ecs =
-    Ecs.insert .position
+    Ecs.insert components.position
         id
         { x = position.x + velocity.x * deltaTime
         , y = position.y + velocity.y * deltaTime
@@ -129,16 +191,16 @@ moveEntity deltaTime ( id, { position, velocity } ) ecs =
 
 
 type alias BoundsCheck =
-    { position : Ecs.Position
-    , resolution : Ecs.OutOfBoundsResolution
+    { position : Position
+    , resolution : OutOfBoundsResolution
     }
 
 
-boundsCheckSelector : Ecs.Selector BoundsCheck
+boundsCheckSelector : Ecs.Select.Selector EntityId Ecs BoundsCheck
 boundsCheckSelector =
-    Ecs.select2 BoundsCheck
-        .position
-        .outOfBoundsResolution
+    Ecs.Select.select2 BoundsCheck
+        components.position
+        components.outOfBoundsResolution
 
 
 boundsCheckEntities : ( State, Ecs ) -> ( State, Ecs )
@@ -155,7 +217,7 @@ boundsCheckEntities ( state, ecs ) =
 boundsCheckEntity :
     Float
     -> Float
-    -> ( Ecs.EntityId, BoundsCheck )
+    -> ( EntityId, BoundsCheck )
     -> ( State, Ecs )
     -> ( State, Ecs )
 boundsCheckEntity worldWidth worldHeight ( id, { position, resolution } ) ( state, ecs ) =
@@ -164,7 +226,7 @@ boundsCheckEntity worldWidth worldHeight ( id, { position, resolution } ) ( stat
             || (position.y < 0 || (position.y > worldHeight))
     then
         case resolution of
-            Ecs.Teleport ->
+            Teleport ->
                 let
                     x =
                         if position.x < 0 then
@@ -186,10 +248,14 @@ boundsCheckEntity worldWidth worldHeight ( id, { position, resolution } ) ( stat
                         else
                             position.y
                 in
-                ( state, Ecs.insert .position id { x = x, y = y } ecs )
+                ( state
+                , Ecs.insert components.position id { x = x, y = y } ecs
+                )
 
-            Ecs.Destroy ->
-                ( removeEntity state, Ecs.clear id ecs )
+            Destroy ->
+                ( removeEntity state
+                , Ecs.clear spec id ecs
+                )
 
     else
         ( state, ecs )
@@ -200,16 +266,16 @@ boundsCheckEntity worldWidth worldHeight ( id, { position, resolution } ) ( stat
 
 
 type alias Render =
-    { position : Ecs.Position
-    , display : Ecs.Display
+    { position : Position
+    , display : Display
     }
 
 
-renderSelector : Ecs.Selector Render
+renderSelector : Ecs.Select.Selector EntityId Ecs Render
 renderSelector =
-    Ecs.select2 Render
-        .position
-        .display
+    Ecs.Select.select2 Render
+        components.position
+        components.display
 
 
 renderEntities : Ecs -> List (Html.Html msg)
@@ -218,10 +284,10 @@ renderEntities ecs =
         |> List.map renderEntity
 
 
-renderEntity : ( Ecs.EntityId, Render ) -> Html.Html msg
+renderEntity : ( EntityId, Render ) -> Html.Html msg
 renderEntity ( _, { position, display } ) =
     case display of
-        Ecs.Circle { radius, color } ->
+        Circle { radius, color } ->
             Html.div
                 [ Html.Attributes.style "position" "absolute"
                 , Html.Attributes.style "display" "inline-block"
@@ -234,7 +300,7 @@ renderEntity ( _, { position, display } ) =
                 ]
                 []
 
-        Ecs.Image { src, width, height } ->
+        Image { src, width, height } ->
             Html.img
                 [ Html.Attributes.style "position" "absolute"
                 , Html.Attributes.style "display" "inline-block"
@@ -263,7 +329,7 @@ type alias Model =
 
 
 type alias State =
-    { nextId : Ecs.EntityId
+    { nextId : EntityId
     , entityCount : Int
     , worldWidth : Int
     , worldHeight : Int
@@ -283,13 +349,13 @@ init _ =
         , frameCount = 0
         , history = Array.repeat 30 (1 / 60)
         }
-      , Ecs.empty
+      , Ecs.empty spec
       )
     , Cmd.none
     )
 
 
-addEntity : State -> ( Ecs.EntityId, State )
+addEntity : State -> ( EntityId, State )
 addEntity state =
     ( state.nextId
     , { state
@@ -321,7 +387,10 @@ update msg ( state, ecs ) =
                     , frameCount = state.frameCount + 1
                     , history =
                         Array.set
-                            (remainderBy (Array.length state.history) state.frameCount)
+                            (remainderBy
+                                (Array.length state.history)
+                                state.frameCount
+                            )
                             (deltaTimeMillis / 1000)
                             state.history
                 }
@@ -364,7 +433,10 @@ view ( state, ecs ) =
         , Html.div []
             [ Html.text ("entities: " ++ (state.entityCount |> String.fromInt))
             , Html.text " - "
-            , Html.text ("components: " ++ (Ecs.componentCount ecs |> String.fromInt))
+            , Html.text
+                ("components: "
+                    ++ (Ecs.componentCount spec ecs |> String.fromInt)
+                )
             , Html.text " - "
             , Html.text ("fps: " ++ (getFps state.history |> String.fromInt))
             ]
