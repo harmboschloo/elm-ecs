@@ -20,6 +20,7 @@ ecs
 - https://github.com/slide-rs/specs
 - https://stackoverflow.com/questions/1901251/component-based-game-engine-design
 - https://www.sebaslab.com/ecs-design-to-achieve-true-inversion-of-flow-control/
+- https://www.youtube.com/playlist?list=PLX2vGYjWbI0TPRStIWx3UyNB8QqjNUj98
 
 webgl
 

@@ -1,8 +1,9 @@
-module Systems.MotionControl exposing (update)
+module Systems.MotionControl exposing (MotionControl, applyControls, update)
 
 import Components exposing (Motion, Position, Velocity)
 import Components.Controls as Controls exposing (Controls)
-import Entities exposing (Entities, EntityId, Selector)
+import Entities exposing (Entities, Selector)
+import EntityId exposing (EntityId)
 import Global exposing (Global)
 
 

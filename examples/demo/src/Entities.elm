@@ -1,7 +1,6 @@
 module Entities exposing
     ( Ecs
     , Entities
-    , EntityId
     , Selector
     , addEntity
     , andGet
@@ -13,8 +12,11 @@ module Entities exposing
     , process
     , remove
     , removeEntity
+    , select
+    , select1
     , select2
     , select4
+    , select5
     , selectComponent
     , selectList
     , update
@@ -30,6 +32,7 @@ import Components
         , Scale
         , ScaleAnimation
         , Sprite
+        , Star
         , Velocity
         )
 import Components.CollisionShape as CollisionShape exposing (CollisionShape)
@@ -38,14 +41,11 @@ import Components.DelayedOperations exposing (DelayedOperations)
 import Ecs
 import Ecs.Select
 import Ecs.Spec
+import EntityId exposing (EntityId)
 
 
 
 -- ECS SPEC --
-
-
-type alias EntityId =
-    Int
 
 
 type alias ComponentSpecs =
@@ -59,6 +59,7 @@ type alias ComponentSpecs =
     , scale : ComponentSpec Scale
     , scaleAnimation : ComponentSpec ScaleAnimation
     , sprite : ComponentSpec Sprite
+    , star : ComponentSpec Star
     , velocity : ComponentSpec Velocity
     }
 
@@ -68,7 +69,7 @@ type alias ComponentSpec a =
 
 
 type alias Ecs =
-    Ecs.Spec.Ecs11 EntityId Ai CollisionShape Controls DelayedOperations KeyControlsMap Motion Position Scale ScaleAnimation Sprite Velocity
+    Ecs.Spec.Ecs12 EntityId Ai CollisionShape Controls DelayedOperations KeyControlsMap Motion Position Scale ScaleAnimation Sprite Star Velocity
 
 
 type alias Selector a =
@@ -77,12 +78,12 @@ type alias Selector a =
 
 spec : Ecs.Spec.Spec EntityId Ecs
 spec =
-    Ecs.Spec.spec11
+    Ecs.Spec.spec12
 
 
 componentSpecs : ComponentSpecs
 componentSpecs =
-    Ecs.Spec.components11 ComponentSpecs
+    Ecs.Spec.components12 ComponentSpecs
 
 
 
@@ -185,6 +186,14 @@ selectComponent getSpec =
     Ecs.Select.component (getSpec componentSpecs)
 
 
+select1 :
+    (a -> b)
+    -> (ComponentSpecs -> ComponentSpec a)
+    -> Selector b
+select1 fn getSpecA =
+    Ecs.Select.select1 fn (getSpecA componentSpecs)
+
+
 select2 :
     (a -> b -> c)
     -> (ComponentSpecs -> ComponentSpec a)
@@ -209,6 +218,23 @@ select4 fn getSpecA getSpecB getSpecC getSpecD =
         (getSpecD componentSpecs)
 
 
+select5 :
+    (a -> b -> c -> d -> e -> f)
+    -> (ComponentSpecs -> ComponentSpec a)
+    -> (ComponentSpecs -> ComponentSpec b)
+    -> (ComponentSpecs -> ComponentSpec c)
+    -> (ComponentSpecs -> ComponentSpec d)
+    -> (ComponentSpecs -> ComponentSpec e)
+    -> Selector f
+select5 fn getSpecA getSpecB getSpecC getSpecD getSpecE =
+    Ecs.Select.select5 fn
+        (getSpecA componentSpecs)
+        (getSpecB componentSpecs)
+        (getSpecC componentSpecs)
+        (getSpecD componentSpecs)
+        (getSpecE componentSpecs)
+
+
 andGet :
     (ComponentSpecs -> ComponentSpec a)
     -> Selector (Maybe a -> b)
@@ -220,6 +246,11 @@ andGet getSpec =
 andHas : (ComponentSpecs -> ComponentSpec b) -> Selector a -> Selector a
 andHas getSpec =
     Ecs.Select.andHas (getSpec componentSpecs)
+
+
+select : Selector a -> EntityId -> Entities -> Maybe a
+select selector id (Entities model) =
+    Ecs.select selector id model.ecs
 
 
 selectList : Selector a -> Entities -> List ( EntityId, a )

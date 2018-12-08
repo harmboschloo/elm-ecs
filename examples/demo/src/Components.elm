@@ -6,17 +6,19 @@ module Components exposing
     , Scale
     , ScaleAnimation
     , Sprite
+    , Star
     , Velocity
     )
 
 import Data.Animation exposing (Animation)
 import Data.KeyCode exposing (KeyCode)
+import EntityId exposing (EntityId)
 import WebGL.Texture exposing (Texture)
 
 
 type alias Ai =
-    ()
-
+    { target : Maybe EntityId
+    }
 
 
 type alias KeyControlsMap =
@@ -59,6 +61,10 @@ type alias Sprite =
     , pivotX : Float
     , pivotY : Float
     }
+
+
+type alias Star =
+    ()
 
 
 type alias Velocity =

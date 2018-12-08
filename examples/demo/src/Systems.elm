@@ -5,6 +5,7 @@ import Frame exposing (Frame)
 import Global exposing (Global)
 import History exposing (History)
 import Html exposing (Html)
+import Systems.Ai as Ai
 import Systems.Animation as Animation
 import Systems.Collision as Collision
 import Systems.DelayedOperations as DelayedOperations
@@ -20,6 +21,7 @@ update state =
     state
         |> DelayedOperations.update
         |> Spawn.update
+        |> Ai.update
         |> KeyControls.update
         |> MotionControl.update
         |> Movement.update

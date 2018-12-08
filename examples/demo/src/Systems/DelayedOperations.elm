@@ -5,7 +5,8 @@ import Components.DelayedOperations as DelayedOperations
         ( DelayedOperations
         , Operation
         )
-import Entities exposing (Entities, EntityId, Selector)
+import Entities exposing (Entities, Selector)
+import EntityId exposing (EntityId)
 import Global exposing (Global)
 
 

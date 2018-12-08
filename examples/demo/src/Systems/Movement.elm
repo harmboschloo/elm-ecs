@@ -1,7 +1,8 @@
-module Systems.Movement exposing (update)
+module Systems.Movement exposing (update, updatePosition)
 
 import Components exposing (Position, Velocity)
-import Entities exposing (Entities, EntityId, Selector)
+import Entities exposing (Entities, Selector)
+import EntityId exposing (EntityId)
 import Global exposing (Global)
 
 
@@ -37,11 +38,16 @@ updateEntity ( entityId, { position, velocity } ) ( global, entities ) =
         (\ecs ->
             Entities.insert .position
                 entityId
-                { x = position.x + velocity.velocityX * deltaTime
-                , y = position.y + velocity.velocityY * deltaTime
-                , angle = position.angle + velocity.angularVelocity * deltaTime
-                }
+                (updatePosition deltaTime velocity position)
                 ecs
         )
         entities
     )
+
+
+updatePosition : Float -> Velocity -> Position -> Position
+updatePosition deltaTime velocity position =
+    { x = position.x + velocity.velocityX * deltaTime
+    , y = position.y + velocity.velocityY * deltaTime
+    , angle = position.angle + velocity.angularVelocity * deltaTime
+    }

@@ -13,7 +13,7 @@ import Collision.Grid as Grid
 import Collision.Position exposing (Position)
 import Collision.Shape exposing (Shape)
 import Components.CollisionShape as CollisionShape exposing (Category)
-import Entities exposing (EntityId)
+import EntityId exposing (EntityId)
 
 
 type alias CollisionGrid =

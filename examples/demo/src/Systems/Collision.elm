@@ -4,7 +4,8 @@ import Components exposing (Position, Velocity)
 import Components.CollisionShape as CollisionShape exposing (CollisionShape)
 import Components.DelayedOperations as DelayedOperations
 import Data.Animation as Animation
-import Entities exposing (Entities, EntityId, Selector)
+import Entities exposing (Entities, Selector)
+import EntityId exposing (EntityId)
 import Global exposing (Global)
 import Systems.Collision.Grid as Grid exposing (CollisionGrid)
 

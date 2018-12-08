@@ -16,7 +16,8 @@ import Components.Controls as Controls
 import Components.DelayedOperations as DelayedOperations
 import Data.Animation as Animation
 import Data.KeyCode as KeyCode
-import Entities exposing (Ecs, Entities, EntityId)
+import Entities exposing (Ecs, Entities)
+import EntityId exposing (EntityId)
 import Global exposing (Global)
 import Random exposing (Generator)
 import Utils exposing (times)
@@ -25,8 +26,8 @@ import Utils exposing (times)
 createInitalEntities : ( Global, Entities ) -> ( Global, Entities )
 createInitalEntities ( global, entities ) =
     ( global, entities )
-        |> times 10 createAiShip
         |> createPlayerShip
+        |> times 10 createAiShip
         |> times 30 createStar
 
 
@@ -101,7 +102,7 @@ createAiShip ( global1, entities1 ) =
                             entityId
                             assets.sprites.aiShip
                             position
-                        |> Entities.insert .ai entityId ()
+                        |> Entities.insert .ai entityId { target = Nothing }
                 )
                 entities2
     in
@@ -149,6 +150,7 @@ createStar ( global1, entities1 ) =
             Entities.updateEcs
                 (\ecs ->
                     ecs
+                        |> Entities.insert .star entityId ()
                         |> Entities.insert .sprite entityId assets.sprites.star
                         |> Entities.insert .position entityId position
                         |> Entities.insert .velocity
@@ -188,9 +190,16 @@ createStar ( global1, entities1 ) =
 
 positionGenerator : Global.World -> Generator Position
 positionGenerator world =
+    let
+        marginX =
+            world.width * 0.1
+
+        marginY =
+            world.height * 0.1
+    in
     Random.map3 Position
-        (Random.float 0 world.width)
-        (Random.float 0 world.height)
+        (Random.float marginX (world.width - marginX))
+        (Random.float marginY (world.height - marginY))
         angleGenerator
 
 

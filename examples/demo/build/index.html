@@ -596,11 +596,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.b4.bf === region.cu.bf)
+	if (region.b4.bf === region.cv.bf)
 	{
 		return 'on line ' + region.b4.bf;
 	}
-	return 'on lines ' + region.b4.bf + ' through ' + region.cu.bf;
+	return 'on lines ' + region.b4.bf + ' through ' + region.cv.bf;
 }
 
 
@@ -1915,9 +1915,9 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.dJ,
+		impl.dK,
 		impl.cf,
-		impl.d6,
+		impl.d7,
 		function() { return function() {} }
 	);
 });
@@ -3937,11 +3937,11 @@ var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debug
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.dJ,
+		impl.dK,
 		impl.cf,
-		impl.d6,
+		impl.d7,
 		function(sendToApp, initialModel) {
-			var view = impl.ee;
+			var view = impl.eg;
 			/**/
 			var domNode = args['node'];
 			//*/
@@ -3973,12 +3973,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.dJ,
+		impl.dK,
 		impl.cf,
-		impl.d6,
+		impl.d7,
 		function(sendToApp, initialModel) {
 			var divertHrefToApp = impl.bj && impl.bj(sendToApp)
-			var view = impl.ee;
+			var view = impl.eg;
 			var title = _VirtualDom_doc.title;
 			var bodyNode = _VirtualDom_doc.body;
 			var currNode = _VirtualDom_virtualize(bodyNode);
@@ -3986,12 +3986,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 			{
 				_VirtualDom_divertHrefToApp = divertHrefToApp;
 				var doc = view(model);
-				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.dp);
+				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.dq);
 				var patches = _VirtualDom_diff(currNode, nextNode);
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.d8) && (_VirtualDom_doc.title = title = doc.d8);
+				(title !== doc.ea) && (_VirtualDom_doc.title = title = doc.ea);
 			});
 		}
 	);
@@ -4042,8 +4042,8 @@ function _Browser_makeAnimator(model, draw)
 
 function _Browser_application(impl)
 {
-	var onUrlChange = impl.dV;
-	var onUrlRequest = impl.dW;
+	var onUrlChange = impl.dW;
+	var onUrlRequest = impl.dX;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
@@ -4063,9 +4063,9 @@ function _Browser_application(impl)
 					var next = elm$url$Url$fromString(href).a;
 					sendToApp(onUrlRequest(
 						(next
-							&& curr.c6 === next.c6
-							&& curr.cz === next.cz
-							&& curr.c1.a === next.c1.a
+							&& curr.c7 === next.c7
+							&& curr.cA === next.cA
+							&& curr.c2.a === next.c2.a
 						)
 							? elm$browser$Browser$Internal(next)
 							: elm$browser$Browser$External(href)
@@ -4073,13 +4073,13 @@ function _Browser_application(impl)
 				}
 			});
 		},
-		dJ: function(flags)
+		dK: function(flags)
 		{
-			return A3(impl.dJ, flags, _Browser_getUrl(), key);
+			return A3(impl.dK, flags, _Browser_getUrl(), key);
 		},
-		ee: impl.ee,
+		eg: impl.eg,
 		cf: impl.cf,
-		d6: impl.d6
+		d7: impl.d7
 	});
 }
 
@@ -4145,17 +4145,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { dG: 'hidden', bb: 'visibilitychange' }
+		? { dH: 'hidden', bb: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { dG: 'mozHidden', bb: 'mozvisibilitychange' }
+		? { dH: 'mozHidden', bb: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { dG: 'msHidden', bb: 'msvisibilitychange' }
+		? { dH: 'msHidden', bb: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { dG: 'webkitHidden', bb: 'webkitvisibilitychange' }
-		: { dG: 'hidden', bb: 'visibilitychange' };
+		? { dH: 'webkitHidden', bb: 'webkitvisibilitychange' }
+		: { dH: 'hidden', bb: 'visibilitychange' };
 }
 
 
@@ -4236,7 +4236,7 @@ var _Browser_call = F2(function(functionName, id)
 function _Browser_getViewport()
 {
 	return {
-		da: _Browser_getScene(),
+		db: _Browser_getScene(),
 		bL: {
 			cl: _Browser_window.pageXOffset,
 			cm: _Browser_window.pageYOffset,
@@ -4275,7 +4275,7 @@ function _Browser_getViewportOf(id)
 	return _Browser_withNode(id, function(node)
 	{
 		return {
-			da: {
+			db: {
 				ci: node.scrollWidth,
 				bS: node.scrollHeight
 			},
@@ -4313,14 +4313,14 @@ function _Browser_getElement(id)
 		var x = _Browser_window.pageXOffset;
 		var y = _Browser_window.pageYOffset;
 		return {
-			da: _Browser_getScene(),
+			db: _Browser_getScene(),
 			bL: {
 				cl: x,
 				cm: y,
 				ci: _Browser_doc.documentElement.clientWidth,
 				bS: _Browser_doc.documentElement.clientHeight
 			},
-			dB: {
+			dC: {
 				cl: x + rect.left,
 				cm: y + rect.top,
 				ci: rect.width,
@@ -4451,7 +4451,7 @@ var _Regex_never = /.^/;
 var _Regex_fromStringWith = F2(function(options, string)
 {
 	var flags = 'g';
-	if (options.cY) { flags += 'm'; }
+	if (options.cZ) { flags += 'm'; }
 	if (options.cp) { flags += 'i'; }
 
 	try
@@ -4869,11 +4869,11 @@ var _MJS_v4setW = F2(function(w, a) {
 });
 
 var _MJS_v4toRecord = function(a) {
-    return { cl: a[0], cm: a[1], bM: a[2], dg: a[3] };
+    return { cl: a[0], cm: a[1], bM: a[2], dh: a[3] };
 };
 
 var _MJS_v4fromRecord = function(r) {
-    return new Float64Array([r.cl, r.cm, r.bM, r.dg]);
+    return new Float64Array([r.cl, r.cm, r.bM, r.dh]);
 };
 
 var _MJS_v4add = F2(function(a, b) {
@@ -4979,31 +4979,31 @@ var _MJS_m4x4identity = new Float64Array([
 
 var _MJS_m4x4fromRecord = function(r) {
     var m = new Float64Array(16);
-    m[0] = r.cC;
-    m[1] = r.cG;
-    m[2] = r.cK;
-    m[3] = r.cO;
-    m[4] = r.cD;
-    m[5] = r.cH;
-    m[6] = r.cL;
-    m[7] = r.cP;
-    m[8] = r.cE;
-    m[9] = r.cI;
-    m[10] = r.cM;
-    m[11] = r.cQ;
-    m[12] = r.cF;
-    m[13] = r.cJ;
-    m[14] = r.cN;
-    m[15] = r.cR;
+    m[0] = r.cD;
+    m[1] = r.cH;
+    m[2] = r.cL;
+    m[3] = r.cP;
+    m[4] = r.cE;
+    m[5] = r.cI;
+    m[6] = r.cM;
+    m[7] = r.cQ;
+    m[8] = r.cF;
+    m[9] = r.cJ;
+    m[10] = r.cN;
+    m[11] = r.cR;
+    m[12] = r.cG;
+    m[13] = r.cK;
+    m[14] = r.cO;
+    m[15] = r.cS;
     return m;
 };
 
 var _MJS_m4x4toRecord = function(m) {
     return {
-        cC: m[0], cG: m[1], cK: m[2], cO: m[3],
-        cD: m[4], cH: m[5], cL: m[6], cP: m[7],
-        cE: m[8], cI: m[9], cM: m[10], cQ: m[11],
-        cF: m[12], cJ: m[13], cN: m[14], cR: m[15]
+        cD: m[0], cH: m[1], cL: m[2], cP: m[3],
+        cE: m[4], cI: m[5], cM: m[6], cQ: m[7],
+        cF: m[8], cJ: m[9], cN: m[10], cR: m[11],
+        cG: m[12], cK: m[13], cO: m[14], cS: m[15]
     };
 };
 
@@ -6199,7 +6199,7 @@ function _WebGL_diff(oldModel, newModel) {
 }
 var author$project$Assets$Assets = F2(
 	function (background, sprites) {
-		return {$7: background, d3: sprites};
+		return {dp: background, d4: sprites};
 	});
 var author$project$Assets$backgroundSrc = '../assets/spaceshooter/darkPurple.png';
 var elm$core$Basics$False = 1;
@@ -6212,7 +6212,7 @@ var elm_explorations$webgl$WebGL$Texture$linear = 9729;
 var elm_explorations$webgl$WebGL$Texture$nearestMipmapLinear = 9986;
 var elm_explorations$webgl$WebGL$Texture$Wrap = elm$core$Basics$identity;
 var elm_explorations$webgl$WebGL$Texture$repeat = 10497;
-var elm_explorations$webgl$WebGL$Texture$defaultOptions = {cw: true, bA: elm_explorations$webgl$WebGL$Texture$repeat, cS: elm_explorations$webgl$WebGL$Texture$linear, cW: elm_explorations$webgl$WebGL$Texture$nearestMipmapLinear, bK: elm_explorations$webgl$WebGL$Texture$repeat};
+var elm_explorations$webgl$WebGL$Texture$defaultOptions = {cx: true, bA: elm_explorations$webgl$WebGL$Texture$repeat, cT: elm_explorations$webgl$WebGL$Texture$linear, cX: elm_explorations$webgl$WebGL$Texture$nearestMipmapLinear, bK: elm_explorations$webgl$WebGL$Texture$repeat};
 var elm$core$Elm$JsArray$foldr = _JsArray_foldr;
 var elm$core$Array$foldr = F3(
 	function (func, baseCase, _n0) {
@@ -6300,11 +6300,11 @@ var elm_explorations$webgl$WebGL$Texture$SizeError = F2(
 	});
 var elm_explorations$webgl$WebGL$Texture$loadWith = F2(
 	function (_n0, url) {
-		var magnify = _n0.cS;
-		var minify = _n0.cW;
+		var magnify = _n0.cT;
+		var minify = _n0.cX;
 		var horizontalWrap = _n0.bA;
 		var verticalWrap = _n0.bK;
-		var flipY = _n0.cw;
+		var flipY = _n0.cx;
 		var expand = F4(
 			function (_n1, _n2, _n3, _n4) {
 				var mag = _n1;
@@ -6320,13 +6320,13 @@ var author$project$Assets$loadBackground = A2(
 	elm_explorations$webgl$WebGL$Texture$loadWith,
 	_Utils_update(
 		elm_explorations$webgl$WebGL$Texture$defaultOptions,
-		{cw: false, cS: elm_explorations$webgl$WebGL$Texture$nearest, cW: elm_explorations$webgl$WebGL$Texture$nearest}),
+		{cx: false, cT: elm_explorations$webgl$WebGL$Texture$nearest, cX: elm_explorations$webgl$WebGL$Texture$nearest}),
 	author$project$Assets$backgroundSrc);
 var author$project$Assets$initSpritesheet = function (texture) {
 	return {
 		co: {bS: 75, b_: 0.5, b$: 0.6, b6: texture, ci: 112, cl: 112, cm: 716},
-		c0: {bS: 75, b_: 0.5, b$: 0.6, b6: texture, ci: 99, cl: 237, cm: 377},
-		dc: {bS: 30, b_: 0.5, b$: 0.5, b6: texture, ci: 31, cl: 778, cm: 557}
+		c1: {bS: 75, b_: 0.5, b$: 0.6, b6: texture, ci: 99, cl: 237, cm: 377},
+		dd: {bS: 30, b_: 0.5, b$: 0.5, b6: texture, ci: 31, cl: 778, cm: 557}
 	};
 };
 var author$project$Assets$spritesheetSrc = '../assets/spaceshooter/sheet.png';
@@ -6353,7 +6353,7 @@ var author$project$Assets$loadSpritesheet = A2(
 		elm_explorations$webgl$WebGL$Texture$loadWith,
 		_Utils_update(
 			elm_explorations$webgl$WebGL$Texture$defaultOptions,
-			{cw: false, cS: elm_explorations$webgl$WebGL$Texture$nearest, cW: elm_explorations$webgl$WebGL$Texture$nearest}),
+			{cx: false, cT: elm_explorations$webgl$WebGL$Texture$nearest, cX: elm_explorations$webgl$WebGL$Texture$nearest}),
 		author$project$Assets$spritesheetSrc));
 var elm$core$Task$map2 = F3(
 	function (func, taskA, taskB) {
@@ -6373,7 +6373,7 @@ var elm$core$Task$map2 = F3(
 var author$project$Assets$load = A3(elm$core$Task$map2, author$project$Assets$Assets, author$project$Assets$loadBackground, author$project$Assets$loadSpritesheet);
 var author$project$Main$InitData = F3(
 	function (assets, posix, viewport) {
-		return {bO: assets, c3: posix, bL: viewport};
+		return {bO: assets, c4: posix, bL: viewport};
 	});
 var author$project$Main$InitPending = {$: 0};
 var author$project$Main$InitReceived = function (a) {
@@ -6941,7 +6941,7 @@ var elm$core$String$contains = _String_contains;
 var elm$core$String$toInt = _String_toInt;
 var elm$url$Url$Url = F6(
 	function (protocol, host, port_, path, query, fragment) {
-		return {cx: fragment, cz: host, c_: path, c1: port_, c6: protocol, c7: query};
+		return {cy: fragment, cA: host, c$: path, c2: port_, c7: protocol, c8: query};
 	});
 var elm$url$Url$chompBeforePath = F5(
 	function (protocol, path, params, frag, str) {
@@ -7119,7 +7119,7 @@ var elm$browser$Browser$AnimationManager$Time = function (a) {
 };
 var elm$browser$Browser$AnimationManager$State = F3(
 	function (subs, request, oldTime) {
-		return {bY: oldTime, c9: request, dd: subs};
+		return {bY: oldTime, da: request, de: subs};
 	});
 var elm$browser$Browser$AnimationManager$init = elm$core$Task$succeed(
 	A3(elm$browser$Browser$AnimationManager$State, _List_Nil, elm$core$Maybe$Nothing, 0));
@@ -7130,7 +7130,7 @@ var elm$core$Process$kill = _Scheduler_kill;
 var elm$core$Process$spawn = _Scheduler_spawn;
 var elm$browser$Browser$AnimationManager$onEffects = F3(
 	function (router, subs, _n0) {
-		var request = _n0.c9;
+		var request = _n0.da;
 		var oldTime = _n0.bY;
 		var _n1 = _Utils_Tuple2(request, subs);
 		if (_n1.a.$ === 1) {
@@ -7177,7 +7177,7 @@ var elm$browser$Browser$AnimationManager$onEffects = F3(
 	});
 var elm$browser$Browser$AnimationManager$onSelfMsg = F3(
 	function (router, newTime, _n0) {
-		var subs = _n0.dd;
+		var subs = _n0.de;
 		var oldTime = _n0.bY;
 		var send = function (sub) {
 			if (!sub.$) {
@@ -7272,7 +7272,7 @@ var elm$browser$Browser$Events$MySub = F3(
 	});
 var elm$browser$Browser$Events$State = F2(
 	function (subs, pids) {
-		return {c$: pids, dd: subs};
+		return {c0: pids, de: subs};
 	});
 var elm$core$Dict$RBEmpty_elm_builtin = {$: -2};
 var elm$core$Dict$empty = elm$core$Dict$RBEmpty_elm_builtin;
@@ -7296,7 +7296,7 @@ var elm$browser$Browser$Events$addKey = function (sub) {
 };
 var elm$browser$Browser$Events$Event = F2(
 	function (key, event) {
-		return {cv: event, cA: key};
+		return {cw: event, cB: key};
 	});
 var elm$browser$Browser$Events$spawn = F3(
 	function (router, key, _n0) {
@@ -7577,7 +7577,7 @@ var elm$browser$Browser$Events$onEffects = F3(
 			stepLeft,
 			stepBoth,
 			stepRight,
-			state.c$,
+			state.c0,
 			elm$core$Dict$fromList(newSubs),
 			_Utils_Tuple3(_List_Nil, elm$core$Dict$empty, _List_Nil));
 		var deadPids = _n0.a;
@@ -7623,8 +7623,8 @@ var elm$core$List$filterMap = F2(
 	});
 var elm$browser$Browser$Events$onSelfMsg = F3(
 	function (router, _n0, state) {
-		var key = _n0.cA;
-		var event = _n0.cv;
+		var key = _n0.cB;
+		var event = _n0.cw;
 		var toMessage = function (_n2) {
 			var subKey = _n2.a;
 			var _n3 = _n2.b;
@@ -7633,7 +7633,7 @@ var elm$browser$Browser$Events$onSelfMsg = F3(
 			var decoder = _n3.c;
 			return _Utils_eq(subKey, key) ? A2(_Browser_decodeEvent, decoder, event) : elm$core$Maybe$Nothing;
 		};
-		var messages = A2(elm$core$List$filterMap, toMessage, state.dd);
+		var messages = A2(elm$core$List$filterMap, toMessage, state.de);
 		return A2(
 			elm$core$Task$andThen,
 			function (_n1) {
@@ -7797,7 +7797,7 @@ var author$project$Frame$update = F2(
 								{
 									as: author$project$Frame$NextFramePending(
 										{
-											d4: author$project$Frame$getSeconds(posix),
+											d5: author$project$Frame$getSeconds(posix),
 											cg: elm$core$Maybe$Nothing
 										})
 								}),
@@ -7807,8 +7807,8 @@ var author$project$Frame$update = F2(
 						var posix = _n1.b.a;
 						var time = author$project$Frame$getSeconds(posix);
 						var index = model.a1 + 1;
-						var frameTime = time - data.d4;
-						var deltaTime = A2(elm$core$Basics$min, frameTime, model.cU);
+						var frameTime = time - data.d5;
+						var deltaTime = A2(elm$core$Basics$min, frameTime, model.cV);
 						var accumulatedTime = model.bu + deltaTime;
 						return _Utils_Tuple2(
 							_Utils_update(
@@ -7817,7 +7817,7 @@ var author$project$Frame$update = F2(
 									bu: accumulatedTime,
 									a1: index,
 									as: author$project$Frame$FrameUpdatePending(
-										{aM: deltaTime, d4: time})
+										{aM: deltaTime, d5: time})
 								}),
 							A3(
 								author$project$Frame$Update,
@@ -7825,7 +7825,7 @@ var author$project$Frame$update = F2(
 								A2(
 									elm$core$Maybe$map,
 									function (updateData) {
-										return {aM: updateData.aM, cy: frameTime, a1: model.a1, bJ: updateData.bJ};
+										return {aM: updateData.aM, cz: frameTime, a1: model.a1, bJ: updateData.bJ};
 									},
 									data.cg),
 								A2(elm$core$Task$perform, author$project$Frame$OnUpdateTime, elm$time$Time$now)));
@@ -7836,14 +7836,14 @@ var author$project$Frame$update = F2(
 				if (_n1.a.$ === 3) {
 					var data = _n1.a.a;
 					var posix = _n1.b.a;
-					var updateTime = author$project$Frame$getSeconds(posix) - data.d4;
+					var updateTime = author$project$Frame$getSeconds(posix) - data.d5;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
 								as: author$project$Frame$NextFramePending(
 									{
-										d4: data.d4,
+										d5: data.d5,
 										cg: elm$core$Maybe$Just(
 											{aM: data.aM, bJ: updateTime})
 									})
@@ -8609,7 +8609,7 @@ var author$project$History$getFpsMedium = F2(
 			A2(
 				elm$core$List$map,
 				function ($) {
-					return $.cy;
+					return $.cz;
 				},
 				A2(folkertdev$elm_deque$BoundedDeque$takeBack, length, model)));
 		var mediumTimes = author$project$History$isEven(length) ? A2(
@@ -8695,7 +8695,7 @@ var elm$random$Random$float = F2(
 var author$project$Builder$angleGenerator = A2(elm$random$Random$float, 0, 2 * elm$core$Basics$pi);
 var author$project$Components$Position = F3(
 	function (x, y, angle) {
-		return {dl: angle, cl: x, cm: y};
+		return {dm: angle, cl: x, cm: y};
 	});
 var elm$random$Random$map3 = F4(
 	function (func, _n0, _n1, _n2) {
@@ -8718,14 +8718,16 @@ var elm$random$Random$map3 = F4(
 		};
 	});
 var author$project$Builder$positionGenerator = function (world) {
+	var marginY = world.bS * 0.1;
+	var marginX = world.ci * 0.1;
 	return A4(
 		elm$random$Random$map3,
 		author$project$Components$Position,
-		A2(elm$random$Random$float, 0, world.ci),
-		A2(elm$random$Random$float, 0, world.bS),
+		A2(elm$random$Random$float, marginX, world.ci - marginX),
+		A2(elm$random$Random$float, marginY, world.bS - marginY),
 		author$project$Builder$angleGenerator);
 };
-var author$project$Builder$shipMotion = {dN: 600, dO: 20, dP: 5, dQ: 400};
+var author$project$Builder$shipMotion = {dO: 600, dP: 20, dQ: 5, dR: 400};
 var author$project$Collision$Shape$Circle = function (a) {
 	return {$: 1, a: a};
 };
@@ -8734,11 +8736,11 @@ var author$project$Collision$Shape$circle = function (radius) {
 };
 var author$project$Components$Velocity = F3(
 	function (velocityX, velocityY, angularVelocity) {
-		return {dm: angularVelocity, eb: velocityX, ec: velocityY};
+		return {dn: angularVelocity, ed: velocityX, ee: velocityY};
 	});
 var author$project$Components$CollisionShape$CollisionShape = F2(
 	function (shape, category) {
-		return {dq: category, bF: shape};
+		return {dr: category, bF: shape};
 	});
 var author$project$Components$CollisionShape$ShipScoop = 1;
 var author$project$Components$CollisionShape$shipScoop = 1;
@@ -8765,8 +8767,8 @@ var author$project$Ecs$insert = F4(
 			ecs);
 	});
 var author$project$Ecs$Internal$ComponentSpec = elm$core$Basics$identity;
-var author$project$Ecs$Spec$Ecs11 = elm$core$Basics$identity;
-var author$project$Ecs$Spec$components11 = function (fn) {
+var author$project$Ecs$Spec$Ecs12 = elm$core$Basics$identity;
+var author$project$Ecs$Spec$components12 = function (fn) {
 	return fn(
 		{
 			bR: function (_n0) {
@@ -8780,6 +8782,7 @@ var author$project$Ecs$Spec$components11 = function (fn) {
 						a: updateFn(ecs.a),
 						j: ecs.j,
 						k: ecs.k,
+						l: ecs.l,
 						b: ecs.b,
 						c: ecs.c,
 						d: ecs.d,
@@ -8803,6 +8806,7 @@ var author$project$Ecs$Spec$components11 = function (fn) {
 						a: ecs.a,
 						j: ecs.j,
 						k: ecs.k,
+						l: ecs.l,
 						b: updateFn(ecs.b),
 						c: ecs.c,
 						d: ecs.d,
@@ -8826,6 +8830,7 @@ var author$project$Ecs$Spec$components11 = function (fn) {
 						a: ecs.a,
 						j: ecs.j,
 						k: ecs.k,
+						l: ecs.l,
 						b: ecs.b,
 						c: updateFn(ecs.c),
 						d: ecs.d,
@@ -8849,6 +8854,7 @@ var author$project$Ecs$Spec$components11 = function (fn) {
 						a: ecs.a,
 						j: ecs.j,
 						k: ecs.k,
+						l: ecs.l,
 						b: ecs.b,
 						c: ecs.c,
 						d: updateFn(ecs.d),
@@ -8872,6 +8878,7 @@ var author$project$Ecs$Spec$components11 = function (fn) {
 						a: ecs.a,
 						j: ecs.j,
 						k: ecs.k,
+						l: ecs.l,
 						b: ecs.b,
 						c: ecs.c,
 						d: ecs.d,
@@ -8895,6 +8902,7 @@ var author$project$Ecs$Spec$components11 = function (fn) {
 						a: ecs.a,
 						j: ecs.j,
 						k: ecs.k,
+						l: ecs.l,
 						b: ecs.b,
 						c: ecs.c,
 						d: ecs.d,
@@ -8918,6 +8926,7 @@ var author$project$Ecs$Spec$components11 = function (fn) {
 						a: ecs.a,
 						j: ecs.j,
 						k: ecs.k,
+						l: ecs.l,
 						b: ecs.b,
 						c: ecs.c,
 						d: ecs.d,
@@ -8941,6 +8950,7 @@ var author$project$Ecs$Spec$components11 = function (fn) {
 						a: ecs.a,
 						j: ecs.j,
 						k: ecs.k,
+						l: ecs.l,
 						b: ecs.b,
 						c: ecs.c,
 						d: ecs.d,
@@ -8964,6 +8974,7 @@ var author$project$Ecs$Spec$components11 = function (fn) {
 						a: ecs.a,
 						j: ecs.j,
 						k: ecs.k,
+						l: ecs.l,
 						b: ecs.b,
 						c: ecs.c,
 						d: ecs.d,
@@ -8987,6 +8998,7 @@ var author$project$Ecs$Spec$components11 = function (fn) {
 						a: ecs.a,
 						j: updateFn(ecs.j),
 						k: ecs.k,
+						l: ecs.l,
 						b: ecs.b,
 						c: ecs.c,
 						d: ecs.d,
@@ -9010,6 +9022,31 @@ var author$project$Ecs$Spec$components11 = function (fn) {
 						a: ecs.a,
 						j: ecs.j,
 						k: updateFn(ecs.k),
+						l: ecs.l,
+						b: ecs.b,
+						c: ecs.c,
+						d: ecs.d,
+						e: ecs.e,
+						f: ecs.f,
+						g: ecs.g,
+						h: ecs.h,
+						i: ecs.i
+					};
+				})
+		})(
+		{
+			bR: function (_n22) {
+				var ecs = _n22;
+				return ecs.l;
+			},
+			cf: F2(
+				function (updateFn, _n23) {
+					var ecs = _n23;
+					return {
+						a: ecs.a,
+						j: ecs.j,
+						k: ecs.k,
+						l: updateFn(ecs.l),
 						b: ecs.b,
 						c: ecs.c,
 						d: ecs.d,
@@ -9032,8 +9069,10 @@ var author$project$Entities$ComponentSpecs = function (ai) {
 							return function (scale) {
 								return function (scaleAnimation) {
 									return function (sprite) {
-										return function (velocity) {
-											return {dj: ai, dt: collisionShape, dv: controls, dz: delayedOperations, dL: keyControlsMap, dS: motion, c2: position, d$: scale, d0: scaleAnimation, db: sprite, df: velocity};
+										return function (star) {
+											return function (velocity) {
+												return {dk: ai, du: collisionShape, dw: controls, dA: delayedOperations, dM: keyControlsMap, dT: motion, c3: position, d0: scale, d1: scaleAnimation, dc: sprite, dd: star, dg: velocity};
+											};
 										};
 									};
 								};
@@ -9045,7 +9084,7 @@ var author$project$Entities$ComponentSpecs = function (ai) {
 		};
 	};
 };
-var author$project$Entities$componentSpecs = author$project$Ecs$Spec$components11(author$project$Entities$ComponentSpecs);
+var author$project$Entities$componentSpecs = author$project$Ecs$Spec$components12(author$project$Entities$ComponentSpecs);
 var author$project$Entities$insert = function (getSpec) {
 	return author$project$Ecs$insert(
 		getSpec(author$project$Entities$componentSpecs));
@@ -9055,7 +9094,7 @@ var author$project$Builder$setShipComponents = F4(
 		return A4(
 			author$project$Entities$insert,
 			function ($) {
-				return $.dt;
+				return $.du;
 			},
 			entityId,
 			A2(
@@ -9065,35 +9104,35 @@ var author$project$Builder$setShipComponents = F4(
 			A4(
 				author$project$Entities$insert,
 				function ($) {
-					return $.df;
+					return $.dg;
 				},
 				entityId,
 				A3(author$project$Components$Velocity, 0, 0, 0),
 				A4(
 					author$project$Entities$insert,
 					function ($) {
-						return $.dS;
+						return $.dT;
 					},
 					entityId,
 					author$project$Builder$shipMotion,
 					A4(
 						author$project$Entities$insert,
 						function ($) {
-							return $.dv;
+							return $.dw;
 						},
 						entityId,
 						A2(author$project$Components$Controls$controls, 0, 0),
 						A4(
 							author$project$Entities$insert,
 							function ($) {
-								return $.c2;
+								return $.c3;
 							},
 							entityId,
 							position,
 							A4(
 								author$project$Entities$insert,
 								function ($) {
-									return $.db;
+									return $.dc;
 								},
 								entityId,
 								sprite,
@@ -9104,13 +9143,13 @@ var author$project$Entities$addEntity = function (_n0) {
 	var model = _n0;
 	return _Utils_Tuple2(
 		model.bh + 1,
-		{ag: model.ag, aw: model.aw + 1, bh: model.bh + 1});
+		{af: model.af, aw: model.aw + 1, bh: model.bh + 1});
 };
 var author$project$Entities$updateEcs = F2(
 	function (fn, _n0) {
 		var model = _n0;
 		return {
-			ag: fn(model.ag),
+			af: fn(model.af),
 			aw: model.aw,
 			bh: model.bh
 		};
@@ -9160,11 +9199,11 @@ var author$project$Builder$createAiShip = function (_n0) {
 			return A4(
 				author$project$Entities$insert,
 				function ($) {
-					return $.dj;
+					return $.dk;
 				},
 				entityId,
-				0,
-				A4(author$project$Builder$setShipComponents, entityId, assets.d3.co, position, ecs));
+				{d8: elm$core$Maybe$Nothing},
+				A4(author$project$Builder$setShipComponents, entityId, assets.d4.co, position, ecs));
 		},
 		entities2);
 	return _Utils_Tuple2(global2, entities3);
@@ -9190,15 +9229,15 @@ var author$project$Builder$createPlayerShip = function (_n0) {
 			return A4(
 				author$project$Entities$insert,
 				function ($) {
-					return $.dL;
+					return $.dM;
 				},
 				entityId,
-				{di: author$project$Data$KeyCode$arrowUp, dy: author$project$Data$KeyCode$arrowDown, dZ: author$project$Data$KeyCode$arrowLeft, d_: author$project$Data$KeyCode$arrowRight},
+				{dj: author$project$Data$KeyCode$arrowUp, dz: author$project$Data$KeyCode$arrowDown, d_: author$project$Data$KeyCode$arrowLeft, d$: author$project$Data$KeyCode$arrowRight},
 				A4(
 					author$project$Builder$setShipComponents,
 					entityId,
-					assets.d3.c0,
-					{dl: angle, cl: world.ci / 2, cm: world.bS / 2},
+					assets.d4.c1,
+					{dm: angle, cl: world.ci / 2, cm: world.bS / 2},
 					ecs));
 		},
 		entities2);
@@ -9235,7 +9274,7 @@ var author$project$Data$Animation$AnimationData = F2(
 var author$project$Data$Animation$animation = function (config) {
 	return A2(
 		author$project$Data$Animation$AnimationData,
-		{aD: 0, dA: config.dA, dF: config.dF, d4: config.d4, d9: config.d9},
+		{aD: 0, dB: config.dB, dG: config.dG, d5: config.d5, eb: config.eb},
 		_List_Nil);
 };
 var author$project$Data$Animation$delay = F2(
@@ -9336,7 +9375,7 @@ var author$project$Builder$createStar = function (_n0) {
 			return A4(
 				author$project$Entities$update,
 				function ($) {
-					return $.dz;
+					return $.dA;
 				},
 				entityId,
 				A2(
@@ -9347,43 +9386,50 @@ var author$project$Builder$createStar = function (_n0) {
 				A4(
 					author$project$Entities$insert,
 					function ($) {
-						return $.d0;
+						return $.d1;
 					},
 					entityId,
 					A2(
 						author$project$Data$Animation$delay,
 						delay,
 						author$project$Data$Animation$animation(
-							{dA: 0.5, dF: 0, d4: time, d9: 1})),
+							{dB: 0.5, dG: 0, d5: time, eb: 1})),
 					A4(
 						author$project$Entities$insert,
 						function ($) {
-							return $.d$;
+							return $.d0;
 						},
 						entityId,
 						0,
 						A4(
 							author$project$Entities$insert,
 							function ($) {
-								return $.df;
+								return $.dg;
 							},
 							entityId,
 							A3(author$project$Components$Velocity, 0, 0, elm$core$Basics$pi / 4),
 							A4(
 								author$project$Entities$insert,
 								function ($) {
-									return $.c2;
+									return $.c3;
 								},
 								entityId,
 								position,
 								A4(
 									author$project$Entities$insert,
 									function ($) {
-										return $.db;
+										return $.dc;
 									},
 									entityId,
-									assets.d3.dc,
-									ecs))))));
+									assets.d4.dd,
+									A4(
+										author$project$Entities$insert,
+										function ($) {
+											return $.dd;
+										},
+										entityId,
+										0,
+										ecs)))))));
 		},
 		entities2);
 	return _Utils_Tuple2(global3, entities3);
@@ -9412,16 +9458,16 @@ var author$project$Builder$createInitalEntities = function (_n0) {
 		author$project$Utils$times,
 		30,
 		author$project$Builder$createStar,
-		author$project$Builder$createPlayerShip(
-			A3(
-				author$project$Utils$times,
-				10,
-				author$project$Builder$createAiShip,
+		A3(
+			author$project$Utils$times,
+			10,
+			author$project$Builder$createAiShip,
+			author$project$Builder$createPlayerShip(
 				_Utils_Tuple2(global, entities))));
 };
 var author$project$Ecs$empty = function (_n0) {
 	var spec = _n0;
-	return spec.dC;
+	return spec.dD;
 };
 var author$project$Ecs$Internal$Spec = elm$core$Basics$identity;
 var elm$core$Dict$isEmpty = function (dict) {
@@ -9461,14 +9507,15 @@ var elm$core$Dict$size = function (dict) {
 	return A2(elm$core$Dict$sizeHelp, 0, dict);
 };
 var elm$core$Set$empty = elm$core$Dict$empty;
-var author$project$Ecs$Spec$spec11 = {
-	ds: F2(
+var author$project$Ecs$Spec$spec12 = {
+	dt: F2(
 		function (id, _n0) {
 			var ecs = _n0;
 			return {
 				a: A2(elm$core$Dict$remove, id, ecs.a),
 				j: A2(elm$core$Dict$remove, id, ecs.j),
 				k: A2(elm$core$Dict$remove, id, ecs.k),
+				l: A2(elm$core$Dict$remove, id, ecs.l),
 				b: A2(elm$core$Dict$remove, id, ecs.b),
 				c: A2(elm$core$Dict$remove, id, ecs.c),
 				d: A2(elm$core$Dict$remove, id, ecs.d),
@@ -9479,12 +9526,12 @@ var author$project$Ecs$Spec$spec11 = {
 				i: A2(elm$core$Dict$remove, id, ecs.i)
 			};
 		}),
-	du: function (_n1) {
+	dv: function (_n1) {
 		var ecs = _n1;
-		return (((((((((elm$core$Dict$size(ecs.a) + elm$core$Dict$size(ecs.b)) + elm$core$Dict$size(ecs.c)) + elm$core$Dict$size(ecs.d)) + elm$core$Dict$size(ecs.e)) + elm$core$Dict$size(ecs.f)) + elm$core$Dict$size(ecs.g)) + elm$core$Dict$size(ecs.h)) + elm$core$Dict$size(ecs.i)) + elm$core$Dict$size(ecs.j)) + elm$core$Dict$size(ecs.k);
+		return ((((((((((elm$core$Dict$size(ecs.a) + elm$core$Dict$size(ecs.b)) + elm$core$Dict$size(ecs.c)) + elm$core$Dict$size(ecs.d)) + elm$core$Dict$size(ecs.e)) + elm$core$Dict$size(ecs.f)) + elm$core$Dict$size(ecs.g)) + elm$core$Dict$size(ecs.h)) + elm$core$Dict$size(ecs.i)) + elm$core$Dict$size(ecs.j)) + elm$core$Dict$size(ecs.k)) + elm$core$Dict$size(ecs.l);
 	},
-	dC: {a: elm$core$Dict$empty, j: elm$core$Dict$empty, k: elm$core$Dict$empty, b: elm$core$Dict$empty, c: elm$core$Dict$empty, d: elm$core$Dict$empty, e: elm$core$Dict$empty, f: elm$core$Dict$empty, g: elm$core$Dict$empty, h: elm$core$Dict$empty, i: elm$core$Dict$empty},
-	dH: function (_n2) {
+	dD: {a: elm$core$Dict$empty, j: elm$core$Dict$empty, k: elm$core$Dict$empty, l: elm$core$Dict$empty, b: elm$core$Dict$empty, c: elm$core$Dict$empty, d: elm$core$Dict$empty, e: elm$core$Dict$empty, f: elm$core$Dict$empty, g: elm$core$Dict$empty, h: elm$core$Dict$empty, i: elm$core$Dict$empty},
+	dI: function (_n2) {
 		var ecs = _n2;
 		return A3(
 			elm$core$List$foldl,
@@ -9512,27 +9559,28 @@ var author$project$Ecs$Spec$spec11 = {
 					elm$core$Dict$keys(ecs.h),
 					elm$core$Dict$keys(ecs.i),
 					elm$core$Dict$keys(ecs.j),
-					elm$core$Dict$keys(ecs.k)
+					elm$core$Dict$keys(ecs.k),
+					elm$core$Dict$keys(ecs.l)
 				]));
 	},
-	dK: function (_n3) {
+	dL: function (_n3) {
 		var ecs = _n3;
-		return elm$core$Dict$isEmpty(ecs.a) && (elm$core$Dict$isEmpty(ecs.b) && (elm$core$Dict$isEmpty(ecs.c) && (elm$core$Dict$isEmpty(ecs.d) && (elm$core$Dict$isEmpty(ecs.e) && (elm$core$Dict$isEmpty(ecs.f) && (elm$core$Dict$isEmpty(ecs.g) && (elm$core$Dict$isEmpty(ecs.h) && (elm$core$Dict$isEmpty(ecs.i) && (elm$core$Dict$isEmpty(ecs.j) && elm$core$Dict$isEmpty(ecs.k))))))))));
+		return elm$core$Dict$isEmpty(ecs.a) && (elm$core$Dict$isEmpty(ecs.b) && (elm$core$Dict$isEmpty(ecs.c) && (elm$core$Dict$isEmpty(ecs.d) && (elm$core$Dict$isEmpty(ecs.e) && (elm$core$Dict$isEmpty(ecs.f) && (elm$core$Dict$isEmpty(ecs.g) && (elm$core$Dict$isEmpty(ecs.h) && (elm$core$Dict$isEmpty(ecs.i) && (elm$core$Dict$isEmpty(ecs.j) && (elm$core$Dict$isEmpty(ecs.k) && elm$core$Dict$isEmpty(ecs.l)))))))))));
 	},
-	dR: F2(
+	dS: F2(
 		function (id, _n4) {
 			var ecs = _n4;
-			return A2(elm$core$Dict$member, id, ecs.a) || (A2(elm$core$Dict$member, id, ecs.b) || (A2(elm$core$Dict$member, id, ecs.c) || (A2(elm$core$Dict$member, id, ecs.d) || (A2(elm$core$Dict$member, id, ecs.e) || (A2(elm$core$Dict$member, id, ecs.f) || (A2(elm$core$Dict$member, id, ecs.g) || (A2(elm$core$Dict$member, id, ecs.h) || (A2(elm$core$Dict$member, id, ecs.i) || (A2(elm$core$Dict$member, id, ecs.j) || A2(elm$core$Dict$member, id, ecs.k))))))))));
+			return A2(elm$core$Dict$member, id, ecs.a) || (A2(elm$core$Dict$member, id, ecs.b) || (A2(elm$core$Dict$member, id, ecs.c) || (A2(elm$core$Dict$member, id, ecs.d) || (A2(elm$core$Dict$member, id, ecs.e) || (A2(elm$core$Dict$member, id, ecs.f) || (A2(elm$core$Dict$member, id, ecs.g) || (A2(elm$core$Dict$member, id, ecs.h) || (A2(elm$core$Dict$member, id, ecs.i) || (A2(elm$core$Dict$member, id, ecs.j) || (A2(elm$core$Dict$member, id, ecs.k) || A2(elm$core$Dict$member, id, ecs.l)))))))))));
 		})
 };
-var author$project$Entities$spec = author$project$Ecs$Spec$spec11;
+var author$project$Entities$spec = author$project$Ecs$Spec$spec12;
 var author$project$Entities$empty = {
-	ag: author$project$Ecs$empty(author$project$Entities$spec),
+	af: author$project$Ecs$empty(author$project$Entities$spec),
 	aw: 0,
 	bh: 0
 };
 var author$project$Frame$init = function (maxDeltaTime) {
-	return {bu: 0, a1: 0, cU: maxDeltaTime, as: author$project$Frame$Initializing};
+	return {bu: 0, a1: 0, cV: maxDeltaTime, as: author$project$Frame$Initializing};
 };
 var author$project$Global$screenToWorld = function (screen) {
 	return {bS: 2 * screen.bS, ci: 2 * screen.ci};
@@ -9569,7 +9617,7 @@ var elm$random$Random$initialSeed = function (x) {
 };
 var author$project$Main$initSuccess = function (_n0) {
 	var assets = _n0.bO;
-	var posix = _n0.c3;
+	var posix = _n0.c4;
 	var viewport = _n0.bL;
 	var seed = elm$random$Random$initialSeed(
 		elm$time$Time$posixToMillis(posix));
@@ -9594,7 +9642,7 @@ var author$project$Main$initSuccess = function (_n0) {
 var author$project$Ecs$selectList = F2(
 	function (_n0, ecs) {
 		var selector = _n0;
-		return selector.d2(ecs);
+		return selector.d3(ecs);
 	});
 var author$project$Entities$process = F3(
 	function (selector, fn, _n0) {
@@ -9604,7 +9652,7 @@ var author$project$Entities$process = F3(
 			elm$core$List$foldl,
 			fn,
 			_Utils_Tuple2(b, model),
-			A2(author$project$Ecs$selectList, selector, model.ag));
+			A2(author$project$Ecs$selectList, selector, model.af));
 	});
 var author$project$Ecs$Internal$Selector = elm$core$Basics$identity;
 var elm$core$List$filter = F2(
@@ -9623,9 +9671,9 @@ var author$project$Ecs$Select$andHas = F2(
 		var spec = _n0;
 		var selector = _n1;
 		return {
-			d1: F2(
+			d2: F2(
 				function (id, ecs) {
-					var _n2 = A2(selector.d1, id, ecs);
+					var _n2 = A2(selector.d2, id, ecs);
 					if (_n2.$ === 1) {
 						return elm$core$Maybe$Nothing;
 					} else {
@@ -9636,7 +9684,7 @@ var author$project$Ecs$Select$andHas = F2(
 							spec.bR(ecs)) ? elm$core$Maybe$Just(a) : elm$core$Maybe$Nothing;
 					}
 				}),
-			d2: function (ecs) {
+			d3: function (ecs) {
 				return A2(
 					elm$core$List$filter,
 					function (_n3) {
@@ -9646,7 +9694,7 @@ var author$project$Ecs$Select$andHas = F2(
 							id,
 							spec.bR(ecs));
 					},
-					selector.d2(ecs));
+					selector.d3(ecs));
 			}
 		};
 	});
@@ -9657,19 +9705,489 @@ var author$project$Entities$andHas = function (getSpec) {
 var author$project$Ecs$Select$component = function (_n0) {
 	var spec = _n0;
 	return {
-		d1: F2(
+		d2: F2(
 			function (id, ecs) {
 				return A2(
 					elm$core$Dict$get,
 					id,
 					spec.bR(ecs));
 			}),
-		d2: function (ecs) {
+		d3: function (ecs) {
 			return elm$core$Dict$toList(
 				spec.bR(ecs));
 		}
 	};
 };
+var author$project$Ecs$Select$selectAndMap3 = F6(
+	function (fn, _n0, _n1, _n2, id, ecs) {
+		var aSelector = _n0;
+		var bSelector = _n1;
+		var cSelector = _n2;
+		var _n3 = A2(aSelector.d2, id, ecs);
+		if (_n3.$ === 1) {
+			return elm$core$Maybe$Nothing;
+		} else {
+			var a = _n3.a;
+			var _n4 = A2(bSelector.d2, id, ecs);
+			if (_n4.$ === 1) {
+				return elm$core$Maybe$Nothing;
+			} else {
+				var b = _n4.a;
+				var _n5 = A2(cSelector.d2, id, ecs);
+				if (_n5.$ === 1) {
+					return elm$core$Maybe$Nothing;
+				} else {
+					var c = _n5.a;
+					return elm$core$Maybe$Just(
+						A3(fn, a, b, c));
+				}
+			}
+		}
+	});
+var author$project$Ecs$Select$selectAndMap4 = F7(
+	function (fn, _n0, _n1, _n2, _n3, id, ecs) {
+		var aSelector = _n0;
+		var bSelector = _n1;
+		var cSelector = _n2;
+		var dSelector = _n3;
+		var _n4 = A2(aSelector.d2, id, ecs);
+		if (_n4.$ === 1) {
+			return elm$core$Maybe$Nothing;
+		} else {
+			var a = _n4.a;
+			var _n5 = A2(bSelector.d2, id, ecs);
+			if (_n5.$ === 1) {
+				return elm$core$Maybe$Nothing;
+			} else {
+				var b = _n5.a;
+				var _n6 = A2(cSelector.d2, id, ecs);
+				if (_n6.$ === 1) {
+					return elm$core$Maybe$Nothing;
+				} else {
+					var c = _n6.a;
+					var _n7 = A2(dSelector.d2, id, ecs);
+					if (_n7.$ === 1) {
+						return elm$core$Maybe$Nothing;
+					} else {
+						var d = _n7.a;
+						return elm$core$Maybe$Just(
+							A4(fn, a, b, c, d));
+					}
+				}
+			}
+		}
+	});
+var author$project$Ecs$Select$map4 = F5(
+	function (fn, _n0, bSelector, cSelector, dSelector) {
+		var aSelector = _n0;
+		return {
+			d2: F2(
+				function (id, ecs) {
+					return A7(author$project$Ecs$Select$selectAndMap4, fn, aSelector, bSelector, cSelector, dSelector, id, ecs);
+				}),
+			d3: function (ecs) {
+				return A2(
+					elm$core$List$filterMap,
+					function (_n1) {
+						var id = _n1.a;
+						var a = _n1.b;
+						var _n2 = A6(
+							author$project$Ecs$Select$selectAndMap3,
+							F3(
+								function (b, c, d) {
+									return A4(fn, a, b, c, d);
+								}),
+							bSelector,
+							cSelector,
+							dSelector,
+							id,
+							ecs);
+						if (_n2.$ === 1) {
+							return elm$core$Maybe$Nothing;
+						} else {
+							var e = _n2.a;
+							return elm$core$Maybe$Just(
+								_Utils_Tuple2(id, e));
+						}
+					},
+					aSelector.d3(ecs));
+			}
+		};
+	});
+var author$project$Ecs$Select$select4 = F5(
+	function (fn, aSpec, bSpec, cSpec, dSpec) {
+		return A5(
+			author$project$Ecs$Select$map4,
+			fn,
+			author$project$Ecs$Select$component(aSpec),
+			author$project$Ecs$Select$component(bSpec),
+			author$project$Ecs$Select$component(cSpec),
+			author$project$Ecs$Select$component(dSpec));
+	});
+var author$project$Entities$select4 = F5(
+	function (fn, getSpecA, getSpecB, getSpecC, getSpecD) {
+		return A5(
+			author$project$Ecs$Select$select4,
+			fn,
+			getSpecA(author$project$Entities$componentSpecs),
+			getSpecB(author$project$Entities$componentSpecs),
+			getSpecC(author$project$Entities$componentSpecs),
+			getSpecD(author$project$Entities$componentSpecs));
+	});
+var author$project$Systems$Ai$Ship = F4(
+	function (ai, motion, position, velocity) {
+		return {dk: ai, dT: motion, c3: position, dg: velocity};
+	});
+var author$project$Systems$Ai$shipSelector = A2(
+	author$project$Entities$andHas,
+	function ($) {
+		return $.dw;
+	},
+	A5(
+		author$project$Entities$select4,
+		author$project$Systems$Ai$Ship,
+		function ($) {
+			return $.dk;
+		},
+		function ($) {
+			return $.dT;
+		},
+		function ($) {
+			return $.c3;
+		},
+		function ($) {
+			return $.dg;
+		}));
+var author$project$Ecs$select = F3(
+	function (_n0, id, ecs) {
+		var selector = _n0;
+		return A2(selector.d2, id, ecs);
+	});
+var author$project$Entities$select = F3(
+	function (selector, id, _n0) {
+		var model = _n0;
+		return A3(author$project$Ecs$select, selector, id, model.af);
+	});
+var author$project$Components$Controls$getAcceleration = function (_n0) {
+	var data = _n0;
+	return data.bN;
+};
+var author$project$Components$Controls$getRotation = function (_n0) {
+	var data = _n0;
+	return data.b3;
+};
+var elm$core$Basics$cos = _Basics_cos;
+var elm$core$Basics$sin = _Basics_sin;
+var author$project$Systems$MotionControl$applyControls = F2(
+	function (_n0, deltaTime) {
+		var controls = _n0.dw;
+		var motion = _n0.dT;
+		var position = _n0.c3;
+		var velocity = _n0.dg;
+		var rotationControls = author$project$Components$Controls$getRotation(controls);
+		var targetAngularVelocity = rotationControls * motion.dQ;
+		var angularAcceleration = A3(elm$core$Basics$clamp, -motion.dP, motion.dP, (targetAngularVelocity - velocity.dn) / deltaTime);
+		var uncheckedAngularVelocity = A3(elm$core$Basics$clamp, -motion.dQ, motion.dQ, velocity.dn + (angularAcceleration * deltaTime));
+		var angularVelocity = ((uncheckedAngularVelocity < 0) && (velocity.dn > 0)) ? 0 : (((uncheckedAngularVelocity > 0) && (velocity.dn < 0)) ? 0 : uncheckedAngularVelocity);
+		var accelerationControls = author$project$Components$Controls$getAcceleration(controls);
+		var maxAcceleration = (accelerationControls > 0) ? motion.dO : motion.dR;
+		var acceleration = accelerationControls * maxAcceleration;
+		return {
+			dn: angularVelocity,
+			ed: velocity.ed + ((acceleration * elm$core$Basics$cos(position.dm)) * deltaTime),
+			ee: velocity.ee + ((acceleration * elm$core$Basics$sin(position.dm)) * deltaTime)
+		};
+	});
+var author$project$Systems$Movement$updatePosition = F3(
+	function (deltaTime, velocity, position) {
+		return {dm: position.dm + (velocity.dn * deltaTime), cl: position.cl + (velocity.ed * deltaTime), cm: position.cm + (velocity.ee * deltaTime)};
+	});
+var author$project$Systems$Ai$applyControls = F3(
+	function (controls, deltaTime, ship) {
+		var velocity = A2(
+			author$project$Systems$MotionControl$applyControls,
+			{dw: controls, dT: ship.dT, c3: ship.c3, dg: ship.dg},
+			deltaTime);
+		var position = A3(author$project$Systems$Movement$updatePosition, deltaTime, velocity, ship.c3);
+		return {dk: ship.dk, dT: ship.dT, c3: position, dg: velocity};
+	});
+var author$project$Systems$Ai$calculateDistanceSquared = F2(
+	function (targetPosition, ship) {
+		var deltaY = ship.c3.cm - targetPosition.cm;
+		var deltaX = ship.c3.cl - targetPosition.cl;
+		return (deltaX * deltaX) + (deltaY * deltaY);
+	});
+var author$project$Systems$Ai$pairs = function (list) {
+	if (!list.b) {
+		return _List_Nil;
+	} else {
+		var head = list.a;
+		var tail = list.b;
+		return _Utils_ap(
+			A2(
+				elm$core$List$map,
+				function (i) {
+					return _Utils_Tuple2(head, i);
+				},
+				tail),
+			author$project$Systems$Ai$pairs(tail));
+	}
+};
+var author$project$Systems$Ai$possibleControls = author$project$Systems$Ai$pairs(
+	_List_fromArray(
+		[
+			A2(author$project$Components$Controls$controls, 0, 0),
+			A2(author$project$Components$Controls$controls, -1, 0),
+			A2(author$project$Components$Controls$controls, 1, 0),
+			A2(author$project$Components$Controls$controls, 0, -1),
+			A2(author$project$Components$Controls$controls, 0, 1),
+			A2(author$project$Components$Controls$controls, -1, -1),
+			A2(author$project$Components$Controls$controls, 1, -1),
+			A2(author$project$Components$Controls$controls, 1, 1),
+			A2(author$project$Components$Controls$controls, -1, 1)
+		]));
+var author$project$Systems$Ai$withDistanceSquared = F3(
+	function (targetPosition, controls, ship) {
+		return {
+			dw: controls,
+			cu: A2(author$project$Systems$Ai$calculateDistanceSquared, targetPosition, ship)
+		};
+	});
+var elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return elm$core$Maybe$Just(x);
+	} else {
+		return elm$core$Maybe$Nothing;
+	}
+};
+var author$project$Systems$Ai$findControlsForTarget = F2(
+	function (position, ship) {
+		var currentDistanceSquared = A2(author$project$Systems$Ai$calculateDistanceSquared, position, ship);
+		var lookAheadTime = A3(elm$core$Basics$clamp, 1.0e-2, 0.5, currentDistanceSquared / 100000);
+		return A2(
+			elm$core$Maybe$withDefault,
+			A2(author$project$Components$Controls$controls, 0, 0),
+			A2(
+				elm$core$Maybe$map,
+				function ($) {
+					return $.dw;
+				},
+				elm$core$List$head(
+					A2(
+						elm$core$List$sortBy,
+						function ($) {
+							return $.cu;
+						},
+						A2(
+							elm$core$List$map,
+							function (_n0) {
+								var controls1 = _n0.a;
+								var controls2 = _n0.b;
+								return A3(
+									author$project$Systems$Ai$withDistanceSquared,
+									position,
+									controls1,
+									A3(
+										author$project$Systems$Ai$applyControls,
+										controls2,
+										lookAheadTime,
+										A3(author$project$Systems$Ai$applyControls, controls1, lookAheadTime, ship)));
+							},
+							author$project$Systems$Ai$possibleControls)))));
+	});
+var author$project$Entities$selectList = F2(
+	function (selector, _n0) {
+		var model = _n0;
+		return A2(author$project$Ecs$selectList, selector, model.af);
+	});
+var author$project$Ecs$Select$selectAndMap1 = F4(
+	function (fn, _n0, id, ecs) {
+		var aSelector = _n0;
+		var _n1 = A2(aSelector.d2, id, ecs);
+		if (_n1.$ === 1) {
+			return elm$core$Maybe$Nothing;
+		} else {
+			var a = _n1.a;
+			return elm$core$Maybe$Just(
+				fn(a));
+		}
+	});
+var author$project$Ecs$Select$selectAndMap2 = F5(
+	function (fn, _n0, _n1, id, ecs) {
+		var aSelector = _n0;
+		var bSelector = _n1;
+		var _n2 = A2(aSelector.d2, id, ecs);
+		if (_n2.$ === 1) {
+			return elm$core$Maybe$Nothing;
+		} else {
+			var a = _n2.a;
+			var _n3 = A2(bSelector.d2, id, ecs);
+			if (_n3.$ === 1) {
+				return elm$core$Maybe$Nothing;
+			} else {
+				var b = _n3.a;
+				return elm$core$Maybe$Just(
+					A2(fn, a, b));
+			}
+		}
+	});
+var author$project$Ecs$Select$map2 = F3(
+	function (fn, _n0, bSelector) {
+		var aSelector = _n0;
+		return {
+			d2: F2(
+				function (id, ecs) {
+					return A5(author$project$Ecs$Select$selectAndMap2, fn, aSelector, bSelector, id, ecs);
+				}),
+			d3: function (ecs) {
+				return A2(
+					elm$core$List$filterMap,
+					function (_n1) {
+						var id = _n1.a;
+						var a = _n1.b;
+						var _n2 = A4(
+							author$project$Ecs$Select$selectAndMap1,
+							function (b) {
+								return A2(fn, a, b);
+							},
+							bSelector,
+							id,
+							ecs);
+						if (_n2.$ === 1) {
+							return elm$core$Maybe$Nothing;
+						} else {
+							var c = _n2.a;
+							return elm$core$Maybe$Just(
+								_Utils_Tuple2(id, c));
+						}
+					},
+					aSelector.d3(ecs));
+			}
+		};
+	});
+var author$project$Ecs$Select$select2 = F3(
+	function (fn, aSpec, bSpec) {
+		return A3(
+			author$project$Ecs$Select$map2,
+			fn,
+			author$project$Ecs$Select$component(aSpec),
+			author$project$Ecs$Select$component(bSpec));
+	});
+var author$project$Entities$select2 = F3(
+	function (fn, getSpecA, getSpecB) {
+		return A3(
+			author$project$Ecs$Select$select2,
+			fn,
+			getSpecA(author$project$Entities$componentSpecs),
+			getSpecB(author$project$Entities$componentSpecs));
+	});
+var author$project$Systems$Ai$Target = F2(
+	function (star, position) {
+		return {c3: position, dd: star};
+	});
+var author$project$Systems$Ai$targetSelector = A2(
+	author$project$Entities$andHas,
+	function ($) {
+		return $.du;
+	},
+	A3(
+		author$project$Entities$select2,
+		author$project$Systems$Ai$Target,
+		function ($) {
+			return $.dd;
+		},
+		function ($) {
+			return $.c3;
+		}));
+var author$project$Systems$Ai$findTargetFor = F2(
+	function (ship, entities) {
+		return A2(
+			elm$core$Maybe$map,
+			function (_n2) {
+				var entityId = _n2.a;
+				var position = _n2.b;
+				return _Utils_Tuple2(entityId, position);
+			},
+			elm$core$List$head(
+				A2(
+					elm$core$List$sortBy,
+					function (_n1) {
+						var distanceSquared = _n1.c;
+						return distanceSquared;
+					},
+					A2(
+						elm$core$List$map,
+						function (_n0) {
+							var entityId = _n0.a;
+							var target = _n0.b;
+							return _Utils_Tuple3(
+								entityId,
+								target.c3,
+								A2(author$project$Systems$Ai$calculateDistanceSquared, target.c3, ship));
+						},
+						A2(author$project$Entities$selectList, author$project$Systems$Ai$targetSelector, entities)))));
+	});
+var author$project$Systems$Ai$updateEntity = F2(
+	function (_n0, _n1) {
+		var entityId = _n0.a;
+		var ship = _n0.b;
+		var global = _n1.a;
+		var entities = _n1.b;
+		var maybeTarget = function () {
+			var _n6 = ship.dk.d8;
+			if (!_n6.$) {
+				var targetId = _n6.a;
+				var _n7 = A3(author$project$Entities$select, author$project$Systems$Ai$targetSelector, targetId, entities);
+				if (!_n7.$) {
+					var target = _n7.a;
+					return elm$core$Maybe$Just(
+						_Utils_Tuple2(targetId, target.c3));
+				} else {
+					return A2(author$project$Systems$Ai$findTargetFor, ship, entities);
+				}
+			} else {
+				return A2(author$project$Systems$Ai$findTargetFor, ship, entities);
+			}
+		}();
+		var _n2 = function () {
+			if (!maybeTarget.$) {
+				var _n4 = maybeTarget.a;
+				var targetId = _n4.a;
+				var position = _n4.b;
+				return _Utils_Tuple2(
+					elm$core$Maybe$Just(targetId),
+					position);
+			} else {
+				var _n5 = author$project$Global$getWorld(global);
+				var width = _n5.ci;
+				var height = _n5.bS;
+				return _Utils_Tuple2(
+					elm$core$Maybe$Nothing,
+					{dm: 0, cl: width / 2, cm: height / 2});
+			}
+		}();
+		var maybeTargetId = _n2.a;
+		var targetPosition = _n2.b;
+		var controls = A2(author$project$Systems$Ai$findControlsForTarget, targetPosition, ship);
+		return _Utils_Tuple2(
+			global,
+			A2(
+				author$project$Entities$updateEcs,
+				function (ecs) {
+					return A4(
+						author$project$Entities$insert,
+						function ($) {
+							return $.dw;
+						},
+						entityId,
+						controls,
+						ecs);
+				},
+				entities));
+	});
+var author$project$Systems$Ai$update = A2(author$project$Entities$process, author$project$Systems$Ai$shipSelector, author$project$Systems$Ai$updateEntity);
 var author$project$Entities$selectComponent = function (getSpec) {
 	return author$project$Ecs$Select$component(
 		getSpec(author$project$Entities$componentSpecs));
@@ -9677,14 +10195,14 @@ var author$project$Entities$selectComponent = function (getSpec) {
 var author$project$Systems$Animation$scaleAnimationSelector = A2(
 	author$project$Entities$andHas,
 	function ($) {
-		return $.d$;
+		return $.d0;
 	},
 	author$project$Entities$selectComponent(
 		function ($) {
-			return $.d0;
+			return $.d1;
 		}));
 var author$project$Data$Animation$getEndTime = function (data) {
-	return (data.d4 + data.aD) + data.dA;
+	return (data.d5 + data.aD) + data.dB;
 };
 var author$project$Data$Animation$getActive = F3(
 	function (time, data, appended) {
@@ -9711,7 +10229,6 @@ var author$project$Data$Animation$getActive = F3(
 			}
 		}
 	});
-var elm$core$Basics$cos = _Basics_cos;
 var mgold$elm_animation$Animation$defaultEase = function (x) {
 	return (1 - elm$core$Basics$cos(elm$core$Basics$pi * x)) / 2;
 };
@@ -9801,17 +10318,17 @@ var author$project$Data$Animation$animate = F2(
 			time,
 			A2(
 				mgold$elm_animation$Animation$to,
-				data.d9,
+				data.eb,
 				A2(
 					mgold$elm_animation$Animation$from,
-					data.dF,
+					data.dG,
 					A2(
 						mgold$elm_animation$Animation$duration,
-						data.dA,
+						data.dB,
 						A2(
 							mgold$elm_animation$Animation$delay,
 							data.aD,
-							mgold$elm_animation$Animation$animation(data.d4))))));
+							mgold$elm_animation$Animation$animation(data.d5))))));
 	});
 var author$project$Data$Animation$hasEnded = F2(
 	function (time, _n0) {
@@ -9851,13 +10368,13 @@ var author$project$Systems$Animation$updateEntity = F2(
 					return (A2(author$project$Data$Animation$hasEnded, time, scaleAnimation) ? A2(
 						author$project$Entities$remove,
 						function ($) {
-							return $.d0;
+							return $.d1;
 						},
 						entityId) : elm$core$Basics$identity)(
 						A4(
 							author$project$Entities$insert,
 							function ($) {
-								return $.d$;
+								return $.d0;
 							},
 							entityId,
 							A2(author$project$Data$Animation$animate, time, scaleAnimation),
@@ -9866,104 +10383,18 @@ var author$project$Systems$Animation$updateEntity = F2(
 				entities));
 	});
 var author$project$Systems$Animation$update = A2(author$project$Entities$process, author$project$Systems$Animation$scaleAnimationSelector, author$project$Systems$Animation$updateEntity);
-var author$project$Entities$selectList = F2(
-	function (selector, _n0) {
-		var model = _n0;
-		return A2(author$project$Ecs$selectList, selector, model.ag);
-	});
-var author$project$Ecs$Select$selectAndMap1 = F4(
-	function (fn, _n0, id, ecs) {
-		var aSelector = _n0;
-		var _n1 = A2(aSelector.d1, id, ecs);
-		if (_n1.$ === 1) {
-			return elm$core$Maybe$Nothing;
-		} else {
-			var a = _n1.a;
-			return elm$core$Maybe$Just(
-				fn(a));
-		}
-	});
-var author$project$Ecs$Select$selectAndMap2 = F5(
-	function (fn, _n0, _n1, id, ecs) {
-		var aSelector = _n0;
-		var bSelector = _n1;
-		var _n2 = A2(aSelector.d1, id, ecs);
-		if (_n2.$ === 1) {
-			return elm$core$Maybe$Nothing;
-		} else {
-			var a = _n2.a;
-			var _n3 = A2(bSelector.d1, id, ecs);
-			if (_n3.$ === 1) {
-				return elm$core$Maybe$Nothing;
-			} else {
-				var b = _n3.a;
-				return elm$core$Maybe$Just(
-					A2(fn, a, b));
-			}
-		}
-	});
-var author$project$Ecs$Select$map2 = F3(
-	function (fn, _n0, bSelector) {
-		var aSelector = _n0;
-		return {
-			d1: F2(
-				function (id, ecs) {
-					return A5(author$project$Ecs$Select$selectAndMap2, fn, aSelector, bSelector, id, ecs);
-				}),
-			d2: function (ecs) {
-				return A2(
-					elm$core$List$filterMap,
-					function (_n1) {
-						var id = _n1.a;
-						var a = _n1.b;
-						var _n2 = A4(
-							author$project$Ecs$Select$selectAndMap1,
-							function (b) {
-								return A2(fn, a, b);
-							},
-							bSelector,
-							id,
-							ecs);
-						if (_n2.$ === 1) {
-							return elm$core$Maybe$Nothing;
-						} else {
-							var c = _n2.a;
-							return elm$core$Maybe$Just(
-								_Utils_Tuple2(id, c));
-						}
-					},
-					aSelector.d2(ecs));
-			}
-		};
-	});
-var author$project$Ecs$Select$select2 = F3(
-	function (fn, aSpec, bSpec) {
-		return A3(
-			author$project$Ecs$Select$map2,
-			fn,
-			author$project$Ecs$Select$component(aSpec),
-			author$project$Ecs$Select$component(bSpec));
-	});
-var author$project$Entities$select2 = F3(
-	function (fn, getSpecA, getSpecB) {
-		return A3(
-			author$project$Ecs$Select$select2,
-			fn,
-			getSpecA(author$project$Entities$componentSpecs),
-			getSpecB(author$project$Entities$componentSpecs));
-	});
 var author$project$Systems$Collision$Collidable = F2(
 	function (collisionShape, position) {
-		return {dt: collisionShape, c2: position};
+		return {du: collisionShape, c3: position};
 	});
 var author$project$Systems$Collision$collidableSelector = A3(
 	author$project$Entities$select2,
 	author$project$Systems$Collision$Collidable,
 	function ($) {
-		return $.dt;
+		return $.du;
 	},
 	function ($) {
-		return $.c2;
+		return $.c3;
 	});
 var author$project$Components$DelayedOperations$RemoveEntity = {$: 0};
 var author$project$Data$Animation$getLast = F2(
@@ -9991,10 +10422,10 @@ var author$project$Data$Animation$andNext = F2(
 		var lastData = A2(author$project$Data$Animation$getLast, start, appended);
 		var data = {
 			aD: nextData.aD,
-			dA: nextData.dA,
-			dF: lastData.d9,
-			d4: author$project$Data$Animation$getEndTime(lastData),
-			d9: nextData.d9
+			dB: nextData.dB,
+			dG: lastData.eb,
+			d5: author$project$Data$Animation$getEndTime(lastData),
+			eb: nextData.eb
 		};
 		return A2(
 			author$project$Data$Animation$AnimationData,
@@ -10007,7 +10438,7 @@ var author$project$Data$Animation$andNext = F2(
 var author$project$Data$Animation$nextAnimation = function (config) {
 	return A2(
 		author$project$Data$Animation$AnimationData,
-		{aD: 0, dA: config.dA, dF: 0, d4: 0, d9: config.d9},
+		{aD: 0, dB: config.dB, dG: 0, d5: 0, eb: config.eb},
 		_List_Nil);
 };
 var author$project$Systems$Collision$handleStarShipCollisions = F2(
@@ -10025,33 +10456,33 @@ var author$project$Systems$Collision$handleStarShipCollisions = F2(
 					return A4(
 						author$project$Entities$update,
 						function ($) {
-							return $.dz;
+							return $.dA;
 						},
 						starEntityId,
 						A2(author$project$Components$DelayedOperations$add, time + 1, author$project$Components$DelayedOperations$RemoveEntity),
 						A4(
 							author$project$Entities$insert,
 							function ($) {
-								return $.d0;
+								return $.d1;
 							},
 							starEntityId,
 							A2(
 								author$project$Data$Animation$andNext,
 								author$project$Data$Animation$nextAnimation(
-									{dA: 0.5, d9: 0}),
+									{dB: 0.5, eb: 0}),
 								author$project$Data$Animation$animation(
-									{dA: 0.5, dF: 1, d4: time, d9: 1.5})),
+									{dB: 0.5, dG: 1, d5: time, eb: 1.5})),
 							A4(
 								author$project$Entities$insert,
 								function ($) {
-									return $.df;
+									return $.dg;
 								},
 								starEntityId,
 								A3(author$project$Components$Velocity, 0, 0, 2 * elm$core$Basics$pi),
 								A3(
 									author$project$Entities$remove,
 									function ($) {
-										return $.dt;
+										return $.du;
 									},
 									starEntityId,
 									ecs))));
@@ -10173,7 +10604,7 @@ var author$project$Collision$Grid$insert = F5(
 					return A4(
 						author$project$Collision$Grid$insertItem,
 						A2(author$project$Collision$Shape$bounds, position, shape),
-						{cs: data, c2: position, bF: shape},
+						{cs: data, c3: position, bF: shape},
 						cellSize,
 						category);
 				},
@@ -10183,9 +10614,9 @@ var author$project$Systems$Collision$Grid$insert = author$project$Collision$Grid
 var author$project$Systems$Collision$insertEntity = F2(
 	function (_n0, grid) {
 		var entityId = _n0.a;
-		var collisionShape = _n0.b.dt;
-		var position = _n0.b.c2;
-		return A5(author$project$Systems$Collision$Grid$insert, position, collisionShape.bF, entityId, collisionShape.dq, grid);
+		var collisionShape = _n0.b.du;
+		var position = _n0.b.c3;
+		return A5(author$project$Systems$Collision$Grid$insert, position, collisionShape.bF, entityId, collisionShape.dr, grid);
 	});
 var author$project$Collision$Bounds$intersectAxis = F4(
 	function (a0, a1, b0, b1) {
@@ -10234,7 +10665,7 @@ var author$project$Collision$Shape$intersect = F4(
 	});
 var author$project$Collision$Grid$shapeIntersect = F2(
 	function (itemA, itemB) {
-		return A4(author$project$Collision$Shape$intersect, itemA.c2, itemA.bF, itemB.c2, itemB.bF);
+		return A4(author$project$Collision$Shape$intersect, itemA.c3, itemA.bF, itemB.c3, itemB.bF);
 	});
 var elm$core$Dict$values = function (dict) {
 	return A3(
@@ -10362,18 +10793,18 @@ var author$project$Systems$Collision$update = function (_n0) {
 };
 var author$project$Systems$DelayedOperations$delayedOperationsSelector = author$project$Entities$selectComponent(
 	function ($) {
-		return $.dz;
+		return $.dA;
 	});
 var author$project$Ecs$clear = F3(
 	function (_n0, id, ecs) {
 		var spec = _n0;
-		return A2(spec.ds, id, ecs);
+		return A2(spec.dt, id, ecs);
 	});
 var author$project$Entities$removeEntity = F2(
 	function (entityId, _n0) {
 		var model = _n0;
 		return {
-			ag: A3(author$project$Ecs$clear, author$project$Entities$spec, entityId, model.ag),
+			af: A3(author$project$Ecs$clear, author$project$Entities$spec, entityId, model.af),
 			aw: model.aw - 1,
 			bh: model.bh
 		};
@@ -10390,7 +10821,7 @@ var author$project$Systems$DelayedOperations$handleOperation = F3(
 					return A4(
 						author$project$Entities$insert,
 						function ($) {
-							return $.dt;
+							return $.du;
 						},
 						entityId,
 						collisionShape,
@@ -10439,7 +10870,7 @@ var author$project$Systems$DelayedOperations$updateEntity = F2(
 						return A3(
 							author$project$Entities$remove,
 							function ($) {
-								return $.dz;
+								return $.dA;
 							},
 							entityId,
 							ecs);
@@ -10447,7 +10878,7 @@ var author$project$Systems$DelayedOperations$updateEntity = F2(
 						return A4(
 							author$project$Entities$insert,
 							function ($) {
-								return $.dz;
+								return $.dA;
 							},
 							entityId,
 							operations2,
@@ -10460,11 +10891,11 @@ var author$project$Systems$DelayedOperations$update = A2(author$project$Entities
 var author$project$Systems$KeyControls$keyControlsSelector = A2(
 	author$project$Entities$andHas,
 	function ($) {
-		return $.dv;
+		return $.dw;
 	},
 	author$project$Entities$selectComponent(
 		function ($) {
-			return $.dL;
+			return $.dM;
 		}));
 var author$project$Global$getActiveKeys = function (_n0) {
 	var model = _n0;
@@ -10479,8 +10910,8 @@ var author$project$Systems$KeyControls$updateControls = F2(
 	function (keyControlsMap, activeKeys) {
 		var rotation = function () {
 			var _n1 = _Utils_Tuple2(
-				A2(elm$core$Set$member, keyControlsMap.dZ, activeKeys),
-				A2(elm$core$Set$member, keyControlsMap.d_, activeKeys));
+				A2(elm$core$Set$member, keyControlsMap.d_, activeKeys),
+				A2(elm$core$Set$member, keyControlsMap.d$, activeKeys));
 			if (_n1.a) {
 				if (_n1.b) {
 					return 0;
@@ -10497,8 +10928,8 @@ var author$project$Systems$KeyControls$updateControls = F2(
 		}();
 		var acceleration = function () {
 			var _n0 = _Utils_Tuple2(
-				A2(elm$core$Set$member, keyControlsMap.di, activeKeys),
-				A2(elm$core$Set$member, keyControlsMap.dy, activeKeys));
+				A2(elm$core$Set$member, keyControlsMap.dj, activeKeys),
+				A2(elm$core$Set$member, keyControlsMap.dz, activeKeys));
 			if (_n0.a) {
 				if (_n0.b) {
 					return 0;
@@ -10529,7 +10960,7 @@ var author$project$Systems$KeyControls$updateEntity = F2(
 					return A4(
 						author$project$Entities$insert,
 						function ($) {
-							return $.dv;
+							return $.dw;
 						},
 						entityId,
 						A2(
@@ -10541,174 +10972,29 @@ var author$project$Systems$KeyControls$updateEntity = F2(
 				entities));
 	});
 var author$project$Systems$KeyControls$update = A2(author$project$Entities$process, author$project$Systems$KeyControls$keyControlsSelector, author$project$Systems$KeyControls$updateEntity);
-var author$project$Ecs$Select$selectAndMap3 = F6(
-	function (fn, _n0, _n1, _n2, id, ecs) {
-		var aSelector = _n0;
-		var bSelector = _n1;
-		var cSelector = _n2;
-		var _n3 = A2(aSelector.d1, id, ecs);
-		if (_n3.$ === 1) {
-			return elm$core$Maybe$Nothing;
-		} else {
-			var a = _n3.a;
-			var _n4 = A2(bSelector.d1, id, ecs);
-			if (_n4.$ === 1) {
-				return elm$core$Maybe$Nothing;
-			} else {
-				var b = _n4.a;
-				var _n5 = A2(cSelector.d1, id, ecs);
-				if (_n5.$ === 1) {
-					return elm$core$Maybe$Nothing;
-				} else {
-					var c = _n5.a;
-					return elm$core$Maybe$Just(
-						A3(fn, a, b, c));
-				}
-			}
-		}
-	});
-var author$project$Ecs$Select$selectAndMap4 = F7(
-	function (fn, _n0, _n1, _n2, _n3, id, ecs) {
-		var aSelector = _n0;
-		var bSelector = _n1;
-		var cSelector = _n2;
-		var dSelector = _n3;
-		var _n4 = A2(aSelector.d1, id, ecs);
-		if (_n4.$ === 1) {
-			return elm$core$Maybe$Nothing;
-		} else {
-			var a = _n4.a;
-			var _n5 = A2(bSelector.d1, id, ecs);
-			if (_n5.$ === 1) {
-				return elm$core$Maybe$Nothing;
-			} else {
-				var b = _n5.a;
-				var _n6 = A2(cSelector.d1, id, ecs);
-				if (_n6.$ === 1) {
-					return elm$core$Maybe$Nothing;
-				} else {
-					var c = _n6.a;
-					var _n7 = A2(dSelector.d1, id, ecs);
-					if (_n7.$ === 1) {
-						return elm$core$Maybe$Nothing;
-					} else {
-						var d = _n7.a;
-						return elm$core$Maybe$Just(
-							A4(fn, a, b, c, d));
-					}
-				}
-			}
-		}
-	});
-var author$project$Ecs$Select$map4 = F5(
-	function (fn, _n0, bSelector, cSelector, dSelector) {
-		var aSelector = _n0;
-		return {
-			d1: F2(
-				function (id, ecs) {
-					return A7(author$project$Ecs$Select$selectAndMap4, fn, aSelector, bSelector, cSelector, dSelector, id, ecs);
-				}),
-			d2: function (ecs) {
-				return A2(
-					elm$core$List$filterMap,
-					function (_n1) {
-						var id = _n1.a;
-						var a = _n1.b;
-						var _n2 = A6(
-							author$project$Ecs$Select$selectAndMap3,
-							F3(
-								function (b, c, d) {
-									return A4(fn, a, b, c, d);
-								}),
-							bSelector,
-							cSelector,
-							dSelector,
-							id,
-							ecs);
-						if (_n2.$ === 1) {
-							return elm$core$Maybe$Nothing;
-						} else {
-							var e = _n2.a;
-							return elm$core$Maybe$Just(
-								_Utils_Tuple2(id, e));
-						}
-					},
-					aSelector.d2(ecs));
-			}
-		};
-	});
-var author$project$Ecs$Select$select4 = F5(
-	function (fn, aSpec, bSpec, cSpec, dSpec) {
-		return A5(
-			author$project$Ecs$Select$map4,
-			fn,
-			author$project$Ecs$Select$component(aSpec),
-			author$project$Ecs$Select$component(bSpec),
-			author$project$Ecs$Select$component(cSpec),
-			author$project$Ecs$Select$component(dSpec));
-	});
-var author$project$Entities$select4 = F5(
-	function (fn, getSpecA, getSpecB, getSpecC, getSpecD) {
-		return A5(
-			author$project$Ecs$Select$select4,
-			fn,
-			getSpecA(author$project$Entities$componentSpecs),
-			getSpecB(author$project$Entities$componentSpecs),
-			getSpecC(author$project$Entities$componentSpecs),
-			getSpecD(author$project$Entities$componentSpecs));
-	});
 var author$project$Systems$MotionControl$MotionControl = F4(
 	function (controls, motion, position, velocity) {
-		return {dv: controls, dS: motion, c2: position, df: velocity};
+		return {dw: controls, dT: motion, c3: position, dg: velocity};
 	});
 var author$project$Systems$MotionControl$motionControlSelector = A5(
 	author$project$Entities$select4,
 	author$project$Systems$MotionControl$MotionControl,
 	function ($) {
-		return $.dv;
+		return $.dw;
 	},
 	function ($) {
-		return $.dS;
+		return $.dT;
 	},
 	function ($) {
-		return $.c2;
+		return $.c3;
 	},
 	function ($) {
-		return $.df;
+		return $.dg;
 	});
 var author$project$Global$getDeltaTime = function (_n0) {
 	var model = _n0;
 	return model.aM;
 };
-var author$project$Components$Controls$getAcceleration = function (_n0) {
-	var data = _n0;
-	return data.bN;
-};
-var author$project$Components$Controls$getRotation = function (_n0) {
-	var data = _n0;
-	return data.b3;
-};
-var elm$core$Basics$sin = _Basics_sin;
-var author$project$Systems$MotionControl$applyControls = F2(
-	function (_n0, deltaTime) {
-		var controls = _n0.dv;
-		var motion = _n0.dS;
-		var position = _n0.c2;
-		var velocity = _n0.df;
-		var rotationControls = author$project$Components$Controls$getRotation(controls);
-		var targetAngularVelocity = rotationControls * motion.dP;
-		var angularAcceleration = A3(elm$core$Basics$clamp, -motion.dO, motion.dO, (targetAngularVelocity - velocity.dm) / deltaTime);
-		var uncheckedAngularVelocity = A3(elm$core$Basics$clamp, -motion.dP, motion.dP, velocity.dm + (angularAcceleration * deltaTime));
-		var angularVelocity = ((uncheckedAngularVelocity < 0) && (velocity.dm > 0)) ? 0 : (((uncheckedAngularVelocity > 0) && (velocity.dm < 0)) ? 0 : uncheckedAngularVelocity);
-		var accelerationControls = author$project$Components$Controls$getAcceleration(controls);
-		var maxAcceleration = (accelerationControls > 0) ? motion.dN : motion.dQ;
-		var acceleration = accelerationControls * maxAcceleration;
-		return {
-			dm: angularVelocity,
-			eb: velocity.eb + ((acceleration * elm$core$Basics$cos(position.dl)) * deltaTime),
-			ec: velocity.ec + ((acceleration * elm$core$Basics$sin(position.dl)) * deltaTime)
-		};
-	});
 var author$project$Systems$MotionControl$updateEntity = F2(
 	function (_n0, _n1) {
 		var entityId = _n0.a;
@@ -10723,7 +11009,7 @@ var author$project$Systems$MotionControl$updateEntity = F2(
 					return A4(
 						author$project$Entities$insert,
 						function ($) {
-							return $.df;
+							return $.dg;
 						},
 						entityId,
 						A2(
@@ -10737,22 +11023,22 @@ var author$project$Systems$MotionControl$updateEntity = F2(
 var author$project$Systems$MotionControl$update = A2(author$project$Entities$process, author$project$Systems$MotionControl$motionControlSelector, author$project$Systems$MotionControl$updateEntity);
 var author$project$Systems$Movement$Movement = F2(
 	function (position, velocity) {
-		return {c2: position, df: velocity};
+		return {c3: position, dg: velocity};
 	});
 var author$project$Systems$Movement$movementSelector = A3(
 	author$project$Entities$select2,
 	author$project$Systems$Movement$Movement,
 	function ($) {
-		return $.c2;
+		return $.c3;
 	},
 	function ($) {
-		return $.df;
+		return $.dg;
 	});
 var author$project$Systems$Movement$updateEntity = F2(
 	function (_n0, _n1) {
 		var entityId = _n0.a;
-		var position = _n0.b.c2;
-		var velocity = _n0.b.df;
+		var position = _n0.b.c3;
+		var velocity = _n0.b.dg;
 		var global = _n1.a;
 		var entities = _n1.b;
 		var deltaTime = author$project$Global$getDeltaTime(global);
@@ -10764,16 +11050,16 @@ var author$project$Systems$Movement$updateEntity = F2(
 					return A4(
 						author$project$Entities$insert,
 						function ($) {
-							return $.c2;
+							return $.c3;
 						},
 						entityId,
-						{dl: position.dl + (velocity.dm * deltaTime), cl: position.cl + (velocity.eb * deltaTime), cm: position.cm + (velocity.ec * deltaTime)},
+						A3(author$project$Systems$Movement$updatePosition, deltaTime, velocity, position),
 						ecs);
 				},
 				entities));
 	});
 var author$project$Systems$Movement$update = A2(author$project$Entities$process, author$project$Systems$Movement$movementSelector, author$project$Systems$Movement$updateEntity);
-var author$project$Systems$Spawn$spawnRate = 5;
+var author$project$Systems$Spawn$spawnRate = 10;
 var author$project$Systems$Spawn$testSpawnRate = 50;
 var author$project$Systems$Spawn$update = function (_n0) {
 	var global1 = _n0.a;
@@ -10801,8 +11087,9 @@ var author$project$Systems$update = function (state) {
 			author$project$Systems$Movement$update(
 				author$project$Systems$MotionControl$update(
 					author$project$Systems$KeyControls$update(
-						author$project$Systems$Spawn$update(
-							author$project$Systems$DelayedOperations$update(state)))))));
+						author$project$Systems$Ai$update(
+							author$project$Systems$Spawn$update(
+								author$project$Systems$DelayedOperations$update(state))))))));
 };
 var elm$core$Basics$neq = _Utils_notEqual;
 var elm$core$Platform$Cmd$map = _Platform_map;
@@ -10876,7 +11163,7 @@ var author$project$Main$update = F2(
 											author$project$History$add,
 											{
 												aw: author$project$Entities$getEntityCount(successModel.a_),
-												cy: stats.cy,
+												cz: stats.cz,
 												a1: stats.a1,
 												bJ: stats.bJ
 											},
@@ -10923,11 +11210,11 @@ var author$project$Main$viewError = function (error) {
 var author$project$Ecs$componentCount = F2(
 	function (_n0, ecs) {
 		var spec = _n0;
-		return spec.du(ecs);
+		return spec.dv(ecs);
 	});
 var author$project$Entities$getComponentCount = function (_n0) {
 	var model = _n0;
-	return A2(author$project$Ecs$componentCount, author$project$Entities$spec, model.ag);
+	return A2(author$project$Ecs$componentCount, author$project$Entities$spec, model.af);
 };
 var author$project$Global$getScreen = function (_n0) {
 	var model = _n0;
@@ -10950,7 +11237,7 @@ var terezka$elm_charts$Plot$dot = F3(
 	function (view, x, y) {
 		return {
 			ai: elm$core$Maybe$Nothing,
-			ee: elm$core$Maybe$Just(view),
+			eg: elm$core$Maybe$Just(view),
 			cl: x,
 			aV: elm$core$Maybe$Nothing,
 			a8: elm$core$Maybe$Nothing,
@@ -11231,25 +11518,16 @@ var myrho$elm_round$Round$round = myrho$elm_round$Round$roundFun(
 				}
 			}
 		}));
-var elm$core$List$head = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return elm$core$Maybe$Just(x);
-	} else {
-		return elm$core$Maybe$Nothing;
-	}
-};
 var elm$regex$Regex$Match = F4(
 	function (match, index, number, submatches) {
-		return {a1: index, dM: match, dU: number, d5: submatches};
+		return {a1: index, dN: match, dV: number, d6: submatches};
 	});
 var elm$regex$Regex$findAtMost = _Regex_findAtMost;
 var elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
 var elm$regex$Regex$fromString = function (string) {
 	return A2(
 		elm$regex$Regex$fromStringWith,
-		{cp: false, cY: false},
+		{cp: false, cZ: false},
 		string);
 };
 var elm$regex$Regex$never = _Regex_never;
@@ -11270,7 +11548,7 @@ var terezka$elm_charts$Plot$deltaPrecision = function (delta) {
 						A2(
 							elm$core$List$map,
 							function ($) {
-								return $.dM;
+								return $.dN;
 							},
 							A3(
 								elm$regex$Regex$findAtMost,
@@ -11317,7 +11595,7 @@ var terezka$elm_charts$Plot$niceInterval = F3(
 		return magMsdFinal * magPow;
 	});
 var terezka$elm_charts$Plot$decentPositions = function (summary) {
-	return (summary.cB > 600) ? A3(
+	return (summary.cC > 600) ? A3(
 		terezka$elm_charts$Plot$interval,
 		0,
 		A3(terezka$elm_charts$Plot$niceInterval, summary.aQ, summary.bg, 10),
@@ -11357,8 +11635,8 @@ var terezka$elm_charts$Plot$viewLabel = F2(
 	});
 var terezka$elm_charts$Plot$simpleLabel = function (position) {
 	return {
-		c2: position,
-		ee: A2(
+		c3: position,
+		eg: A2(
 			terezka$elm_charts$Plot$viewLabel,
 			_List_Nil,
 			elm$core$String$fromFloat(position))
@@ -11373,7 +11651,7 @@ var terezka$elm_charts$Plot$fullLine = F2(
 				elm$core$List$cons,
 				elm$svg$Svg$Attributes$style('pointer-events: none;'),
 				attributes),
-			cu: summary.bg,
+			cv: summary.bg,
 			b4: summary.aQ
 		};
 	});
@@ -11392,8 +11670,8 @@ var terezka$elm_charts$Plot$simpleTick = function (position) {
 			[
 				elm$svg$Svg$Attributes$stroke(terezka$elm_charts$Internal$Colors$darkGrey)
 			]),
-		cB: 5,
-		c2: position
+		cC: 5,
+		c3: position
 	};
 };
 var terezka$elm_charts$Plot$normalAxis = terezka$elm_charts$Plot$customAxis(
@@ -11409,7 +11687,7 @@ var terezka$elm_charts$Plot$normalAxis = terezka$elm_charts$Plot$customAxis(
 					terezka$elm_charts$Plot$remove,
 					0,
 					terezka$elm_charts$Plot$decentPositions(summary))),
-			c2: terezka$elm_charts$Plot$closestToZero,
+			c3: terezka$elm_charts$Plot$closestToZero,
 			aJ: A2(
 				elm$core$List$map,
 				terezka$elm_charts$Plot$simpleTick,
@@ -11630,7 +11908,7 @@ terezka$elm_charts$Plot$cyclic$plotPosition = function () {
 	return terezka$elm_charts$Plot$plotPosition;
 };
 var terezka$elm_charts$Internal$Draw$length = function (axis) {
-	return (axis.cB - axis.a3) - axis.cT;
+	return (axis.cC - axis.a3) - axis.cU;
 };
 var terezka$elm_charts$Internal$Draw$range = function (axis) {
 	return (axis.bg - axis.aQ) ? (axis.bg - axis.aQ) : 1;
@@ -11664,8 +11942,8 @@ var terezka$elm_charts$Plot$toNearestX = F2(
 		var _default = A2(
 			elm$core$Maybe$withDefault,
 			0,
-			elm$core$List$head(summary.cl.dk));
-		return A3(elm$core$List$foldl, updateIfCloser, _default, summary.cl.dk);
+			elm$core$List$head(summary.cl.dl));
+		return A3(elm$core$List$foldl, updateIfCloser, _default, summary.cl.dl);
 	});
 var terezka$elm_charts$Plot$unScalePoint = F4(
 	function (summary, mouseX, mouseY, _n0) {
@@ -11678,12 +11956,12 @@ var terezka$elm_charts$Plot$unScalePoint = F4(
 				cl: A2(
 					terezka$elm_charts$Plot$toNearestX,
 					summary,
-					A2(terezka$elm_charts$Internal$Draw$toUnSVGX, summary, (summary.cl.cB * (mouseX - left)) / width)),
+					A2(terezka$elm_charts$Internal$Draw$toUnSVGX, summary, (summary.cl.cC * (mouseX - left)) / width)),
 				cm: A3(
 					elm$core$Basics$clamp,
 					summary.cm.aQ,
 					summary.cm.bg,
-					A2(terezka$elm_charts$Internal$Draw$toUnSVGY, summary, (summary.cm.cB * (mouseY - top)) / height))
+					A2(terezka$elm_charts$Internal$Draw$toUnSVGY, summary, (summary.cm.cC * (mouseY - top)) / height))
 			});
 	});
 var terezka$elm_charts$Plot$handleHint = F2(
@@ -11782,15 +12060,15 @@ var terezka$elm_charts$Plot$innerAttributes = function (customizations) {
 			]));
 };
 var terezka$elm_charts$Plot$defaultPlotSummary = {
-	cl: {dk: _List_Nil, bg: 1.0, aQ: 0.0},
-	cm: {dk: _List_Nil, bg: 1.0, aQ: 0.0}
+	cl: {dl: _List_Nil, bg: 1.0, aQ: 0.0},
+	cm: {dl: _List_Nil, bg: 1.0, aQ: 0.0}
 };
 var terezka$elm_charts$Plot$toPlotSummary = F3(
 	function (customizations, toNiceReach, points_) {
 		var foldAxis = F2(
 			function (summary, v) {
 				return {
-					dk: A2(elm$core$List$cons, v, summary.dk),
+					dl: A2(elm$core$List$cons, v, summary.dl),
 					bg: A2(elm$core$Basics$max, summary.bg, v),
 					aQ: A2(elm$core$Basics$min, summary.aQ, v)
 				};
@@ -11803,13 +12081,13 @@ var terezka$elm_charts$Plot$toPlotSummary = F3(
 					return elm$core$Maybe$Just(
 						{
 							cl: {
-								dk: _List_fromArray(
+								dl: _List_fromArray(
 									[x]),
 								bg: x,
 								aQ: x
 							},
 							cm: {
-								dk: _List_fromArray(
+								dl: _List_fromArray(
 									[y]),
 								bg: y,
 								aQ: y
@@ -11831,22 +12109,22 @@ var terezka$elm_charts$Plot$toPlotSummary = F3(
 				A3(elm$core$List$foldl, foldPlot, elm$core$Maybe$Nothing, points_)));
 		return {
 			cl: {
-				dk: elm$core$List$sort(plotSummary.cl.dk),
-				dw: plotSummary.cl.bg,
-				dx: plotSummary.cl.aQ,
-				cB: customizations.ci,
+				dl: elm$core$List$sort(plotSummary.cl.dl),
+				dx: plotSummary.cl.bg,
+				dy: plotSummary.cl.aQ,
+				cC: customizations.ci,
 				a3: customizations.aP.bV,
-				cT: customizations.aP.b2,
+				cU: customizations.aP.b2,
 				bg: customizations.cb(plotSummary.cl.bg),
 				aQ: customizations.cc(plotSummary.cl.aQ)
 			},
 			cm: {
-				dk: plotSummary.cm.dk,
-				dw: plotSummary.cm.bg,
-				dx: plotSummary.cm.aQ,
-				cB: customizations.bS,
+				dl: plotSummary.cm.dl,
+				dx: plotSummary.cm.bg,
+				dy: plotSummary.cm.aQ,
+				cC: customizations.bS,
 				a3: customizations.aP.cd,
-				cT: customizations.aP.bP,
+				cU: customizations.aP.bP,
 				bg: customizations.b9(plotSummary.cm.bg),
 				aQ: customizations.ca(plotSummary.cm.aQ)
 			}
@@ -11880,7 +12158,7 @@ var terezka$elm_charts$Plot$viewDataPoint = F2(
 	function (plotSummary, _n0) {
 		var x = _n0.cl;
 		var y = _n0.cm;
-		var view = _n0.ee;
+		var view = _n0.eg;
 		if (view.$ === 1) {
 			return elm$core$Maybe$Nothing;
 		} else {
@@ -12461,7 +12739,7 @@ var terezka$elm_charts$Plot$viewActualJunk = F2(
 	function (summary, _n0) {
 		var x = _n0.cl;
 		var y = _n0.cm;
-		var view = _n0.ee;
+		var view = _n0.eg;
 		return A2(
 			elm$svg$Svg$g,
 			_List_fromArray(
@@ -12481,7 +12759,7 @@ var terezka$elm_charts$Plot$viewAxisLine = F3(
 		if (!axisLine.$) {
 			var attributes = axisLine.a.ad;
 			var start = axisLine.a.b4;
-			var end = axisLine.a.cu;
+			var end = axisLine.a.cv;
 			return A2(
 				terezka$elm_charts$Internal$Draw$draw,
 				attributes,
@@ -12551,7 +12829,7 @@ var terezka$elm_charts$Plot$viewTickInner = F3(
 	});
 var terezka$elm_charts$Plot$viewActualHorizontalAxis = F4(
 	function (summary, _n0, glitterLabels, glitterTicks) {
-		var position = _n0.c2;
+		var position = _n0.c3;
 		var axisLine = _n0.aC;
 		var ticks = _n0.aJ;
 		var labels = _n0.aG;
@@ -12574,13 +12852,13 @@ var terezka$elm_charts$Plot$viewActualHorizontalAxis = F4(
 						A4(
 						terezka$elm_charts$Internal$Draw$place,
 						summary,
-						at(props.c2),
+						at(props.c3),
 						0,
 						positionOfLabel),
 						elm$svg$Svg$Attributes$style('text-anchor: middle;')
 					]),
 				_List_fromArray(
-					[props.ee]));
+					[props.eg]));
 		};
 		var viewTickLine = function (props) {
 			return A2(
@@ -12590,7 +12868,7 @@ var terezka$elm_charts$Plot$viewActualHorizontalAxis = F4(
 						A4(
 						terezka$elm_charts$Internal$Draw$place,
 						summary,
-						at(props.c2),
+						at(props.c3),
 						0,
 						0)
 					]),
@@ -12600,7 +12878,7 @@ var terezka$elm_charts$Plot$viewActualHorizontalAxis = F4(
 						terezka$elm_charts$Plot$viewTickInner,
 						props.ad,
 						0,
-						lengthOfTick(props.cB))
+						lengthOfTick(props.cC))
 					]));
 		};
 		return A2(
@@ -12656,7 +12934,7 @@ var terezka$elm_charts$Plot$viewActualHorizontalGrid = F2(
 	function (summary, gridLines) {
 		var viewGridLine = function (_n0) {
 			var attributes = _n0.ad;
-			var position = _n0.c2;
+			var position = _n0.c3;
 			return A2(
 				terezka$elm_charts$Internal$Draw$draw,
 				attributes,
@@ -12695,7 +12973,7 @@ var terezka$elm_charts$Plot$viewHorizontalGrid = F2(
 	});
 var terezka$elm_charts$Plot$viewActualVerticalAxis = F3(
 	function (summary, _n0, glitterTicks) {
-		var position = _n0.c2;
+		var position = _n0.c3;
 		var axisLine = _n0.aC;
 		var ticks = _n0.aJ;
 		var labels = _n0.aG;
@@ -12718,7 +12996,7 @@ var terezka$elm_charts$Plot$viewActualVerticalAxis = F3(
 						A4(
 						terezka$elm_charts$Internal$Draw$place,
 						summary,
-						at(props.c2),
+						at(props.c3),
 						0,
 						0)
 					]),
@@ -12727,7 +13005,7 @@ var terezka$elm_charts$Plot$viewActualVerticalAxis = F3(
 						A3(
 						terezka$elm_charts$Plot$viewTickInner,
 						props.ad,
-						lengthOfTick(props.cB),
+						lengthOfTick(props.cC),
 						0)
 					]));
 		};
@@ -12740,13 +13018,13 @@ var terezka$elm_charts$Plot$viewActualVerticalAxis = F3(
 						A4(
 						terezka$elm_charts$Internal$Draw$place,
 						summary,
-						at(props.c2),
+						at(props.c3),
 						positionOfLabel,
 						5),
 						elm$svg$Svg$Attributes$style(anchorOfLabel)
 					]),
 				_List_fromArray(
-					[props.ee]));
+					[props.eg]));
 		};
 		return A2(
 			elm$svg$Svg$g,
@@ -12797,7 +13075,7 @@ var terezka$elm_charts$Plot$viewActualVerticalGrid = F2(
 	function (summary, gridLines) {
 		var viewGridLine = function (_n0) {
 			var attributes = _n0.ad;
-			var position = _n0.c2;
+			var position = _n0.c3;
 			return A2(
 				terezka$elm_charts$Internal$Draw$draw,
 				attributes,
@@ -12986,7 +13264,7 @@ var author$project$History$view = function (_n0) {
 						terezka$elm_charts$Plot$line(
 						elm$core$List$map(
 							function (point) {
-								return A2(terezka$elm_charts$Plot$clear, point.a1, point.cy);
+								return A2(terezka$elm_charts$Plot$clear, point.a1, point.cz);
 							})),
 						terezka$elm_charts$Plot$line(
 						elm$core$List$map(
@@ -13013,7 +13291,7 @@ var author$project$Systems$Render$getCameraTransform = function (world) {
 	return A4(elm_explorations$linear_algebra$Math$Matrix4$makeOrtho2D, 0, world.ci, 0, world.bS);
 };
 var author$project$Systems$Render$Attributes = function (vertexPosition) {
-	return {ed: vertexPosition};
+	return {ef: vertexPosition};
 };
 var author$project$Systems$Render$face = F4(
 	function (a, b, c, d) {
@@ -13050,7 +13328,7 @@ var author$project$Systems$Render$texturedFragmentShader = {
 };
 var author$project$Systems$Render$texturedVertexShader = {
 	src: '\n\n        attribute vec2 vertexPosition;\n        uniform mat4 transform;\n        uniform vec2 textureOffset;\n        uniform vec2 textureSize;\n        varying vec2 textureCoordinate;\n\n        void main () {\n          gl_Position = transform * vec4(vertexPosition, 0, 1.0);\n          textureCoordinate = textureOffset + vertexPosition * textureSize;\n        }\n\n    ',
-	attributes: {vertexPosition: 'ed'},
+	attributes: {vertexPosition: 'ef'},
 	uniforms: {textureOffset: 'b7', textureSize: 'b8', transform: 'ce'}
 };
 var elm_explorations$linear_algebra$Math$Matrix4$makeScale3 = _MJS_m4x4makeScale3;
@@ -13137,7 +13415,7 @@ var elm_explorations$webgl$WebGL$Texture$size = _Texture_size;
 var author$project$Systems$Render$renderBackground = F2(
 	function (global, cameraTransform) {
 		var assets = author$project$Global$getAssets(global);
-		var _n0 = elm_explorations$webgl$WebGL$Texture$size(assets.$7);
+		var _n0 = elm_explorations$webgl$WebGL$Texture$size(assets.dp);
 		var textureWidth = _n0.a;
 		var textureHeight = _n0.b;
 		var _n1 = author$project$Global$getWorld(global);
@@ -13149,7 +13427,7 @@ var author$project$Systems$Render$renderBackground = F2(
 			author$project$Systems$Render$texturedFragmentShader,
 			author$project$Systems$Render$squareMesh,
 			{
-				b6: assets.$7,
+				b6: assets.dp,
 				b7: A2(elm_explorations$linear_algebra$Math$Vector2$vec2, 0, 0),
 				b8: A2(elm_explorations$linear_algebra$Math$Vector2$vec2, width / textureWidth, height / textureHeight),
 				ce: A2(
@@ -13170,9 +13448,9 @@ var elm_explorations$linear_algebra$Math$Vector3$vec3 = _MJS_v3;
 var author$project$Systems$Render$renderSprite = F2(
 	function (cameraTransform, _n0) {
 		var entityId = _n0.a;
-		var sprite = _n0.b.db;
-		var position = _n0.b.c2;
-		var maybeScale = _n0.b.cV;
+		var sprite = _n0.b.dc;
+		var position = _n0.b.c3;
+		var maybeScale = _n0.b.cW;
 		var spriteTransform = A4(
 			elm_explorations$linear_algebra$Math$Matrix4$translate3,
 			-sprite.b_,
@@ -13190,7 +13468,7 @@ var author$project$Systems$Render$renderSprite = F2(
 		var worldTransform = scalekMat(
 			A3(
 				elm_explorations$linear_algebra$Math$Matrix4$rotate,
-				position.dl + (elm$core$Basics$pi / 2),
+				position.dm + (elm$core$Basics$pi / 2),
 				A3(elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 0, 1),
 				A3(elm_explorations$linear_algebra$Math$Matrix4$makeTranslate3, position.cl, position.cm, 0)));
 		var _n1 = elm_explorations$webgl$WebGL$Texture$size(sprite.b6);
@@ -13218,9 +13496,9 @@ var author$project$Ecs$Select$andGet = F2(
 		var spec = _n0;
 		var selector = _n1;
 		return {
-			d1: F2(
+			d2: F2(
 				function (id, ecs) {
-					var _n2 = A2(selector.d1, id, ecs);
+					var _n2 = A2(selector.d2, id, ecs);
 					if (_n2.$ === 1) {
 						return elm$core$Maybe$Nothing;
 					} else {
@@ -13233,7 +13511,7 @@ var author$project$Ecs$Select$andGet = F2(
 									spec.bR(ecs))));
 					}
 				}),
-			d2: function (ecs) {
+			d3: function (ecs) {
 				return A2(
 					elm$core$List$map,
 					function (_n3) {
@@ -13247,7 +13525,7 @@ var author$project$Ecs$Select$andGet = F2(
 									id,
 									spec.bR(ecs))));
 					},
-					selector.d2(ecs));
+					selector.d3(ecs));
 			}
 		};
 	});
@@ -13257,21 +13535,21 @@ var author$project$Entities$andGet = function (getSpec) {
 };
 var author$project$Systems$Render$Renderable = F3(
 	function (position, sprite, maybeScale) {
-		return {cV: maybeScale, c2: position, db: sprite};
+		return {cW: maybeScale, c3: position, dc: sprite};
 	});
 var author$project$Systems$Render$renderableSelector = A2(
 	author$project$Entities$andGet,
 	function ($) {
-		return $.d$;
+		return $.d0;
 	},
 	A3(
 		author$project$Entities$select2,
 		author$project$Systems$Render$Renderable,
 		function ($) {
-			return $.c2;
+			return $.c3;
 		},
 		function ($) {
-			return $.db;
+			return $.dc;
 		}));
 var author$project$Systems$Render$renderEntities = F3(
 	function (global, entities, cameraTransform) {
@@ -13394,7 +13672,7 @@ var author$project$Systems$Render$view = F4(
 var author$project$Systems$view = author$project$Systems$Render$view;
 var author$project$Main$view = function (model) {
 	return {
-		dp: function () {
+		dq: function () {
 			switch (model.$) {
 				case 0:
 					return _List_fromArray(
@@ -13415,12 +13693,12 @@ var author$project$Main$view = function (model) {
 						]);
 			}
 		}(),
-		d8: 'Ecs Example'
+		ea: 'Ecs Example'
 	};
 };
 var elm$browser$Browser$document = _Browser_document;
 var author$project$Main$main = elm$browser$Browser$document(
-	{dJ: author$project$Main$init, d6: author$project$Main$subscriptions, cf: author$project$Main$update, ee: author$project$Main$view});
+	{dK: author$project$Main$init, d7: author$project$Main$subscriptions, cf: author$project$Main$update, eg: author$project$Main$view});
 _Platform_export({'Main':{'init':author$project$Main$main(
 	elm$json$Json$Decode$succeed(0))(0)}});}(this));
 

@@ -10,7 +10,7 @@ import Utils
 spawnRate : Float
 spawnRate =
     -- per second
-    5
+    10
 
 
 testSpawnRate : Float

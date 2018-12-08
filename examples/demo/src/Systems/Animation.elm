@@ -2,8 +2,9 @@ module Systems.Animation exposing (update)
 
 import Components exposing (ScaleAnimation)
 import Data.Animation as Animation exposing (Animation)
-import Entities exposing (Entities, EntityId, Selector)
+import Entities exposing (Entities, Selector)
 import Global exposing (Global)
+import EntityId exposing (EntityId)
 
 
 scaleAnimationSelector : Selector ScaleAnimation

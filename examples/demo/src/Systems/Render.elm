@@ -1,7 +1,8 @@
 module Systems.Render exposing (view)
 
 import Components exposing (Position, Scale, Sprite)
-import Entities exposing (Entities, EntityId, Selector)
+import Entities exposing (Entities, Selector)
+import EntityId exposing (EntityId)
 import Frame exposing (Frame)
 import Global exposing (Global)
 import History exposing (History)
