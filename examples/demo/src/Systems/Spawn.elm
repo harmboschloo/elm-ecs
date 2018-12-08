@@ -7,27 +7,11 @@ import Random
 import Utils
 
 
-spawnRate : Float
-spawnRate =
-    -- per second
-    10
-
-
-testSpawnRate : Float
-testSpawnRate =
-    -- per second
-    50
-
-
 update : ( Global, Entities ) -> ( Global, Entities )
 update ( global1, entities ) =
     let
         rate =
-            if Global.isTestEnabled global1 then
-                testSpawnRate
-
-            else
-                spawnRate
+            Global.getSpawnRate global1
 
         spawn =
             rate * Global.getDeltaTime global1

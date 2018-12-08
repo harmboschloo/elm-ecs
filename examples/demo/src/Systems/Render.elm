@@ -59,6 +59,9 @@ view frame history global entities =
                 " - components: "
                     ++ String.fromInt (Entities.getComponentCount entities)
             , text <|
+                " - spawn rate (s): "
+                    ++ String.fromInt (Global.getSpawnRate global |> round)
+            , text <|
                 " - test "
                     ++ (if Global.isTestEnabled global then
                             "1"

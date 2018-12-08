@@ -7,6 +7,7 @@ module Global exposing
     , getAssets
     , getDeltaTime
     , getScreen
+    , getSpawnRate
     , getTime
     , getWorld
     , init
@@ -50,6 +51,7 @@ type alias Model =
     , time : Float
     , deltaTime : Float
     , test : Bool
+    , spawnRate : Float
     }
 
 
@@ -77,6 +79,7 @@ init assets seed screen =
         , time = 0
         , deltaTime = 0
         , test = False
+        , spawnRate = 5
         }
 
 
@@ -115,6 +118,11 @@ getScreen (Global model) =
 getWorld : Global -> World
 getWorld (Global model) =
     model.world
+
+
+getSpawnRate : Global -> Float
+getSpawnRate (Global model) =
+    model.spawnRate
 
 
 isPaused : Global -> Bool
@@ -176,6 +184,7 @@ updateKeyUp keyCode (Global model) =
             | activeKeys = Set.remove keyCode model.activeKeys
             , test = toggleKey KeyCode.t keyCode model.test
             , running = toggleKey KeyCode.esc keyCode model.running
+            , spawnRate = nextSpawnRate KeyCode.s keyCode model.spawnRate
         }
 
 
@@ -183,6 +192,23 @@ toggleKey : KeyCode -> KeyCode -> Bool -> Bool
 toggleKey keyCode keyCodePressed currentValue =
     if keyCode == keyCodePressed then
         not currentValue
+
+    else
+        currentValue
+
+
+nextSpawnRate : KeyCode -> KeyCode -> Float -> Float
+nextSpawnRate keyCode keyCodePressed currentValue =
+    if keyCode == keyCodePressed then
+        case round currentValue of
+            5 ->
+                50.0
+
+            50 ->
+                0.0
+
+            _ ->
+                5.0
 
     else
         currentValue

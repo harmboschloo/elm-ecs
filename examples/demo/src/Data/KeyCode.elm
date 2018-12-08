@@ -5,6 +5,7 @@ module Data.KeyCode exposing
     , arrowRight
     , arrowUp
     , esc
+    , s
     , t
     )
 
@@ -36,6 +37,11 @@ arrowRight =
 arrowDown : KeyCode
 arrowDown =
     40
+
+
+s : KeyCode
+s =
+    83
 
 
 t : KeyCode
