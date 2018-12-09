@@ -6,7 +6,6 @@ module KeyCode exposing
     , arrowUp
     , esc
     , s
-    , t
     )
 
 
@@ -42,8 +41,3 @@ arrowDown =
 s : KeyCode
 s =
     83
-
-
-t : KeyCode
-t =
-    84

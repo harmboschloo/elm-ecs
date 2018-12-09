@@ -3,7 +3,6 @@ module Systems exposing (update, view)
 import Entities exposing (Entities)
 import Frame exposing (Frame)
 import Global exposing (Global)
-import History exposing (History)
 import Html exposing (Html)
 import Systems.Ai as Ai
 import Systems.Animation as Animation
@@ -29,6 +28,6 @@ update state =
         |> Collision.update
 
 
-view : Frame -> History -> Global -> Entities -> Html msg
+view : Frame -> Global -> Entities -> Html msg
 view =
     Render.view

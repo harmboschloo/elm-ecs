@@ -7,7 +7,6 @@ import Builder
 import Entities exposing (Entities)
 import Frame exposing (Frame)
 import Global exposing (Global)
-import History exposing (History)
 import Html exposing (Html, text)
 import Random
 import Systems
@@ -30,7 +29,6 @@ type alias SuccessModel =
     { global : Global
     , entities : Entities
     , frame : Frame
-    , history : History
     }
 
 
@@ -70,8 +68,7 @@ initSuccess { assets, posix, viewport } =
     InitSuccess
         { global = global
         , entities = entities
-        , frame = Frame.init (1.0 / 20.0)
-        , history = History.empty 500
+        , frame = Frame.init (1.0 / 20.0) 60
         }
 
 
@@ -126,51 +123,23 @@ update msg model =
                     Frame.update frameMsg successModel.frame
             in
             case outMsg of
-                Frame.NoOp ->
+                Frame.None ->
                     ( InitSuccess { successModel | frame = frame }
                     , Cmd.none
                     )
 
-                Frame.Update data maybeStats cmd ->
+                Frame.Update data cmd ->
                     let
                         ( global, entities ) =
                             Systems.update
                                 ( Global.setTiming data successModel.global
                                 , successModel.entities
                                 )
-
-                        history =
-                            case maybeStats of
-                                Nothing ->
-                                    successModel.history
-
-                                Just stats ->
-                                    History.add
-                                        { index = stats.index
-                                        , updateTime = stats.updateTime
-                                        , frameTime = stats.frameTime
-                                        , entityCount =
-                                            Entities.getEntityCount
-                                                successModel.entities
-                                        }
-                                        successModel.history
-
-                        newFrame =
-                            if
-                                Global.isTestEnabled global
-                                    && not (Frame.isPaused frame)
-                                    && (History.getFps history < 30)
-                            then
-                                Frame.togglePaused frame
-
-                            else
-                                frame
                     in
                     ( InitSuccess
                         { global = global
                         , entities = entities
-                        , frame = newFrame
-                        , history = history
+                        , frame = frame
                         }
                     , Cmd.map FrameMsg cmd
                     )
@@ -211,8 +180,8 @@ view model =
             InitFailure error ->
                 viewError error
 
-            InitSuccess { global, entities, frame, history } ->
-                [ Systems.view frame history global entities ]
+            InitSuccess { global, entities, frame } ->
+                [ Systems.view frame global entities ]
     }
 
 

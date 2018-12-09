@@ -5,7 +5,6 @@ import Entities exposing (Entities, Selector)
 import EntityId exposing (EntityId)
 import Frame exposing (Frame)
 import Global exposing (Global)
-import History exposing (History)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (height, style, width)
 import Math.Matrix4 as Mat4 exposing (Mat4, makeOrtho2D)
@@ -30,63 +29,87 @@ renderableSelector =
         |> Entities.andGet .scale
 
 
-view : Frame -> History -> Global -> Entities -> Html msg
-view frame history global entities =
+view : Frame -> Global -> Entities -> Html msg
+view frame global entities =
+    let
+        screen =
+            Global.getScreen global
+    in
     div []
-        [ div
-            [ style "color" "#fff"
-            , style "position" "absolute"
+        [ viewWebGL (Global.getScreen global) global entities
+        , div
+            [ style "position" "absolute"
             , style "top" "0"
-            , style "bottom" "0"
             , style "left" "0"
-            , style "right" "0"
-            , style "overflow" "hidden"
+            , style "color" "#fff"
+            , style "font-family" "monospace"
             ]
-            [ text "controls: arrow keys - "
-            , text <|
-                if Frame.isPaused frame then
-                    "paused"
+            [ div [] [ text "controls: arrow keys" ]
+            , div []
+                [ text <|
+                    if Frame.isPaused frame then
+                        "resume"
 
-                else
-                    "running"
-            , text <|
-                " (esc) - fps: "
-                    ++ String.fromInt (round <| History.getFps history)
-            , text <|
-                " - entities: "
-                    ++ String.fromInt (Entities.getEntityCount entities)
-            , text <|
-                " - components: "
-                    ++ String.fromInt (Entities.getComponentCount entities)
-            , text <|
-                " - spawn rate (s): "
-                    ++ String.fromInt (Global.getSpawnRate global |> round)
-            , text <|
-                " - test "
-                    ++ (if Global.isTestEnabled global then
-                            "1"
-
-                        else
-                            "0"
-                       )
-                    ++ " (t)"
-            , div
-                [ style "position" "absolute"
-                , style "top" "0"
-                , style "left" "0"
-                , style "z-index" "-1"
+                    else
+                        "pause"
+                , text ": esc"
                 ]
-                [ viewWebGL (Global.getScreen global) global entities
+            , div []
+                [ text <|
+                    "spawn rate: "
+                        ++ String.fromInt (Global.getSpawnRate global |> round)
+                        ++ "/s"
+                , text " (change: s)"
                 ]
+            , div []
+                [ text <|
+                    "entities: "
+                        ++ String.fromInt (Entities.getEntityCount entities)
+                ]
+            , div []
+                [ text <|
+                    "components: "
+                        ++ String.fromInt (Entities.getComponentCount entities)
+                ]
+            , div []
+                [ text <| "frame time: " ++ frameStat .frameTime frame
+                , text <|
+                    " ("
+                        ++ ((1 / Frame.medium .frameTime frame)
+                                |> round
+                                |> String.fromInt
+                           )
+                        ++ "fps)"
+                ]
+            , div [] [ text <| "delta time: " ++ frameStat .deltaTime frame ]
+            , div [] [ text <| "update time: " ++ frameStat .updateTime frame ]
             ]
-        , if Frame.isPaused frame then
-            div
-                [ style "margin-top" "1.5em" ]
-                [ History.view history ]
-
-          else
-            text ""
         ]
+
+
+frameStat : (Frame.FrameData -> Float) -> Frame -> String
+frameStat getData frame =
+    (frame
+        |> Frame.medium getData
+        |> (*) 1000
+        |> round
+        |> String.fromInt
+    )
+        ++ "ms ("
+        ++ (frame
+                |> Frame.minimum getData
+                |> (*) 1000
+                |> round
+                |> String.fromInt
+           )
+        ++ "/"
+        ++ (frame
+                |> Frame.maximum getData
+                |> (*) 1000
+                |> round
+                |> String.fromInt
+           )
+        ++ ")"
 
 
 viewWebGL : Global.Screen -> Global -> Entities -> Html msg
@@ -97,6 +120,9 @@ viewWebGL screen global entities =
         ]
         [ width screen.width
         , height screen.height
+        , style "position" "absolute"
+        , style "top" "0"
+        , style "left" "0"
         ]
         (renderEntities global entities (getCameraTransform (Global.getWorld global)))
 

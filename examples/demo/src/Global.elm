@@ -12,7 +12,6 @@ module Global exposing
     , getWorld
     , init
     , isPaused
-    , isTestEnabled
     , randomStep
     , setTiming
     , subscriptions
@@ -50,7 +49,6 @@ type alias Model =
     , world : World
     , time : Float
     , deltaTime : Float
-    , test : Bool
     , spawnRate : Float
     }
 
@@ -78,7 +76,6 @@ init assets seed screen =
         , world = screenToWorld screen
         , time = 0
         , deltaTime = 0
-        , test = False
         , spawnRate = 5
         }
 
@@ -130,11 +127,6 @@ isPaused (Global model) =
     not model.running
 
 
-isTestEnabled : Global -> Bool
-isTestEnabled (Global model) =
-    model.test
-
-
 setTiming : { deltaTime : Float, accumulatedTime : Float } -> Global -> Global
 setTiming data (Global model) =
     Global
@@ -169,7 +161,11 @@ update msg global =
 
 updateWindowSize : Screen -> Global -> Global
 updateWindowSize screen (Global model) =
-    Global { model | screen = screen }
+    Global
+        { model
+            | screen = screen
+            , world = screenToWorld screen
+        }
 
 
 updateKeyDown : KeyCode -> Global -> Global
@@ -182,7 +178,6 @@ updateKeyUp keyCode (Global model) =
     Global
         { model
             | activeKeys = Set.remove keyCode model.activeKeys
-            , test = toggleKey KeyCode.t keyCode model.test
             , running = toggleKey KeyCode.esc keyCode model.running
             , spawnRate = nextSpawnRate KeyCode.s keyCode model.spawnRate
         }
