@@ -1,4 +1,4 @@
-module Data.Animation exposing
+module Animation.Sequence exposing
     ( Animation
     , Config
     , NextConfig

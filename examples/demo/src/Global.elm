@@ -26,9 +26,9 @@ import Browser.Events
         , onKeyUp
         , onResize
         )
-import Data.KeyCode as KeyCode exposing (KeyCode)
 import Html.Events
 import Json.Decode as Decode exposing (Decoder)
+import KeyCode exposing (KeyCode)
 import Random exposing (Generator, Seed)
 import Set exposing (Set)
 

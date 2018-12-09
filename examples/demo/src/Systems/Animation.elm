@@ -1,10 +1,10 @@
 module Systems.Animation exposing (update)
 
+import Animation.Sequence as Animation exposing (Animation)
 import Components exposing (ScaleAnimation)
-import Data.Animation as Animation exposing (Animation)
 import Entities exposing (Entities, Selector)
-import Global exposing (Global)
 import EntityId exposing (EntityId)
+import Global exposing (Global)
 
 
 scaleAnimationSelector : Selector ScaleAnimation

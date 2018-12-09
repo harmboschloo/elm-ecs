@@ -3,7 +3,7 @@ module Systems.Collision exposing (update)
 import Components exposing (Position, Velocity)
 import Components.CollisionShape as CollisionShape exposing (CollisionShape)
 import Components.DelayedOperations as DelayedOperations
-import Data.Animation as Animation
+import Animation.Sequence as Animation
 import Entities exposing (Entities, Selector)
 import EntityId exposing (EntityId)
 import Global exposing (Global)

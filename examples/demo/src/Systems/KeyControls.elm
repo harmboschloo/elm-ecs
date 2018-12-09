@@ -2,10 +2,10 @@ module Systems.KeyControls exposing (update)
 
 import Components exposing (KeyControlsMap)
 import Components.Controls exposing (Controls, controls)
-import Data.KeyCode exposing (KeyCode)
 import Entities exposing (Entities, Selector)
 import EntityId exposing (EntityId)
 import Global exposing (Global)
+import KeyCode exposing (KeyCode)
 import Set exposing (Set)
 
 

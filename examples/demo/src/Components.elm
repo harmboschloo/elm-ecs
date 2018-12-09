@@ -10,9 +10,9 @@ module Components exposing
     , Velocity
     )
 
-import Data.Animation exposing (Animation)
-import Data.KeyCode exposing (KeyCode)
+import Animation.Sequence exposing (Animation)
 import EntityId exposing (EntityId)
+import KeyCode exposing (KeyCode)
 import WebGL.Texture exposing (Texture)
 
 

@@ -3,6 +3,7 @@ module Builder exposing
     , createStar
     )
 
+import Animation.Sequence as Animation
 import Collision.Shape as Shape
 import Components
     exposing
@@ -14,11 +15,10 @@ import Components
 import Components.CollisionShape as CollisionShape exposing (CollisionShape)
 import Components.Controls as Controls
 import Components.DelayedOperations as DelayedOperations
-import Data.Animation as Animation
-import Data.KeyCode as KeyCode
 import Entities exposing (Ecs, Entities)
 import EntityId exposing (EntityId)
 import Global exposing (Global)
+import KeyCode
 import Random exposing (Generator)
 import Utils exposing (times)
 
