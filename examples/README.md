@@ -1,2 +1,0 @@
-- [basic live](https://harmboschloo.github.io/elm-ecs-generator/examples/basic/)
-- [demo live](https://harmboschloo.github.io/elm-ecs-generator/examples/demo/build/)
