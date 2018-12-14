@@ -1,7 +1,7 @@
 {
     "type": "package",
     "name": "harmboschloo/elm-ecs",
-    "summary": "Entity-Component-System",
+    "summary": "An Entity-Component-System (ECS)",
     "license": "BSD-3-Clause",
     "version": "1.0.0",
     "exposed-modules": [

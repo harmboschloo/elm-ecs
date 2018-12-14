@@ -113,24 +113,28 @@ import Ecs.Internal as Internal
 import Set
 
 
-{-| -}
+{-| The ecs specification type.
+-}
 type alias Spec comparable ecs =
     Internal.Spec comparable ecs
 
 
-{-| -}
+{-| A component specification type.
+-}
 type alias ComponentSpec comparable ecs a =
     Internal.ComponentSpec comparable ecs a
 
 
-{-| -}
+{-| An ecs model type with 1 component type.
+-}
 type Ecs1 comparable a1
     = Ecs1
         { data1 : Dict comparable a1
         }
 
 
-{-| -}
+{-| An ecs specification with 1 component type.
+-}
 spec1 : Spec comparable (Ecs1 comparable a1)
 spec1 =
     Internal.Spec
@@ -164,7 +168,8 @@ spec1 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 1 component type.
+-}
 components1 :
     (ComponentSpec comparable (Ecs1 comparable a1) a1
      -> componentSpecs
@@ -183,7 +188,8 @@ components1 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 2 component types.
+-}
 type Ecs2 comparable a1 a2
     = Ecs2
         { data1 : Dict comparable a1
@@ -191,7 +197,8 @@ type Ecs2 comparable a1 a2
         }
 
 
-{-| -}
+{-| An ecs specification with 2 component types.
+-}
 spec2 : Spec comparable (Ecs2 comparable a1 a2)
 spec2 =
     Internal.Spec
@@ -231,7 +238,8 @@ spec2 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 2 component types.
+-}
 components2 :
     (ComponentSpec comparable (Ecs2 comparable a1 a2) a1
      -> ComponentSpec comparable (Ecs2 comparable a1 a2) a2
@@ -262,7 +270,8 @@ components2 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 3 component types.
+-}
 type Ecs3 comparable a1 a2 a3
     = Ecs3
         { data1 : Dict comparable a1
@@ -271,7 +280,8 @@ type Ecs3 comparable a1 a2 a3
         }
 
 
-{-| -}
+{-| An ecs specification with 3 component types.
+-}
 spec3 : Spec comparable (Ecs3 comparable a1 a2 a3)
 spec3 =
     Internal.Spec
@@ -317,7 +327,8 @@ spec3 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 3 component types.
+-}
 components3 :
     (ComponentSpec comparable (Ecs3 comparable a1 a2 a3) a1
      -> ComponentSpec comparable (Ecs3 comparable a1 a2 a3) a2
@@ -362,7 +373,8 @@ components3 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 4 component types.
+-}
 type Ecs4 comparable a1 a2 a3 a4
     = Ecs4
         { data1 : Dict comparable a1
@@ -372,7 +384,8 @@ type Ecs4 comparable a1 a2 a3 a4
         }
 
 
-{-| -}
+{-| An ecs specification with 4 component types.
+-}
 spec4 : Spec comparable (Ecs4 comparable a1 a2 a3 a4)
 spec4 =
     Internal.Spec
@@ -424,7 +437,8 @@ spec4 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 4 component types.
+-}
 components4 :
     (ComponentSpec comparable (Ecs4 comparable a1 a2 a3 a4) a1
      -> ComponentSpec comparable (Ecs4 comparable a1 a2 a3 a4) a2
@@ -485,7 +499,8 @@ components4 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 5 component types.
+-}
 type Ecs5 comparable a1 a2 a3 a4 a5
     = Ecs5
         { data1 : Dict comparable a1
@@ -496,7 +511,8 @@ type Ecs5 comparable a1 a2 a3 a4 a5
         }
 
 
-{-| -}
+{-| An ecs specification with 5 component types.
+-}
 spec5 : Spec comparable (Ecs5 comparable a1 a2 a3 a4 a5)
 spec5 =
     Internal.Spec
@@ -554,7 +570,8 @@ spec5 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 5 component types.
+-}
 components5 :
     (ComponentSpec comparable (Ecs5 comparable a1 a2 a3 a4 a5) a1
      -> ComponentSpec comparable (Ecs5 comparable a1 a2 a3 a4 a5) a2
@@ -633,7 +650,8 @@ components5 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 6 component types.
+-}
 type Ecs6 comparable a1 a2 a3 a4 a5 a6
     = Ecs6
         { data1 : Dict comparable a1
@@ -645,7 +663,8 @@ type Ecs6 comparable a1 a2 a3 a4 a5 a6
         }
 
 
-{-| -}
+{-| An ecs specification with 6 component types.
+-}
 spec6 : Spec comparable (Ecs6 comparable a1 a2 a3 a4 a5 a6)
 spec6 =
     Internal.Spec
@@ -709,7 +728,8 @@ spec6 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 6 component types.
+-}
 components6 :
     (ComponentSpec comparable (Ecs6 comparable a1 a2 a3 a4 a5 a6) a1
      -> ComponentSpec comparable (Ecs6 comparable a1 a2 a3 a4 a5 a6) a2
@@ -808,7 +828,8 @@ components6 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 7 component types.
+-}
 type Ecs7 comparable a1 a2 a3 a4 a5 a6 a7
     = Ecs7
         { data1 : Dict comparable a1
@@ -821,7 +842,8 @@ type Ecs7 comparable a1 a2 a3 a4 a5 a6 a7
         }
 
 
-{-| -}
+{-| An ecs specification with 7 component types.
+-}
 spec7 : Spec comparable (Ecs7 comparable a1 a2 a3 a4 a5 a6 a7)
 spec7 =
     Internal.Spec
@@ -891,7 +913,8 @@ spec7 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 7 component types.
+-}
 components7 :
     (ComponentSpec comparable (Ecs7 comparable a1 a2 a3 a4 a5 a6 a7) a1
      -> ComponentSpec comparable (Ecs7 comparable a1 a2 a3 a4 a5 a6 a7) a2
@@ -1012,7 +1035,8 @@ components7 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 8 component types.
+-}
 type Ecs8 comparable a1 a2 a3 a4 a5 a6 a7 a8
     = Ecs8
         { data1 : Dict comparable a1
@@ -1026,7 +1050,8 @@ type Ecs8 comparable a1 a2 a3 a4 a5 a6 a7 a8
         }
 
 
-{-| -}
+{-| An ecs specification with 8 component types.
+-}
 spec8 : Spec comparable (Ecs8 comparable a1 a2 a3 a4 a5 a6 a7 a8)
 spec8 =
     Internal.Spec
@@ -1102,7 +1127,8 @@ spec8 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 8 component types.
+-}
 components8 :
     (ComponentSpec comparable (Ecs8 comparable a1 a2 a3 a4 a5 a6 a7 a8) a1
      -> ComponentSpec comparable (Ecs8 comparable a1 a2 a3 a4 a5 a6 a7 a8) a2
@@ -1247,7 +1273,8 @@ components8 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 9 component types.
+-}
 type Ecs9 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9
     = Ecs9
         { data1 : Dict comparable a1
@@ -1262,7 +1289,8 @@ type Ecs9 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9
         }
 
 
-{-| -}
+{-| An ecs specification with 9 component types.
+-}
 spec9 : Spec comparable (Ecs9 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9)
 spec9 =
     Internal.Spec
@@ -1344,7 +1372,8 @@ spec9 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 9 component types.
+-}
 components9 :
     (ComponentSpec comparable (Ecs9 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9) a1
      -> ComponentSpec comparable (Ecs9 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9) a2
@@ -1515,7 +1544,8 @@ components9 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 10 component types.
+-}
 type Ecs10 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10
     = Ecs10
         { data1 : Dict comparable a1
@@ -1531,7 +1561,8 @@ type Ecs10 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10
         }
 
 
-{-| -}
+{-| An ecs specification with 10 component types.
+-}
 spec10 : Spec comparable (Ecs10 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10)
 spec10 =
     Internal.Spec
@@ -1619,7 +1650,8 @@ spec10 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 10 component types.
+-}
 components10 :
     (ComponentSpec comparable (Ecs10 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10) a1
      -> ComponentSpec comparable (Ecs10 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10) a2
@@ -1818,7 +1850,8 @@ components10 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 11 component types.
+-}
 type Ecs11 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11
     = Ecs11
         { data1 : Dict comparable a1
@@ -1835,7 +1868,8 @@ type Ecs11 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11
         }
 
 
-{-| -}
+{-| An ecs specification with 11 component types.
+-}
 spec11 : Spec comparable (Ecs11 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11)
 spec11 =
     Internal.Spec
@@ -1929,7 +1963,8 @@ spec11 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 11 component types.
+-}
 components11 :
     (ComponentSpec comparable (Ecs11 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11) a1
      -> ComponentSpec comparable (Ecs11 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11) a2
@@ -2158,7 +2193,8 @@ components11 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 12 component types.
+-}
 type Ecs12 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12
     = Ecs12
         { data1 : Dict comparable a1
@@ -2176,7 +2212,8 @@ type Ecs12 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12
         }
 
 
-{-| -}
+{-| An ecs specification with 12 component types.
+-}
 spec12 : Spec comparable (Ecs12 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12)
 spec12 =
     Internal.Spec
@@ -2276,7 +2313,8 @@ spec12 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 12 component types.
+-}
 components12 :
     (ComponentSpec comparable (Ecs12 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12) a1
      -> ComponentSpec comparable (Ecs12 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12) a2
@@ -2537,7 +2575,8 @@ components12 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 13 component types.
+-}
 type Ecs13 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13
     = Ecs13
         { data1 : Dict comparable a1
@@ -2556,7 +2595,8 @@ type Ecs13 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13
         }
 
 
-{-| -}
+{-| An ecs specification with 13 component types.
+-}
 spec13 : Spec comparable (Ecs13 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13)
 spec13 =
     Internal.Spec
@@ -2662,7 +2702,8 @@ spec13 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 13 component types.
+-}
 components13 :
     (ComponentSpec comparable (Ecs13 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a1
      -> ComponentSpec comparable (Ecs13 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a2
@@ -2957,7 +2998,8 @@ components13 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 14 component types.
+-}
 type Ecs14 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14
     = Ecs14
         { data1 : Dict comparable a1
@@ -2977,7 +3019,8 @@ type Ecs14 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14
         }
 
 
-{-| -}
+{-| An ecs specification with 14 component types.
+-}
 spec14 : Spec comparable (Ecs14 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14)
 spec14 =
     Internal.Spec
@@ -3089,7 +3132,8 @@ spec14 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 14 component types.
+-}
 components14 :
     (ComponentSpec comparable (Ecs14 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a1
      -> ComponentSpec comparable (Ecs14 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a2
@@ -3420,7 +3464,8 @@ components14 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 15 component types.
+-}
 type Ecs15 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15
     = Ecs15
         { data1 : Dict comparable a1
@@ -3441,7 +3486,8 @@ type Ecs15 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15
         }
 
 
-{-| -}
+{-| An ecs specification with 15 component types.
+-}
 spec15 : Spec comparable (Ecs15 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15)
 spec15 =
     Internal.Spec
@@ -3559,7 +3605,8 @@ spec15 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 15 component types.
+-}
 components15 :
     (ComponentSpec comparable (Ecs15 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a1
      -> ComponentSpec comparable (Ecs15 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a2
@@ -3928,7 +3975,8 @@ components15 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 16 component types.
+-}
 type Ecs16 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16
     = Ecs16
         { data1 : Dict comparable a1
@@ -3950,7 +3998,8 @@ type Ecs16 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16
         }
 
 
-{-| -}
+{-| An ecs specification with 16 component types.
+-}
 spec16 : Spec comparable (Ecs16 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16)
 spec16 =
     Internal.Spec
@@ -4074,7 +4123,8 @@ spec16 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 16 component types.
+-}
 components16 :
     (ComponentSpec comparable (Ecs16 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16) a1
      -> ComponentSpec comparable (Ecs16 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16) a2
@@ -4483,7 +4533,8 @@ components16 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 17 component types.
+-}
 type Ecs17 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
     = Ecs17
         { data1 : Dict comparable a1
@@ -4506,7 +4557,8 @@ type Ecs17 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 17 component types.
+-}
 spec17 : Spec comparable (Ecs17 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17)
 spec17 =
     Internal.Spec
@@ -4636,7 +4688,8 @@ spec17 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 17 component types.
+-}
 components17 :
     (ComponentSpec comparable (Ecs17 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17) a1
      -> ComponentSpec comparable (Ecs17 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17) a2
@@ -5087,7 +5140,8 @@ components17 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 18 component types.
+-}
 type Ecs18 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18
     = Ecs18
         { data1 : Dict comparable a1
@@ -5111,7 +5165,8 @@ type Ecs18 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 18 component types.
+-}
 spec18 : Spec comparable (Ecs18 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18)
 spec18 =
     Internal.Spec
@@ -5247,7 +5302,8 @@ spec18 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 18 component types.
+-}
 components18 :
     (ComponentSpec comparable (Ecs18 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18) a1
      -> ComponentSpec comparable (Ecs18 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18) a2
@@ -5742,7 +5798,8 @@ components18 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 19 component types.
+-}
 type Ecs19 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19
     = Ecs19
         { data1 : Dict comparable a1
@@ -5767,7 +5824,8 @@ type Ecs19 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 19 component types.
+-}
 spec19 : Spec comparable (Ecs19 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19)
 spec19 =
     Internal.Spec
@@ -5909,7 +5967,8 @@ spec19 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 19 component types.
+-}
 components19 :
     (ComponentSpec comparable (Ecs19 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19) a1
      -> ComponentSpec comparable (Ecs19 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19) a2
@@ -6450,7 +6509,8 @@ components19 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 20 component types.
+-}
 type Ecs20 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20
     = Ecs20
         { data1 : Dict comparable a1
@@ -6476,7 +6536,8 @@ type Ecs20 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 20 component types.
+-}
 spec20 : Spec comparable (Ecs20 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20)
 spec20 =
     Internal.Spec
@@ -6624,7 +6685,8 @@ spec20 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 20 component types.
+-}
 components20 :
     (ComponentSpec comparable (Ecs20 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20) a1
      -> ComponentSpec comparable (Ecs20 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20) a2
@@ -7213,7 +7275,8 @@ components20 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 21 component types.
+-}
 type Ecs21 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21
     = Ecs21
         { data1 : Dict comparable a1
@@ -7240,7 +7303,8 @@ type Ecs21 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 21 component types.
+-}
 spec21 : Spec comparable (Ecs21 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21)
 spec21 =
     Internal.Spec
@@ -7394,7 +7458,8 @@ spec21 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 21 component types.
+-}
 components21 :
     (ComponentSpec comparable (Ecs21 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21) a1
      -> ComponentSpec comparable (Ecs21 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21) a2
@@ -8033,7 +8098,8 @@ components21 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 22 component types.
+-}
 type Ecs22 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22
     = Ecs22
         { data1 : Dict comparable a1
@@ -8061,7 +8127,8 @@ type Ecs22 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 22 component types.
+-}
 spec22 : Spec comparable (Ecs22 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22)
 spec22 =
     Internal.Spec
@@ -8221,7 +8288,8 @@ spec22 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 22 component types.
+-}
 components22 :
     (ComponentSpec comparable (Ecs22 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22) a1
      -> ComponentSpec comparable (Ecs22 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22) a2
@@ -8912,7 +8980,8 @@ components22 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 23 component types.
+-}
 type Ecs23 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23
     = Ecs23
         { data1 : Dict comparable a1
@@ -8941,7 +9010,8 @@ type Ecs23 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 23 component types.
+-}
 spec23 : Spec comparable (Ecs23 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23)
 spec23 =
     Internal.Spec
@@ -9107,7 +9177,8 @@ spec23 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 23 component types.
+-}
 components23 :
     (ComponentSpec comparable (Ecs23 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23) a1
      -> ComponentSpec comparable (Ecs23 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23) a2
@@ -9852,7 +9923,8 @@ components23 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 24 component types.
+-}
 type Ecs24 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24
     = Ecs24
         { data1 : Dict comparable a1
@@ -9882,7 +9954,8 @@ type Ecs24 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 24 component types.
+-}
 spec24 : Spec comparable (Ecs24 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24)
 spec24 =
     Internal.Spec
@@ -10054,7 +10127,8 @@ spec24 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 24 component types.
+-}
 components24 :
     (ComponentSpec comparable (Ecs24 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24) a1
      -> ComponentSpec comparable (Ecs24 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24) a2
@@ -10855,7 +10929,8 @@ components24 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 25 component types.
+-}
 type Ecs25 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25
     = Ecs25
         { data1 : Dict comparable a1
@@ -10886,7 +10961,8 @@ type Ecs25 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 25 component types.
+-}
 spec25 : Spec comparable (Ecs25 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25)
 spec25 =
     Internal.Spec
@@ -11064,7 +11140,8 @@ spec25 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 25 component types.
+-}
 components25 :
     (ComponentSpec comparable (Ecs25 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25) a1
      -> ComponentSpec comparable (Ecs25 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25) a2
@@ -11923,7 +12000,8 @@ components25 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 26 component types.
+-}
 type Ecs26 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26
     = Ecs26
         { data1 : Dict comparable a1
@@ -11955,7 +12033,8 @@ type Ecs26 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 26 component types.
+-}
 spec26 : Spec comparable (Ecs26 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26)
 spec26 =
     Internal.Spec
@@ -12139,7 +12218,8 @@ spec26 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 26 component types.
+-}
 components26 :
     (ComponentSpec comparable (Ecs26 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26) a1
      -> ComponentSpec comparable (Ecs26 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26) a2
@@ -13058,7 +13138,8 @@ components26 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 27 component types.
+-}
 type Ecs27 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27
     = Ecs27
         { data1 : Dict comparable a1
@@ -13091,7 +13172,8 @@ type Ecs27 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 27 component types.
+-}
 spec27 : Spec comparable (Ecs27 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27)
 spec27 =
     Internal.Spec
@@ -13281,7 +13363,8 @@ spec27 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 27 component types.
+-}
 components27 :
     (ComponentSpec comparable (Ecs27 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27) a1
      -> ComponentSpec comparable (Ecs27 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27) a2
@@ -14262,7 +14345,8 @@ components27 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 28 component types.
+-}
 type Ecs28 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28
     = Ecs28
         { data1 : Dict comparable a1
@@ -14296,7 +14380,8 @@ type Ecs28 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 28 component types.
+-}
 spec28 : Spec comparable (Ecs28 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28)
 spec28 =
     Internal.Spec
@@ -14492,7 +14577,8 @@ spec28 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 28 component types.
+-}
 components28 :
     (ComponentSpec comparable (Ecs28 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28) a1
      -> ComponentSpec comparable (Ecs28 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28) a2
@@ -15537,7 +15623,8 @@ components28 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 29 component types.
+-}
 type Ecs29 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29
     = Ecs29
         { data1 : Dict comparable a1
@@ -15572,7 +15659,8 @@ type Ecs29 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 29 component types.
+-}
 spec29 : Spec comparable (Ecs29 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29)
 spec29 =
     Internal.Spec
@@ -15774,7 +15862,8 @@ spec29 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 29 component types.
+-}
 components29 :
     (ComponentSpec comparable (Ecs29 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29) a1
      -> ComponentSpec comparable (Ecs29 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29) a2
@@ -16885,7 +16974,8 @@ components29 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 30 component types.
+-}
 type Ecs30 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30
     = Ecs30
         { data1 : Dict comparable a1
@@ -16921,7 +17011,8 @@ type Ecs30 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 30 component types.
+-}
 spec30 : Spec comparable (Ecs30 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30)
 spec30 =
     Internal.Spec
@@ -17129,7 +17220,8 @@ spec30 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 30 component types.
+-}
 components30 :
     (ComponentSpec comparable (Ecs30 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30) a1
      -> ComponentSpec comparable (Ecs30 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30) a2
@@ -18308,7 +18400,8 @@ components30 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 31 component types.
+-}
 type Ecs31 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31
     = Ecs31
         { data1 : Dict comparable a1
@@ -18345,7 +18438,8 @@ type Ecs31 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 31 component types.
+-}
 spec31 : Spec comparable (Ecs31 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31)
 spec31 =
     Internal.Spec
@@ -18559,7 +18653,8 @@ spec31 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 31 component types.
+-}
 components31 :
     (ComponentSpec comparable (Ecs31 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31) a1
      -> ComponentSpec comparable (Ecs31 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31) a2
@@ -19808,7 +19903,8 @@ components31 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 32 component types.
+-}
 type Ecs32 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32
     = Ecs32
         { data1 : Dict comparable a1
@@ -19846,7 +19942,8 @@ type Ecs32 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 32 component types.
+-}
 spec32 : Spec comparable (Ecs32 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32)
 spec32 =
     Internal.Spec
@@ -20066,7 +20163,8 @@ spec32 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 32 component types.
+-}
 components32 :
     (ComponentSpec comparable (Ecs32 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32) a1
      -> ComponentSpec comparable (Ecs32 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32) a2
@@ -21387,7 +21485,8 @@ components32 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 33 component types.
+-}
 type Ecs33 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33
     = Ecs33
         { data1 : Dict comparable a1
@@ -21426,7 +21525,8 @@ type Ecs33 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 33 component types.
+-}
 spec33 : Spec comparable (Ecs33 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33)
 spec33 =
     Internal.Spec
@@ -21652,7 +21752,8 @@ spec33 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 33 component types.
+-}
 components33 :
     (ComponentSpec comparable (Ecs33 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33) a1
      -> ComponentSpec comparable (Ecs33 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33) a2
@@ -23047,7 +23148,8 @@ components33 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 34 component types.
+-}
 type Ecs34 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34
     = Ecs34
         { data1 : Dict comparable a1
@@ -23087,7 +23189,8 @@ type Ecs34 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 34 component types.
+-}
 spec34 : Spec comparable (Ecs34 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34)
 spec34 =
     Internal.Spec
@@ -23319,7 +23422,8 @@ spec34 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 34 component types.
+-}
 components34 :
     (ComponentSpec comparable (Ecs34 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34) a1
      -> ComponentSpec comparable (Ecs34 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34) a2
@@ -24790,7 +24894,8 @@ components34 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 35 component types.
+-}
 type Ecs35 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35
     = Ecs35
         { data1 : Dict comparable a1
@@ -24831,7 +24936,8 @@ type Ecs35 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 35 component types.
+-}
 spec35 : Spec comparable (Ecs35 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35)
 spec35 =
     Internal.Spec
@@ -25069,7 +25175,8 @@ spec35 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 35 component types.
+-}
 components35 :
     (ComponentSpec comparable (Ecs35 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35) a1
      -> ComponentSpec comparable (Ecs35 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35) a2
@@ -26618,7 +26725,8 @@ components35 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 36 component types.
+-}
 type Ecs36 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36
     = Ecs36
         { data1 : Dict comparable a1
@@ -26660,7 +26768,8 @@ type Ecs36 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 36 component types.
+-}
 spec36 : Spec comparable (Ecs36 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36)
 spec36 =
     Internal.Spec
@@ -26904,7 +27013,8 @@ spec36 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 36 component types.
+-}
 components36 :
     (ComponentSpec comparable (Ecs36 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36) a1
      -> ComponentSpec comparable (Ecs36 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36) a2
@@ -28533,7 +28643,8 @@ components36 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 37 component types.
+-}
 type Ecs37 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37
     = Ecs37
         { data1 : Dict comparable a1
@@ -28576,7 +28687,8 @@ type Ecs37 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 37 component types.
+-}
 spec37 : Spec comparable (Ecs37 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37)
 spec37 =
     Internal.Spec
@@ -28826,7 +28938,8 @@ spec37 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 37 component types.
+-}
 components37 :
     (ComponentSpec comparable (Ecs37 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37) a1
      -> ComponentSpec comparable (Ecs37 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37) a2
@@ -30537,7 +30650,8 @@ components37 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 38 component types.
+-}
 type Ecs38 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38
     = Ecs38
         { data1 : Dict comparable a1
@@ -30581,7 +30695,8 @@ type Ecs38 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 38 component types.
+-}
 spec38 : Spec comparable (Ecs38 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38)
 spec38 =
     Internal.Spec
@@ -30837,7 +30952,8 @@ spec38 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 38 component types.
+-}
 components38 :
     (ComponentSpec comparable (Ecs38 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38) a1
      -> ComponentSpec comparable (Ecs38 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38) a2
@@ -32632,7 +32748,8 @@ components38 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 39 component types.
+-}
 type Ecs39 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39
     = Ecs39
         { data1 : Dict comparable a1
@@ -32677,7 +32794,8 @@ type Ecs39 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 39 component types.
+-}
 spec39 : Spec comparable (Ecs39 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39)
 spec39 =
     Internal.Spec
@@ -32939,7 +33057,8 @@ spec39 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 39 component types.
+-}
 components39 :
     (ComponentSpec comparable (Ecs39 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39) a1
      -> ComponentSpec comparable (Ecs39 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39) a2
@@ -34820,7 +34939,8 @@ components39 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 40 component types.
+-}
 type Ecs40 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40
     = Ecs40
         { data1 : Dict comparable a1
@@ -34866,7 +34986,8 @@ type Ecs40 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 40 component types.
+-}
 spec40 : Spec comparable (Ecs40 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40)
 spec40 =
     Internal.Spec
@@ -35134,7 +35255,8 @@ spec40 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 40 component types.
+-}
 components40 :
     (ComponentSpec comparable (Ecs40 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40) a1
      -> ComponentSpec comparable (Ecs40 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40) a2
@@ -37103,7 +37225,8 @@ components40 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 41 component types.
+-}
 type Ecs41 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41
     = Ecs41
         { data1 : Dict comparable a1
@@ -37150,7 +37273,8 @@ type Ecs41 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 41 component types.
+-}
 spec41 : Spec comparable (Ecs41 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41)
 spec41 =
     Internal.Spec
@@ -37424,7 +37548,8 @@ spec41 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 41 component types.
+-}
 components41 :
     (ComponentSpec comparable (Ecs41 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41) a1
      -> ComponentSpec comparable (Ecs41 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41) a2
@@ -39483,7 +39608,8 @@ components41 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 42 component types.
+-}
 type Ecs42 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42
     = Ecs42
         { data1 : Dict comparable a1
@@ -39531,7 +39657,8 @@ type Ecs42 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 42 component types.
+-}
 spec42 : Spec comparable (Ecs42 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42)
 spec42 =
     Internal.Spec
@@ -39811,7 +39938,8 @@ spec42 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 42 component types.
+-}
 components42 :
     (ComponentSpec comparable (Ecs42 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42) a1
      -> ComponentSpec comparable (Ecs42 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42) a2
@@ -41962,7 +42090,8 @@ components42 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 43 component types.
+-}
 type Ecs43 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43
     = Ecs43
         { data1 : Dict comparable a1
@@ -42011,7 +42140,8 @@ type Ecs43 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 43 component types.
+-}
 spec43 : Spec comparable (Ecs43 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43)
 spec43 =
     Internal.Spec
@@ -42297,7 +42427,8 @@ spec43 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 43 component types.
+-}
 components43 :
     (ComponentSpec comparable (Ecs43 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43) a1
      -> ComponentSpec comparable (Ecs43 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43) a2
@@ -44542,7 +44673,8 @@ components43 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 44 component types.
+-}
 type Ecs44 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44
     = Ecs44
         { data1 : Dict comparable a1
@@ -44592,7 +44724,8 @@ type Ecs44 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 44 component types.
+-}
 spec44 : Spec comparable (Ecs44 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44)
 spec44 =
     Internal.Spec
@@ -44884,7 +45017,8 @@ spec44 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 44 component types.
+-}
 components44 :
     (ComponentSpec comparable (Ecs44 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44) a1
      -> ComponentSpec comparable (Ecs44 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44) a2
@@ -47225,7 +47359,8 @@ components44 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 45 component types.
+-}
 type Ecs45 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45
     = Ecs45
         { data1 : Dict comparable a1
@@ -47276,7 +47411,8 @@ type Ecs45 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 45 component types.
+-}
 spec45 : Spec comparable (Ecs45 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45)
 spec45 =
     Internal.Spec
@@ -47574,7 +47710,8 @@ spec45 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 45 component types.
+-}
 components45 :
     (ComponentSpec comparable (Ecs45 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45) a1
      -> ComponentSpec comparable (Ecs45 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45) a2
@@ -50013,7 +50150,8 @@ components45 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 46 component types.
+-}
 type Ecs46 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46
     = Ecs46
         { data1 : Dict comparable a1
@@ -50065,7 +50203,8 @@ type Ecs46 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 46 component types.
+-}
 spec46 : Spec comparable (Ecs46 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46)
 spec46 =
     Internal.Spec
@@ -50369,7 +50508,8 @@ spec46 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 46 component types.
+-}
 components46 :
     (ComponentSpec comparable (Ecs46 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46) a1
      -> ComponentSpec comparable (Ecs46 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46) a2
@@ -52908,7 +53048,8 @@ components46 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 47 component types.
+-}
 type Ecs47 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46 a47
     = Ecs47
         { data1 : Dict comparable a1
@@ -52961,7 +53102,8 @@ type Ecs47 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 47 component types.
+-}
 spec47 : Spec comparable (Ecs47 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46 a47)
 spec47 =
     Internal.Spec
@@ -53271,7 +53413,8 @@ spec47 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 47 component types.
+-}
 components47 :
     (ComponentSpec comparable (Ecs47 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46 a47) a1
      -> ComponentSpec comparable (Ecs47 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46 a47) a2
@@ -55912,7 +56055,8 @@ components47 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 48 component types.
+-}
 type Ecs48 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46 a47 a48
     = Ecs48
         { data1 : Dict comparable a1
@@ -55966,7 +56110,8 @@ type Ecs48 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 48 component types.
+-}
 spec48 : Spec comparable (Ecs48 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46 a47 a48)
 spec48 =
     Internal.Spec
@@ -56282,7 +56427,8 @@ spec48 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 48 component types.
+-}
 components48 :
     (ComponentSpec comparable (Ecs48 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46 a47 a48) a1
      -> ComponentSpec comparable (Ecs48 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46 a47 a48) a2
@@ -59027,7 +59173,8 @@ components48 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 49 component types.
+-}
 type Ecs49 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46 a47 a48 a49
     = Ecs49
         { data1 : Dict comparable a1
@@ -59082,7 +59229,8 @@ type Ecs49 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 49 component types.
+-}
 spec49 : Spec comparable (Ecs49 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46 a47 a48 a49)
 spec49 =
     Internal.Spec
@@ -59404,7 +59552,8 @@ spec49 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 49 component types.
+-}
 components49 :
     (ComponentSpec comparable (Ecs49 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46 a47 a48 a49) a1
      -> ComponentSpec comparable (Ecs49 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46 a47 a48 a49) a2
@@ -62255,7 +62404,8 @@ components49 fn =
         )
 
 
-{-| -}
+{-| An ecs model type with 50 component types.
+-}
 type Ecs50 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46 a47 a48 a49 a50
     = Ecs50
         { data1 : Dict comparable a1
@@ -62311,7 +62461,8 @@ type Ecs50 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17
         }
 
 
-{-| -}
+{-| An ecs specification with 50 component types.
+-}
 spec50 : Spec comparable (Ecs50 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46 a47 a48 a49 a50)
 spec50 =
     Internal.Spec
@@ -62639,7 +62790,8 @@ spec50 =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with 50 component types.
+-}
 components50 :
     (ComponentSpec comparable (Ecs50 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46 a47 a48 a49 a50) a1
      -> ComponentSpec comparable (Ecs50 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46 a47 a48 a49 a50) a2

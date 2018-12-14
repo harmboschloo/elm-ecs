@@ -1,9 +1,3 @@
-# To do
-
-- Process distinguish between functions with id and without (current)?
-- canvas renderer for demo https://package.elm-lang.org/packages/joakin/elm-canvas/latest/
-- Can we get rit of Entity type defined by user?
-
 # Resources
 
 ecs
@@ -22,7 +16,6 @@ ecs
 - https://www.sebaslab.com/ecs-design-to-achieve-true-inversion-of-flow-control/
 - https://www.youtube.com/playlist?list=PLX2vGYjWbI0TPRStIWx3UyNB8QqjNUj98
 - https://github.com/HeroesGrave/ecs-rs/blob/master/doc/tutorial.md
-- https://slide-rs.github.io/specs/
 - https://github.com/sebas77/Svelto.ECS
 
 webgl

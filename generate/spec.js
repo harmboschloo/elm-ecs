@@ -22,12 +22,14 @@ import Ecs.Internal as Internal
 import Set
 
 
-{-| -}
+{-| The ecs specification type.
+-}
 type alias Spec comparable ecs =
     Internal.Spec comparable ecs
 
 
-{-| -}
+{-| A component specification type.
+-}
 type alias ComponentSpec comparable ecs a =
     Internal.ComponentSpec comparable ecs a
 ${specs.map(iSpec => {
@@ -39,7 +41,8 @@ ${specs.map(iSpec => {
 
     return `
 
-{-| -}
+{-| An ecs model type with ${iSpec} component type${iSpec > 1 ? "s" : ""}.
+-}
 type ${ecs}
     = Ecs${iSpec}
         { ${components.map(i => `data${i} : Dict comparable a${i}`).join(`
@@ -47,7 +50,8 @@ type ${ecs}
         }
 
 
-{-| -}
+{-| An ecs specification with ${iSpec} component type${iSpec > 1 ? "s" : ""}.
+-}
 spec${iSpec} : Spec comparable (${ecs})
 spec${iSpec} =
     Internal.Spec
@@ -89,7 +93,10 @@ spec${iSpec} =
         }
 
 
-{-| -}
+{-| Create component specifications for an ecs with ${iSpec} component type${
+      iSpec > 1 ? "s" : ""
+    }.
+-}
 components${iSpec} :
     (${components.map(i => `ComponentSpec comparable (${ecs}) a${i}`).join(`
      -> `)}

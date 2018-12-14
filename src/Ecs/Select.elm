@@ -5,7 +5,14 @@ module Ecs.Select exposing
 
 {-|
 
+
+# Create selecors
+
 @docs Selector, component, select1, select2, select3, select4, select5
+
+
+# Modify selectors
+
 @docs andGet, andHas, andNot, andThen, andFilter
 
 -}
@@ -14,11 +21,14 @@ import Dict
 import Ecs.Internal as Internal exposing (ComponentSpec(..), Spec(..))
 
 
+{-| A selector of a specific set of components.
+-}
 type alias Selector comparable ecs a =
     Internal.Selector comparable ecs a
 
 
-{-| -}
+{-| Create a selector for a component type.
+-}
 component : ComponentSpec comparable ecs a -> Selector comparable ecs a
 component (ComponentSpec spec) =
     Internal.Selector
@@ -27,7 +37,8 @@ component (ComponentSpec spec) =
         }
 
 
-{-| -}
+{-| Create a selector for 1 component type, mapped to the provided function.
+-}
 select1 :
     (a -> b)
     -> ComponentSpec comparable ecs a
@@ -36,7 +47,8 @@ select1 fn aSpec =
     map fn (component aSpec)
 
 
-{-| -}
+{-| Create a selector for 2 component types, mapped to the provided function.
+-}
 select2 :
     (a -> b -> c)
     -> ComponentSpec comparable ecs a
@@ -48,7 +60,8 @@ select2 fn aSpec bSpec =
         (component bSpec)
 
 
-{-| -}
+{-| Create a selector for 3 component types, mapped to the provided function.
+-}
 select3 :
     (a -> b -> c -> d)
     -> ComponentSpec comparable ecs a
@@ -62,7 +75,8 @@ select3 fn aSpec bSpec cSpec =
         (component cSpec)
 
 
-{-| -}
+{-| Create a selector for 4 component types, mapped to the provided function.
+-}
 select4 :
     (a -> b -> c -> d -> e)
     -> ComponentSpec comparable ecs a
@@ -78,7 +92,8 @@ select4 fn aSpec bSpec cSpec dSpec =
         (component dSpec)
 
 
-{-| -}
+{-| Create a selector for 5 component types, mapped to the provided function.
+-}
 select5 :
     (a -> b -> c -> d -> e -> f)
     -> ComponentSpec comparable ecs a
@@ -270,7 +285,8 @@ map5 fn (Internal.Selector aSelector) bSelector cSelector dSelector eSelector =
 -- MODIFIERS --
 
 
-{-| -}
+{-| Also get a specific component type.
+-}
 andGet :
     ComponentSpec comparable ecs a
     -> Selector comparable ecs (Maybe a -> b)
@@ -295,7 +311,8 @@ andGet (ComponentSpec spec) (Internal.Selector selector) =
         }
 
 
-{-| -}
+{-| Also depend on the previous result.
+-}
 andThen :
     (a -> Maybe b)
     -> Selector comparable ecs a
@@ -325,7 +342,8 @@ andThen fn (Internal.Selector selector) =
         }
 
 
-{-| -}
+{-| Also check if a specific component type is present.
+-}
 andHas :
     ComponentSpec comparable ecs b
     -> Selector comparable ecs a
@@ -351,7 +369,8 @@ andHas (ComponentSpec spec) (Internal.Selector selector) =
         }
 
 
-{-| -}
+{-| Also check if a specific component type is not present.
+-}
 andNot :
     ComponentSpec comparable ecs b
     -> Selector comparable ecs a
@@ -378,7 +397,8 @@ andNot (ComponentSpec spec) (Internal.Selector selector) =
         }
 
 
-{-| -}
+{-| Also only keep data that satify the test.
+-}
 andFilter :
     (a -> Bool)
     -> Selector comparable ecs a
