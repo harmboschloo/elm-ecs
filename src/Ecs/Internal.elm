@@ -1,29 +1,40 @@
-module Ecs.Internal exposing (ComponentSpec(..), Selector(..), Spec(..))
+module Ecs.Internal exposing
+    ( ComponentSpec(..)
+    , EntityId(..)
+    , Selector(..)
+    , Spec(..)
+    )
 
 import Dict exposing (Dict)
 import Set exposing (Set)
 
 
-type Spec comparable ecs
+type EntityId
+    = EntityId Int
+
+
+type Spec ecs
     = Spec
         { empty : ecs
-        , clear : comparable -> ecs -> ecs
+        , clear : EntityId -> ecs -> ecs
         , isEmpty : ecs -> Bool
         , componentCount : ecs -> Int
-        , ids : ecs -> Set comparable
-        , member : comparable -> ecs -> Bool
+        , ids : ecs -> Set Int
+        , member : EntityId -> ecs -> Bool
+        , create : ecs -> ( ecs, EntityId )
+        , destroy : EntityId -> ecs -> ecs
         }
 
 
-type ComponentSpec comparable ecs a
+type ComponentSpec ecs a
     = ComponentSpec
-        { get : ecs -> Dict comparable a
-        , update : (Dict comparable a -> Dict comparable a) -> ecs -> ecs
+        { get : ecs -> Dict Int a
+        , update : (Dict Int a -> Dict Int a) -> ecs -> ecs
         }
 
 
-type Selector comparable ecs a
+type Selector ecs a
     = Selector
-        { select : comparable -> ecs -> Maybe a
-        , selectList : ecs -> List ( comparable, a )
+        { select : Int -> ecs -> Maybe a
+        , selectList : ecs -> List ( EntityId, a )
         }

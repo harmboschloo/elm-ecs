@@ -18,22 +18,32 @@ module Ecs.Select exposing
 -}
 
 import Dict
-import Ecs.Internal as Internal exposing (ComponentSpec(..), Spec(..))
+import Ecs.Internal as Internal
+    exposing
+        ( ComponentSpec(..)
+        , EntityId(..)
+        , Spec(..)
+        )
 
 
 {-| A selector of a specific set of components.
 -}
-type alias Selector comparable ecs a =
-    Internal.Selector comparable ecs a
+type alias Selector ecs a =
+    Internal.Selector ecs a
 
 
 {-| Create a selector for a component type.
 -}
-component : ComponentSpec comparable ecs a -> Selector comparable ecs a
+component : ComponentSpec ecs a -> Selector ecs a
 component (ComponentSpec spec) =
     Internal.Selector
-        { select = \id ecs -> Dict.get id (spec.get ecs)
-        , selectList = \ecs -> Dict.toList (spec.get ecs)
+        { select = \entityId ecs -> Dict.get entityId (spec.get ecs)
+        , selectList =
+            \ecs ->
+                Dict.foldr
+                    (\entityId data list -> ( EntityId entityId, data ) :: list)
+                    []
+                    (spec.get ecs)
         }
 
 
@@ -41,8 +51,8 @@ component (ComponentSpec spec) =
 -}
 select1 :
     (a -> b)
-    -> ComponentSpec comparable ecs a
-    -> Selector comparable ecs b
+    -> ComponentSpec ecs a
+    -> Selector ecs b
 select1 fn aSpec =
     map fn (component aSpec)
 
@@ -51,9 +61,9 @@ select1 fn aSpec =
 -}
 select2 :
     (a -> b -> c)
-    -> ComponentSpec comparable ecs a
-    -> ComponentSpec comparable ecs b
-    -> Selector comparable ecs c
+    -> ComponentSpec ecs a
+    -> ComponentSpec ecs b
+    -> Selector ecs c
 select2 fn aSpec bSpec =
     map2 fn
         (component aSpec)
@@ -64,10 +74,10 @@ select2 fn aSpec bSpec =
 -}
 select3 :
     (a -> b -> c -> d)
-    -> ComponentSpec comparable ecs a
-    -> ComponentSpec comparable ecs b
-    -> ComponentSpec comparable ecs c
-    -> Selector comparable ecs d
+    -> ComponentSpec ecs a
+    -> ComponentSpec ecs b
+    -> ComponentSpec ecs c
+    -> Selector ecs d
 select3 fn aSpec bSpec cSpec =
     map3 fn
         (component aSpec)
@@ -79,11 +89,11 @@ select3 fn aSpec bSpec cSpec =
 -}
 select4 :
     (a -> b -> c -> d -> e)
-    -> ComponentSpec comparable ecs a
-    -> ComponentSpec comparable ecs b
-    -> ComponentSpec comparable ecs c
-    -> ComponentSpec comparable ecs d
-    -> Selector comparable ecs e
+    -> ComponentSpec ecs a
+    -> ComponentSpec ecs b
+    -> ComponentSpec ecs c
+    -> ComponentSpec ecs d
+    -> Selector ecs e
 select4 fn aSpec bSpec cSpec dSpec =
     map4 fn
         (component aSpec)
@@ -96,12 +106,12 @@ select4 fn aSpec bSpec cSpec dSpec =
 -}
 select5 :
     (a -> b -> c -> d -> e -> f)
-    -> ComponentSpec comparable ecs a
-    -> ComponentSpec comparable ecs b
-    -> ComponentSpec comparable ecs c
-    -> ComponentSpec comparable ecs d
-    -> ComponentSpec comparable ecs e
-    -> Selector comparable ecs f
+    -> ComponentSpec ecs a
+    -> ComponentSpec ecs b
+    -> ComponentSpec ecs c
+    -> ComponentSpec ecs d
+    -> ComponentSpec ecs e
+    -> Selector ecs f
 select5 fn aSpec bSpec cSpec dSpec eSpec =
     map5 fn
         (component aSpec)
@@ -115,47 +125,47 @@ select5 fn aSpec bSpec cSpec dSpec eSpec =
 -- MAPPING --
 
 
-map : (a -> b) -> Selector comparable ecs a -> Selector comparable ecs b
+map : (a -> b) -> Selector ecs a -> Selector ecs b
 map fn (Internal.Selector selector) =
     Internal.Selector
         { select =
-            \id ecs ->
+            \entityId ecs ->
                 selectAndMap1 fn
                     (Internal.Selector selector)
-                    id
+                    entityId
                     ecs
         , selectList =
             \ecs ->
                 List.map
-                    (\( id, a ) -> ( id, fn a ))
+                    (\( entityId, a ) -> ( entityId, fn a ))
                     (selector.selectList ecs)
         }
 
 
 map2 :
     (a -> b -> c)
-    -> Selector comparable ecs a
-    -> Selector comparable ecs b
-    -> Selector comparable ecs c
+    -> Selector ecs a
+    -> Selector ecs b
+    -> Selector ecs c
 map2 fn (Internal.Selector aSelector) bSelector =
     Internal.Selector
         { select =
-            \id ecs ->
+            \entityId ecs ->
                 selectAndMap2 fn
                     (Internal.Selector aSelector)
                     bSelector
-                    id
+                    entityId
                     ecs
         , selectList =
             \ecs ->
                 List.filterMap
-                    (\( id, a ) ->
-                        case selectAndMap1 (\b -> fn a b) bSelector id ecs of
+                    (\( EntityId entityId, a ) ->
+                        case selectAndMap1 (\b -> fn a b) bSelector entityId ecs of
                             Nothing ->
                                 Nothing
 
                             Just c ->
-                                Just ( id, c )
+                                Just ( EntityId entityId, c )
                     )
                     (aSelector.selectList ecs)
         }
@@ -163,36 +173,36 @@ map2 fn (Internal.Selector aSelector) bSelector =
 
 map3 :
     (a -> b -> c -> d)
-    -> Selector comparable ecs a
-    -> Selector comparable ecs b
-    -> Selector comparable ecs c
-    -> Selector comparable ecs d
+    -> Selector ecs a
+    -> Selector ecs b
+    -> Selector ecs c
+    -> Selector ecs d
 map3 fn (Internal.Selector aSelector) bSelector cSelector =
     Internal.Selector
         { select =
-            \id ecs ->
+            \entityId ecs ->
                 selectAndMap3 fn
                     (Internal.Selector aSelector)
                     bSelector
                     cSelector
-                    id
+                    entityId
                     ecs
         , selectList =
             \ecs ->
                 List.filterMap
-                    (\( id, a ) ->
+                    (\( EntityId entityId, a ) ->
                         case
                             selectAndMap2 (\b c -> fn a b c)
                                 bSelector
                                 cSelector
-                                id
+                                entityId
                                 ecs
                         of
                             Nothing ->
                                 Nothing
 
                             Just d ->
-                                Just ( id, d )
+                                Just ( EntityId entityId, d )
                     )
                     (aSelector.selectList ecs)
         }
@@ -200,39 +210,39 @@ map3 fn (Internal.Selector aSelector) bSelector cSelector =
 
 map4 :
     (a -> b -> c -> d -> e)
-    -> Selector comparable ecs a
-    -> Selector comparable ecs b
-    -> Selector comparable ecs c
-    -> Selector comparable ecs d
-    -> Selector comparable ecs e
+    -> Selector ecs a
+    -> Selector ecs b
+    -> Selector ecs c
+    -> Selector ecs d
+    -> Selector ecs e
 map4 fn (Internal.Selector aSelector) bSelector cSelector dSelector =
     Internal.Selector
         { select =
-            \id ecs ->
+            \entityId ecs ->
                 selectAndMap4 fn
                     (Internal.Selector aSelector)
                     bSelector
                     cSelector
                     dSelector
-                    id
+                    entityId
                     ecs
         , selectList =
             \ecs ->
                 List.filterMap
-                    (\( id, a ) ->
+                    (\( EntityId entityId, a ) ->
                         case
                             selectAndMap3 (\b c d -> fn a b c d)
                                 bSelector
                                 cSelector
                                 dSelector
-                                id
+                                entityId
                                 ecs
                         of
                             Nothing ->
                                 Nothing
 
                             Just e ->
-                                Just ( id, e )
+                                Just ( EntityId entityId, e )
                     )
                     (aSelector.selectList ecs)
         }
@@ -240,42 +250,42 @@ map4 fn (Internal.Selector aSelector) bSelector cSelector dSelector =
 
 map5 :
     (a -> b -> c -> d -> e -> f)
-    -> Selector comparable ecs a
-    -> Selector comparable ecs b
-    -> Selector comparable ecs c
-    -> Selector comparable ecs d
-    -> Selector comparable ecs e
-    -> Selector comparable ecs f
+    -> Selector ecs a
+    -> Selector ecs b
+    -> Selector ecs c
+    -> Selector ecs d
+    -> Selector ecs e
+    -> Selector ecs f
 map5 fn (Internal.Selector aSelector) bSelector cSelector dSelector eSelector =
     Internal.Selector
         { select =
-            \id ecs ->
+            \entityId ecs ->
                 selectAndMap5 fn
                     (Internal.Selector aSelector)
                     bSelector
                     cSelector
                     dSelector
                     eSelector
-                    id
+                    entityId
                     ecs
         , selectList =
             \ecs ->
                 List.filterMap
-                    (\( id, a ) ->
+                    (\( EntityId entityId, a ) ->
                         case
                             selectAndMap4 (\b c d e -> fn a b c d e)
                                 bSelector
                                 cSelector
                                 dSelector
                                 eSelector
-                                id
+                                entityId
                                 ecs
                         of
                             Nothing ->
                                 Nothing
 
                             Just f ->
-                                Just ( id, f )
+                                Just ( EntityId entityId, f )
                     )
                     (aSelector.selectList ecs)
         }
@@ -288,25 +298,27 @@ map5 fn (Internal.Selector aSelector) bSelector cSelector dSelector eSelector =
 {-| Also get a specific component type.
 -}
 andGet :
-    ComponentSpec comparable ecs a
-    -> Selector comparable ecs (Maybe a -> b)
-    -> Selector comparable ecs b
+    ComponentSpec ecs a
+    -> Selector ecs (Maybe a -> b)
+    -> Selector ecs b
 andGet (ComponentSpec spec) (Internal.Selector selector) =
     Internal.Selector
         { select =
-            \id ecs ->
-                case selector.select id ecs of
+            \entityId ecs ->
+                case selector.select entityId ecs of
                     Nothing ->
                         Nothing
 
                     Just fn ->
-                        Just (fn (Dict.get id (spec.get ecs)))
+                        Just (fn (Dict.get entityId (spec.get ecs)))
         , selectList =
             \ecs ->
                 selector.selectList ecs
                     |> List.map
-                        (\( id, fn ) ->
-                            ( id, fn (Dict.get id (spec.get ecs)) )
+                        (\( EntityId entityId, fn ) ->
+                            ( EntityId entityId
+                            , fn (Dict.get entityId (spec.get ecs))
+                            )
                         )
         }
 
@@ -315,13 +327,13 @@ andGet (ComponentSpec spec) (Internal.Selector selector) =
 -}
 andThen :
     (a -> Maybe b)
-    -> Selector comparable ecs a
-    -> Selector comparable ecs b
+    -> Selector ecs a
+    -> Selector ecs b
 andThen fn (Internal.Selector selector) =
     Internal.Selector
         { select =
-            \id ecs ->
-                case selector.select id ecs of
+            \entityId ecs ->
+                case selector.select entityId ecs of
                     Nothing ->
                         Nothing
 
@@ -331,13 +343,13 @@ andThen fn (Internal.Selector selector) =
             \ecs ->
                 selector.selectList ecs
                     |> List.filterMap
-                        (\( id, a ) ->
+                        (\( entityId, a ) ->
                             case fn a of
                                 Nothing ->
                                     Nothing
 
                                 Just b ->
-                                    Just ( id, b )
+                                    Just ( entityId, b )
                         )
         }
 
@@ -345,19 +357,19 @@ andThen fn (Internal.Selector selector) =
 {-| Also check if a specific component type is present.
 -}
 andHas :
-    ComponentSpec comparable ecs b
-    -> Selector comparable ecs a
-    -> Selector comparable ecs a
+    ComponentSpec ecs b
+    -> Selector ecs a
+    -> Selector ecs a
 andHas (ComponentSpec spec) (Internal.Selector selector) =
     Internal.Selector
         { select =
-            \id ecs ->
-                case selector.select id ecs of
+            \entityId ecs ->
+                case selector.select entityId ecs of
                     Nothing ->
                         Nothing
 
                     Just a ->
-                        if Dict.member id (spec.get ecs) then
+                        if Dict.member entityId (spec.get ecs) then
                             Just a
 
                         else
@@ -365,26 +377,29 @@ andHas (ComponentSpec spec) (Internal.Selector selector) =
         , selectList =
             \ecs ->
                 selector.selectList ecs
-                    |> List.filter (\( id, _ ) -> Dict.member id (spec.get ecs))
+                    |> List.filter
+                        (\( EntityId entityId, _ ) ->
+                            Dict.member entityId (spec.get ecs)
+                        )
         }
 
 
 {-| Also check if a specific component type is not present.
 -}
 andNot :
-    ComponentSpec comparable ecs b
-    -> Selector comparable ecs a
-    -> Selector comparable ecs a
+    ComponentSpec ecs b
+    -> Selector ecs a
+    -> Selector ecs a
 andNot (ComponentSpec spec) (Internal.Selector selector) =
     Internal.Selector
         { select =
-            \id ecs ->
-                case selector.select id ecs of
+            \entityId ecs ->
+                case selector.select entityId ecs of
                     Nothing ->
                         Nothing
 
                     Just a ->
-                        if Dict.member id (spec.get ecs) then
+                        if Dict.member entityId (spec.get ecs) then
                             Nothing
 
                         else
@@ -393,7 +408,9 @@ andNot (ComponentSpec spec) (Internal.Selector selector) =
             \ecs ->
                 selector.selectList ecs
                     |> List.filter
-                        (\( id, _ ) -> not (Dict.member id (spec.get ecs)))
+                        (\( EntityId entityId, _ ) ->
+                            not (Dict.member entityId (spec.get ecs))
+                        )
         }
 
 
@@ -401,13 +418,13 @@ andNot (ComponentSpec spec) (Internal.Selector selector) =
 -}
 andFilter :
     (a -> Bool)
-    -> Selector comparable ecs a
-    -> Selector comparable ecs a
+    -> Selector ecs a
+    -> Selector ecs a
 andFilter fn (Internal.Selector selector) =
     Internal.Selector
         { select =
-            \id ecs ->
-                case selector.select id ecs of
+            \entityId ecs ->
+                case selector.select entityId ecs of
                     Nothing ->
                         Nothing
 
@@ -420,7 +437,7 @@ andFilter fn (Internal.Selector selector) =
         , selectList =
             \ecs ->
                 selector.selectList ecs
-                    |> List.filter (\( id, a ) -> fn a)
+                    |> List.filter (\( EntityId entityId, a ) -> fn a)
         }
 
 
@@ -430,12 +447,12 @@ andFilter fn (Internal.Selector selector) =
 
 selectAndMap1 :
     (a -> b)
-    -> Selector comparable ecs a
-    -> comparable
+    -> Selector ecs a
+    -> Int
     -> ecs
     -> Maybe b
-selectAndMap1 fn (Internal.Selector aSelector) id ecs =
-    case aSelector.select id ecs of
+selectAndMap1 fn (Internal.Selector aSelector) entityId ecs =
+    case aSelector.select entityId ecs of
         Nothing ->
             Nothing
 
@@ -445,18 +462,18 @@ selectAndMap1 fn (Internal.Selector aSelector) id ecs =
 
 selectAndMap2 :
     (a -> b -> c)
-    -> Selector comparable ecs a
-    -> Selector comparable ecs b
-    -> comparable
+    -> Selector ecs a
+    -> Selector ecs b
+    -> Int
     -> ecs
     -> Maybe c
-selectAndMap2 fn (Internal.Selector aSelector) (Internal.Selector bSelector) id ecs =
-    case aSelector.select id ecs of
+selectAndMap2 fn (Internal.Selector aSelector) (Internal.Selector bSelector) entityId ecs =
+    case aSelector.select entityId ecs of
         Nothing ->
             Nothing
 
         Just a ->
-            case bSelector.select id ecs of
+            case bSelector.select entityId ecs of
                 Nothing ->
                     Nothing
 
@@ -466,24 +483,24 @@ selectAndMap2 fn (Internal.Selector aSelector) (Internal.Selector bSelector) id 
 
 selectAndMap3 :
     (a -> b -> c -> d)
-    -> Selector comparable ecs a
-    -> Selector comparable ecs b
-    -> Selector comparable ecs c
-    -> comparable
+    -> Selector ecs a
+    -> Selector ecs b
+    -> Selector ecs c
+    -> Int
     -> ecs
     -> Maybe d
-selectAndMap3 fn (Internal.Selector aSelector) (Internal.Selector bSelector) (Internal.Selector cSelector) id ecs =
-    case aSelector.select id ecs of
+selectAndMap3 fn (Internal.Selector aSelector) (Internal.Selector bSelector) (Internal.Selector cSelector) entityId ecs =
+    case aSelector.select entityId ecs of
         Nothing ->
             Nothing
 
         Just a ->
-            case bSelector.select id ecs of
+            case bSelector.select entityId ecs of
                 Nothing ->
                     Nothing
 
                 Just b ->
-                    case cSelector.select id ecs of
+                    case cSelector.select entityId ecs of
                         Nothing ->
                             Nothing
 
@@ -493,30 +510,30 @@ selectAndMap3 fn (Internal.Selector aSelector) (Internal.Selector bSelector) (In
 
 selectAndMap4 :
     (a -> b -> c -> d -> e)
-    -> Selector comparable ecs a
-    -> Selector comparable ecs b
-    -> Selector comparable ecs c
-    -> Selector comparable ecs d
-    -> comparable
+    -> Selector ecs a
+    -> Selector ecs b
+    -> Selector ecs c
+    -> Selector ecs d
+    -> Int
     -> ecs
     -> Maybe e
-selectAndMap4 fn (Internal.Selector aSelector) (Internal.Selector bSelector) (Internal.Selector cSelector) (Internal.Selector dSelector) id ecs =
-    case aSelector.select id ecs of
+selectAndMap4 fn (Internal.Selector aSelector) (Internal.Selector bSelector) (Internal.Selector cSelector) (Internal.Selector dSelector) entityId ecs =
+    case aSelector.select entityId ecs of
         Nothing ->
             Nothing
 
         Just a ->
-            case bSelector.select id ecs of
+            case bSelector.select entityId ecs of
                 Nothing ->
                     Nothing
 
                 Just b ->
-                    case cSelector.select id ecs of
+                    case cSelector.select entityId ecs of
                         Nothing ->
                             Nothing
 
                         Just c ->
-                            case dSelector.select id ecs of
+                            case dSelector.select entityId ecs of
                                 Nothing ->
                                     Nothing
 
@@ -526,36 +543,36 @@ selectAndMap4 fn (Internal.Selector aSelector) (Internal.Selector bSelector) (In
 
 selectAndMap5 :
     (a -> b -> c -> d -> e -> f)
-    -> Selector comparable ecs a
-    -> Selector comparable ecs b
-    -> Selector comparable ecs c
-    -> Selector comparable ecs d
-    -> Selector comparable ecs e
-    -> comparable
+    -> Selector ecs a
+    -> Selector ecs b
+    -> Selector ecs c
+    -> Selector ecs d
+    -> Selector ecs e
+    -> Int
     -> ecs
     -> Maybe f
-selectAndMap5 fn (Internal.Selector aSelector) (Internal.Selector bSelector) (Internal.Selector cSelector) (Internal.Selector dSelector) (Internal.Selector eSelector) id ecs =
-    case aSelector.select id ecs of
+selectAndMap5 fn (Internal.Selector aSelector) (Internal.Selector bSelector) (Internal.Selector cSelector) (Internal.Selector dSelector) (Internal.Selector eSelector) entityId ecs =
+    case aSelector.select entityId ecs of
         Nothing ->
             Nothing
 
         Just a ->
-            case bSelector.select id ecs of
+            case bSelector.select entityId ecs of
                 Nothing ->
                     Nothing
 
                 Just b ->
-                    case cSelector.select id ecs of
+                    case cSelector.select entityId ecs of
                         Nothing ->
                             Nothing
 
                         Just c ->
-                            case dSelector.select id ecs of
+                            case dSelector.select entityId ecs of
                                 Nothing ->
                                     Nothing
 
                                 Just d ->
-                                    case eSelector.select id ecs of
+                                    case eSelector.select entityId ecs of
                                         Nothing ->
                                             Nothing
 

@@ -13,9 +13,9 @@ module Ecs2 exposing
     )
 
 import Data exposing (A, B, C)
-import V1.Ecs as Ecs
-import V1.Ecs.Select as Select
-import V1.Ecs.Spec as Spec
+import Ecs as Ecs exposing (EntityId)
+import Ecs.Select as Select
+import Ecs.Spec as Spec
 
 
 type alias ComponentSpecs =
@@ -26,18 +26,18 @@ type alias ComponentSpecs =
 
 
 type alias ComponentSpec a =
-    Spec.ComponentSpec Int Ecs a
+    Spec.ComponentSpec World a
 
 
-type alias Ecs =
-    Spec.Ecs3 Int A B C
+type alias World =
+    Spec.Ecs3 A B C
 
 
 type alias Selector a =
-    Select.Selector Int Ecs a
+    Select.Selector World a
 
 
-spec : Spec.Spec Int Ecs
+spec : Spec.Spec World
 spec =
     Spec.spec3
 
@@ -47,35 +47,35 @@ components =
     Spec.components3 ComponentSpecs
 
 
-builder : Data.Builder ( Int, Ecs ) Int
+builder : Data.Builder World EntityId
 builder =
-    { empty = ( 0, Ecs.empty spec )
-    , create = \( nextId, ecs ) -> ( ( nextId + 1, ecs ), nextId )
+    { empty = Ecs.empty spec
+    , create = \world -> Ecs.create spec world
     , insertA =
-        \a ( ( nextId, ecs ), entityId ) ->
-            ( ( nextId, Ecs.insert components.a entityId a ecs ), entityId )
+        \a ( world, entityId ) ->
+            ( Ecs.insert components.a entityId a world, entityId )
     , insertB =
-        \b ( ( nextId, ecs ), entityId ) ->
-            ( ( nextId, Ecs.insert components.b entityId b ecs ), entityId )
+        \b ( world, entityId ) ->
+            ( Ecs.insert components.b entityId b world, entityId )
     , insertC =
-        \c ( ( nextId, ecs ), entityId ) ->
-            ( ( nextId, Ecs.insert components.c entityId c ecs ), entityId )
+        \c ( world, entityId ) ->
+            ( Ecs.insert components.c entityId c world, entityId )
     }
 
 
-insertA : Int -> A -> ( Int, Ecs ) -> ( Int, Ecs )
-insertA entityId a ( x, ecs ) =
-    ( x, Ecs.insert components.a entityId a ecs )
+insertA : EntityId -> A -> World -> World
+insertA entityId a world =
+    Ecs.insert components.a entityId a world
 
 
-insertB : Int -> B -> ( Int, Ecs ) -> ( Int, Ecs )
-insertB entityId b ( x, ecs ) =
-    ( x, Ecs.insert components.b entityId b ecs )
+insertB : EntityId -> B -> World -> World
+insertB entityId b world =
+    Ecs.insert components.b entityId b world
 
 
-insertC : Int -> C -> ( Int, Ecs ) -> ( Int, Ecs )
-insertC entityId c ( x, ecs ) =
-    ( x, Ecs.insert components.c entityId c ecs )
+insertC : EntityId -> C -> World -> World
+insertC entityId c world =
+    Ecs.insert components.c entityId c world
 
 
 aSelector : Selector A
@@ -83,9 +83,9 @@ aSelector =
     Select.component components.a
 
 
-selectA : ( Int, Ecs ) -> List ( Int, A )
-selectA ( _, ecs ) =
-    Ecs.selectList aSelector ecs
+selectA : World -> List ( EntityId, A )
+selectA world =
+    Ecs.selectList aSelector world
 
 
 bSelector : Selector B
@@ -93,9 +93,9 @@ bSelector =
     Select.component components.b
 
 
-selectB : ( Int, Ecs ) -> List ( Int, B )
-selectB ( _, ecs ) =
-    Ecs.selectList bSelector ecs
+selectB : World -> List ( EntityId, B )
+selectB world =
+    Ecs.selectList bSelector world
 
 
 cSelector : Selector C
@@ -103,9 +103,9 @@ cSelector =
     Select.component components.c
 
 
-selectC : ( Int, Ecs ) -> List ( Int, C )
-selectC ( _, ecs ) =
-    Ecs.selectList cSelector ecs
+selectC : World -> List ( EntityId, C )
+selectC world =
+    Ecs.selectList cSelector world
 
 
 type alias AB =
@@ -121,9 +121,9 @@ abSelector =
         components.b
 
 
-selectAB : ( Int, Ecs ) -> List ( Int, AB )
-selectAB ( _, ecs ) =
-    Ecs.selectList abSelector ecs
+selectAB : World -> List ( EntityId, AB )
+selectAB world =
+    Ecs.selectList abSelector world
 
 
 type alias BA =
@@ -139,9 +139,9 @@ baSelector =
         components.a
 
 
-selectBA : ( Int, Ecs ) -> List ( Int, BA )
-selectBA ( _, ecs ) =
-    Ecs.selectList baSelector ecs
+selectBA : World -> List ( EntityId, BA )
+selectBA world =
+    Ecs.selectList baSelector world
 
 
 type alias ABC =
@@ -159,9 +159,9 @@ abcSelector =
         components.c
 
 
-selectABC : ( Int, Ecs ) -> List ( Int, ABC )
-selectABC ( _, ecs ) =
-    Ecs.selectList abcSelector ecs
+selectABC : World -> List ( EntityId, ABC )
+selectABC world =
+    Ecs.selectList abcSelector world
 
 
 type alias CBA =
@@ -179,6 +179,6 @@ cbaSelector =
         components.a
 
 
-selectCBA : ( Int, Ecs ) -> List ( Int, CBA )
-selectCBA ( _, ecs ) =
-    Ecs.selectList cbaSelector ecs
+selectCBA : World -> List ( EntityId, CBA )
+selectCBA world =
+    Ecs.selectList cbaSelector world

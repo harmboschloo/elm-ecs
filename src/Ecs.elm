@@ -3,6 +3,7 @@ module Ecs exposing
     , member, clear
     , has, get, insert, update, remove, size
     , select, selectList
+    , EntityId, create, destroy
     )
 
 {-|
@@ -30,7 +31,12 @@ module Ecs exposing
 -}
 
 import Dict exposing (Dict)
-import Ecs.Internal exposing (ComponentSpec(..), Selector(..), Spec(..))
+import Ecs.Internal as Internal
+    exposing
+        ( ComponentSpec(..)
+        , Selector(..)
+        , Spec(..)
+        )
 import Set exposing (Set)
 
 
@@ -40,57 +46,71 @@ import Set exposing (Set)
 
 {-| Create an empty ecs.
 -}
-empty : Spec comparable ecs -> ecs
+empty : Spec ecs -> ecs
 empty (Spec spec) =
     spec.empty
 
 
 {-| Determine if the ecs is empty
 -}
-isEmpty : Spec comparable ecs -> ecs -> Bool
+isEmpty : Spec ecs -> ecs -> Bool
 isEmpty (Spec spec) ecs =
     spec.isEmpty ecs
 
 
 {-| Determine the total number of entities in the ecs.
-Warning: this is an expensive operation.
 -}
-entityCount : Spec comparable ecs -> ecs -> Int
-entityCount spec ecs =
-    Set.size (ids spec ecs)
+entityCount : Spec ecs -> ecs -> Int
+entityCount (Spec spec) ecs =
+    Set.size (spec.ids ecs)
 
 
 {-| Determine the total number of components in the ecs.
 -}
-componentCount : Spec comparable ecs -> ecs -> Int
+componentCount : Spec ecs -> ecs -> Int
 componentCount (Spec spec) ecs =
     spec.componentCount ecs
 
 
 {-| Get all entity ids in the ecs.
-Warning: this is an expensive operation.
 -}
-ids : Spec comparable ecs -> ecs -> Set comparable
+ids : Spec ecs -> ecs -> List EntityId
 ids (Spec spec) ecs =
     spec.ids ecs
+        |> Set.toList
+        |> List.map Internal.EntityId
 
 
 
 -- ENTITY --
 
 
+type alias EntityId =
+    Internal.EntityId
+
+
+create : Spec ecs -> ecs -> ( ecs, EntityId )
+create (Spec spec) ecs =
+    spec.create ecs
+
+
+destroy : Spec ecs -> EntityId -> ecs -> ecs
+destroy (Spec spec) entityId ecs =
+    spec.destroy entityId ecs
+
+
 {-| Determine if an entity is in the ecs.
 -}
-member : Spec comparable ecs -> comparable -> ecs -> Bool
-member (Spec spec) id ecs =
-    spec.member id ecs
+member : Spec ecs -> EntityId -> ecs -> Bool
+member (Spec spec) entityId ecs =
+    spec.member entityId ecs
 
 
 {-| Remove all components of an entity.
 -}
-clear : Spec comparable ecs -> comparable -> ecs -> ecs
-clear (Spec spec) id ecs =
-    spec.clear id ecs
+clear : Spec ecs -> EntityId -> ecs -> ecs
+clear (Spec spec) entityId ecs =
+    spec.clear entityId ecs
 
 
 
@@ -99,47 +119,49 @@ clear (Spec spec) id ecs =
 
 {-| Determines if an entity has a specific component.
 -}
-has : ComponentSpec comparable ecs a -> comparable -> ecs -> Bool
-has (ComponentSpec spec) id ecs =
-    Dict.member id (spec.get ecs)
+has : ComponentSpec ecs a -> EntityId -> ecs -> Bool
+has (ComponentSpec spec) (Internal.EntityId entityId) ecs =
+    Dict.member entityId (spec.get ecs)
 
 
 {-| Get a specific component of an entity.
 -}
-get : ComponentSpec comparable ecs a -> comparable -> ecs -> Maybe a
-get (ComponentSpec spec) id ecs =
-    Dict.get id (spec.get ecs)
+get : ComponentSpec ecs a -> EntityId -> ecs -> Maybe a
+get (ComponentSpec spec) (Internal.EntityId entityId) ecs =
+    Dict.get entityId (spec.get ecs)
 
 
 {-| Insert a specific component in an entity.
 -}
-insert : ComponentSpec comparable ecs a -> comparable -> a -> ecs -> ecs
-insert (ComponentSpec spec) id a ecs =
-    spec.update (\dict -> Dict.insert id a dict) ecs
+insert : ComponentSpec ecs a -> EntityId -> a -> ecs -> ecs
+insert (ComponentSpec spec) (Internal.EntityId entityId) a ecs =
+    -- TODO check member
+    spec.update (\dict -> Dict.insert entityId a dict) ecs
 
 
 {-| Update a specific component in an entity.
 -}
 update :
-    ComponentSpec comparable ecs a
-    -> comparable
+    ComponentSpec ecs a
+    -> EntityId
     -> (Maybe a -> Maybe a)
     -> ecs
     -> ecs
-update (ComponentSpec spec) id fn ecs =
-    spec.update (\dict -> Dict.update id fn dict) ecs
+update (ComponentSpec spec) (Internal.EntityId entityId) fn ecs =
+    -- TODO check member
+    spec.update (\dict -> Dict.update entityId fn dict) ecs
 
 
 {-| Remove a specific component from an entity.
 -}
-remove : ComponentSpec comparable ecs a -> comparable -> ecs -> ecs
-remove (ComponentSpec spec) id ecs =
-    spec.update (\dict -> Dict.remove id dict) ecs
+remove : ComponentSpec ecs a -> EntityId -> ecs -> ecs
+remove (ComponentSpec spec) (Internal.EntityId entityId) ecs =
+    spec.update (\dict -> Dict.remove entityId dict) ecs
 
 
 {-| Determine the total number of components of a specific type.
 -}
-size : ComponentSpec comparable ecs a -> ecs -> Int
+size : ComponentSpec ecs a -> ecs -> Int
 size (ComponentSpec spec) ecs =
     Dict.size (spec.get ecs)
 
@@ -150,13 +172,13 @@ size (ComponentSpec spec) ecs =
 
 {-| Get a specific set of components of an entity.
 -}
-select : Selector comparable ecs a -> comparable -> ecs -> Maybe a
-select (Selector selector) id ecs =
-    selector.select id ecs
+select : Selector ecs a -> EntityId -> ecs -> Maybe a
+select (Selector selector) (Internal.EntityId entityId) ecs =
+    selector.select entityId ecs
 
 
 {-| Get all entities with a specific set of components.
 -}
-selectList : Selector comparable ecs a -> ecs -> List ( comparable, a )
+selectList : Selector ecs a -> ecs -> List ( EntityId, a )
 selectList (Selector selector) ecs =
     selector.selectList ecs

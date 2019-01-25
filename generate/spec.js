@@ -19,25 +19,23 @@ ${specs.map(i => `@docs Ecs${i}, spec${i}, components${i}`).join(`
 
 import Dict exposing (Dict)
 import Ecs.Internal as Internal
-import Set
+import Set exposing (Set)
 
 
 {-| The ecs specification type.
 -}
-type alias Spec comparable ecs =
-    Internal.Spec comparable ecs
+type alias Spec ecs =
+    Internal.Spec ecs
 
 
 {-| A component specification type.
 -}
-type alias ComponentSpec comparable ecs a =
-    Internal.ComponentSpec comparable ecs a
+type alias ComponentSpec ecs a =
+    Internal.ComponentSpec ecs a
 ${specs.map(iSpec => {
     const components = range(iSpec);
 
-    const ecs = `Ecs${iSpec} comparable ${components
-      .map(i => `a${i}`)
-      .join(" ")}`;
+    const ecs = `Ecs${iSpec} ${components.map(i => `a${i}`).join(" ")}`;
 
     return `
 
@@ -45,51 +43,84 @@ ${specs.map(iSpec => {
 -}
 type ${ecs}
     = Ecs${iSpec}
-        { ${components.map(i => `data${i} : Dict comparable a${i}`).join(`
-        , `)}
+        { entities :
+            { nextId : Int
+            , activeIds : Set Int
+            }
+        , data :
+            { ${components.map(i => `data${i} : Dict Int a${i}`).join(`
+            , `)}
+            }
         }
 
 
 {-| An ecs specification with ${iSpec} component type${iSpec > 1 ? "s" : ""}.
 -}
-spec${iSpec} : Spec comparable (${ecs})
+spec${iSpec} : Spec (${ecs})
 spec${iSpec} =
     Internal.Spec
         { empty =
             Ecs${iSpec}
-                { ${components.map(i => `data${i} = Dict.empty`).join(`
-                , `)}
-                }
-        , clear =
-            \\id (Ecs${iSpec} ecs) ->
-                Ecs${iSpec}
-                    { ${components.map(
-                      i => `data${i} = Dict.remove id ecs.data${i}`
-                    ).join(`
+                { entities =
+                    { nextId = 0
+                    , activeIds = Set.empty
+                    }
+                , data =
+                    { ${components.map(i => `data${i} = Dict.empty`).join(`
                     , `)}
                     }
+                }
+        , clear =
+            \\(Internal.EntityId entityId) (Ecs${iSpec} { entities, data }) ->
+                Ecs${iSpec}
+                    { entities = entities
+                    , data =
+                        { ${components.map(
+                          i => `data${i} = Dict.remove entityId data.data${i}`
+                        ).join(`
+                        , `)}
+                        }
+                    }
         , isEmpty =
-            \\(Ecs${iSpec} ecs) ->
-                ${components.map(i => `Dict.isEmpty ecs.data${i}`).join(`
+            \\(Ecs${iSpec} { data }) ->
+                ${components.map(i => `Dict.isEmpty data.data${i}`).join(`
                     && `)}
         , componentCount =
-            \\(Ecs${iSpec} ecs) ->
-                ${components.map(i => `Dict.size ecs.data${i}`).join(`
+            \\(Ecs${iSpec} { data }) ->
+                ${components.map(i => `Dict.size data.data${i}`).join(`
                     + `)}
         , ids =
-            \\(Ecs${iSpec} ecs) ->
-                [ ${components.map(i => `Dict.keys ecs.data${i}`).join(`
-                , `)}
-                ]
-                    |> List.foldl
-                        (\\keys a ->
-                            List.foldl (\\key b -> Set.insert key b) a keys
-                        )
-                        Set.empty
+            \\(Ecs${iSpec} { entities }) ->
+                entities.activeIds
         , member =
-            \\id (Ecs${iSpec} ecs) ->
-                ${components.map(i => `Dict.member id ecs.data${i}`).join(`
-                    || `)}
+            \\(Internal.EntityId entityId) (Ecs${iSpec} { entities }) ->
+                Set.member entityId entities.activeIds
+        , create =
+            \\(Ecs${iSpec} { entities, data }) ->
+                ( Ecs${iSpec}
+                    { entities =
+                        { nextId = entities.nextId + 1
+                        , activeIds = Set.insert entities.nextId entities.activeIds
+                        }
+                    , data = data
+                    }
+                , Internal.EntityId (entities.nextId + 1)
+                )
+        , destroy =
+            \\(Internal.EntityId entityId) (Ecs${iSpec} { entities, data }) ->
+                Ecs${iSpec}
+                    { entities =
+                        { nextId = entities.nextId
+                        , activeIds = Set.remove entityId entities.activeIds
+                        }
+                    -- TODO refactor with clear
+                    , data =
+                        { ${components.map(
+                          i => `data${i} = Dict.remove entityId data.data${i}`
+                        ).join(`
+                        , `)}
+                        }
+                    }
         }
 
 
@@ -98,7 +129,7 @@ spec${iSpec} =
     }.
 -}
 components${iSpec} :
-    (${components.map(i => `ComponentSpec comparable (${ecs}) a${i}`).join(`
+    (${components.map(i => `ComponentSpec (${ecs}) a${i}`).join(`
      -> `)}
      -> componentSpecs
     )
@@ -107,17 +138,20 @@ components${iSpec} fn =
     fn
         ${components.map(
           iComponent => `(Internal.ComponentSpec
-            { get = \\(Ecs${iSpec} ecs) -> ecs.data${iComponent}
+            { get = \\(Ecs${iSpec} { data }) -> data.data${iComponent}
             , update =
-                \\updateFn (Ecs${iSpec} ecs) ->
+                \\updateFn (Ecs${iSpec} { entities, data }) ->
                     Ecs${iSpec}
-                        { ${components.map(
-                          i =>
-                            `data${i} =${
-                              i === iComponent ? " updateFn" : ""
-                            } ecs.data${i}`
-                        ).join(`
-                        , `)}
+                        { entities = entities
+                        , data =
+                            { ${components.map(
+                              i =>
+                                `data${i} =${
+                                  i === iComponent ? " updateFn" : ""
+                                } data.data${i}`
+                            ).join(`
+                            , `)}
+                            }
                         }
             }
         )`
