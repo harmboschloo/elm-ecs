@@ -18,37 +18,33 @@ import Ecs.Select as Select
 import Ecs.Spec as Spec
 
 
+type alias Components =
+    Spec.Components3 A B C
+
+
 type alias ComponentSpecs =
-    { a : ComponentSpec Data.A
-    , b : ComponentSpec Data.B
-    , c : ComponentSpec Data.C
+    { a : Spec.ComponentSpec Components Data.A
+    , b : Spec.ComponentSpec Components Data.B
+    , c : Spec.ComponentSpec Components Data.C
     }
 
 
-type alias ComponentSpec a =
-    Spec.ComponentSpec Data a
-
-
-type alias Data =
-    Spec.Data3 A B C
-
-
 type alias World =
-    Ecs.World Data
+    Ecs.World Components
 
 
 type alias Selector a =
-    Select.Selector Data a
+    Select.Selector Components a
 
 
-spec : Spec.Spec Data
+spec : Spec.Spec Components
 spec =
     Spec.spec3
 
 
 components : ComponentSpecs
 components =
-    Spec.components3 ComponentSpecs
+    Spec.componentSpecs3 ComponentSpecs
 
 
 builder : Data.Builder World EntityId

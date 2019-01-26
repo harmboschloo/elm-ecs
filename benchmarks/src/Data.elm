@@ -23,17 +23,17 @@ type C
     = C
 
 
-type alias Builder ecs entityId =
-    { empty : ecs
-    , create : ecs -> ( ecs, entityId )
-    , insertA : A -> ( ecs, entityId ) -> ( ecs, entityId )
-    , insertB : B -> ( ecs, entityId ) -> ( ecs, entityId )
-    , insertC : C -> ( ecs, entityId ) -> ( ecs, entityId )
+type alias Builder world entityId =
+    { empty : world
+    , create : world -> ( world, entityId )
+    , insertA : A -> ( world, entityId ) -> ( world, entityId )
+    , insertB : B -> ( world, entityId ) -> ( world, entityId )
+    , insertC : C -> ( world, entityId ) -> ( world, entityId )
     }
 
 
-applyList : List (List (ecs -> ( ecs, entityId ))) -> ecs -> ecs
-applyList list ecs =
+applyList : List (List (world -> ( world, entityId ))) -> world -> world
+applyList list world =
     Random.step
         (list
             |> List.concat
@@ -41,7 +41,7 @@ applyList list ecs =
         )
         (Random.initialSeed 1234)
         |> Tuple.first
-        |> List.foldl (\fn ecs2 -> fn ecs2 |> Tuple.first) ecs
+        |> List.foldl (\fn ecs2 -> fn ecs2 |> Tuple.first) world
 
 
 mixedLabel : Int -> String
@@ -51,7 +51,7 @@ mixedLabel n =
         [ "Ecs", "ABC", "BC", "C" ]
 
 
-mixed : Int -> Builder ecs entityId -> ecs
+mixed : Int -> Builder world entityId -> world
 mixed n b =
     applyList
         [ List.repeat n (b.create >> b.insertA A >> b.insertB B >> b.insertC C)
@@ -62,7 +62,7 @@ mixed n b =
 
 
 
--- initCompareEcs : Int -> Apis.EcsApi ecs -> ( String, ecs )
+-- initCompareEcs : Int -> Apis.EcsApi world -> ( String, world )
 -- initCompareEcs n api =
 --     ( String.join
 --         (" " ++ String.fromInt n)
@@ -74,7 +74,7 @@ mixed n b =
 --         ]
 --         api
 --     )
--- initCompareSubsetEcs : Int -> Apis.EcsApi ecs -> ( String, ecs )
+-- initCompareSubsetEcs : Int -> Apis.EcsApi world -> ( String, world )
 -- initCompareSubsetEcs n api =
 --     ( String.join
 --         (" " ++ String.fromInt n)
@@ -87,7 +87,7 @@ mixed n b =
 --         ]
 --         api
 --     )
--- initScaleEcsA : Int -> Apis.EcsApi ecs -> ( String, ecs )
+-- initScaleEcsA : Int -> Apis.EcsApi world -> ( String, world )
 -- initScaleEcsA n api =
 --     ( String.join
 --         (" " ++ String.fromInt n)
@@ -100,7 +100,7 @@ mixed n b =
 --         ]
 --         api
 --     )
--- initScaleEcsAB : Int -> Apis.EcsApi ecs -> ( String, ecs )
+-- initScaleEcsAB : Int -> Apis.EcsApi world -> ( String, world )
 -- initScaleEcsAB n api =
 --     ( String.join
 --         (" " ++ String.fromInt n)
@@ -113,7 +113,7 @@ mixed n b =
 --         ]
 --         api
 --     )
--- initScaleEcsABC : Int -> Apis.EcsApi ecs -> ( String, ecs )
+-- initScaleEcsABC : Int -> Apis.EcsApi world -> ( String, world )
 -- initScaleEcsABC n api =
 --     ( String.join
 --         (" " ++ String.fromInt n)
@@ -126,7 +126,7 @@ mixed n b =
 --         ]
 --         api
 --     )
--- applyList : List (List (ecs -> ecs)) -> Apis.EcsApi ecs -> ecs
+-- applyList : List (List (world -> world)) -> Apis.EcsApi world -> world
 -- applyList list api =
 --     Random.step
 --         (list
@@ -135,4 +135,4 @@ mixed n b =
 --         )
 --         (Random.initialSeed 1234)
 --         |> Tuple.first
---         |> List.foldl (\f ecs -> f ecs) api.empty
+--         |> List.foldl (\f world -> f world) api.empty

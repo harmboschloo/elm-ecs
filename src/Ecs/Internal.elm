@@ -13,23 +13,23 @@ type EntityId
     = EntityId Int
 
 
-type Spec data
+type Spec components
     = Spec
-        { empty : data
-        , clear : Int -> data -> data
-        , size : data -> Int
+        { empty : components
+        , clear : Int -> components -> components
+        , size : components -> Int
         }
 
 
-type ComponentSpec data a
+type ComponentSpec components a
     = ComponentSpec
-        { get : data -> Dict Int a
-        , update : (Dict Int a -> Dict Int a) -> data -> data
+        { get : components -> Dict Int a
+        , update : (Dict Int a -> Dict Int a) -> components -> components
         }
 
 
-type Selector data a
+type Selector components a
     = Selector
-        { select : Int -> data -> Maybe a
-        , selectList : data -> List ( EntityId, a )
+        { select : Int -> components -> Maybe a
+        , selectList : components -> List ( EntityId, a )
         }
