@@ -169,12 +169,19 @@ get (ComponentSpec spec) (Internal.EntityId entityId) (World { data }) =
 {-| Insert a specific component in an entity.
 -}
 insert : ComponentSpec data a -> EntityId -> a -> World data -> World data
-insert (ComponentSpec spec) (Internal.EntityId entityId) a (World { entities, data }) =
-    -- TODO check member
-    World
-        { entities = entities
-        , data = spec.update (\dict -> Dict.insert entityId a dict) data
-        }
+insert (ComponentSpec spec) (Internal.EntityId entityId) a (World world) =
+    let
+        { entities, data } =
+            world
+    in
+    if Set.member entityId entities.activeIds then
+        World
+            { entities = entities
+            , data = spec.update (\dict -> Dict.insert entityId a dict) data
+            }
+
+    else
+        World world
 
 
 {-| Update a specific component in an entity.
@@ -185,12 +192,19 @@ update :
     -> (Maybe a -> Maybe a)
     -> World data
     -> World data
-update (ComponentSpec spec) (Internal.EntityId entityId) fn (World { entities, data }) =
-    -- TODO check member
-    World
-        { entities = entities
-        , data = spec.update (\dict -> Dict.update entityId fn dict) data
-        }
+update (ComponentSpec spec) (Internal.EntityId entityId) fn (World world) =
+    let
+        { entities, data } =
+            world
+    in
+    if Set.member entityId entities.activeIds then
+        World
+            { entities = entities
+            , data = spec.update (\dict -> Dict.update entityId fn dict) data
+            }
+
+    else
+        World world
 
 
 {-| Remove a specific component from an entity.
