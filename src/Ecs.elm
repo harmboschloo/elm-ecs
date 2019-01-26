@@ -3,7 +3,7 @@ module Ecs exposing
     , member, clear
     , has, get, insert, update, remove, size
     , select, selectList
-    , EntityId, create, destroy
+    , EntityId, World, create, destroy
     )
 
 {-|
@@ -44,39 +44,57 @@ import Set exposing (Set)
 -- MODEL --
 
 
-{-| Create an empty ecs.
+type World data
+    = World
+        { entities :
+            { nextId : Int
+            , activeIds : Set Int
+            }
+        , data : data
+        }
+
+
+{-| Create an empty world.
 -}
-empty : Spec ecs -> ecs
+empty : Spec data -> World data
 empty (Spec spec) =
-    spec.empty
+    World
+        { entities =
+            { -- TODO start at -...?
+              nextId = 0
+            , activeIds = Set.empty
+            }
+        , data = spec.empty
+        }
 
 
-{-| Determine if the ecs is empty
+{-| Determine if the world is empty
 -}
-isEmpty : Spec ecs -> ecs -> Bool
-isEmpty (Spec spec) ecs =
-    spec.isEmpty ecs
+isEmpty : World data -> Bool
+isEmpty (World world) =
+    Set.isEmpty world.entities.activeIds
 
 
-{-| Determine the total number of entities in the ecs.
+{-| Determine the total number of entities in the world.
 -}
-entityCount : Spec ecs -> ecs -> Int
-entityCount (Spec spec) ecs =
-    Set.size (spec.ids ecs)
+entityCount : World data -> Int
+entityCount (World world) =
+    Set.size world.entities.activeIds
 
 
-{-| Determine the total number of components in the ecs.
+{-| Determine the total number of components in the world.
 -}
-componentCount : Spec ecs -> ecs -> Int
-componentCount (Spec spec) ecs =
-    spec.componentCount ecs
+componentCount : Spec data -> World data -> Int
+componentCount (Spec spec) (World world) =
+    -- TODO track number of components in world?
+    spec.size world.data
 
 
-{-| Get all entity ids in the ecs.
+{-| Get all entity ids in the world.
 -}
-ids : Spec ecs -> ecs -> List EntityId
-ids (Spec spec) ecs =
-    spec.ids ecs
+ids : World data -> List EntityId
+ids (World world) =
+    world.entities.activeIds
         |> Set.toList
         |> List.map Internal.EntityId
 
@@ -89,28 +107,45 @@ type alias EntityId =
     Internal.EntityId
 
 
-create : Spec ecs -> ecs -> ( ecs, EntityId )
-create (Spec spec) ecs =
-    spec.create ecs
+create : World data -> ( World data, EntityId )
+create (World { entities, data }) =
+    ( World
+        { entities =
+            { nextId = entities.nextId + 1
+            , activeIds = Set.insert entities.nextId entities.activeIds
+            }
+        , data = data
+        }
+    , Internal.EntityId entities.nextId
+    )
 
 
-destroy : Spec ecs -> EntityId -> ecs -> ecs
-destroy (Spec spec) entityId ecs =
-    spec.destroy entityId ecs
+destroy : Spec data -> EntityId -> World data -> World data
+destroy (Spec spec) (Internal.EntityId entityId) (World { entities, data }) =
+    World
+        { entities =
+            { nextId = entities.nextId
+            , activeIds = Set.remove entityId entities.activeIds
+            }
+        , data = spec.clear entityId data
+        }
 
 
-{-| Determine if an entity is in the ecs.
+{-| Determine if an entity is in the world.
 -}
-member : Spec ecs -> EntityId -> ecs -> Bool
-member (Spec spec) entityId ecs =
-    spec.member entityId ecs
+member : EntityId -> World data -> Bool
+member (Internal.EntityId entityId) (World { entities }) =
+    Set.member entityId entities.activeIds
 
 
 {-| Remove all components of an entity.
 -}
-clear : Spec ecs -> EntityId -> ecs -> ecs
-clear (Spec spec) entityId ecs =
-    spec.clear entityId ecs
+clear : Spec data -> EntityId -> World data -> World data
+clear (Spec spec) (Internal.EntityId entityId) (World { entities, data }) =
+    World
+        { entities = entities
+        , data = spec.clear entityId data
+        }
 
 
 
@@ -119,51 +154,60 @@ clear (Spec spec) entityId ecs =
 
 {-| Determines if an entity has a specific component.
 -}
-has : ComponentSpec ecs a -> EntityId -> ecs -> Bool
-has (ComponentSpec spec) (Internal.EntityId entityId) ecs =
-    Dict.member entityId (spec.get ecs)
+has : ComponentSpec data a -> EntityId -> World data -> Bool
+has (ComponentSpec spec) (Internal.EntityId entityId) (World { data }) =
+    Dict.member entityId (spec.get data)
 
 
 {-| Get a specific component of an entity.
 -}
-get : ComponentSpec ecs a -> EntityId -> ecs -> Maybe a
-get (ComponentSpec spec) (Internal.EntityId entityId) ecs =
-    Dict.get entityId (spec.get ecs)
+get : ComponentSpec data a -> EntityId -> World data -> Maybe a
+get (ComponentSpec spec) (Internal.EntityId entityId) (World { data }) =
+    Dict.get entityId (spec.get data)
 
 
 {-| Insert a specific component in an entity.
 -}
-insert : ComponentSpec ecs a -> EntityId -> a -> ecs -> ecs
-insert (ComponentSpec spec) (Internal.EntityId entityId) a ecs =
+insert : ComponentSpec data a -> EntityId -> a -> World data -> World data
+insert (ComponentSpec spec) (Internal.EntityId entityId) a (World { entities, data }) =
     -- TODO check member
-    spec.update (\dict -> Dict.insert entityId a dict) ecs
+    World
+        { entities = entities
+        , data = spec.update (\dict -> Dict.insert entityId a dict) data
+        }
 
 
 {-| Update a specific component in an entity.
 -}
 update :
-    ComponentSpec ecs a
+    ComponentSpec data a
     -> EntityId
     -> (Maybe a -> Maybe a)
-    -> ecs
-    -> ecs
-update (ComponentSpec spec) (Internal.EntityId entityId) fn ecs =
+    -> World data
+    -> World data
+update (ComponentSpec spec) (Internal.EntityId entityId) fn (World { entities, data }) =
     -- TODO check member
-    spec.update (\dict -> Dict.update entityId fn dict) ecs
+    World
+        { entities = entities
+        , data = spec.update (\dict -> Dict.update entityId fn dict) data
+        }
 
 
 {-| Remove a specific component from an entity.
 -}
-remove : ComponentSpec ecs a -> EntityId -> ecs -> ecs
-remove (ComponentSpec spec) (Internal.EntityId entityId) ecs =
-    spec.update (\dict -> Dict.remove entityId dict) ecs
+remove : ComponentSpec data a -> EntityId -> World data -> World data
+remove (ComponentSpec spec) (Internal.EntityId entityId) (World { entities, data }) =
+    World
+        { entities = entities
+        , data = spec.update (\dict -> Dict.remove entityId dict) data
+        }
 
 
 {-| Determine the total number of components of a specific type.
 -}
-size : ComponentSpec ecs a -> ecs -> Int
-size (ComponentSpec spec) ecs =
-    Dict.size (spec.get ecs)
+size : ComponentSpec data a -> World data -> Int
+size (ComponentSpec spec) (World { data }) =
+    Dict.size (spec.get data)
 
 
 
@@ -172,13 +216,13 @@ size (ComponentSpec spec) ecs =
 
 {-| Get a specific set of components of an entity.
 -}
-select : Selector ecs a -> EntityId -> ecs -> Maybe a
-select (Selector selector) (Internal.EntityId entityId) ecs =
-    selector.select entityId ecs
+select : Selector data a -> EntityId -> World data -> Maybe a
+select (Selector selector) (Internal.EntityId entityId) (World { data }) =
+    selector.select entityId data
 
 
 {-| Get all entities with a specific set of components.
 -}
-selectList : Selector ecs a -> ecs -> List ( EntityId, a )
-selectList (Selector selector) ecs =
-    selector.selectList ecs
+selectList : Selector data a -> World data -> List ( EntityId, a )
+selectList (Selector selector) (World { data }) =
+    selector.selectList data

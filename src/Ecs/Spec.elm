@@ -1,16 +1,16 @@
 module Ecs.Spec exposing
     ( Spec, ComponentSpec
-    , Ecs1, spec1, components1
-    , Ecs2, spec2, components2
-    , Ecs3, spec3, components3
+    , Data1, spec1, components1
+    , Data2, spec2, components2
+    , Data3, spec3, components3
     )
 
 {-|
 
 @docs Spec, ComponentSpec
-@docs Ecs1, spec1, components1
-@docs Ecs2, spec2, components2
-@docs Ecs3, spec3, components3
+@docs Data1, spec1, components1
+@docs Data2, spec2, components2
+@docs Data3, spec3, components3
 
 -}
 
@@ -22,346 +22,172 @@ import Ecs.Internal.Record3 as Record3
 import Set exposing (Set)
 
 
-{-| The ecs specification type.
+{-| The data specification type.
 -}
-type alias Spec ecs =
-    Internal.Spec ecs
+type alias Spec data =
+    Internal.Spec data
 
 
 {-| A component specification type.
 -}
-type alias ComponentSpec ecs a =
-    Internal.ComponentSpec ecs a
+type alias ComponentSpec data a =
+    Internal.ComponentSpec data a
 
 
-{-| An ecs model type with 1 component type.
+{-| An data type with 1 component type.
 -}
-type Ecs1 a1
-    = Ecs1
-        { entities :
-            { nextId : Int
-            , activeIds : Set Int
-            }
-        , data : Record1.Record (Dict Int a1)
-        }
+type Data1 a1
+    = Data1 (Record1.Record (Dict Int a1))
 
 
-{-| An ecs specification with 1 component type.
+{-| An data specification with 1 component type.
 -}
-spec1 : Spec (Ecs1 a1)
+spec1 : Spec (Data1 a1)
 spec1 =
     Internal.Spec
         { empty =
-            Ecs1
-                { entities =
-                    { nextId = 0
-                    , activeIds = Set.empty
-                    }
-                , data =
-                    { a1 = Dict.empty
-                    }
+            Data1
+                { a1 = Dict.empty
                 }
         , clear =
-            \(Internal.EntityId entityId) (Ecs1 { entities, data }) ->
-                Ecs1
-                    { entities = entities
-                    , data =
-                        { a1 = Dict.remove entityId data.a1
-                        }
+            \entityId (Data1 data) ->
+                Data1
+                    { a1 = Dict.remove entityId data.a1
                     }
-        , isEmpty =
-            \(Ecs1 { data }) ->
-                Dict.isEmpty data.a1
-        , componentCount =
-            \(Ecs1 { data }) ->
+        , size =
+            \(Data1 data) ->
                 Dict.size data.a1
-        , ids =
-            \(Ecs1 { entities }) ->
-                entities.activeIds
-        , member =
-            \(Internal.EntityId entityId) (Ecs1 { entities }) ->
-                Set.member entityId entities.activeIds
-        , create =
-            \(Ecs1 { entities, data }) ->
-                ( Ecs1
-                    { entities =
-                        { nextId = entities.nextId + 1
-                        , activeIds = Set.insert entities.nextId entities.activeIds
-                        }
-                    , data = data
-                    }
-                , Internal.EntityId (entities.nextId + 1)
-                )
-        , destroy =
-            \(Internal.EntityId entityId) (Ecs1 { entities, data }) ->
-                Ecs1
-                    { entities =
-                        { nextId = entities.nextId
-                        , activeIds = Set.remove entityId entities.activeIds
-                        }
-
-                    -- TODO refactor with clear
-                    , data =
-                        { a1 = Dict.remove entityId data.a1
-                        }
-                    }
         }
 
 
-{-| Create component specifications for an ecs with 1 component type.
+{-| Create component specifications for an data with 1 component type.
 -}
 components1 :
-    (ComponentSpec (Ecs1 a1) a1
+    (ComponentSpec (Data1 a1) a1
      -> componentSpecs
     )
     -> componentSpecs
 components1 fn =
     fn
         (Internal.ComponentSpec
-            { get = \(Ecs1 { data }) -> data.a1
+            { get = \(Data1 data) -> data.a1
             , update =
-                \updateFn (Ecs1 { entities, data }) ->
-                    Ecs1
-                        { entities = entities
-                        , data = Record1.update1 updateFn data
-                        }
+                \updateFn (Data1 data) -> Data1 (Record1.update1 updateFn data)
             }
         )
 
 
-{-| An ecs model type with 2 component types.
+{-| An data type with 2 component types.
 -}
-type Ecs2 a1 a2
-    = Ecs2
-        { entities :
-            { nextId : Int
-            , activeIds : Set Int
-            }
-        , data : Record2.Record (Dict Int a1) (Dict Int a2)
-        }
+type Data2 a1 a2
+    = Data2 (Record2.Record (Dict Int a1) (Dict Int a2))
 
 
-{-| An ecs specification with 2 component types.
+{-| An data specification with 2 component types.
 -}
-spec2 : Spec (Ecs2 a1 a2)
+spec2 : Spec (Data2 a1 a2)
 spec2 =
     Internal.Spec
         { empty =
-            Ecs2
-                { entities =
-                    { nextId = 0
-                    , activeIds = Set.empty
-                    }
-                , data =
-                    { a1 = Dict.empty
-                    , a2 = Dict.empty
-                    }
+            Data2
+                { a1 = Dict.empty
+                , a2 = Dict.empty
                 }
         , clear =
-            \(Internal.EntityId entityId) (Ecs2 { entities, data }) ->
-                Ecs2
-                    { entities = entities
-                    , data =
-                        { a1 = Dict.remove entityId data.a1
-                        , a2 = Dict.remove entityId data.a2
-                        }
+            \entityId (Data2 data) ->
+                Data2
+                    { a1 = Dict.remove entityId data.a1
+                    , a2 = Dict.remove entityId data.a2
                     }
-        , isEmpty =
-            \(Ecs2 { data }) ->
-                Dict.isEmpty data.a1
-                    && Dict.isEmpty data.a2
-        , componentCount =
-            \(Ecs2 { data }) ->
+        , size =
+            \(Data2 data) ->
                 Dict.size data.a1
                     + Dict.size data.a2
-        , ids =
-            \(Ecs2 { entities }) ->
-                entities.activeIds
-        , member =
-            \(Internal.EntityId entityId) (Ecs2 { entities }) ->
-                Set.member entityId entities.activeIds
-        , create =
-            \(Ecs2 { entities, data }) ->
-                ( Ecs2
-                    { entities =
-                        { nextId = entities.nextId + 1
-                        , activeIds = Set.insert entities.nextId entities.activeIds
-                        }
-                    , data = data
-                    }
-                , Internal.EntityId (entities.nextId + 1)
-                )
-        , destroy =
-            \(Internal.EntityId entityId) (Ecs2 { entities, data }) ->
-                Ecs2
-                    { entities =
-                        { nextId = entities.nextId
-                        , activeIds = Set.remove entityId entities.activeIds
-                        }
-
-                    -- TODO refactor with clear
-                    , data =
-                        { a1 = Dict.remove entityId data.a1
-                        , a2 = Dict.remove entityId data.a2
-                        }
-                    }
         }
 
 
-{-| Create component specifications for an ecs with 2 component types.
+{-| Create component specifications for an data with 2 component types.
 -}
 components2 :
-    (ComponentSpec (Ecs2 a1 a2) a1
-     -> ComponentSpec (Ecs2 a1 a2) a2
+    (ComponentSpec (Data2 a1 a2) a1
+     -> ComponentSpec (Data2 a1 a2) a2
      -> componentSpecs
     )
     -> componentSpecs
 components2 fn =
     fn
         (Internal.ComponentSpec
-            { get = \(Ecs2 { data }) -> data.a1
+            { get = \(Data2 data) -> data.a1
             , update =
-                \updateFn (Ecs2 { entities, data }) ->
-                    Ecs2
-                        { entities = entities
-                        , data = Record2.update1 updateFn data
-                        }
+                \updateFn (Data2 data) -> Data2 (Record2.update1 updateFn data)
             }
         )
         (Internal.ComponentSpec
-            { get = \(Ecs2 { data }) -> data.a2
+            { get = \(Data2 data) -> data.a2
             , update =
-                \updateFn (Ecs2 { entities, data }) ->
-                    Ecs2
-                        { entities = entities
-                        , data = Record2.update2 updateFn data
-                        }
+                \updateFn (Data2 data) -> Data2 (Record2.update2 updateFn data)
             }
         )
 
 
-{-| An ecs model type with 3 component types.
+{-| An data type with 3 component types.
 -}
-type Ecs3 a1 a2 a3
-    = Ecs3
-        { entities :
-            { nextId : Int
-            , activeIds : Set Int
-            }
-        , data : Record3.Record (Dict Int a1) (Dict Int a2) (Dict Int a3)
-        }
+type Data3 a1 a2 a3
+    = Data3 (Record3.Record (Dict Int a1) (Dict Int a2) (Dict Int a3))
 
 
-{-| An ecs specification with 3 component types.
+{-| An data specification with 3 component types.
 -}
-spec3 : Spec (Ecs3 a1 a2 a3)
+spec3 : Spec (Data3 a1 a2 a3)
 spec3 =
     Internal.Spec
         { empty =
-            Ecs3
-                { entities =
-                    { nextId = 0
-                    , activeIds = Set.empty
-                    }
-                , data =
-                    { a1 = Dict.empty
-                    , a2 = Dict.empty
-                    , a3 = Dict.empty
-                    }
+            Data3
+                { a1 = Dict.empty
+                , a2 = Dict.empty
+                , a3 = Dict.empty
                 }
         , clear =
-            \(Internal.EntityId entityId) (Ecs3 { entities, data }) ->
-                Ecs3
-                    { entities = entities
-                    , data =
-                        { a1 = Dict.remove entityId data.a1
-                        , a2 = Dict.remove entityId data.a2
-                        , a3 = Dict.remove entityId data.a3
-                        }
+            \entityId (Data3 data) ->
+                Data3
+                    { a1 = Dict.remove entityId data.a1
+                    , a2 = Dict.remove entityId data.a2
+                    , a3 = Dict.remove entityId data.a3
                     }
-        , isEmpty =
-            \(Ecs3 { data }) ->
-                Dict.isEmpty data.a1
-                    && Dict.isEmpty data.a2
-                    && Dict.isEmpty data.a3
-        , componentCount =
-            \(Ecs3 { data }) ->
+        , size =
+            \(Data3 data) ->
                 Dict.size data.a1
                     + Dict.size data.a2
                     + Dict.size data.a3
-        , ids =
-            \(Ecs3 { entities }) ->
-                entities.activeIds
-        , member =
-            \(Internal.EntityId entityId) (Ecs3 { entities }) ->
-                Set.member entityId entities.activeIds
-        , create =
-            \(Ecs3 { entities, data }) ->
-                ( Ecs3
-                    { entities =
-                        { nextId = entities.nextId + 1
-                        , activeIds = Set.insert entities.nextId entities.activeIds
-                        }
-                    , data = data
-                    }
-                , Internal.EntityId (entities.nextId + 1)
-                )
-        , destroy =
-            \(Internal.EntityId entityId) (Ecs3 { entities, data }) ->
-                Ecs3
-                    { entities =
-                        { nextId = entities.nextId
-                        , activeIds = Set.remove entityId entities.activeIds
-                        }
-
-                    -- TODO refactor with clear
-                    , data =
-                        { a1 = Dict.remove entityId data.a1
-                        , a2 = Dict.remove entityId data.a2
-                        , a3 = Dict.remove entityId data.a3
-                        }
-                    }
         }
 
 
-{-| Create component specifications for an ecs with 3 component types.
+{-| Create component specifications for an data with 3 component types.
 -}
 components3 :
-    (ComponentSpec (Ecs3 a1 a2 a3) a1
-     -> ComponentSpec (Ecs3 a1 a2 a3) a2
-     -> ComponentSpec (Ecs3 a1 a2 a3) a3
+    (ComponentSpec (Data3 a1 a2 a3) a1
+     -> ComponentSpec (Data3 a1 a2 a3) a2
+     -> ComponentSpec (Data3 a1 a2 a3) a3
      -> componentSpecs
     )
     -> componentSpecs
 components3 fn =
     fn
         (Internal.ComponentSpec
-            { get = \(Ecs3 { data }) -> data.a1
+            { get = \(Data3 data) -> data.a1
             , update =
-                \updateFn (Ecs3 { entities, data }) ->
-                    Ecs3
-                        { entities = entities
-                        , data = Record3.update1 updateFn data
-                        }
+                \updateFn (Data3 data) -> Data3 (Record3.update1 updateFn data)
             }
         )
         (Internal.ComponentSpec
-            { get = \(Ecs3 { data }) -> data.a2
+            { get = \(Data3 data) -> data.a2
             , update =
-                \updateFn (Ecs3 { entities, data }) ->
-                    Ecs3
-                        { entities = entities
-                        , data = Record3.update2 updateFn data
-                        }
+                \updateFn (Data3 data) -> Data3 (Record3.update2 updateFn data)
             }
         )
         (Internal.ComponentSpec
-            { get = \(Ecs3 { data }) -> data.a3
+            { get = \(Data3 data) -> data.a3
             , update =
-                \updateFn (Ecs3 { entities, data }) ->
-                    Ecs3
-                        { entities = entities
-                        , data = Record3.update3 updateFn data
-                        }
+                \updateFn (Data3 data) -> Data3 (Record3.update3 updateFn data)
             }
         )

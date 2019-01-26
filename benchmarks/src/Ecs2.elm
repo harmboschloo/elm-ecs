@@ -26,18 +26,22 @@ type alias ComponentSpecs =
 
 
 type alias ComponentSpec a =
-    Spec.ComponentSpec World a
+    Spec.ComponentSpec Data a
+
+
+type alias Data =
+    Spec.Data3 A B C
 
 
 type alias World =
-    Spec.Ecs3 A B C
+    Ecs.World Data
 
 
 type alias Selector a =
-    Select.Selector World a
+    Select.Selector Data a
 
 
-spec : Spec.Spec World
+spec : Spec.Spec Data
 spec =
     Spec.spec3
 
@@ -50,7 +54,7 @@ components =
 builder : Data.Builder World EntityId
 builder =
     { empty = Ecs.empty spec
-    , create = \world -> Ecs.create spec world
+    , create = \world -> Ecs.create world
     , insertA =
         \a ( world, entityId ) ->
             ( Ecs.insert components.a entityId a world, entityId )

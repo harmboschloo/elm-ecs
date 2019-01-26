@@ -13,28 +13,23 @@ type EntityId
     = EntityId Int
 
 
-type Spec ecs
+type Spec data
     = Spec
-        { empty : ecs
-        , clear : EntityId -> ecs -> ecs
-        , isEmpty : ecs -> Bool
-        , componentCount : ecs -> Int
-        , ids : ecs -> Set Int
-        , member : EntityId -> ecs -> Bool
-        , create : ecs -> ( ecs, EntityId )
-        , destroy : EntityId -> ecs -> ecs
+        { empty : data
+        , clear : Int -> data -> data
+        , size : data -> Int
         }
 
 
-type ComponentSpec ecs a
+type ComponentSpec data a
     = ComponentSpec
-        { get : ecs -> Dict Int a
-        , update : (Dict Int a -> Dict Int a) -> ecs -> ecs
+        { get : data -> Dict Int a
+        , update : (Dict Int a -> Dict Int a) -> data -> data
         }
 
 
-type Selector ecs a
+type Selector data a
     = Selector
-        { select : Int -> ecs -> Maybe a
-        , selectList : ecs -> List ( EntityId, a )
+        { select : Int -> data -> Maybe a
+        , selectList : data -> List ( EntityId, a )
         }
