@@ -16,6 +16,9 @@ module Ecs.Spec exposing
 
 import Dict exposing (Dict)
 import Ecs.Internal as Internal
+import Ecs.Internal.Record1 as Record1
+import Ecs.Internal.Record2 as Record2
+import Ecs.Internal.Record3 as Record3
 import Set exposing (Set)
 
 
@@ -39,9 +42,7 @@ type Ecs1 a1
             { nextId : Int
             , activeIds : Set Int
             }
-        , data :
-            { data1 : Dict Int a1
-            }
+        , data : Record1.Record (Dict Int a1)
         }
 
 
@@ -57,7 +58,7 @@ spec1 =
                     , activeIds = Set.empty
                     }
                 , data =
-                    { data1 = Dict.empty
+                    { a1 = Dict.empty
                     }
                 }
         , clear =
@@ -65,15 +66,15 @@ spec1 =
                 Ecs1
                     { entities = entities
                     , data =
-                        { data1 = Dict.remove entityId data.data1
+                        { a1 = Dict.remove entityId data.a1
                         }
                     }
         , isEmpty =
             \(Ecs1 { data }) ->
-                Dict.isEmpty data.data1
+                Dict.isEmpty data.a1
         , componentCount =
             \(Ecs1 { data }) ->
-                Dict.size data.data1
+                Dict.size data.a1
         , ids =
             \(Ecs1 { entities }) ->
                 entities.activeIds
@@ -98,9 +99,10 @@ spec1 =
                         { nextId = entities.nextId
                         , activeIds = Set.remove entityId entities.activeIds
                         }
+
                     -- TODO refactor with clear
                     , data =
-                        { data1 = Dict.remove entityId data.data1
+                        { a1 = Dict.remove entityId data.a1
                         }
                     }
         }
@@ -116,14 +118,12 @@ components1 :
 components1 fn =
     fn
         (Internal.ComponentSpec
-            { get = \(Ecs1 { data }) -> data.data1
+            { get = \(Ecs1 { data }) -> data.a1
             , update =
                 \updateFn (Ecs1 { entities, data }) ->
                     Ecs1
                         { entities = entities
-                        , data =
-                            { data1 = updateFn data.data1
-                            }
+                        , data = Record1.update1 updateFn data
                         }
             }
         )
@@ -137,10 +137,7 @@ type Ecs2 a1 a2
             { nextId : Int
             , activeIds : Set Int
             }
-        , data :
-            { data1 : Dict Int a1
-            , data2 : Dict Int a2
-            }
+        , data : Record2.Record (Dict Int a1) (Dict Int a2)
         }
 
 
@@ -156,8 +153,8 @@ spec2 =
                     , activeIds = Set.empty
                     }
                 , data =
-                    { data1 = Dict.empty
-                    , data2 = Dict.empty
+                    { a1 = Dict.empty
+                    , a2 = Dict.empty
                     }
                 }
         , clear =
@@ -165,18 +162,18 @@ spec2 =
                 Ecs2
                     { entities = entities
                     , data =
-                        { data1 = Dict.remove entityId data.data1
-                        , data2 = Dict.remove entityId data.data2
+                        { a1 = Dict.remove entityId data.a1
+                        , a2 = Dict.remove entityId data.a2
                         }
                     }
         , isEmpty =
             \(Ecs2 { data }) ->
-                Dict.isEmpty data.data1
-                    && Dict.isEmpty data.data2
+                Dict.isEmpty data.a1
+                    && Dict.isEmpty data.a2
         , componentCount =
             \(Ecs2 { data }) ->
-                Dict.size data.data1
-                    + Dict.size data.data2
+                Dict.size data.a1
+                    + Dict.size data.a2
         , ids =
             \(Ecs2 { entities }) ->
                 entities.activeIds
@@ -201,10 +198,11 @@ spec2 =
                         { nextId = entities.nextId
                         , activeIds = Set.remove entityId entities.activeIds
                         }
+
                     -- TODO refactor with clear
                     , data =
-                        { data1 = Dict.remove entityId data.data1
-                        , data2 = Dict.remove entityId data.data2
+                        { a1 = Dict.remove entityId data.a1
+                        , a2 = Dict.remove entityId data.a2
                         }
                     }
         }
@@ -221,28 +219,22 @@ components2 :
 components2 fn =
     fn
         (Internal.ComponentSpec
-            { get = \(Ecs2 { data }) -> data.data1
+            { get = \(Ecs2 { data }) -> data.a1
             , update =
                 \updateFn (Ecs2 { entities, data }) ->
                     Ecs2
                         { entities = entities
-                        , data =
-                            { data1 = updateFn data.data1
-                            , data2 = data.data2
-                            }
+                        , data = Record2.update1 updateFn data
                         }
             }
         )
         (Internal.ComponentSpec
-            { get = \(Ecs2 { data }) -> data.data2
+            { get = \(Ecs2 { data }) -> data.a2
             , update =
                 \updateFn (Ecs2 { entities, data }) ->
                     Ecs2
                         { entities = entities
-                        , data =
-                            { data1 = data.data1
-                            , data2 = updateFn data.data2
-                            }
+                        , data = Record2.update2 updateFn data
                         }
             }
         )
@@ -256,11 +248,7 @@ type Ecs3 a1 a2 a3
             { nextId : Int
             , activeIds : Set Int
             }
-        , data :
-            { data1 : Dict Int a1
-            , data2 : Dict Int a2
-            , data3 : Dict Int a3
-            }
+        , data : Record3.Record (Dict Int a1) (Dict Int a2) (Dict Int a3)
         }
 
 
@@ -276,9 +264,9 @@ spec3 =
                     , activeIds = Set.empty
                     }
                 , data =
-                    { data1 = Dict.empty
-                    , data2 = Dict.empty
-                    , data3 = Dict.empty
+                    { a1 = Dict.empty
+                    , a2 = Dict.empty
+                    , a3 = Dict.empty
                     }
                 }
         , clear =
@@ -286,21 +274,21 @@ spec3 =
                 Ecs3
                     { entities = entities
                     , data =
-                        { data1 = Dict.remove entityId data.data1
-                        , data2 = Dict.remove entityId data.data2
-                        , data3 = Dict.remove entityId data.data3
+                        { a1 = Dict.remove entityId data.a1
+                        , a2 = Dict.remove entityId data.a2
+                        , a3 = Dict.remove entityId data.a3
                         }
                     }
         , isEmpty =
             \(Ecs3 { data }) ->
-                Dict.isEmpty data.data1
-                    && Dict.isEmpty data.data2
-                    && Dict.isEmpty data.data3
+                Dict.isEmpty data.a1
+                    && Dict.isEmpty data.a2
+                    && Dict.isEmpty data.a3
         , componentCount =
             \(Ecs3 { data }) ->
-                Dict.size data.data1
-                    + Dict.size data.data2
-                    + Dict.size data.data3
+                Dict.size data.a1
+                    + Dict.size data.a2
+                    + Dict.size data.a3
         , ids =
             \(Ecs3 { entities }) ->
                 entities.activeIds
@@ -325,11 +313,12 @@ spec3 =
                         { nextId = entities.nextId
                         , activeIds = Set.remove entityId entities.activeIds
                         }
+
                     -- TODO refactor with clear
                     , data =
-                        { data1 = Dict.remove entityId data.data1
-                        , data2 = Dict.remove entityId data.data2
-                        , data3 = Dict.remove entityId data.data3
+                        { a1 = Dict.remove entityId data.a1
+                        , a2 = Dict.remove entityId data.a2
+                        , a3 = Dict.remove entityId data.a3
                         }
                     }
         }
@@ -347,44 +336,32 @@ components3 :
 components3 fn =
     fn
         (Internal.ComponentSpec
-            { get = \(Ecs3 { data }) -> data.data1
+            { get = \(Ecs3 { data }) -> data.a1
             , update =
                 \updateFn (Ecs3 { entities, data }) ->
                     Ecs3
                         { entities = entities
-                        , data =
-                            { data1 = updateFn data.data1
-                            , data2 = data.data2
-                            , data3 = data.data3
-                            }
+                        , data = Record3.update1 updateFn data
                         }
             }
         )
         (Internal.ComponentSpec
-            { get = \(Ecs3 { data }) -> data.data2
+            { get = \(Ecs3 { data }) -> data.a2
             , update =
                 \updateFn (Ecs3 { entities, data }) ->
                     Ecs3
                         { entities = entities
-                        , data =
-                            { data1 = data.data1
-                            , data2 = updateFn data.data2
-                            , data3 = data.data3
-                            }
+                        , data = Record3.update2 updateFn data
                         }
             }
         )
         (Internal.ComponentSpec
-            { get = \(Ecs3 { data }) -> data.data3
+            { get = \(Ecs3 { data }) -> data.a3
             , update =
                 \updateFn (Ecs3 { entities, data }) ->
                     Ecs3
                         { entities = entities
-                        , data =
-                            { data1 = data.data1
-                            , data2 = data.data2
-                            , data3 = updateFn data.data3
-                            }
+                        , data = Record3.update3 updateFn data
                         }
             }
         )

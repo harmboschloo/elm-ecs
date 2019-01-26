@@ -1,4 +1,5 @@
 // @ts-check
+const { range } = require("./utils");
 
 exports.generate = function(n) {
   const specs = range(n);
@@ -19,6 +20,8 @@ ${specs.map(i => `@docs Ecs${i}, spec${i}, components${i}`).join(`
 
 import Dict exposing (Dict)
 import Ecs.Internal as Internal
+${specs.map(i => `import Ecs.Internal.Record${i} as Record${i}`).join(`
+`)}
 import Set exposing (Set)
 
 
@@ -36,6 +39,9 @@ ${specs.map(iSpec => {
     const components = range(iSpec);
 
     const ecs = `Ecs${iSpec} ${components.map(i => `a${i}`).join(" ")}`;
+    const data = `Record${iSpec}.Record ${components
+      .map(i => `(Dict Int a${i})`)
+      .join(" ")}`;
 
     return `
 
@@ -47,10 +53,7 @@ type ${ecs}
             { nextId : Int
             , activeIds : Set Int
             }
-        , data :
-            { ${components.map(i => `data${i} : Dict Int a${i}`).join(`
-            , `)}
-            }
+        , data : ${data}
         }
 
 
@@ -66,7 +69,7 @@ spec${iSpec} =
                     , activeIds = Set.empty
                     }
                 , data =
-                    { ${components.map(i => `data${i} = Dict.empty`).join(`
+                    { ${components.map(i => `a${i} = Dict.empty`).join(`
                     , `)}
                     }
                 }
@@ -76,18 +79,18 @@ spec${iSpec} =
                     { entities = entities
                     , data =
                         { ${components.map(
-                          i => `data${i} = Dict.remove entityId data.data${i}`
+                          i => `a${i} = Dict.remove entityId data.a${i}`
                         ).join(`
                         , `)}
                         }
                     }
         , isEmpty =
             \\(Ecs${iSpec} { data }) ->
-                ${components.map(i => `Dict.isEmpty data.data${i}`).join(`
+                ${components.map(i => `Dict.isEmpty data.a${i}`).join(`
                     && `)}
         , componentCount =
             \\(Ecs${iSpec} { data }) ->
-                ${components.map(i => `Dict.size data.data${i}`).join(`
+                ${components.map(i => `Dict.size data.a${i}`).join(`
                     + `)}
         , ids =
             \\(Ecs${iSpec} { entities }) ->
@@ -113,10 +116,11 @@ spec${iSpec} =
                         { nextId = entities.nextId
                         , activeIds = Set.remove entityId entities.activeIds
                         }
+
                     -- TODO refactor with clear
                     , data =
                         { ${components.map(
-                          i => `data${i} = Dict.remove entityId data.data${i}`
+                          i => `a${i} = Dict.remove entityId data.a${i}`
                         ).join(`
                         , `)}
                         }
@@ -138,20 +142,12 @@ components${iSpec} fn =
     fn
         ${components.map(
           iComponent => `(Internal.ComponentSpec
-            { get = \\(Ecs${iSpec} { data }) -> data.data${iComponent}
+            { get = \\(Ecs${iSpec} { data }) -> data.a${iComponent}
             , update =
                 \\updateFn (Ecs${iSpec} { entities, data }) ->
                     Ecs${iSpec}
                         { entities = entities
-                        , data =
-                            { ${components.map(
-                              i =>
-                                `data${i} =${
-                                  i === iComponent ? " updateFn" : ""
-                                } data.data${i}`
-                            ).join(`
-                            , `)}
-                            }
+                        , data = Record${iSpec}.update${iComponent} updateFn data
                         }
             }
         )`
@@ -161,9 +157,3 @@ components${iSpec} fn =
 `)}
 `;
 };
-
-function range(n) {
-  return Array(n)
-    .fill(0)
-    .map((_, index) => index + 1);
-}

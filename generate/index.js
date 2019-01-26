@@ -3,11 +3,16 @@
 const path = require("path");
 const fs = require("fs");
 const spec = require("./spec");
+const record = require("./record");
+const { range } = require("./utils");
 
-const maxComponents = 3;
+const n = 3;
 const outputPath = path.resolve(__dirname, "../src");
 
-writeFile("Ecs/Spec.elm", spec.generate(maxComponents));
+writeFile("Ecs/Spec.elm", spec.generate(n));
+range(n).forEach(i =>
+  writeFile(`Ecs/Internal/Record${i}.elm`, record.generate(i))
+);
 
 function writeFile(file, code) {
   const filePath = path.resolve(outputPath, file);
