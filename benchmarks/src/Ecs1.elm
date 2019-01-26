@@ -3,6 +3,7 @@ module Ecs1 exposing
     , insertA
     , insertB
     , insertC
+    , label
     , selectA
     , selectAB
     , selectABC
@@ -16,6 +17,11 @@ import Data exposing (A, B, C)
 import V1.Ecs as Ecs
 import V1.Ecs.Select as Select
 import V1.Ecs.Spec as Spec
+
+
+label : String
+label =
+    "Ecs v1"
 
 
 type alias ComponentSpecs =

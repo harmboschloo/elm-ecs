@@ -3,6 +3,7 @@ module Ecs2 exposing
     , insertA
     , insertB
     , insertC
+    , label
     , selectA
     , selectAB
     , selectABC
@@ -16,6 +17,11 @@ import Data exposing (A, B, C)
 import Ecs as Ecs exposing (EntityId)
 import Ecs.Select as Select
 import Ecs.Spec as Spec
+
+
+label : String
+label =
+    "Ecs v2 latest"
 
 
 type alias Components =

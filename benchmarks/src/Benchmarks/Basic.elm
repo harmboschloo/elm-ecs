@@ -4,17 +4,7 @@ import Benchmark exposing (Benchmark)
 import Benchmark.Runner as Runner
 import Data
 import Ecs1
-import Ecs2
-
-
-ecs1Label : String
-ecs1Label =
-    "Ecs v1"
-
-
-ecs2Label : String
-ecs2Label =
-    "Ecs v2"
+import Ecs2W as Ecs2
 
 
 main : Runner.BenchmarkProgram
@@ -42,53 +32,53 @@ benchmark n =
     in
     Benchmark.describe label
         [ Benchmark.compare "insert A"
-            ecs1Label
+            Ecs1.label
             (\_ -> Ecs1.insertA insertEntityId1 Data.A insertEcs1)
-            ecs2Label
+            Ecs2.label
             (\_ -> Ecs2.insertA insertEntityId2 Data.A insertEcs2)
         , Benchmark.compare "insert B"
-            ecs1Label
+            Ecs1.label
             (\_ -> Ecs1.insertB insertEntityId1 Data.B insertEcs1)
-            ecs2Label
+            Ecs2.label
             (\_ -> Ecs2.insertB insertEntityId2 Data.B insertEcs2)
         , Benchmark.compare "insert C"
-            ecs1Label
+            Ecs1.label
             (\_ -> Ecs1.insertC insertEntityId1 Data.C insertEcs1)
-            ecs2Label
+            Ecs2.label
             (\_ -> Ecs2.insertC insertEntityId2 Data.C insertEcs2)
         , Benchmark.compare "selectA"
-            ecs1Label
+            Ecs1.label
             (\_ -> Ecs1.selectA ecs1)
-            ecs2Label
+            Ecs2.label
             (\_ -> Ecs2.selectA ecs2)
         , Benchmark.compare "selectB"
-            ecs1Label
+            Ecs1.label
             (\_ -> Ecs1.selectB ecs1)
-            ecs2Label
+            Ecs2.label
             (\_ -> Ecs2.selectB ecs2)
         , Benchmark.compare "selectC"
-            ecs1Label
+            Ecs1.label
             (\_ -> Ecs1.selectC ecs1)
-            ecs2Label
+            Ecs2.label
             (\_ -> Ecs2.selectC ecs2)
         , Benchmark.compare "selectAB"
-            ecs1Label
+            Ecs1.label
             (\_ -> Ecs1.selectAB ecs1)
-            ecs2Label
+            Ecs2.label
             (\_ -> Ecs2.selectAB ecs2)
         , Benchmark.compare "selectBA"
-            ecs1Label
+            Ecs1.label
             (\_ -> Ecs1.selectBA ecs1)
-            ecs2Label
+            Ecs2.label
             (\_ -> Ecs2.selectBA ecs2)
         , Benchmark.compare "selectABC"
-            ecs1Label
+            Ecs1.label
             (\_ -> Ecs1.selectABC ecs1)
-            ecs2Label
+            Ecs2.label
             (\_ -> Ecs2.selectABC ecs2)
         , Benchmark.compare "selectCBA"
-            ecs1Label
+            Ecs1.label
             (\_ -> Ecs1.selectCBA ecs1)
-            ecs2Label
+            Ecs2.label
             (\_ -> Ecs2.selectCBA ecs2)
         ]
