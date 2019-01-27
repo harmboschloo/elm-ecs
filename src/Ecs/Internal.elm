@@ -31,5 +31,5 @@ type ComponentSpec components a
 type Selector components a
     = Selector
         { select : Int -> components -> Maybe a
-        , selectList : components -> List ( EntityId, a )
+        , selectAll : components -> List ( EntityId, a )
         }

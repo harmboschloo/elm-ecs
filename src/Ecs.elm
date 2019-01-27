@@ -2,7 +2,7 @@ module Ecs exposing
     ( empty, isEmpty, entityCount, componentCount, ids
     , member, clear
     , has, get, insert, update, remove, size
-    , select, selectList
+    , select, selectAll, processAll, processAllWithState
     , EntityId, World, create, destroy
     )
 
@@ -26,7 +26,7 @@ module Ecs exposing
 
 # Apply Selectors
 
-@docs select, selectList
+@docs select, selectAll, processAll, processAllWithState
 
 -}
 
@@ -248,6 +248,28 @@ select (Selector selector) (Internal.EntityId entityId) (World { components }) =
 
 {-| Get all entities with a specific set of components.
 -}
-selectList : Selector components a -> World components -> List ( EntityId, a )
-selectList (Selector selector) (World { components }) =
-    selector.selectList components
+selectAll : Selector components a -> World components -> List ( EntityId, a )
+selectAll (Selector selector) (World { components }) =
+    selector.selectAll components
+
+
+processAll :
+    Selector components a
+    -> (( EntityId, a ) -> World components -> World components)
+    -> World components
+    -> World components
+processAll selector fn world =
+    List.foldl fn world (selectAll selector world)
+
+
+processAllWithState :
+    Selector components a
+    ->
+        (( EntityId, a )
+         -> ( World components, state )
+         -> ( World components, state )
+        )
+    -> ( World components, state )
+    -> ( World components, state )
+processAllWithState selector fn ( world, state ) =
+    List.foldl fn ( world, state ) (selectAll selector world)

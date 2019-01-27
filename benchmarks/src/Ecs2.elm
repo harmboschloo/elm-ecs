@@ -40,13 +40,13 @@ specs : Specs
 specs =
     Spec.specs3 Specs
 
+
 type alias World =
     Ecs.World Components
 
 
 type alias Selector a =
     Select.Selector Components a
-
 
 
 builder : Data.Builder World EntityId
@@ -87,7 +87,7 @@ aSelector =
 
 selectA : World -> List ( EntityId, A )
 selectA world =
-    Ecs.selectList aSelector world
+    Ecs.selectAll aSelector world
 
 
 bSelector : Selector B
@@ -97,7 +97,7 @@ bSelector =
 
 selectB : World -> List ( EntityId, B )
 selectB world =
-    Ecs.selectList bSelector world
+    Ecs.selectAll bSelector world
 
 
 cSelector : Selector C
@@ -107,7 +107,7 @@ cSelector =
 
 selectC : World -> List ( EntityId, C )
 selectC world =
-    Ecs.selectList cSelector world
+    Ecs.selectAll cSelector world
 
 
 type alias AB =
@@ -125,7 +125,7 @@ abSelector =
 
 selectAB : World -> List ( EntityId, AB )
 selectAB world =
-    Ecs.selectList abSelector world
+    Ecs.selectAll abSelector world
 
 
 type alias BA =
@@ -143,7 +143,7 @@ baSelector =
 
 selectBA : World -> List ( EntityId, BA )
 selectBA world =
-    Ecs.selectList baSelector world
+    Ecs.selectAll baSelector world
 
 
 type alias ABC =
@@ -163,7 +163,7 @@ abcSelector =
 
 selectABC : World -> List ( EntityId, ABC )
 selectABC world =
-    Ecs.selectList abcSelector world
+    Ecs.selectAll abcSelector world
 
 
 type alias CBA =
@@ -183,4 +183,4 @@ cbaSelector =
 
 selectCBA : World -> List ( EntityId, CBA )
 selectCBA world =
-    Ecs.selectList cbaSelector world
+    Ecs.selectAll cbaSelector world
