@@ -2,11 +2,12 @@ module Systems.Ai exposing (update)
 
 import Components exposing (Ai, Motion, Position, Star, Velocity)
 import Components.Controls as Controls exposing (Controls)
-import Entities exposing (Entities, Selector)
-import EntityId exposing (EntityId)
+import Ecs
+import Ecs.Select
 import Global exposing (Global)
 import Systems.MotionControl as MotionControl
 import Systems.Movement as Movement
+import World exposing (EntityId, Selector, World, specs)
 
 
 type alias Ship =
@@ -19,12 +20,12 @@ type alias Ship =
 
 shipSelector : Selector Ship
 shipSelector =
-    Entities.select4 Ship
-        .ai
-        .motion
-        .position
-        .velocity
-        |> Entities.andHas .controls
+    Ecs.Select.select4 Ship
+        specs.ai
+        specs.motion
+        specs.position
+        specs.velocity
+        |> Ecs.Select.andHas specs.controls
 
 
 type alias Target =
@@ -35,35 +36,32 @@ type alias Target =
 
 targetSelector : Selector Target
 targetSelector =
-    Entities.select2 Target
-        .star
-        .position
-        |> Entities.andHas .collisionShape
+    Ecs.Select.select2 Target
+        specs.star
+        specs.position
+        |> Ecs.Select.andHas specs.collisionShape
 
 
-update : ( Global, Entities ) -> ( Global, Entities )
+update : ( World, Global ) -> ( World, Global )
 update =
-    Entities.process shipSelector updateEntity
+    Ecs.processAllWithState shipSelector updateEntity
 
 
-updateEntity :
-    ( EntityId, Ship )
-    -> ( Global, Entities )
-    -> ( Global, Entities )
-updateEntity ( entityId, ship ) ( global, entities ) =
+updateEntity : ( EntityId, Ship ) -> ( World, Global ) -> ( World, Global )
+updateEntity ( entityId, ship ) ( world, global ) =
     let
         maybeTarget =
             case ship.ai.target of
                 Just targetId ->
-                    case Entities.select targetSelector targetId entities of
+                    case Ecs.select targetSelector targetId world of
                         Just target ->
                             Just ( targetId, target.position )
 
                         Nothing ->
-                            findTargetFor ship entities
+                            findTargetFor ship world
 
                 Nothing ->
-                    findTargetFor ship entities
+                    findTargetFor ship world
 
         ( maybeTargetId, targetPosition ) =
             case maybeTarget of
@@ -85,16 +83,14 @@ updateEntity ( entityId, ship ) ( global, entities ) =
         controls =
             findControlsForTarget targetPosition ship
     in
-    ( global
-    , Entities.updateEcs
-        (\ecs -> Entities.insert .controls entityId controls ecs)
-        entities
+    ( Ecs.insert specs.controls entityId controls world
+    , global
     )
 
 
-findTargetFor : Ship -> Entities -> Maybe ( EntityId, Position )
-findTargetFor ship entities =
-    Entities.selectList targetSelector entities
+findTargetFor : Ship -> World -> Maybe ( EntityId, Position )
+findTargetFor ship world =
+    Ecs.selectAll targetSelector world
         |> List.map
             (\( entityId, target ) ->
                 ( entityId

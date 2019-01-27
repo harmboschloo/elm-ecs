@@ -4,7 +4,7 @@ import Assets exposing (Assets)
 import Browser exposing (Document)
 import Browser.Dom exposing (Viewport, getViewport)
 import Builder
-import Entities exposing (Entities)
+import Ecs
 import Frame exposing (Frame)
 import Global exposing (Global)
 import Html exposing (Html, text)
@@ -13,6 +13,7 @@ import Systems
 import Task
 import Time exposing (Posix, posixToMillis)
 import WebGL.Texture as Texture exposing (Error)
+import World exposing (World, specs)
 
 
 
@@ -27,7 +28,7 @@ type Model
 
 type alias SuccessModel =
     { global : Global
-    , entities : Entities
+    , world : World
     , frame : Frame
     }
 
@@ -61,13 +62,13 @@ initSuccess { assets, posix, viewport } =
         seed =
             Random.initialSeed (posixToMillis posix)
 
-        ( global, entities ) =
+        ( world, global ) =
             Builder.createInitalEntities
-                ( Global.init assets seed screen, Entities.empty )
+                ( Ecs.empty specs.all, Global.init assets seed screen )
     in
     InitSuccess
         { global = global
-        , entities = entities
+        , world = world
         , frame = Frame.init (1.0 / 20.0) 60
         }
 
@@ -130,15 +131,15 @@ update msg model =
 
                 Frame.Update data cmd ->
                     let
-                        ( global, entities ) =
+                        ( world, global ) =
                             Systems.update
-                                ( Global.setTiming data successModel.global
-                                , successModel.entities
+                                ( successModel.world
+                                , Global.setTiming data successModel.global
                                 )
                     in
                     ( InitSuccess
                         { global = global
-                        , entities = entities
+                        , world = world
                         , frame = frame
                         }
                     , Cmd.map FrameMsg cmd
@@ -180,8 +181,8 @@ view model =
             InitFailure error ->
                 viewError error
 
-            InitSuccess { global, entities, frame } ->
-                [ Systems.view frame global entities ]
+            InitSuccess { world, global, frame } ->
+                [ Systems.view frame world global ]
     }
 
 

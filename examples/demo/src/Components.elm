@@ -11,13 +11,13 @@ module Components exposing
     )
 
 import Animation.Sequence exposing (Animation)
-import EntityId exposing (EntityId)
+import Ecs
 import KeyCode exposing (KeyCode)
 import WebGL.Texture exposing (Texture)
 
 
 type alias Ai =
-    { target : Maybe EntityId
+    { target : Maybe Ecs.EntityId
     }
 
 

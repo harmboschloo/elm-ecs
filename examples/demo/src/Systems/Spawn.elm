@@ -1,14 +1,14 @@
 module Systems.Spawn exposing (update)
 
 import Builder
-import Entities exposing (Entities)
 import Global exposing (Global)
 import Random
 import Utils
+import World exposing (World)
 
 
-update : ( Global, Entities ) -> ( Global, Entities )
-update ( global1, entities ) =
+update : ( World, Global ) -> ( World, Global )
+update ( world, global1 ) =
     let
         rate =
             Global.getSpawnRate global1
@@ -32,4 +32,4 @@ update ( global1, entities ) =
         n =
             floor spawn + nFraction
     in
-    Utils.times n Builder.createStar ( global2, entities )
+    Utils.times n Builder.createStar ( world, global2 )

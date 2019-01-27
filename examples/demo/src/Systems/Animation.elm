@@ -2,44 +2,41 @@ module Systems.Animation exposing (update)
 
 import Animation.Sequence as Animation exposing (Animation)
 import Components exposing (ScaleAnimation)
-import Entities exposing (Entities, Selector)
-import EntityId exposing (EntityId)
+import Ecs
+import Ecs.Select
 import Global exposing (Global)
+import World exposing (EntityId, Selector, World, specs)
 
 
 scaleAnimationSelector : Selector ScaleAnimation
 scaleAnimationSelector =
-    Entities.selectComponent .scaleAnimation
-        |> Entities.andHas .scale
+    Ecs.Select.component specs.scaleAnimation
+        |> Ecs.Select.andHas specs.scale
 
 
-update : ( Global, Entities ) -> ( Global, Entities )
+update : ( World, Global ) -> ( World, Global )
 update =
-    Entities.process scaleAnimationSelector updateEntity
+    Ecs.processAllWithState scaleAnimationSelector updateEntity
 
 
 updateEntity :
     ( EntityId, ScaleAnimation )
-    -> ( Global, Entities )
-    -> ( Global, Entities )
-updateEntity ( entityId, scaleAnimation ) ( global, entities ) =
+    -> ( World, Global )
+    -> ( World, Global )
+updateEntity ( entityId, scaleAnimation ) ( world, global ) =
     let
         time =
             Global.getTime global
     in
-    ( global
-    , Entities.updateEcs
-        (\ecs ->
-            ecs
-                |> Entities.insert .scale
-                    entityId
-                    (Animation.animate time scaleAnimation)
-                |> (if Animation.hasEnded time scaleAnimation then
-                        Entities.remove .scaleAnimation entityId
+    ( world
+        |> Ecs.insert specs.scale
+            entityId
+            (Animation.animate time scaleAnimation)
+        |> (if Animation.hasEnded time scaleAnimation then
+                Ecs.remove specs.scaleAnimation entityId
 
-                    else
-                        identity
-                   )
-        )
-        entities
+            else
+                identity
+           )
+    , global
     )

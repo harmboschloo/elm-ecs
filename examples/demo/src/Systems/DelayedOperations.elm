@@ -5,49 +5,41 @@ import Components.DelayedOperations as DelayedOperations
         ( DelayedOperations
         , Operation
         )
-import Entities exposing (Entities, Selector)
-import EntityId exposing (EntityId)
+import Ecs
+import Ecs.Select
 import Global exposing (Global)
+import World exposing (EntityId, Selector, World, specs)
 
 
 delayedOperationsSelector : Selector DelayedOperations
 delayedOperationsSelector =
-    Entities.selectComponent .delayedOperations
+    Ecs.Select.component specs.delayedOperations
 
 
-update : ( Global, Entities ) -> ( Global, Entities )
+update : ( World, Global ) -> ( World, Global )
 update =
-    Entities.process delayedOperationsSelector updateEntity
+    Ecs.processAllWithState delayedOperationsSelector updateEntity
 
 
 updateEntity :
     ( EntityId, DelayedOperations )
-    -> ( Global, Entities )
-    -> ( Global, Entities )
-updateEntity ( entityId, operations1 ) ( global, entities1 ) =
+    -> ( World, Global )
+    -> ( World, Global )
+updateEntity ( entityId, operations1 ) ( world1, global ) =
     let
-        ( operations2, entities2 ) =
+        ( operations2, world2 ) =
             List.foldr
                 (updateOperation (Global.getTime global) entityId)
-                ( [], entities1 )
+                ( [], world1 )
                 operations1
     in
-    ( global
-    , Entities.updateEcs
-        (\ecs ->
-            case operations2 of
-                [] ->
-                    Entities.remove .delayedOperations
-                        entityId
-                        ecs
+    ( case operations2 of
+        [] ->
+            Ecs.remove specs.delayedOperations entityId world2
 
-                _ ->
-                    Entities.insert .delayedOperations
-                        entityId
-                        operations2
-                        ecs
-        )
-        entities2
+        _ ->
+            Ecs.insert specs.delayedOperations entityId operations2 world2
+    , global
     )
 
 
@@ -55,28 +47,21 @@ updateOperation :
     Float
     -> EntityId
     -> ( Float, Operation )
-    -> ( DelayedOperations, Entities )
-    -> ( DelayedOperations, Entities )
-updateOperation time entityId ( operationTime, operation ) ( operations, entities ) =
+    -> ( DelayedOperations, World )
+    -> ( DelayedOperations, World )
+updateOperation time entityId ( operationTime, operation ) ( operations, world ) =
     if operationTime > time then
-        ( ( operationTime, operation ) :: operations, entities )
+        ( ( operationTime, operation ) :: operations, world )
 
     else
-        ( operations, handleOperation entityId operation entities )
+        ( operations, handleOperation entityId operation world )
 
 
-handleOperation : EntityId -> Operation -> Entities -> Entities
-handleOperation entityId operation entities =
+handleOperation : EntityId -> Operation -> World -> World
+handleOperation entityId operation world =
     case operation of
         DelayedOperations.RemoveEntity ->
-            Entities.removeEntity entityId entities
+            Ecs.destroy specs.all entityId world
 
         DelayedOperations.InsertCollisionShape collisionShape ->
-            Entities.updateEcs
-                (\ecs ->
-                    Entities.insert .collisionShape
-                        entityId
-                        collisionShape
-                        ecs
-                )
-                entities
+            Ecs.insert specs.collisionShape entityId collisionShape world

@@ -1,6 +1,5 @@
 module Systems exposing (update, view)
 
-import Entities exposing (Entities)
 import Frame exposing (Frame)
 import Global exposing (Global)
 import Html exposing (Html)
@@ -13,9 +12,10 @@ import Systems.MotionControl as MotionControl
 import Systems.Movement as Movement
 import Systems.Render as Render
 import Systems.Spawn as Spawn
+import World exposing (World)
 
 
-update : ( Global, Entities ) -> ( Global, Entities )
+update : ( World, Global ) -> ( World, Global )
 update state =
     state
         |> DelayedOperations.update
@@ -28,6 +28,6 @@ update state =
         |> Collision.update
 
 
-view : Frame -> Global -> Entities -> Html msg
+view : Frame -> World -> Global -> Html msg
 view =
     Render.view

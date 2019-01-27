@@ -6,7 +6,7 @@ const spec = require("./spec");
 const record = require("./record");
 const { range } = require("./utils");
 
-const n = 4;
+const n = 12;
 const outputPath = path.resolve(__dirname, "../src");
 
 writeFile("Ecs/Spec.elm", spec.generate(n));

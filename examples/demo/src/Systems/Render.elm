@@ -1,8 +1,8 @@
 module Systems.Render exposing (view)
 
 import Components exposing (Position, Scale, Sprite)
-import Entities exposing (Entities, Selector)
-import EntityId exposing (EntityId)
+import Ecs
+import Ecs.Select
 import Frame exposing (Frame)
 import Global exposing (Global)
 import Html exposing (Html, div, text)
@@ -12,6 +12,7 @@ import Math.Vector2 exposing (Vec2, vec2)
 import Math.Vector3 exposing (Vec3, vec3)
 import WebGL exposing (Mesh, Shader)
 import WebGL.Texture as Texture exposing (Texture)
+import World exposing (EntityId, Selector, World, specs)
 
 
 type alias Renderable =
@@ -23,20 +24,20 @@ type alias Renderable =
 
 renderableSelector : Selector Renderable
 renderableSelector =
-    Entities.select2 Renderable
-        .position
-        .sprite
-        |> Entities.andGet .scale
+    Ecs.Select.select2 Renderable
+        specs.position
+        specs.sprite
+        |> Ecs.Select.andGet specs.scale
 
 
-view : Frame -> Global -> Entities -> Html msg
-view frame global entities =
+view : Frame -> World -> Global -> Html msg
+view frame world global =
     let
         screen =
             Global.getScreen global
     in
     div []
-        [ viewWebGL (Global.getScreen global) global entities
+        [ viewWebGL (Global.getScreen global) global world
         , div
             [ style "position" "absolute"
             , style "top" "0"
@@ -64,12 +65,12 @@ view frame global entities =
             , div []
                 [ text <|
                     "entities: "
-                        ++ String.fromInt (Entities.getEntityCount entities)
+                        ++ String.fromInt (Ecs.entityCount world)
                 ]
             , div []
                 [ text <|
                     "components: "
-                        ++ String.fromInt (Entities.getComponentCount entities)
+                        ++ String.fromInt (Ecs.componentCount specs.all world)
                 ]
             , div []
                 [ text <| "frame time: " ++ frameStat .frameTime frame
@@ -112,8 +113,8 @@ frameStat getData frame =
         ++ ")"
 
 
-viewWebGL : Global.Screen -> Global -> Entities -> Html msg
-viewWebGL screen global entities =
+viewWebGL : Global.Screen -> Global -> World -> Html msg
+viewWebGL screen global world =
     WebGL.toHtmlWith
         [ WebGL.antialias
         , WebGL.depth 1
@@ -124,7 +125,7 @@ viewWebGL screen global entities =
         , style "top" "0"
         , style "left" "0"
         ]
-        (renderEntities global entities (getCameraTransform (Global.getWorld global)))
+        (renderEntities global world (getCameraTransform (Global.getWorld global)))
 
 
 getCameraTransform : Global.World -> Mat4
@@ -132,8 +133,8 @@ getCameraTransform world =
     makeOrtho2D 0 world.width 0 world.height
 
 
-renderEntities : Global -> Entities -> Mat4 -> List WebGL.Entity
-renderEntities global entities cameraTransform =
+renderEntities : Global -> World -> Mat4 -> List WebGL.Entity
+renderEntities global world cameraTransform =
     let
         background =
             renderBackground global cameraTransform
@@ -141,7 +142,7 @@ renderEntities global entities cameraTransform =
         elements =
             List.map
                 (renderSprite cameraTransform)
-                (Entities.selectList renderableSelector entities)
+                (Ecs.selectAll renderableSelector world)
     in
     background :: elements
 

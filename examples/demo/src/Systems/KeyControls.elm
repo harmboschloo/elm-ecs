@@ -2,38 +2,35 @@ module Systems.KeyControls exposing (update)
 
 import Components exposing (KeyControlsMap)
 import Components.Controls exposing (Controls, controls)
-import Entities exposing (Entities, Selector)
-import EntityId exposing (EntityId)
+import Ecs
+import Ecs.Select
 import Global exposing (Global)
 import KeyCode exposing (KeyCode)
 import Set exposing (Set)
+import World exposing (EntityId, Selector, World, specs)
 
 
 keyControlsSelector : Selector KeyControlsMap
 keyControlsSelector =
-    Entities.selectComponent .keyControlsMap
-        |> Entities.andHas .controls
+    Ecs.Select.component specs.keyControlsMap
+        |> Ecs.Select.andHas specs.controls
 
 
-update : ( Global, Entities ) -> ( Global, Entities )
+update : ( World, Global ) -> ( World, Global )
 update =
-    Entities.process keyControlsSelector updateEntity
+    Ecs.processAllWithState keyControlsSelector updateEntity
 
 
 updateEntity :
     ( EntityId, KeyControlsMap )
-    -> ( Global, Entities )
-    -> ( Global, Entities )
-updateEntity ( entityId, keyControlsMap ) ( global, entities ) =
-    ( global
-    , Entities.updateEcs
-        (\ecs ->
-            Entities.insert .controls
-                entityId
-                (updateControls keyControlsMap (Global.getActiveKeys global))
-                ecs
-        )
-        entities
+    -> ( World, Global )
+    -> ( World, Global )
+updateEntity ( entityId, keyControlsMap ) ( world, global ) =
+    ( Ecs.insert specs.controls
+        entityId
+        (updateControls keyControlsMap (Global.getActiveKeys global))
+        world
+    , global
     )
 
 

@@ -15,17 +15,17 @@ import Components
 import Components.CollisionShape as CollisionShape exposing (CollisionShape)
 import Components.Controls as Controls
 import Components.DelayedOperations as DelayedOperations
-import Entities exposing (Ecs, Entities)
-import EntityId exposing (EntityId)
+import Ecs
 import Global exposing (Global)
 import KeyCode
 import Random exposing (Generator)
 import Utils exposing (times)
+import World exposing (EntityId, World, specs)
 
 
-createInitalEntities : ( Global, Entities ) -> ( Global, Entities )
-createInitalEntities ( global, entities ) =
-    ( global, entities )
+createInitalEntities : ( World, Global ) -> ( World, Global )
+createInitalEntities ( world, global ) =
+    ( world, global )
         |> createPlayerShip
         |> times 10 createAiShip
         |> times 30 createStar
@@ -40,8 +40,8 @@ shipMotion =
     }
 
 
-createPlayerShip : ( Global, Entities ) -> ( Global, Entities )
-createPlayerShip ( global1, entities1 ) =
+createPlayerShip : ( World, Global ) -> ( World, Global )
+createPlayerShip ( world1, global1 ) =
     let
         assets =
             Global.getAssets global1
@@ -52,35 +52,31 @@ createPlayerShip ( global1, entities1 ) =
         ( angle, global2 ) =
             Global.randomStep angleGenerator global1
 
-        ( entityId, entities2 ) =
-            Entities.addEntity entities1
+        ( world2, entityId ) =
+            Ecs.create world1
 
-        entities3 =
-            Entities.updateEcs
-                (\ecs ->
-                    ecs
-                        |> setShipComponents
-                            entityId
-                            assets.sprites.playerShip
-                            { x = world.width / 2
-                            , y = world.height / 2
-                            , angle = angle
-                            }
-                        |> Entities.insert .keyControlsMap
-                            entityId
-                            { accelerate = KeyCode.arrowUp
-                            , decelerate = KeyCode.arrowDown
-                            , rotateLeft = KeyCode.arrowLeft
-                            , rotateRight = KeyCode.arrowRight
-                            }
-                )
-                entities2
+        world3 =
+            world2
+                |> setShipComponents
+                    entityId
+                    assets.sprites.playerShip
+                    { x = world.width / 2
+                    , y = world.height / 2
+                    , angle = angle
+                    }
+                |> Ecs.insert specs.keyControlsMap
+                    entityId
+                    { accelerate = KeyCode.arrowUp
+                    , decelerate = KeyCode.arrowDown
+                    , rotateLeft = KeyCode.arrowLeft
+                    , rotateRight = KeyCode.arrowRight
+                    }
     in
-    ( global2, entities3 )
+    ( world3, global2 )
 
 
-createAiShip : ( Global, Entities ) -> ( Global, Entities )
-createAiShip ( global1, entities1 ) =
+createAiShip : ( World, Global ) -> ( World, Global )
+createAiShip ( world1, global1 ) =
     let
         assets =
             Global.getAssets global1
@@ -91,33 +87,29 @@ createAiShip ( global1, entities1 ) =
         ( position, global2 ) =
             Global.randomStep (positionGenerator world) global1
 
-        ( entityId, entities2 ) =
-            Entities.addEntity entities1
+        ( world2, entityId ) =
+            Ecs.create world1
 
-        entities3 =
-            Entities.updateEcs
-                (\ecs ->
-                    ecs
-                        |> setShipComponents
-                            entityId
-                            assets.sprites.aiShip
-                            position
-                        |> Entities.insert .ai entityId { target = Nothing }
-                )
-                entities2
+        world3 =
+            world2
+                |> setShipComponents
+                    entityId
+                    assets.sprites.aiShip
+                    position
+                |> Ecs.insert specs.ai entityId { target = Nothing }
     in
-    ( global2, entities3 )
+    ( world3, global2 )
 
 
-setShipComponents : EntityId -> Sprite -> Position -> Ecs -> Ecs
-setShipComponents entityId sprite position ecs =
-    ecs
-        |> Entities.insert .sprite entityId sprite
-        |> Entities.insert .position entityId position
-        |> Entities.insert .controls entityId (Controls.controls 0 0)
-        |> Entities.insert .motion entityId shipMotion
-        |> Entities.insert .velocity entityId (Velocity 0 0 0)
-        |> Entities.insert .collisionShape
+setShipComponents : EntityId -> Sprite -> Position -> World -> World
+setShipComponents entityId sprite position world =
+    world
+        |> Ecs.insert specs.sprite entityId sprite
+        |> Ecs.insert specs.position entityId position
+        |> Ecs.insert specs.controls entityId (Controls.controls 0 0)
+        |> Ecs.insert specs.motion entityId shipMotion
+        |> Ecs.insert specs.velocity entityId (Velocity 0 0 0)
+        |> Ecs.insert specs.collisionShape
             entityId
             (CollisionShape
                 (Shape.circle 30)
@@ -125,8 +117,8 @@ setShipComponents entityId sprite position ecs =
             )
 
 
-createStar : ( Global, Entities ) -> ( Global, Entities )
-createStar ( global1, entities1 ) =
+createStar : ( World, Global ) -> ( World, Global )
+createStar ( world1, global1 ) =
     let
         assets =
             Global.getAssets global1
@@ -143,45 +135,41 @@ createStar ( global1, entities1 ) =
         ( delay, global3 ) =
             Global.randomStep (Random.float 0 1) global2
 
-        ( entityId, entities2 ) =
-            Entities.addEntity entities1
+        ( world2, entityId ) =
+            Ecs.create world1
 
-        entities3 =
-            Entities.updateEcs
-                (\ecs ->
-                    ecs
-                        |> Entities.insert .star entityId ()
-                        |> Entities.insert .sprite entityId assets.sprites.star
-                        |> Entities.insert .position entityId position
-                        |> Entities.insert .velocity
-                            entityId
-                            (Velocity 0 0 (pi / 4))
-                        |> Entities.insert .scale entityId 0
-                        |> Entities.insert .scaleAnimation
-                            entityId
-                            (Animation.animation
-                                { startTime = time
-                                , duration = 0.5
-                                , from = 0
-                                , to = 1
-                                }
-                                |> Animation.delay delay
+        world3 =
+            world2
+                |> Ecs.insert specs.star entityId ()
+                |> Ecs.insert specs.sprite entityId assets.sprites.star
+                |> Ecs.insert specs.position entityId position
+                |> Ecs.insert specs.velocity
+                    entityId
+                    (Velocity 0 0 (pi / 4))
+                |> Ecs.insert specs.scale entityId 0
+                |> Ecs.insert specs.scaleAnimation
+                    entityId
+                    (Animation.animation
+                        { startTime = time
+                        , duration = 0.5
+                        , from = 0
+                        , to = 1
+                        }
+                        |> Animation.delay delay
+                    )
+                |> Ecs.update specs.delayedOperations
+                    entityId
+                    (DelayedOperations.add
+                        (time + delay + 0.5)
+                        (DelayedOperations.InsertCollisionShape
+                            (CollisionShape
+                                Shape.point
+                                CollisionShape.starCenter
                             )
-                        |> Entities.update .delayedOperations
-                            entityId
-                            (DelayedOperations.add
-                                (time + delay + 0.5)
-                                (DelayedOperations.InsertCollisionShape
-                                    (CollisionShape
-                                        Shape.point
-                                        CollisionShape.starCenter
-                                    )
-                                )
-                            )
-                )
-                entities2
+                        )
+                    )
     in
-    ( global3, entities3 )
+    ( world3, global3 )
 
 
 
