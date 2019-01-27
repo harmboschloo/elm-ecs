@@ -6,14 +6,14 @@ exports.generate = function(n) {
 
   return `module Ecs.Spec exposing
     ( Spec, ComponentSpec
-    , ${specs.map(i => `Components${i}, spec${i}, componentSpecs${i}`).join(`
+    , ${specs.map(i => `Components${i}, specs${i}`).join(`
     , `)}
     )
 
 {-|
 
 @docs Spec, ComponentSpec
-${specs.map(i => `@docs Components${i}, spec${i}, componentSpecs${i}`).join(`
+${specs.map(i => `@docs Components${i}, specs${i}`).join(`
 `)}
 
 -}
@@ -25,13 +25,13 @@ ${specs.map(i => `import Ecs.Internal.Record${i} as Record${i}`).join(`
 import Set exposing (Set)
 
 
-{-| The specification type.
+{-| The specification type for all components.
 -}
 type alias Spec components =
     Internal.Spec components
 
 
-{-| A component specification type.
+{-| A specification type for a component.
 -}
 type alias ComponentSpec components a =
     Internal.ComponentSpec components a
@@ -53,45 +53,39 @@ type ${componentsType}
     = Components${iSpec} (${recordType})
 
 
-{-| A components specification for ${iSpec} component type${
+{-| Create all specifications for ${iSpec} component type${
       iSpec > 1 ? "s" : ""
     }.
 -}
-spec${iSpec} : Spec (${componentsType})
-spec${iSpec} =
-    Internal.Spec
-        { empty =
-            Components${iSpec}
-                { ${components.map(i => `a${i} = Dict.empty`).join(`
-                , `)}
-                }
-        , clear =
-            \\entityId (Components${iSpec} components) ->
+specs${iSpec} :
+    (Spec (${componentsType})
+     -> ${components.map(i => `ComponentSpec (${componentsType}) a${i}`).join(`
+     -> `)}
+     -> specs
+    )
+    -> specs
+specs${iSpec} fn =
+    fn
+        (Internal.Spec
+            { empty =
                 Components${iSpec}
-                    { ${components.map(
-                      i => `a${i} = Dict.remove entityId components.a${i}`
-                    ).join(`
+                    { ${components.map(i => `a${i} = Dict.empty`).join(`
                     , `)}
                     }
-        , size =
-            \\(Components${iSpec} components) ->
-                ${components.map(i => `Dict.size components.a${i}`).join(`
-                    + `)}
-        }
-
-
-{-| Create component specifications for ${iSpec} component type${
-      iSpec > 1 ? "s" : ""
-    }.
--}
-componentSpecs${iSpec} :
-    (${components.map(i => `ComponentSpec (${componentsType}) a${i}`).join(`
-     -> `)}
-     -> componentSpecs
-    )
-    -> componentSpecs
-componentSpecs${iSpec} fn =
-    fn
+            , clear =
+                \\entityId (Components${iSpec} components) ->
+                    Components${iSpec}
+                        { ${components.map(
+                          i => `a${i} = Dict.remove entityId components.a${i}`
+                        ).join(`
+                        , `)}
+                        }
+            , size =
+                \\(Components${iSpec} components) ->
+                    ${components.map(i => `Dict.size components.a${i}`).join(`
+                        + `)}
+            }
+        )
         ${components.map(
           iComponent => `(Internal.ComponentSpec
             { get = \\(Components${iSpec} components) -> components.a${iComponent}

@@ -28,12 +28,17 @@ type alias Components =
     Spec.Components3 A B C
 
 
-type alias ComponentSpecs =
-    { a : Spec.ComponentSpec Components Data.A
+type alias Specs =
+    { all : Spec.Spec Components
+    , a : Spec.ComponentSpec Components Data.A
     , b : Spec.ComponentSpec Components Data.B
     , c : Spec.ComponentSpec Components Data.C
     }
 
+
+specs : Specs
+specs =
+    Spec.specs3 Specs
 
 type alias World =
     Ecs.World Components
@@ -43,50 +48,41 @@ type alias Selector a =
     Select.Selector Components a
 
 
-spec : Spec.Spec Components
-spec =
-    Spec.spec3
-
-
-components : ComponentSpecs
-components =
-    Spec.componentSpecs3 ComponentSpecs
-
 
 builder : Data.Builder World EntityId
 builder =
-    { empty = Ecs.empty spec
+    { empty = Ecs.empty specs.all
     , create = \world -> Ecs.create world
     , insertA =
         \a ( world, entityId ) ->
-            ( Ecs.insert components.a entityId a world, entityId )
+            ( Ecs.insert specs.a entityId a world, entityId )
     , insertB =
         \b ( world, entityId ) ->
-            ( Ecs.insert components.b entityId b world, entityId )
+            ( Ecs.insert specs.b entityId b world, entityId )
     , insertC =
         \c ( world, entityId ) ->
-            ( Ecs.insert components.c entityId c world, entityId )
+            ( Ecs.insert specs.c entityId c world, entityId )
     }
 
 
 insertA : EntityId -> A -> World -> World
 insertA entityId a world =
-    Ecs.insert components.a entityId a world
+    Ecs.insert specs.a entityId a world
 
 
 insertB : EntityId -> B -> World -> World
 insertB entityId b world =
-    Ecs.insert components.b entityId b world
+    Ecs.insert specs.b entityId b world
 
 
 insertC : EntityId -> C -> World -> World
 insertC entityId c world =
-    Ecs.insert components.c entityId c world
+    Ecs.insert specs.c entityId c world
 
 
 aSelector : Selector A
 aSelector =
-    Select.component components.a
+    Select.component specs.a
 
 
 selectA : World -> List ( EntityId, A )
@@ -96,7 +92,7 @@ selectA world =
 
 bSelector : Selector B
 bSelector =
-    Select.component components.b
+    Select.component specs.b
 
 
 selectB : World -> List ( EntityId, B )
@@ -106,7 +102,7 @@ selectB world =
 
 cSelector : Selector C
 cSelector =
-    Select.component components.c
+    Select.component specs.c
 
 
 selectC : World -> List ( EntityId, C )
@@ -123,8 +119,8 @@ type alias AB =
 abSelector : Selector AB
 abSelector =
     Select.select2 AB
-        components.a
-        components.b
+        specs.a
+        specs.b
 
 
 selectAB : World -> List ( EntityId, AB )
@@ -141,8 +137,8 @@ type alias BA =
 baSelector : Selector BA
 baSelector =
     Select.select2 BA
-        components.b
-        components.a
+        specs.b
+        specs.a
 
 
 selectBA : World -> List ( EntityId, BA )
@@ -160,9 +156,9 @@ type alias ABC =
 abcSelector : Selector ABC
 abcSelector =
     Select.select3 ABC
-        components.a
-        components.b
-        components.c
+        specs.a
+        specs.b
+        specs.c
 
 
 selectABC : World -> List ( EntityId, ABC )
@@ -180,9 +176,9 @@ type alias CBA =
 cbaSelector : Selector CBA
 cbaSelector =
     Select.select3 CBA
-        components.c
-        components.b
-        components.a
+        specs.c
+        specs.b
+        specs.a
 
 
 selectCBA : World -> List ( EntityId, CBA )
