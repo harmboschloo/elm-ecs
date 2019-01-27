@@ -1,4 +1,4 @@
-module Ecs2 exposing
+module Ecs2Old exposing
     ( builder
     , insertA
     , insertB
@@ -14,14 +14,14 @@ module Ecs2 exposing
     )
 
 import Data exposing (A, B, C)
-import Ecs as Ecs exposing (EntityId)
-import Ecs.Select as Select
-import Ecs.Spec as Spec
+import V2Old.Ecs as Ecs exposing (EntityId)
+import V2Old.Ecs.Select as Select
+import V2Old.Ecs.Spec as Spec
 
 
 label : String
 label =
-    "Ecs v2 new"
+    "Ecs v2 old"
 
 
 type alias Components =
@@ -40,13 +40,13 @@ specs : Specs
 specs =
     Spec.specs3 Specs
 
+
 type alias World =
     Ecs.World Components
 
 
 type alias Selector a =
     Select.Selector Components a
-
 
 
 builder : Data.Builder World EntityId
