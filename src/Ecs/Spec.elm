@@ -3,6 +3,7 @@ module Ecs.Spec exposing
     , Components1, specs1
     , Components2, specs2
     , Components3, specs3
+    , Components4, specs4
     )
 
 {-|
@@ -11,6 +12,7 @@ module Ecs.Spec exposing
 @docs Components1, specs1
 @docs Components2, specs2
 @docs Components3, specs3
+@docs Components4, specs4
 
 -}
 
@@ -19,6 +21,7 @@ import Ecs.Internal as Internal
 import Ecs.Internal.Record1 as Record1
 import Ecs.Internal.Record2 as Record2
 import Ecs.Internal.Record3 as Record3
+import Ecs.Internal.Record4 as Record4
 import Set exposing (Set)
 
 
@@ -183,5 +186,78 @@ specs3 fn =
             , update =
                 \updateFn (Components3 components) ->
                     Components3 (Record3.update3 updateFn components)
+            }
+        )
+
+
+{-| A components type for 4 components.
+-}
+type Components4 a1 a2 a3 a4
+    = Components4 (Record4.Record (Dict Int a1) (Dict Int a2) (Dict Int a3) (Dict Int a4))
+
+
+{-| Create all specifications for 4 component types.
+-}
+specs4 :
+    (Spec (Components4 a1 a2 a3 a4)
+     -> ComponentSpec (Components4 a1 a2 a3 a4) a1
+     -> ComponentSpec (Components4 a1 a2 a3 a4) a2
+     -> ComponentSpec (Components4 a1 a2 a3 a4) a3
+     -> ComponentSpec (Components4 a1 a2 a3 a4) a4
+     -> specs
+    )
+    -> specs
+specs4 fn =
+    fn
+        (Internal.Spec
+            { empty =
+                Components4
+                    { a1 = Dict.empty
+                    , a2 = Dict.empty
+                    , a3 = Dict.empty
+                    , a4 = Dict.empty
+                    }
+            , clear =
+                \entityId (Components4 components) ->
+                    Components4
+                        { a1 = Dict.remove entityId components.a1
+                        , a2 = Dict.remove entityId components.a2
+                        , a3 = Dict.remove entityId components.a3
+                        , a4 = Dict.remove entityId components.a4
+                        }
+            , size =
+                \(Components4 components) ->
+                    Dict.size components.a1
+                        + Dict.size components.a2
+                        + Dict.size components.a3
+                        + Dict.size components.a4
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components4 components) -> components.a1
+            , update =
+                \updateFn (Components4 components) ->
+                    Components4 (Record4.update1 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components4 components) -> components.a2
+            , update =
+                \updateFn (Components4 components) ->
+                    Components4 (Record4.update2 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components4 components) -> components.a3
+            , update =
+                \updateFn (Components4 components) ->
+                    Components4 (Record4.update3 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components4 components) -> components.a4
+            , update =
+                \updateFn (Components4 components) ->
+                    Components4 (Record4.update4 updateFn components)
             }
         )
