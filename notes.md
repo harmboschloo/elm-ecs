@@ -36,3 +36,7 @@ more ecs
 - https://www.reddit.com/r/elm/comments/68qiig/slime_ecs_for_elm/
 - http://www.html5gamedevs.com/topic/26508-entity-component-system-and-functional-programming/
 - https://hackernoon.com/when-not-to-use-ecs-48362c71cf47
+
+misc
+
+- https://github.com/webbhuset/test-elm-performance
