@@ -17,6 +17,7 @@ ecs
 - https://www.youtube.com/playlist?list=PLX2vGYjWbI0TPRStIWx3UyNB8QqjNUj98
 - https://github.com/HeroesGrave/ecs-rs/blob/master/doc/tutorial.md
 - https://github.com/sebas77/Svelto.ECS
+- [Overwatch Gameplay Architecture and Netcode](https://www.youtube.com/watch?v=W3aieHjyNvw
 
 webgl
 
@@ -40,3 +41,4 @@ more ecs
 misc
 
 - https://github.com/webbhuset/test-elm-performance
+- https://docs.rs/hibitset/0.5.4/hibitset/
