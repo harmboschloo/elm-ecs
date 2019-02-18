@@ -36,10 +36,6 @@ type Display
         }
 
 
-
--- ECS SPECS --
-
-
 type alias Components =
     Ecs.Spec.Components4 Position Velocity OutOfBoundsResolution Display
 
@@ -48,8 +44,8 @@ type alias ComponentSpec a =
     Ecs.Spec.ComponentSpec Components a
 
 
-type alias Specs =
-    { all : Ecs.Spec.Spec Components
+type alias ComponentSpecs =
+    { all : Ecs.Spec.AllComponentsSpec Components
     , position : ComponentSpec Position
     , velocity : ComponentSpec Velocity
     , outOfBoundsResolution : ComponentSpec OutOfBoundsResolution
@@ -57,32 +53,104 @@ type alias Specs =
     }
 
 
-specs : Specs
-specs =
-    Ecs.Spec.specs4 Specs
+componentSpecs : ComponentSpecs
+componentSpecs =
+    Ecs.Spec.componentSpecs4 ComponentSpecs
+
+
+
+-- SINGLETONS --
+
+
+type alias Config =
+    { worldWidth : Int
+    , worldHeight : Int
+    }
+
+
+type alias Frame =
+    { deltaTime : Float
+    , count : Int
+    }
+
+
+type alias FpsStats =
+    { timeSum : Float
+    , frameCount : Int
+    , fps : Float
+    }
+
+
+type alias Singletons =
+    Ecs.Spec.Singletons4 Config Frame FpsStats ()
+
+
+type alias SingletonSpec a =
+    Ecs.Spec.SingletonSpec Singletons a
+
+
+type alias SingletonSpecs =
+    { config : SingletonSpec Config
+    , frame : SingletonSpec Frame
+    , fpsStats : SingletonSpec FpsStats
+    , none : SingletonSpec ()
+    }
+
+
+singletonSpecs : SingletonSpecs
+singletonSpecs =
+    Ecs.Spec.singletonSpecs4 SingletonSpecs
+
+
+initSingletons : Singletons
+initSingletons =
+    Ecs.Spec.initSingletons4
+        { worldWidth = 600
+        , worldHeight = 600
+        }
+        { deltaTime = 0
+        , count = 0
+        }
+        { timeSum = 0
+        , frameCount = 0
+        , fps = 0
+        }
+        ()
+
+
+
+-- WORLD --
 
 
 type alias World =
-    Ecs.World Components
+    Ecs.World Components Singletons
+
+
+createWorld : World
+createWorld =
+    Ecs.empty componentSpecs.all initSingletons
 
 
 
 --  SPAWN SYSTEM --
 
 
-spawnEntities : ( State, World ) -> ( State, World )
-spawnEntities ( state, world ) =
+spawnEntities : World -> World
+spawnEntities world =
     let
-        ( newWorld, id ) =
-            Ecs.create world
+        config =
+            Ecs.getSingleton singletonSpecs.config world
+
+        frame =
+            Ecs.getSingleton singletonSpecs.frame world
 
         position =
-            { x = remainderBy state.worldWidth state.frameCount |> toFloat
-            , y = remainderBy state.worldHeight (state.frameCount * 5) |> toFloat
+            { x = remainderBy config.worldWidth frame.count |> toFloat
+            , y = remainderBy config.worldHeight (frame.count * 5) |> toFloat
             }
 
         display =
-            if remainderBy 6 state.frameCount == 0 then
+            if remainderBy 6 frame.count == 0 then
                 Image
                     { src = "./h.png"
                     , width = 16
@@ -92,37 +160,39 @@ spawnEntities ( state, world ) =
             else
                 Circle
                     { radius = 5
-                    , color = getColor state.frameCount
+                    , color = getColor frame.count
                     }
     in
-    if remainderBy 10 state.frameCount == 0 then
-        ( state
-        , newWorld
-            |> Ecs.insert specs.position id position
-            |> Ecs.insert specs.display id display
-        )
+    if remainderBy 10 frame.count == 0 then
+        world
+            |> Ecs.createEntity
+            |> Ecs.andInsertComponent componentSpecs.position position
+            |> Ecs.andInsertComponent componentSpecs.display display
+            |> Tuple.first
 
     else
         let
             velocity =
-                { x = (remainderBy 5 state.frameCount - 2) * 75 |> toFloat
-                , y = (remainderBy 7 state.frameCount - 3) * 50 |> toFloat
+                { x = (remainderBy 5 frame.count - 2) * 75 |> toFloat
+                , y = (remainderBy 7 frame.count - 3) * 50 |> toFloat
                 }
 
             outOfBoundsResolution =
-                if remainderBy 4 state.frameCount == 0 then
+                if remainderBy 4 frame.count == 0 then
                     Destroy
 
                 else
                     Teleport
         in
-        ( state
-        , newWorld
-            |> Ecs.insert specs.position id position
-            |> Ecs.insert specs.velocity id velocity
-            |> Ecs.insert specs.outOfBoundsResolution id outOfBoundsResolution
-            |> Ecs.insert specs.display id display
-        )
+        world
+            |> Ecs.createEntity
+            |> Ecs.andInsertComponent componentSpecs.position position
+            |> Ecs.andInsertComponent componentSpecs.velocity velocity
+            |> Ecs.andInsertComponent
+                componentSpecs.outOfBoundsResolution
+                outOfBoundsResolution
+            |> Ecs.andInsertComponent componentSpecs.display display
+            |> Tuple.first
 
 
 getColor : Int -> String
@@ -160,21 +230,23 @@ type alias Move =
 moveSelector : Ecs.Select.Selector Components Move
 moveSelector =
     Ecs.Select.select2 Move
-        specs.position
-        specs.velocity
+        componentSpecs.position
+        componentSpecs.velocity
 
 
-moveEntities : ( State, World ) -> ( State, World )
-moveEntities ( state, world ) =
-    ( state
-    , Ecs.selectList moveSelector world
-        |> List.foldl (moveEntity state.deltaTime) world
-    )
+moveEntities : World -> World
+moveEntities world =
+    let
+        frame =
+            Ecs.getSingleton singletonSpecs.frame world
+    in
+    Ecs.selectAll moveSelector world
+        |> List.foldl (moveEntity frame.deltaTime) world
 
 
 moveEntity : Float -> ( Ecs.EntityId, Move ) -> World -> World
 moveEntity deltaTime ( id, { position, velocity } ) world =
-    Ecs.insert specs.position
+    Ecs.insertComponent componentSpecs.position
         id
         { x = position.x + velocity.x * deltaTime
         , y = position.y + velocity.y * deltaTime
@@ -195,28 +267,32 @@ type alias BoundsCheck =
 boundsCheckSelector : Ecs.Select.Selector Components BoundsCheck
 boundsCheckSelector =
     Ecs.Select.select2 BoundsCheck
-        specs.position
-        specs.outOfBoundsResolution
+        componentSpecs.position
+        componentSpecs.outOfBoundsResolution
 
 
-boundsCheckEntities : ( State, World ) -> ( State, World )
-boundsCheckEntities ( state, world ) =
-    Ecs.selectList boundsCheckSelector world
+boundsCheckEntities : World -> World
+boundsCheckEntities world =
+    let
+        config =
+            Ecs.getSingleton singletonSpecs.config world
+    in
+    Ecs.selectAll boundsCheckSelector world
         |> List.foldl
             (boundsCheckEntity
-                (toFloat state.worldWidth)
-                (toFloat state.worldHeight)
+                (toFloat config.worldWidth)
+                (toFloat config.worldHeight)
             )
-            ( state, world )
+            world
 
 
 boundsCheckEntity :
     Float
     -> Float
     -> ( Ecs.EntityId, BoundsCheck )
-    -> ( State, World )
-    -> ( State, World )
-boundsCheckEntity worldWidth worldHeight ( id, { position, resolution } ) ( state, world ) =
+    -> World
+    -> World
+boundsCheckEntity worldWidth worldHeight ( id, { position, resolution } ) world =
     if
         (position.x < 0 || (position.x > worldWidth))
             || (position.y < 0 || (position.y > worldHeight))
@@ -244,17 +320,17 @@ boundsCheckEntity worldWidth worldHeight ( id, { position, resolution } ) ( stat
                         else
                             position.y
                 in
-                ( state
-                , Ecs.insert specs.position id { x = x, y = y } world
-                )
+                Ecs.insertComponent
+                    componentSpecs.position
+                    id
+                    { x = x, y = y }
+                    world
 
             Destroy ->
-                ( state
-                , Ecs.destroy specs.all id world
-                )
+                Ecs.destroyEntity componentSpecs.all id world
 
     else
-        ( state, world )
+        world
 
 
 
@@ -270,14 +346,48 @@ type alias Render =
 renderSelector : Ecs.Select.Selector Components Render
 renderSelector =
     Ecs.Select.select2 Render
-        specs.position
-        specs.display
+        componentSpecs.position
+        componentSpecs.display
 
 
-renderEntities : World -> List (Html.Html msg)
-renderEntities world =
-    Ecs.selectList renderSelector world
-        |> List.map renderEntity
+render : World -> List (Html.Html msg)
+render world =
+    let
+        config =
+            Ecs.getSingleton singletonSpecs.config world
+
+        fpsStats =
+            Ecs.getSingleton singletonSpecs.fpsStats world
+    in
+    [ Html.div
+        [ Html.Attributes.style "position" "relative"
+        , Html.Attributes.style "display" "inline-block"
+        , Html.Attributes.style "width"
+            (String.fromInt config.worldWidth ++ "px")
+        , Html.Attributes.style "height"
+            (String.fromInt config.worldHeight ++ "px")
+        , Html.Attributes.style "background-color" "#aaa"
+        ]
+        (world
+            |> Ecs.selectAll renderSelector
+            |> List.map renderEntity
+        )
+    , Html.div []
+        [ Html.text
+            ("entities: "
+                ++ (Ecs.entityCount world |> String.fromInt)
+            )
+        , Html.text " - "
+        , Html.text
+            ("components: "
+                ++ (Ecs.totalComponentCount componentSpecs.all world
+                        |> String.fromInt
+                   )
+            )
+        , Html.text " - "
+        , Html.text ("fps: " ++ (round fpsStats.fps |> String.fromInt))
+        ]
+    ]
 
 
 renderEntity : ( Ecs.EntityId, Render ) -> Html.Html msg
@@ -317,62 +427,78 @@ px value =
 
 
 
--- MODEL --
+-- FRAME SYSTEM --
 
 
-type alias Model =
-    ( State, World )
+updateFrame : Float -> World -> World
+updateFrame deltaTimeMillis world =
+    Ecs.updateSingleton singletonSpecs.frame
+        (\frame ->
+            { count = frame.count + 1
+            , deltaTime = deltaTimeMillis / 1000
+            }
+        )
+        world
 
 
-type alias State =
-    { worldWidth : Int
-    , worldHeight : Int
-    , deltaTime : Float
-    , frameCount : Int
-    , history : Array Float
-    }
+
+-- FPS STATS SYSTEM --
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
-    ( ( { worldWidth = 600
-        , worldHeight = 600
-        , deltaTime = 0
+updateFpsStats : World -> World
+updateFpsStats world =
+    let
+        frame =
+            Ecs.getSingleton singletonSpecs.frame world
+    in
+    Ecs.updateSingleton
+        singletonSpecs.fpsStats
+        (updateFpsStatsHelp frame.deltaTime)
+        world
+
+
+updateFpsStatsHelp : Float -> FpsStats -> FpsStats
+updateFpsStatsHelp deltaTime stats =
+    let
+        timeSum =
+            stats.timeSum + deltaTime
+
+        frameCount =
+            stats.frameCount + 1
+    in
+    if timeSum >= 1 then
+        { timeSum = 0
         , frameCount = 0
-        , history = Array.repeat 30 (1 / 60)
+        , fps = toFloat frameCount / timeSum
         }
-      , Ecs.empty specs.all
-      )
-    , Cmd.none
-    )
+
+    else
+        { timeSum = timeSum
+        , frameCount = frameCount
+        , fps = stats.fps
+        }
 
 
 
--- UPDATE --
+-- PROGRAM --
 
 
 type Msg
     = OnAnimationFrameDelta Float
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ( state, world ) =
+init : () -> ( World, Cmd Msg )
+init _ =
+    ( createWorld, Cmd.none )
+
+
+update : Msg -> World -> ( World, Cmd Msg )
+update msg world =
     case msg of
         OnAnimationFrameDelta deltaTimeMillis ->
-            ( ( { state
-                    | deltaTime = deltaTimeMillis / 1000
-                    , frameCount = state.frameCount + 1
-                    , history =
-                        Array.set
-                            (remainderBy
-                                (Array.length state.history)
-                                state.frameCount
-                            )
-                            (deltaTimeMillis / 1000)
-                            state.history
-                }
-              , world
-              )
+            ( world
+                |> updateFrame deltaTimeMillis
+                |> updateFpsStats
                 |> spawnEntities
                 |> moveEntities
                 |> boundsCheckEntities
@@ -380,61 +506,19 @@ update msg ( state, world ) =
             )
 
 
-
--- SUBSCRIPTIONS --
-
-
-subscriptions : Model -> Sub Msg
-subscriptions state =
+subscriptions : World -> Sub Msg
+subscriptions _ =
     Browser.Events.onAnimationFrameDelta OnAnimationFrameDelta
 
 
-
--- VIEW --
-
-
-view : Model -> Browser.Document Msg
-view ( state, world ) =
+view : World -> Browser.Document Msg
+view world =
     { title = "Ecs Basic Example"
-    , body =
-        [ Html.div
-            [ Html.Attributes.style "position" "relative"
-            , Html.Attributes.style "display" "inline-block"
-            , Html.Attributes.style "width"
-                (String.fromInt state.worldWidth ++ "px")
-            , Html.Attributes.style "height"
-                (String.fromInt state.worldHeight ++ "px")
-            , Html.Attributes.style "background-color" "#aaa"
-            ]
-            (renderEntities world)
-        , Html.div []
-            [ Html.text
-                ("entities: "
-                    ++ (Ecs.entityCount world |> String.fromInt)
-                )
-            , Html.text " - "
-            , Html.text
-                ("components: "
-                    ++ (Ecs.componentCount specs.all world |> String.fromInt)
-                )
-            , Html.text " - "
-            , Html.text ("fps: " ++ (getFps state.history |> String.fromInt))
-            ]
-        ]
+    , body = render world
     }
 
 
-getFps : Array Float -> Int
-getFps history =
-    (toFloat (Array.length history) / Array.foldl (+) 0 history)
-        |> round
-
-
-
--- MAIN --
-
-
-main : Program () Model Msg
+main : Program () World Msg
 main =
     Browser.document
         { init = init

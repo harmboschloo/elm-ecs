@@ -18,12 +18,7 @@ module Ecs.Select exposing
 -}
 
 import Dict
-import Ecs.Internal as Internal
-    exposing
-        ( ComponentSpec(..)
-        , EntityId(..)
-        , Spec(..)
-        )
+import Ecs.Internal as Internal exposing (ComponentSpec(..), EntityId(..))
 
 
 {-| A selector of a specific set of components.

@@ -22,7 +22,6 @@ import Dict exposing (Dict)
 import Ecs.Internal as Internal
 ${specs.map(i => `import Ecs.Internal.Record${i} as Record${i}`).join(`
 `)}
-import Set exposing (Set)
 
 
 {-| The specification type for all components.
@@ -36,16 +35,16 @@ type alias Spec components =
 type alias ComponentSpec components a =
     Internal.ComponentSpec components a
 ${specs.map(iSpec => {
-    const components = range(iSpec);
+  const components = range(iSpec);
 
-    const componentsType = `Components${iSpec} ${components
-      .map(i => `a${i}`)
-      .join(" ")}`;
-    const recordType = `Record${iSpec}.Record ${components
-      .map(i => `(Dict Int a${i})`)
-      .join(" ")}`;
+  const componentsType = `Components${iSpec} ${components
+    .map(i => `a${i}`)
+    .join(" ")}`;
+  const recordType = `Record${iSpec}.Record ${components
+    .map(i => `(Dict Int a${i})`)
+    .join(" ")}`;
 
-    return `
+  return `
 
 {-| A components type for ${iSpec} component${iSpec > 1 ? "s" : ""}.
 -}
@@ -54,8 +53,8 @@ type ${componentsType}
 
 
 {-| Create all specifications for ${iSpec} component type${
-      iSpec > 1 ? "s" : ""
-    }.
+    iSpec > 1 ? "s" : ""
+  }.
 -}
 specs${iSpec} :
     (Spec (${componentsType})
@@ -96,7 +95,7 @@ specs${iSpec} fn =
         )`
         ).join(`
         `)}`;
-  }).join(`
+}).join(`
 `)}
 `;
 };

@@ -1,9 +1,12 @@
 module Ecs exposing
-    ( empty, isEmpty, entityCount, componentCount, ids
-    , member, clear
-    , has, get, insert, update, remove, size
+    ( World, empty, isEmpty, entityCount, totalComponentCount, entityIds
+    , EntityId
+    , createEntity, hasEntity, clearEntity, destroyEntity
+    , hasComponent, getComponent, insertComponent, updateComponent, removeComponent
+    , componentCount
+    , andInsertComponent, andUpdateComponent
+    , getSingleton, setSingleton, updateSingleton
     , select, selectAll, processAll, processAllWithState
-    , EntityId, World, create, destroy
     )
 
 {-|
@@ -11,17 +14,29 @@ module Ecs exposing
 
 # Model
 
-@docs empty, isEmpty, entityCount, componentCount, ids
+@docs World, empty, isEmpty, entityCount, totalComponentCount, entityIds
 
 
 # Entity
 
-@docs member, clear
+@docs EntityId
+@docs createEntity, hasEntity, clearEntity, destroyEntity
 
 
 # Component
 
-@docs has, get, insert, update, remove, size
+@docs hasComponent, getComponent, insertComponent, updateComponent, removeComponent
+@docs componentCount
+
+
+# Component Pipeline
+
+@docs andInsertComponent, andUpdateComponent
+
+
+# Singletons
+
+@docs getSingleton, setSingleton, updateSingleton
 
 
 # Apply Selectors
@@ -30,12 +45,13 @@ module Ecs exposing
 
 -}
 
-import Dict exposing (Dict)
+import Dict
 import Ecs.Internal as Internal
     exposing
-        ( ComponentSpec(..)
+        ( AllComponentsSpec(..)
+        , ComponentSpec(..)
         , Selector(..)
-        , Spec(..)
+        , SingletonSpec(..)
         )
 import Set exposing (Set)
 
@@ -44,56 +60,61 @@ import Set exposing (Set)
 -- MODEL --
 
 
-type World components
+type World components singletons
     = World
         { entities :
             { nextId : Int
             , activeIds : Set Int
             }
         , components : components
+        , singletons : singletons
         }
 
 
 {-| Create an empty world.
 -}
-empty : Spec components -> World components
-empty (Spec spec) =
+empty : AllComponentsSpec components -> singletons -> World components singletons
+empty (AllComponentsSpec componentsSpec) singletons =
     World
-        { entities =
+        { singletons = singletons
+        , entities =
             { -- TODO start at -...?
               nextId = 0
             , activeIds = Set.empty
             }
-        , components = spec.empty
+        , components = componentsSpec.empty
         }
 
 
 {-| Determine if the world is empty
 -}
-isEmpty : World components -> Bool
+isEmpty : World components singletons -> Bool
 isEmpty (World world) =
     Set.isEmpty world.entities.activeIds
 
 
 {-| Determine the total number of entities in the world.
 -}
-entityCount : World components -> Int
+entityCount : World components singletons -> Int
 entityCount (World world) =
     Set.size world.entities.activeIds
 
 
 {-| Determine the total number of components in the world.
 -}
-componentCount : Spec components -> World components -> Int
-componentCount (Spec spec) (World world) =
+totalComponentCount :
+    AllComponentsSpec components
+    -> World components singletons
+    -> Int
+totalComponentCount (AllComponentsSpec spec) (World world) =
     -- TODO track number of components in world?
     spec.size world.components
 
 
 {-| Get all entity ids in the world.
 -}
-ids : World components -> List EntityId
-ids (World world) =
+entityIds : World components singletons -> List EntityId
+entityIds (World world) =
     world.entities.activeIds
         |> Set.toList
         |> List.map Internal.EntityId
@@ -107,44 +128,57 @@ type alias EntityId =
     Internal.EntityId
 
 
-create : World components -> ( World components, EntityId )
-create (World { entities, components }) =
+createEntity :
+    World components singletons
+    -> ( World components singletons, EntityId )
+createEntity (World { entities, components, singletons }) =
     ( World
         { entities =
             { nextId = entities.nextId + 1
             , activeIds = Set.insert entities.nextId entities.activeIds
             }
         , components = components
+        , singletons = singletons
         }
     , Internal.EntityId entities.nextId
     )
 
 
-destroy : Spec components -> EntityId -> World components -> World components
-destroy (Spec spec) (Internal.EntityId entityId) (World { entities, components }) =
+destroyEntity :
+    AllComponentsSpec components
+    -> EntityId
+    -> World components singletons
+    -> World components singletons
+destroyEntity (AllComponentsSpec spec) (Internal.EntityId entityId) (World world) =
     World
         { entities =
-            { nextId = entities.nextId
-            , activeIds = Set.remove entityId entities.activeIds
+            { nextId = world.entities.nextId
+            , activeIds = Set.remove entityId world.entities.activeIds
             }
-        , components = spec.clear entityId components
+        , components = spec.clear entityId world.components
+        , singletons = world.singletons
         }
 
 
 {-| Determine if an entity is in the world.
 -}
-member : EntityId -> World components -> Bool
-member (Internal.EntityId entityId) (World { entities }) =
+hasEntity : EntityId -> World components singletons -> Bool
+hasEntity (Internal.EntityId entityId) (World { entities }) =
     Set.member entityId entities.activeIds
 
 
 {-| Remove all components of an entity.
 -}
-clear : Spec components -> EntityId -> World components -> World components
-clear (Spec spec) (Internal.EntityId entityId) (World { entities, components }) =
+clearEntity :
+    AllComponentsSpec components
+    -> EntityId
+    -> World components singletons
+    -> World components singletons
+clearEntity (AllComponentsSpec spec) (Internal.EntityId entityId) (World world) =
     World
-        { entities = entities
-        , components = spec.clear entityId components
+        { entities = world.entities
+        , components = spec.clear entityId world.components
+        , singletons = world.singletons
         }
 
 
@@ -154,36 +188,43 @@ clear (Spec spec) (Internal.EntityId entityId) (World { entities, components }) 
 
 {-| Determines if an entity has a specific component.
 -}
-has : ComponentSpec components a -> EntityId -> World components -> Bool
-has (ComponentSpec spec) (Internal.EntityId entityId) (World { components }) =
+hasComponent :
+    ComponentSpec components a
+    -> EntityId
+    -> World components singletons
+    -> Bool
+hasComponent (ComponentSpec spec) (Internal.EntityId entityId) (World { components }) =
     Dict.member entityId (spec.get components)
 
 
 {-| Get a specific component of an entity.
 -}
-get : ComponentSpec components a -> EntityId -> World components -> Maybe a
-get (ComponentSpec spec) (Internal.EntityId entityId) (World { components }) =
+getComponent :
+    ComponentSpec components a
+    -> EntityId
+    -> World components singletons
+    -> Maybe a
+getComponent (ComponentSpec spec) (Internal.EntityId entityId) (World { components }) =
     Dict.get entityId (spec.get components)
 
 
 {-| Insert a specific component in an entity.
 -}
-insert :
+insertComponent :
     ComponentSpec components a
     -> EntityId
     -> a
-    -> World components
-    -> World components
-insert (ComponentSpec spec) (Internal.EntityId entityId) a (World world) =
-    let
-        { entities, components } =
-            world
-    in
-    if Set.member entityId entities.activeIds then
+    -> World components singletons
+    -> World components singletons
+insertComponent (ComponentSpec spec) (Internal.EntityId entityId) a (World world) =
+    if Set.member entityId world.entities.activeIds then
         World
-            { entities = entities
+            { entities = world.entities
             , components =
-                spec.update (\dict -> Dict.insert entityId a dict) components
+                spec.update
+                    (\dict -> Dict.insert entityId a dict)
+                    world.components
+            , singletons = world.singletons
             }
 
     else
@@ -192,22 +233,21 @@ insert (ComponentSpec spec) (Internal.EntityId entityId) a (World world) =
 
 {-| Update a specific component in an entity.
 -}
-update :
+updateComponent :
     ComponentSpec components a
     -> EntityId
     -> (Maybe a -> Maybe a)
-    -> World components
-    -> World components
-update (ComponentSpec spec) (Internal.EntityId entityId) fn (World world) =
-    let
-        { entities, components } =
-            world
-    in
-    if Set.member entityId entities.activeIds then
+    -> World components singletons
+    -> World components singletons
+updateComponent (ComponentSpec spec) (Internal.EntityId entityId) fn (World world) =
+    if Set.member entityId world.entities.activeIds then
         World
-            { entities = entities
+            { entities = world.entities
             , components =
-                spec.update (\dict -> Dict.update entityId fn dict) components
+                spec.update
+                    (\dict -> Dict.update entityId fn dict)
+                    world.components
+            , singletons = world.singletons
             }
 
     else
@@ -216,23 +256,84 @@ update (ComponentSpec spec) (Internal.EntityId entityId) fn (World world) =
 
 {-| Remove a specific component from an entity.
 -}
-remove :
+removeComponent :
     ComponentSpec components a
     -> EntityId
-    -> World components
-    -> World components
-remove (ComponentSpec spec) (Internal.EntityId entityId) (World { entities, components }) =
+    -> World components singletons
+    -> World components singletons
+removeComponent (ComponentSpec spec) (Internal.EntityId entityId) (World world) =
     World
-        { entities = entities
-        , components = spec.update (\dict -> Dict.remove entityId dict) components
+        { entities = world.entities
+        , components =
+            spec.update
+                (\dict -> Dict.remove entityId dict)
+                world.components
+        , singletons = world.singletons
         }
 
 
 {-| Determine the total number of components of a specific type.
 -}
-size : ComponentSpec components a -> World components -> Int
-size (ComponentSpec spec) (World { components }) =
+componentCount : ComponentSpec components a -> World components singletons -> Int
+componentCount (ComponentSpec spec) (World { components }) =
     Dict.size (spec.get components)
+
+
+
+-- COMPONENTS PIPELINE --
+
+
+{-| Insert a specific component in an entity.
+-}
+andInsertComponent :
+    ComponentSpec components a
+    -> a
+    -> ( World components singletons, EntityId )
+    -> ( World components singletons, EntityId )
+andInsertComponent spec a ( world, entityId ) =
+    ( insertComponent spec entityId a world, entityId )
+
+
+{-| Update a specific component in an entity.
+-}
+andUpdateComponent :
+    ComponentSpec components a
+    -> (Maybe a -> Maybe a)
+    -> ( World components singletons, EntityId )
+    -> ( World components singletons, EntityId )
+andUpdateComponent spec fn ( world, entityId ) =
+    ( updateComponent spec entityId fn world, entityId )
+
+
+
+-- SINGLETON COMPONENTS --
+
+
+getSingleton : SingletonSpec singletons a -> World components singletons -> a
+getSingleton (SingletonSpec spec) (World { singletons }) =
+    spec.get singletons
+
+
+setSingleton :
+    SingletonSpec singletons a
+    -> a
+    -> World components singletons
+    -> World components singletons
+setSingleton spec a =
+    updateSingleton spec (always a)
+
+
+updateSingleton :
+    SingletonSpec singletons a
+    -> (a -> a)
+    -> World components singletons
+    -> World components singletons
+updateSingleton (SingletonSpec spec) fn (World world) =
+    World
+        { entities = world.entities
+        , components = world.components
+        , singletons = spec.update fn world.singletons
+        }
 
 
 
@@ -241,23 +342,34 @@ size (ComponentSpec spec) (World { components }) =
 
 {-| Get a specific set of components of an entity.
 -}
-select : Selector components a -> EntityId -> World components -> Maybe a
+select :
+    Selector components a
+    -> EntityId
+    -> World components singletons
+    -> Maybe a
 select (Selector selector) (Internal.EntityId entityId) (World { components }) =
     selector.select entityId components
 
 
 {-| Get all entities with a specific set of components.
 -}
-selectAll : Selector components a -> World components -> List ( EntityId, a )
+selectAll :
+    Selector components a
+    -> World components singletons
+    -> List ( EntityId, a )
 selectAll (Selector selector) (World { components }) =
     selector.selectAll components
 
 
 processAll :
     Selector components a
-    -> (( EntityId, a ) -> World components -> World components)
-    -> World components
-    -> World components
+    ->
+        (( EntityId, a )
+         -> World components singletons
+         -> World components singletons
+        )
+    -> World components singletons
+    -> World components singletons
 processAll selector fn world =
     List.foldl fn world (selectAll selector world)
 
@@ -266,10 +378,10 @@ processAllWithState :
     Selector components a
     ->
         (( EntityId, a )
-         -> ( World components, state )
-         -> ( World components, state )
+         -> ( World components singletons, state )
+         -> ( World components singletons, state )
         )
-    -> ( World components, state )
-    -> ( World components, state )
+    -> ( World components singletons, state )
+    -> ( World components singletons, state )
 processAllWithState selector fn ( world, state ) =
     List.foldl fn ( world, state ) (selectAll selector world)
