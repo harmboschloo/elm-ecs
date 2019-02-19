@@ -5,15 +5,23 @@ exports.generate = function(n) {
   const specs = range(n);
 
   return `module Ecs.Spec exposing
-    ( Spec, ComponentSpec
-    , ${specs.map(i => `Components${i}, specs${i}`).join(`
+    ( AllComponentsSpec, ComponentSpec
+    , ${specs.map(i => `Components${i}, componentSpecs${i}`).join(`
+    , `)}
+    , SingletonSpec
+    , ${specs.map(i => `Singletons${i}, initSingletons${i}, singletonSpecs${i}`)
+      .join(`
     , `)}
     )
 
 {-|
 
-@docs Spec, ComponentSpec
-${specs.map(i => `@docs Components${i}, specs${i}`).join(`
+@docs AllComponentsSpec, ComponentSpec
+${specs.map(i => `@docs Components${i}, componentSpecs${i}`).join(`
+`)}
+@docs SingletonSpec
+${specs.map(i => `@docs Singletons${i}, initSingletons${i}, singletonSpecs${i}`)
+  .join(`
 `)}
 
 -}
@@ -26,15 +34,28 @@ ${specs.map(i => `import Ecs.Internal.Record${i} as Record${i}`).join(`
 
 {-| The specification type for all components.
 -}
-type alias Spec components =
-    Internal.Spec components
+type alias AllComponentsSpec components =
+    Internal.AllComponentsSpec components
 
 
 {-| A specification type for a component.
 -}
 type alias ComponentSpec components a =
     Internal.ComponentSpec components a
-${specs.map(iSpec => {
+
+
+{-| A specification type for a singleton.
+-}
+type alias SingletonSpec singletons a =
+    Internal.SingletonSpec singletons a
+${specs.map(generateComponentSpecs).join(`
+`)}
+${specs.map(generateSingletonSpecs).join(`
+`)}
+`;
+};
+
+const generateComponentSpecs = iSpec => {
   const components = range(iSpec);
 
   const componentsType = `Components${iSpec} ${components
@@ -52,20 +73,20 @@ type ${componentsType}
     = Components${iSpec} (${recordType})
 
 
-{-| Create all specifications for ${iSpec} component type${
+{-| Create all component specifications for ${iSpec} component type${
     iSpec > 1 ? "s" : ""
   }.
 -}
-specs${iSpec} :
-    (Spec (${componentsType})
+componentSpecs${iSpec} :
+    (AllComponentsSpec (${componentsType})
      -> ${components.map(i => `ComponentSpec (${componentsType}) a${i}`).join(`
      -> `)}
      -> specs
     )
     -> specs
-specs${iSpec} fn =
+componentSpecs${iSpec} fn =
     fn
-        (Internal.Spec
+        (Internal.AllComponentsSpec
             { empty =
                 Components${iSpec}
                     { ${components.map(i => `a${i} = Dict.empty`).join(`
@@ -95,7 +116,60 @@ specs${iSpec} fn =
         )`
         ).join(`
         `)}`;
-}).join(`
-`)}
-`;
+};
+
+const generateSingletonSpecs = iSpec => {
+  const singletons = range(iSpec);
+
+  const singletonsType = `Singletons${iSpec} ${singletons
+    .map(i => `a${i}`)
+    .join(" ")}`;
+  const recordType = `Record${iSpec}.Record ${singletons
+    .map(i => `a${i}`)
+    .join(" ")}`;
+
+  return `
+
+{-| A singletons type for ${iSpec} singleton${iSpec > 1 ? "s" : ""}.
+-}
+type ${singletonsType}
+    = Singletons${iSpec} (${recordType})
+
+
+{-| Initialize a singleton type for ${iSpec} singleton${iSpec > 1 ? "s" : ""}.
+-}
+initSingletons${iSpec} : ${singletons
+    .map(i => `a${i}`)
+    .join(" -> ")} -> Singletons${iSpec} ${singletons
+    .map(i => `a${i}`)
+    .join(" ")}
+initSingletons${iSpec} ${singletons.map(i => `a${i}`).join(" ")} =
+    Singletons${iSpec}
+        { ${singletons.map(i => `a${i} = a${i}`).join(`
+        , `)}
+        }
+
+
+{-| Create all singleton specifications for ${iSpec} singleton type${
+    iSpec > 1 ? "s" : ""
+  }.
+-}
+singletonSpecs${iSpec} :
+    (${singletons.map(i => `SingletonSpec (${singletonsType}) a${i}`).join(`
+     -> `)}
+     -> specs
+    )
+    -> specs
+singletonSpecs${iSpec} fn =
+    fn
+        ${singletons.map(
+          iSingleton => `(Internal.SingletonSpec
+            { get = \\(Singletons${iSpec} singletons) -> singletons.a${iSingleton}
+            , update =
+                \\updateFn (Singletons${iSpec} singletons) ->
+                    Singletons${iSpec} (Record${iSpec}.update${iSingleton} updateFn singletons)
+            }
+        )`
+        ).join(`
+        `)}`;
 };
