@@ -2,14 +2,16 @@
 
 const path = require("path");
 const fs = require("fs");
-const spec = require("./spec");
+const components = require("./components");
+const singletons = require("./singletons");
 const record = require("./record");
 const { range } = require("./utils");
 
 const n = 12;
 const outputPath = path.resolve(__dirname, "../src");
 
-writeFile("Ecs/Spec.elm", spec.generate(n));
+writeFile("Ecs/Components.elm", components.generate(n));
+writeFile("Ecs/Singletons.elm", singletons.generate(n));
 range(n).forEach(i =>
   writeFile(`Ecs/Internal/Record${i}.elm`, record.generate(i))
 );
