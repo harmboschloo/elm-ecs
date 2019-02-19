@@ -4,8 +4,9 @@ import Array exposing (Array)
 import Browser
 import Browser.Events
 import Ecs
+import Ecs.Components
 import Ecs.Select
-import Ecs.Spec
+import Ecs.Singletons
 import Html
 import Html.Attributes
 
@@ -37,15 +38,19 @@ type Display
 
 
 type alias Components =
-    Ecs.Spec.Components4 Position Velocity OutOfBoundsResolution Display
+    Ecs.Components.Components4 Position Velocity OutOfBoundsResolution Display
+
+
+type alias AllComponentsSpec =
+    Ecs.Components.AllComponentsSpec Components
 
 
 type alias ComponentSpec a =
-    Ecs.Spec.ComponentSpec Components a
+    Ecs.Components.ComponentSpec Components a
 
 
 type alias ComponentSpecs =
-    { all : Ecs.Spec.AllComponentsSpec Components
+    { all : AllComponentsSpec
     , position : ComponentSpec Position
     , velocity : ComponentSpec Velocity
     , outOfBoundsResolution : ComponentSpec OutOfBoundsResolution
@@ -55,7 +60,7 @@ type alias ComponentSpecs =
 
 componentSpecs : ComponentSpecs
 componentSpecs =
-    Ecs.Spec.componentSpecs4 ComponentSpecs
+    Ecs.Components.specs4 ComponentSpecs
 
 
 
@@ -82,29 +87,28 @@ type alias FpsStats =
 
 
 type alias Singletons =
-    Ecs.Spec.Singletons4 Config Frame FpsStats ()
+    Ecs.Singletons.Singletons3 Config Frame FpsStats
 
 
 type alias SingletonSpec a =
-    Ecs.Spec.SingletonSpec Singletons a
+    Ecs.Singletons.SingletonSpec Singletons a
 
 
 type alias SingletonSpecs =
     { config : SingletonSpec Config
     , frame : SingletonSpec Frame
     , fpsStats : SingletonSpec FpsStats
-    , none : SingletonSpec ()
     }
 
 
 singletonSpecs : SingletonSpecs
 singletonSpecs =
-    Ecs.Spec.singletonSpecs4 SingletonSpecs
+    Ecs.Singletons.specs3 SingletonSpecs
 
 
 initSingletons : Singletons
 initSingletons =
-    Ecs.Spec.initSingletons4
+    Ecs.Singletons.init3
         { worldWidth = 600
         , worldHeight = 600
         }
@@ -115,7 +119,6 @@ initSingletons =
         , frameCount = 0
         , fps = 0
         }
-        ()
 
 
 
