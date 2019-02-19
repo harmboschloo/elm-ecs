@@ -1,5 +1,6 @@
 module Ecs exposing
-    ( World, empty, isEmpty, entityCount, totalComponentCount, entityIds
+    ( World, emptyWorld, isEmptyWorld, worldEntityIds
+    , worldEntityCount, worldComponentCount
     , EntityId
     , createEntity, hasEntity, clearEntity, destroyEntity
     , hasComponent, getComponent, insertComponent, updateComponent, removeComponent
@@ -12,9 +13,10 @@ module Ecs exposing
 {-|
 
 
-# Model
+# World
 
-@docs World, empty, isEmpty, entityCount, totalComponentCount, entityIds
+@docs World, emptyWorld, isEmptyWorld, worldEntityIds
+@docs worldEntityCount, worldComponentCount
 
 
 # Entity
@@ -57,7 +59,7 @@ import Set exposing (Set)
 
 
 
--- MODEL --
+-- WORLD --
 
 
 type World components singletons
@@ -71,14 +73,14 @@ type World components singletons
         }
 
 
-{-| Create an empty world.
+{-| Create an empty world without entities or components.
 -}
-empty : AllComponentsSpec components -> singletons -> World components singletons
-empty (AllComponentsSpec componentsSpec) singletons =
+emptyWorld : AllComponentsSpec components -> singletons -> World components singletons
+emptyWorld (AllComponentsSpec componentsSpec) singletons =
     World
         { singletons = singletons
         , entities =
-            { -- TODO start at -...?
+            { -- TODO start at -...? or wrap o max int
               nextId = 0
             , activeIds = Set.empty
             }
@@ -86,35 +88,35 @@ empty (AllComponentsSpec componentsSpec) singletons =
         }
 
 
-{-| Determine if the world is empty
+{-| Determine if the world is empty, without entities or components.
 -}
-isEmpty : World components singletons -> Bool
-isEmpty (World world) =
+isEmptyWorld : World components singletons -> Bool
+isEmptyWorld (World world) =
     Set.isEmpty world.entities.activeIds
 
 
 {-| Determine the total number of entities in the world.
 -}
-entityCount : World components singletons -> Int
-entityCount (World world) =
+worldEntityCount : World components singletons -> Int
+worldEntityCount (World world) =
     Set.size world.entities.activeIds
 
 
 {-| Determine the total number of components in the world.
 -}
-totalComponentCount :
+worldComponentCount :
     AllComponentsSpec components
     -> World components singletons
     -> Int
-totalComponentCount (AllComponentsSpec spec) (World world) =
+worldComponentCount (AllComponentsSpec spec) (World world) =
     -- TODO track number of components in world?
     spec.size world.components
 
 
 {-| Get all entity ids in the world.
 -}
-entityIds : World components singletons -> List EntityId
-entityIds (World world) =
+worldEntityIds : World components singletons -> List EntityId
+worldEntityIds (World world) =
     world.entities.activeIds
         |> Set.toList
         |> List.map Internal.EntityId

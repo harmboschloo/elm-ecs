@@ -131,7 +131,7 @@ type alias World =
 
 createWorld : World
 createWorld =
-    Ecs.empty componentSpecs.all initSingletons
+    Ecs.emptyWorld componentSpecs.all initSingletons
 
 
 
@@ -243,8 +243,7 @@ moveEntities world =
         frame =
             Ecs.getSingleton singletonSpecs.frame world
     in
-    Ecs.selectAll moveSelector world
-        |> List.foldl (moveEntity frame.deltaTime) world
+    Ecs.processAll moveSelector (moveEntity frame.deltaTime) world
 
 
 moveEntity : Float -> ( Ecs.EntityId, Move ) -> World -> World
@@ -280,13 +279,13 @@ boundsCheckEntities world =
         config =
             Ecs.getSingleton singletonSpecs.config world
     in
-    Ecs.selectAll boundsCheckSelector world
-        |> List.foldl
-            (boundsCheckEntity
-                (toFloat config.worldWidth)
-                (toFloat config.worldHeight)
-            )
-            world
+    Ecs.processAll
+        boundsCheckSelector
+        (boundsCheckEntity
+            (toFloat config.worldWidth)
+            (toFloat config.worldHeight)
+        )
+        world
 
 
 boundsCheckEntity :
@@ -378,12 +377,12 @@ render world =
     , Html.div []
         [ Html.text
             ("entities: "
-                ++ (Ecs.entityCount world |> String.fromInt)
+                ++ (Ecs.worldEntityCount world |> String.fromInt)
             )
         , Html.text " - "
         , Html.text
             ("components: "
-                ++ (Ecs.totalComponentCount componentSpecs.all world
+                ++ (Ecs.worldComponentCount componentSpecs.all world
                         |> String.fromInt
                    )
             )
