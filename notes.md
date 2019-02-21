@@ -1,3 +1,19 @@
+# To do
+
+- wrap next entity id to -x at max int
+- diff on selected lists
+- add entityIdToString
+- move types to internal for testing
+- add tests
+- add benchmarks (select, ...)
+- check if Esc.Select.fold/map makes sense instead of returning a list
+- expose Ecs.Select.mapN functions
+- seperate package MultiDict? Or low level ecs? For highly composable types.
+- selector pipeline instead of select1-6?
+- pipeline for setting up specs?
+- check insert multiple components (https://package.elm-lang.org/packages/seurimas/slime/latest/Slime#spawnEntities2)
+- add ops: startEntityOperation, createEntityAndStartOperation, andInsertComponent, and..., andEndEntityOpration, andEndEntityOprationWithId
+
 # Resources
 
 ecs
@@ -18,6 +34,7 @@ ecs
 - https://github.com/HeroesGrave/ecs-rs/blob/master/doc/tutorial.md
 - https://github.com/sebas77/Svelto.ECS
 - [Overwatch Gameplay Architecture and Netcode](https://www.youtube.com/watch?v=W3aieHjyNvw
+- https://hackage.haskell.org/package/apecs
 
 webgl
 
