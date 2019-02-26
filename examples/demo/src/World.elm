@@ -1,52 +1,83 @@
 module World exposing
-    ( ComponentSpec
+    ( World
+    , AllComponentsSpec, ComponentSpec, ComponentSpecs, componentSpecs
     , Components
-    , EntityId
+    , Ai, Collidable, DelayedOperations, Player, Position
+    , Scale, ScaleAnimation, ShipControls, ShipLimits, Sprite, Star, Velocity
     , Selector
-    , Specs
-    , World
-    , specs
+    , SingletonSpec, SingletonSpecs, singletonSpecs
+    , Singletons, initSingletons
+    , ActiveKeys, Assets, ControlMapping, RandomSeed
+    , SpawnConfig, Timer, ViewConfig
     )
 
-import Components
-    exposing
-        ( Ai
-        , KeyControlsMap
-        , Motion
-        , Position
-        , Scale
-        , ScaleAnimation
-        , Sprite
-        , Star
-        , Velocity
-        )
-import Components.CollisionShape as CollisionShape exposing (CollisionShape)
-import Components.Controls exposing (Controls)
-import Components.DelayedOperations exposing (DelayedOperations)
+{-|
+
+@docs World
+@docs AllComponentsSpec, ComponentSpec, ComponentSpecs, componentSpecs
+@docs Components
+@docs Ai, Collidable, DelayedOperations, Player, Position
+@docs Scale, ScaleAnimation, ShipControls, ShipLimits, Sprite, Star, Velocity
+@docs Selector
+@docs SingletonSpec, SingletonSpecs, singletonSpecs
+@docs Singletons, initSingletons
+@docs ActiveKeys, Assets, ControlMapping, RandomSeed
+@docs SpawnConfig, Timer, ViewConfig
+
+-}
+
+import Config.ControlMapping
+import Config.SpawnConfig
+import Config.ViewConfig
+import Core.Animation.Sequence
+import Core.Assets
+import Core.Assets.Sprite
+import Core.Collidable
+import Core.Dynamics.Position
+import Core.Dynamics.Ship.Controls
+import Core.Dynamics.Ship.Limits
+import Core.Dynamics.Velocity
+import Core.UserInput.ActiveKeys
 import Ecs
+import Ecs.Components
 import Ecs.Select
-import Ecs.Spec
+import Ecs.Singletons
+import Random
+import Timing.Timer
+import World.DelayedOperations
 
 
-type alias Components =
-    Ecs.Spec.Components12 Ai CollisionShape Controls DelayedOperations KeyControlsMap Motion Position Scale ScaleAnimation Sprite Star Velocity
+
+-- WORLD --
+
+
+type alias World =
+    Ecs.World Components Singletons
+
+
+
+-- COMPONENT SPECS --
 
 
 type alias ComponentSpec a =
-    Ecs.Spec.ComponentSpec Components a
+    Ecs.Components.ComponentSpec Components a
 
 
-type alias Specs =
-    { all : Ecs.Spec.Spec Components
+type alias AllComponentsSpec =
+    Ecs.Components.AllComponentsSpec Components
+
+
+type alias ComponentSpecs =
+    { all : AllComponentsSpec
     , ai : ComponentSpec Ai
-    , collisionShape : ComponentSpec CollisionShape
-    , controls : ComponentSpec Controls
+    , collidable : ComponentSpec Collidable
     , delayedOperations : ComponentSpec DelayedOperations
-    , keyControlsMap : ComponentSpec KeyControlsMap
-    , motion : ComponentSpec Motion
+    , player : ComponentSpec Player
     , position : ComponentSpec Position
     , scale : ComponentSpec Scale
     , scaleAnimation : ComponentSpec ScaleAnimation
+    , shipControls : ComponentSpec ShipControls
+    , shipLimits : ComponentSpec ShipLimits
     , sprite : ComponentSpec Sprite
     , star : ComponentSpec Star
     , velocity : ComponentSpec Velocity
@@ -57,14 +88,144 @@ type alias Selector a =
     Ecs.Select.Selector Components a
 
 
-type alias EntityId =
-    Ecs.EntityId
+componentSpecs : ComponentSpecs
+componentSpecs =
+    Ecs.Components.specs12 ComponentSpecs
 
 
-type alias World =
-    Ecs.World Components
+
+-- COMPONENTS --
 
 
-specs : Specs
-specs =
-    Ecs.Spec.specs12 Specs
+type alias Components =
+    Ecs.Components.Components12 Ai Collidable DelayedOperations Player Position Scale ScaleAnimation ShipControls ShipLimits Sprite Star Velocity
+
+
+
+-- COMPONENT TYPES --
+
+
+type alias Ai =
+    { target : Maybe Ecs.EntityId
+    }
+
+
+type alias Collidable =
+    Core.Collidable.Collidable
+
+
+type alias DelayedOperations =
+    World.DelayedOperations.DelayedOperations
+
+
+type alias Player =
+    ()
+
+
+type alias Position =
+    Core.Dynamics.Position.Position
+
+
+type alias Scale =
+    Float
+
+
+type alias ScaleAnimation =
+    Core.Animation.Sequence.Animation
+
+
+type alias ShipLimits =
+    Core.Dynamics.Ship.Limits.Limits
+
+
+type alias ShipControls =
+    Core.Dynamics.Ship.Controls.Controls
+
+
+type alias Sprite =
+    Core.Assets.Sprite.Sprite
+
+
+type alias Star =
+    ()
+
+
+type alias Velocity =
+    Core.Dynamics.Velocity.Velocity
+
+
+
+-- SINGLETON SPECS --
+
+
+type alias SingletonSpec a =
+    Ecs.Singletons.SingletonSpec Singletons a
+
+
+type alias SingletonSpecs =
+    { activeKeys : SingletonSpec ActiveKeys
+    , assets : SingletonSpec Assets
+    , controlMapping : SingletonSpec ControlMapping
+    , randomSeed : SingletonSpec RandomSeed
+    , spawnConfig : SingletonSpec SpawnConfig
+    , timer : SingletonSpec Timer
+    , viewConfig : SingletonSpec ViewConfig
+    }
+
+
+singletonSpecs : SingletonSpecs
+singletonSpecs =
+    Ecs.Singletons.specs7 SingletonSpecs
+
+
+
+-- SINGLETONS --
+
+
+type alias Singletons =
+    Ecs.Singletons.Singletons7 ActiveKeys Assets ControlMapping RandomSeed SpawnConfig Timer ViewConfig
+
+
+initSingletons :
+    ActiveKeys
+    -> Assets
+    -> ControlMapping
+    -> RandomSeed
+    -> SpawnConfig
+    -> Timer
+    -> ViewConfig
+    -> Singletons
+initSingletons =
+    Ecs.Singletons.init7
+
+
+
+-- SINGLETON TYPES --
+
+
+type alias ActiveKeys =
+    Core.UserInput.ActiveKeys.ActiveKeys
+
+
+type alias Assets =
+    Core.Assets.Assets
+
+
+type alias ControlMapping =
+    Config.ControlMapping.ControlMapping
+
+
+type alias RandomSeed =
+    Random.Seed
+
+
+type alias SpawnConfig =
+    Config.SpawnConfig.SpawnConfig
+
+
+type alias Timer =
+    Timing.Timer.Timer
+
+
+type alias ViewConfig =
+    Config.ViewConfig.ViewConfig

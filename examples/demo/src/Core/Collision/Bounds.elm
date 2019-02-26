@@ -1,4 +1,4 @@
-module Collision.Bounds exposing
+module Core.Collision.Bounds exposing
     ( Bounds
     , intersect
     )

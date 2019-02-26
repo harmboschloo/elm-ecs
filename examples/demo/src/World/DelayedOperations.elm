@@ -1,10 +1,10 @@
-module Components.DelayedOperations exposing
+module World.DelayedOperations exposing
     ( DelayedOperations
     , Operation(..)
     , add
     )
 
-import Components.CollisionShape exposing (CollisionShape)
+import Core.Collidable exposing (Collidable)
 
 
 type alias DelayedOperations =
@@ -13,7 +13,7 @@ type alias DelayedOperations =
 
 type Operation
     = RemoveEntity
-    | InsertCollisionShape CollisionShape
+    | InsertCollidable Collidable
 
 
 add : Float -> Operation -> Maybe DelayedOperations -> Maybe DelayedOperations

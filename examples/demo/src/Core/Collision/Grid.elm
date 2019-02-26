@@ -1,4 +1,4 @@
-module Collision.Grid exposing
+module Core.Collision.Grid exposing
     ( CollisionGrid, Item
     , empty
     , insert, clear
@@ -14,10 +14,10 @@ module Collision.Grid exposing
 
 -}
 
-import Collision.Bounds as Bounds exposing (Bounds)
-import Collision.Position exposing (Position)
-import Collision.Shape as Shape exposing (Shape)
 import Dict exposing (Dict)
+import Core.Collision.Bounds as Bounds exposing (Bounds)
+import Core.Collision.Position exposing (Position)
+import Core.Collision.Shape as Shape exposing (Shape)
 
 
 type CollisionGrid c a

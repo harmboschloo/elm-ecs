@@ -12,6 +12,9 @@ module Ecs.Components exposing
     , Components10, specs10
     , Components11, specs11
     , Components12, specs12
+    , Components13, specs13
+    , Components14, specs14
+    , Components15, specs15
     )
 
 {-|
@@ -29,6 +32,9 @@ module Ecs.Components exposing
 @docs Components10, specs10
 @docs Components11, specs11
 @docs Components12, specs12
+@docs Components13, specs13
+@docs Components14, specs14
+@docs Components15, specs15
 
 -}
 
@@ -46,6 +52,9 @@ import Ecs.Internal.Record9 as Record9
 import Ecs.Internal.Record10 as Record10
 import Ecs.Internal.Record11 as Record11
 import Ecs.Internal.Record12 as Record12
+import Ecs.Internal.Record13 as Record13
+import Ecs.Internal.Record14 as Record14
+import Ecs.Internal.Record15 as Record15
 
 
 {-| The specification type for all components.
@@ -1262,5 +1271,554 @@ specs12 fn =
             , update =
                 \updateFn (Components12 components) ->
                     Components12 (Record12.update12 updateFn components)
+            }
+        )
+
+
+{-| A components type for 13 components.
+-}
+type Components13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13
+    = Components13 (Record13.Record (Dict Int a1) (Dict Int a2) (Dict Int a3) (Dict Int a4) (Dict Int a5) (Dict Int a6) (Dict Int a7) (Dict Int a8) (Dict Int a9) (Dict Int a10) (Dict Int a11) (Dict Int a12) (Dict Int a13))
+
+
+{-| Create all component specifications for 13 component types.
+-}
+specs13 :
+    (AllComponentsSpec (Components13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13)
+     -> ComponentSpec (Components13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a1
+     -> ComponentSpec (Components13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a2
+     -> ComponentSpec (Components13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a3
+     -> ComponentSpec (Components13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a4
+     -> ComponentSpec (Components13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a5
+     -> ComponentSpec (Components13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a6
+     -> ComponentSpec (Components13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a7
+     -> ComponentSpec (Components13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a8
+     -> ComponentSpec (Components13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a9
+     -> ComponentSpec (Components13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a10
+     -> ComponentSpec (Components13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a11
+     -> ComponentSpec (Components13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a12
+     -> ComponentSpec (Components13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a13
+     -> specs
+    )
+    -> specs
+specs13 fn =
+    fn
+        (Internal.AllComponentsSpec
+            { empty =
+                Components13
+                    { a1 = Dict.empty
+                    , a2 = Dict.empty
+                    , a3 = Dict.empty
+                    , a4 = Dict.empty
+                    , a5 = Dict.empty
+                    , a6 = Dict.empty
+                    , a7 = Dict.empty
+                    , a8 = Dict.empty
+                    , a9 = Dict.empty
+                    , a10 = Dict.empty
+                    , a11 = Dict.empty
+                    , a12 = Dict.empty
+                    , a13 = Dict.empty
+                    }
+            , clear =
+                \entityId (Components13 components) ->
+                    Components13
+                        { a1 = Dict.remove entityId components.a1
+                        , a2 = Dict.remove entityId components.a2
+                        , a3 = Dict.remove entityId components.a3
+                        , a4 = Dict.remove entityId components.a4
+                        , a5 = Dict.remove entityId components.a5
+                        , a6 = Dict.remove entityId components.a6
+                        , a7 = Dict.remove entityId components.a7
+                        , a8 = Dict.remove entityId components.a8
+                        , a9 = Dict.remove entityId components.a9
+                        , a10 = Dict.remove entityId components.a10
+                        , a11 = Dict.remove entityId components.a11
+                        , a12 = Dict.remove entityId components.a12
+                        , a13 = Dict.remove entityId components.a13
+                        }
+            , size =
+                \(Components13 components) ->
+                    Dict.size components.a1
+                        + Dict.size components.a2
+                        + Dict.size components.a3
+                        + Dict.size components.a4
+                        + Dict.size components.a5
+                        + Dict.size components.a6
+                        + Dict.size components.a7
+                        + Dict.size components.a8
+                        + Dict.size components.a9
+                        + Dict.size components.a10
+                        + Dict.size components.a11
+                        + Dict.size components.a12
+                        + Dict.size components.a13
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components13 components) -> components.a1
+            , update =
+                \updateFn (Components13 components) ->
+                    Components13 (Record13.update1 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components13 components) -> components.a2
+            , update =
+                \updateFn (Components13 components) ->
+                    Components13 (Record13.update2 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components13 components) -> components.a3
+            , update =
+                \updateFn (Components13 components) ->
+                    Components13 (Record13.update3 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components13 components) -> components.a4
+            , update =
+                \updateFn (Components13 components) ->
+                    Components13 (Record13.update4 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components13 components) -> components.a5
+            , update =
+                \updateFn (Components13 components) ->
+                    Components13 (Record13.update5 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components13 components) -> components.a6
+            , update =
+                \updateFn (Components13 components) ->
+                    Components13 (Record13.update6 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components13 components) -> components.a7
+            , update =
+                \updateFn (Components13 components) ->
+                    Components13 (Record13.update7 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components13 components) -> components.a8
+            , update =
+                \updateFn (Components13 components) ->
+                    Components13 (Record13.update8 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components13 components) -> components.a9
+            , update =
+                \updateFn (Components13 components) ->
+                    Components13 (Record13.update9 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components13 components) -> components.a10
+            , update =
+                \updateFn (Components13 components) ->
+                    Components13 (Record13.update10 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components13 components) -> components.a11
+            , update =
+                \updateFn (Components13 components) ->
+                    Components13 (Record13.update11 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components13 components) -> components.a12
+            , update =
+                \updateFn (Components13 components) ->
+                    Components13 (Record13.update12 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components13 components) -> components.a13
+            , update =
+                \updateFn (Components13 components) ->
+                    Components13 (Record13.update13 updateFn components)
+            }
+        )
+
+
+{-| A components type for 14 components.
+-}
+type Components14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14
+    = Components14 (Record14.Record (Dict Int a1) (Dict Int a2) (Dict Int a3) (Dict Int a4) (Dict Int a5) (Dict Int a6) (Dict Int a7) (Dict Int a8) (Dict Int a9) (Dict Int a10) (Dict Int a11) (Dict Int a12) (Dict Int a13) (Dict Int a14))
+
+
+{-| Create all component specifications for 14 component types.
+-}
+specs14 :
+    (AllComponentsSpec (Components14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14)
+     -> ComponentSpec (Components14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a1
+     -> ComponentSpec (Components14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a2
+     -> ComponentSpec (Components14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a3
+     -> ComponentSpec (Components14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a4
+     -> ComponentSpec (Components14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a5
+     -> ComponentSpec (Components14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a6
+     -> ComponentSpec (Components14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a7
+     -> ComponentSpec (Components14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a8
+     -> ComponentSpec (Components14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a9
+     -> ComponentSpec (Components14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a10
+     -> ComponentSpec (Components14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a11
+     -> ComponentSpec (Components14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a12
+     -> ComponentSpec (Components14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a13
+     -> ComponentSpec (Components14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a14
+     -> specs
+    )
+    -> specs
+specs14 fn =
+    fn
+        (Internal.AllComponentsSpec
+            { empty =
+                Components14
+                    { a1 = Dict.empty
+                    , a2 = Dict.empty
+                    , a3 = Dict.empty
+                    , a4 = Dict.empty
+                    , a5 = Dict.empty
+                    , a6 = Dict.empty
+                    , a7 = Dict.empty
+                    , a8 = Dict.empty
+                    , a9 = Dict.empty
+                    , a10 = Dict.empty
+                    , a11 = Dict.empty
+                    , a12 = Dict.empty
+                    , a13 = Dict.empty
+                    , a14 = Dict.empty
+                    }
+            , clear =
+                \entityId (Components14 components) ->
+                    Components14
+                        { a1 = Dict.remove entityId components.a1
+                        , a2 = Dict.remove entityId components.a2
+                        , a3 = Dict.remove entityId components.a3
+                        , a4 = Dict.remove entityId components.a4
+                        , a5 = Dict.remove entityId components.a5
+                        , a6 = Dict.remove entityId components.a6
+                        , a7 = Dict.remove entityId components.a7
+                        , a8 = Dict.remove entityId components.a8
+                        , a9 = Dict.remove entityId components.a9
+                        , a10 = Dict.remove entityId components.a10
+                        , a11 = Dict.remove entityId components.a11
+                        , a12 = Dict.remove entityId components.a12
+                        , a13 = Dict.remove entityId components.a13
+                        , a14 = Dict.remove entityId components.a14
+                        }
+            , size =
+                \(Components14 components) ->
+                    Dict.size components.a1
+                        + Dict.size components.a2
+                        + Dict.size components.a3
+                        + Dict.size components.a4
+                        + Dict.size components.a5
+                        + Dict.size components.a6
+                        + Dict.size components.a7
+                        + Dict.size components.a8
+                        + Dict.size components.a9
+                        + Dict.size components.a10
+                        + Dict.size components.a11
+                        + Dict.size components.a12
+                        + Dict.size components.a13
+                        + Dict.size components.a14
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components14 components) -> components.a1
+            , update =
+                \updateFn (Components14 components) ->
+                    Components14 (Record14.update1 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components14 components) -> components.a2
+            , update =
+                \updateFn (Components14 components) ->
+                    Components14 (Record14.update2 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components14 components) -> components.a3
+            , update =
+                \updateFn (Components14 components) ->
+                    Components14 (Record14.update3 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components14 components) -> components.a4
+            , update =
+                \updateFn (Components14 components) ->
+                    Components14 (Record14.update4 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components14 components) -> components.a5
+            , update =
+                \updateFn (Components14 components) ->
+                    Components14 (Record14.update5 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components14 components) -> components.a6
+            , update =
+                \updateFn (Components14 components) ->
+                    Components14 (Record14.update6 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components14 components) -> components.a7
+            , update =
+                \updateFn (Components14 components) ->
+                    Components14 (Record14.update7 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components14 components) -> components.a8
+            , update =
+                \updateFn (Components14 components) ->
+                    Components14 (Record14.update8 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components14 components) -> components.a9
+            , update =
+                \updateFn (Components14 components) ->
+                    Components14 (Record14.update9 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components14 components) -> components.a10
+            , update =
+                \updateFn (Components14 components) ->
+                    Components14 (Record14.update10 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components14 components) -> components.a11
+            , update =
+                \updateFn (Components14 components) ->
+                    Components14 (Record14.update11 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components14 components) -> components.a12
+            , update =
+                \updateFn (Components14 components) ->
+                    Components14 (Record14.update12 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components14 components) -> components.a13
+            , update =
+                \updateFn (Components14 components) ->
+                    Components14 (Record14.update13 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components14 components) -> components.a14
+            , update =
+                \updateFn (Components14 components) ->
+                    Components14 (Record14.update14 updateFn components)
+            }
+        )
+
+
+{-| A components type for 15 components.
+-}
+type Components15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15
+    = Components15 (Record15.Record (Dict Int a1) (Dict Int a2) (Dict Int a3) (Dict Int a4) (Dict Int a5) (Dict Int a6) (Dict Int a7) (Dict Int a8) (Dict Int a9) (Dict Int a10) (Dict Int a11) (Dict Int a12) (Dict Int a13) (Dict Int a14) (Dict Int a15))
+
+
+{-| Create all component specifications for 15 component types.
+-}
+specs15 :
+    (AllComponentsSpec (Components15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15)
+     -> ComponentSpec (Components15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a1
+     -> ComponentSpec (Components15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a2
+     -> ComponentSpec (Components15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a3
+     -> ComponentSpec (Components15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a4
+     -> ComponentSpec (Components15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a5
+     -> ComponentSpec (Components15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a6
+     -> ComponentSpec (Components15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a7
+     -> ComponentSpec (Components15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a8
+     -> ComponentSpec (Components15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a9
+     -> ComponentSpec (Components15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a10
+     -> ComponentSpec (Components15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a11
+     -> ComponentSpec (Components15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a12
+     -> ComponentSpec (Components15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a13
+     -> ComponentSpec (Components15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a14
+     -> ComponentSpec (Components15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a15
+     -> specs
+    )
+    -> specs
+specs15 fn =
+    fn
+        (Internal.AllComponentsSpec
+            { empty =
+                Components15
+                    { a1 = Dict.empty
+                    , a2 = Dict.empty
+                    , a3 = Dict.empty
+                    , a4 = Dict.empty
+                    , a5 = Dict.empty
+                    , a6 = Dict.empty
+                    , a7 = Dict.empty
+                    , a8 = Dict.empty
+                    , a9 = Dict.empty
+                    , a10 = Dict.empty
+                    , a11 = Dict.empty
+                    , a12 = Dict.empty
+                    , a13 = Dict.empty
+                    , a14 = Dict.empty
+                    , a15 = Dict.empty
+                    }
+            , clear =
+                \entityId (Components15 components) ->
+                    Components15
+                        { a1 = Dict.remove entityId components.a1
+                        , a2 = Dict.remove entityId components.a2
+                        , a3 = Dict.remove entityId components.a3
+                        , a4 = Dict.remove entityId components.a4
+                        , a5 = Dict.remove entityId components.a5
+                        , a6 = Dict.remove entityId components.a6
+                        , a7 = Dict.remove entityId components.a7
+                        , a8 = Dict.remove entityId components.a8
+                        , a9 = Dict.remove entityId components.a9
+                        , a10 = Dict.remove entityId components.a10
+                        , a11 = Dict.remove entityId components.a11
+                        , a12 = Dict.remove entityId components.a12
+                        , a13 = Dict.remove entityId components.a13
+                        , a14 = Dict.remove entityId components.a14
+                        , a15 = Dict.remove entityId components.a15
+                        }
+            , size =
+                \(Components15 components) ->
+                    Dict.size components.a1
+                        + Dict.size components.a2
+                        + Dict.size components.a3
+                        + Dict.size components.a4
+                        + Dict.size components.a5
+                        + Dict.size components.a6
+                        + Dict.size components.a7
+                        + Dict.size components.a8
+                        + Dict.size components.a9
+                        + Dict.size components.a10
+                        + Dict.size components.a11
+                        + Dict.size components.a12
+                        + Dict.size components.a13
+                        + Dict.size components.a14
+                        + Dict.size components.a15
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components15 components) -> components.a1
+            , update =
+                \updateFn (Components15 components) ->
+                    Components15 (Record15.update1 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components15 components) -> components.a2
+            , update =
+                \updateFn (Components15 components) ->
+                    Components15 (Record15.update2 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components15 components) -> components.a3
+            , update =
+                \updateFn (Components15 components) ->
+                    Components15 (Record15.update3 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components15 components) -> components.a4
+            , update =
+                \updateFn (Components15 components) ->
+                    Components15 (Record15.update4 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components15 components) -> components.a5
+            , update =
+                \updateFn (Components15 components) ->
+                    Components15 (Record15.update5 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components15 components) -> components.a6
+            , update =
+                \updateFn (Components15 components) ->
+                    Components15 (Record15.update6 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components15 components) -> components.a7
+            , update =
+                \updateFn (Components15 components) ->
+                    Components15 (Record15.update7 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components15 components) -> components.a8
+            , update =
+                \updateFn (Components15 components) ->
+                    Components15 (Record15.update8 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components15 components) -> components.a9
+            , update =
+                \updateFn (Components15 components) ->
+                    Components15 (Record15.update9 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components15 components) -> components.a10
+            , update =
+                \updateFn (Components15 components) ->
+                    Components15 (Record15.update10 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components15 components) -> components.a11
+            , update =
+                \updateFn (Components15 components) ->
+                    Components15 (Record15.update11 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components15 components) -> components.a12
+            , update =
+                \updateFn (Components15 components) ->
+                    Components15 (Record15.update12 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components15 components) -> components.a13
+            , update =
+                \updateFn (Components15 components) ->
+                    Components15 (Record15.update13 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components15 components) -> components.a14
+            , update =
+                \updateFn (Components15 components) ->
+                    Components15 (Record15.update14 updateFn components)
+            }
+        )
+        (Internal.ComponentSpec
+            { get = \(Components15 components) -> components.a15
+            , update =
+                \updateFn (Components15 components) ->
+                    Components15 (Record15.update15 updateFn components)
             }
         )

@@ -1,51 +1,62 @@
 module Systems.DelayedOperations exposing (update)
 
-import Components.DelayedOperations as DelayedOperations
+import Ecs
+import Ecs.Select
+import Timing.Timer as Timer
+import World exposing (World)
+import World.DelayedOperations as DelayedOperations
     exposing
         ( DelayedOperations
         , Operation
         )
-import Ecs
-import Ecs.Select
-import Global exposing (Global)
-import World exposing (EntityId, Selector, World, specs)
 
 
-delayedOperationsSelector : Selector DelayedOperations
+delayedOperationsSelector : World.Selector DelayedOperations
 delayedOperationsSelector =
-    Ecs.Select.component specs.delayedOperations
+    Ecs.Select.component World.componentSpecs.delayedOperations
 
 
-update : ( World, Global ) -> ( World, Global )
+update : World -> World
 update =
-    Ecs.processAllWithState delayedOperationsSelector updateEntity
+    Ecs.processAll delayedOperationsSelector updateEntity
 
 
 updateEntity :
-    ( EntityId, DelayedOperations )
-    -> ( World, Global )
-    -> ( World, Global )
-updateEntity ( entityId, operations1 ) ( world1, global ) =
+    ( Ecs.EntityId, DelayedOperations )
+    -> World
+    -> World
+updateEntity ( entityId, operations1 ) world1 =
     let
+        timer =
+            Ecs.getSingleton World.singletonSpecs.timer world1
+
+        elapsedTime =
+            Timer.elapsedTime timer
+
         ( operations2, world2 ) =
             List.foldr
-                (updateOperation (Global.getTime global) entityId)
+                (updateOperation elapsedTime entityId)
                 ( [], world1 )
                 operations1
     in
-    ( case operations2 of
+    case operations2 of
         [] ->
-            Ecs.remove specs.delayedOperations entityId world2
+            Ecs.removeComponent
+                World.componentSpecs.delayedOperations
+                entityId
+                world2
 
         _ ->
-            Ecs.insert specs.delayedOperations entityId operations2 world2
-    , global
-    )
+            Ecs.insertComponent
+                World.componentSpecs.delayedOperations
+                entityId
+                operations2
+                world2
 
 
 updateOperation :
     Float
-    -> EntityId
+    -> Ecs.EntityId
     -> ( Float, Operation )
     -> ( DelayedOperations, World )
     -> ( DelayedOperations, World )
@@ -57,11 +68,15 @@ updateOperation time entityId ( operationTime, operation ) ( operations, world )
         ( operations, handleOperation entityId operation world )
 
 
-handleOperation : EntityId -> Operation -> World -> World
+handleOperation : Ecs.EntityId -> Operation -> World -> World
 handleOperation entityId operation world =
     case operation of
         DelayedOperations.RemoveEntity ->
-            Ecs.destroy specs.all entityId world
+            Ecs.destroyEntity World.componentSpecs.all entityId world
 
-        DelayedOperations.InsertCollisionShape collisionShape ->
-            Ecs.insert specs.collisionShape entityId collisionShape world
+        DelayedOperations.InsertCollidable collidable ->
+            Ecs.insertComponent
+                World.componentSpecs.collidable
+                entityId
+                collidable
+                world

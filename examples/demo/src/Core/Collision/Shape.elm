@@ -1,4 +1,4 @@
-module Collision.Shape exposing
+module Core.Collision.Shape exposing
     ( Shape
     , point, circle
     , bounds
@@ -14,8 +14,8 @@ module Collision.Shape exposing
 
 -}
 
-import Collision.Bounds exposing (Bounds)
-import Collision.Position exposing (Position)
+import Core.Collision.Bounds exposing (Bounds)
+import Core.Collision.Position exposing (Position)
 
 
 type Shape

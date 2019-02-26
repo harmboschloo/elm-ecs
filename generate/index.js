@@ -7,7 +7,7 @@ const singletons = require("./singletons");
 const record = require("./record");
 const { range } = require("./utils");
 
-const n = 12;
+const n = 15;
 const outputPath = path.resolve(__dirname, "../src");
 
 writeFile("Ecs/Components.elm", components.generate(n));

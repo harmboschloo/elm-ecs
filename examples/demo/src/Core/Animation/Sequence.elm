@@ -1,4 +1,4 @@
-module Animation.Sequence exposing
+module Core.Animation.Sequence exposing
     ( Animation
     , Config
     , NextConfig

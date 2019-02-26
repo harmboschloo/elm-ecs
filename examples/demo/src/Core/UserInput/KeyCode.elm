@@ -1,4 +1,4 @@
-module KeyCode exposing
+module Core.UserInput.KeyCode exposing
     ( KeyCode
     , arrowDown
     , arrowLeft

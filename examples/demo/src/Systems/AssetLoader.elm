@@ -1,21 +1,8 @@
-module Assets exposing (Assets, Spritesheet, load)
+module Systems.AssetLoader exposing (load)
 
-import Components exposing (Sprite)
+import Core.Assets as Assets exposing (Assets)
 import Task exposing (Task)
-import WebGL.Texture as Texture exposing (Error, Texture, defaultOptions)
-
-
-type alias Assets =
-    { background : Texture
-    , sprites : Spritesheet
-    }
-
-
-type alias Spritesheet =
-    { playerShip : Sprite
-    , aiShip : Sprite
-    , star : Sprite
-    }
+import WebGL.Texture as Texture exposing (Texture, defaultOptions)
 
 
 backgroundSrc : String
@@ -28,14 +15,14 @@ spritesheetSrc =
     "../assets/spaceshooter/sheet.png"
 
 
-load : Task Error Assets
+load : Task Texture.Error Assets
 load =
     Task.map2 Assets
         loadBackground
         loadSpritesheet
 
 
-loadBackground : Task Error Texture
+loadBackground : Task Texture.Error Texture
 loadBackground =
     Texture.loadWith
         { defaultOptions
@@ -46,7 +33,7 @@ loadBackground =
         backgroundSrc
 
 
-loadSpritesheet : Task Error Spritesheet
+loadSpritesheet : Task Texture.Error Assets.Spritesheet
 loadSpritesheet =
     Texture.loadWith
         { defaultOptions
@@ -58,7 +45,7 @@ loadSpritesheet =
         |> Task.map initSpritesheet
 
 
-initSpritesheet : Texture -> Spritesheet
+initSpritesheet : Texture -> Assets.Spritesheet
 initSpritesheet texture =
     { --playerShip1Green
       playerShip =

@@ -171,7 +171,7 @@ spawnEntities world =
             |> Ecs.createEntity
             |> Ecs.andInsertComponent componentSpecs.position position
             |> Ecs.andInsertComponent componentSpecs.display display
-            |> Tuple.first
+            |> Tuple.second
 
     else
         let
@@ -195,7 +195,7 @@ spawnEntities world =
                 componentSpecs.outOfBoundsResolution
                 outOfBoundsResolution
             |> Ecs.andInsertComponent componentSpecs.display display
-            |> Tuple.first
+            |> Tuple.second
 
 
 getColor : Int -> String

@@ -12,6 +12,9 @@ module Ecs.Singletons exposing
     , Singletons10, init10, specs10
     , Singletons11, init11, specs11
     , Singletons12, init12, specs12
+    , Singletons13, init13, specs13
+    , Singletons14, init14, specs14
+    , Singletons15, init15, specs15
     )
 
 {-|
@@ -29,6 +32,9 @@ module Ecs.Singletons exposing
 @docs Singletons10, init10, specs10
 @docs Singletons11, init11, specs11
 @docs Singletons12, init12, specs12
+@docs Singletons13, init13, specs13
+@docs Singletons14, init14, specs14
+@docs Singletons15, init15, specs15
 
 -}
 
@@ -46,6 +52,9 @@ import Ecs.Internal.Record9 as Record9
 import Ecs.Internal.Record10 as Record10
 import Ecs.Internal.Record11 as Record11
 import Ecs.Internal.Record12 as Record12
+import Ecs.Internal.Record13 as Record13
+import Ecs.Internal.Record14 as Record14
+import Ecs.Internal.Record15 as Record15
 
 
 {-| A specification type for a singleton.
@@ -1040,5 +1049,455 @@ specs12 fn =
             , update =
                 \updateFn (Singletons12 singletons) ->
                     Singletons12 (Record12.update12 updateFn singletons)
+            }
+        )
+
+
+{-| A singletons type for 13 singletons.
+-}
+type Singletons13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13
+    = Singletons13 (Record13.Record a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13)
+
+
+{-| Initialize a singleton type for 13 singletons.
+-}
+init13 : a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> a8 -> a9 -> a10 -> a11 -> a12 -> a13 -> Singletons13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13
+init13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 =
+    Singletons13
+        { a1 = a1
+        , a2 = a2
+        , a3 = a3
+        , a4 = a4
+        , a5 = a5
+        , a6 = a6
+        , a7 = a7
+        , a8 = a8
+        , a9 = a9
+        , a10 = a10
+        , a11 = a11
+        , a12 = a12
+        , a13 = a13
+        }
+
+
+{-| Create all singleton specifications for 13 singleton types.
+-}
+specs13 :
+    (SingletonSpec (Singletons13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a1
+     -> SingletonSpec (Singletons13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a2
+     -> SingletonSpec (Singletons13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a3
+     -> SingletonSpec (Singletons13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a4
+     -> SingletonSpec (Singletons13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a5
+     -> SingletonSpec (Singletons13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a6
+     -> SingletonSpec (Singletons13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a7
+     -> SingletonSpec (Singletons13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a8
+     -> SingletonSpec (Singletons13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a9
+     -> SingletonSpec (Singletons13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a10
+     -> SingletonSpec (Singletons13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a11
+     -> SingletonSpec (Singletons13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a12
+     -> SingletonSpec (Singletons13 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13) a13
+     -> specs
+    )
+    -> specs
+specs13 fn =
+    fn
+        (Internal.SingletonSpec
+            { get = \(Singletons13 singletons) -> singletons.a1
+            , update =
+                \updateFn (Singletons13 singletons) ->
+                    Singletons13 (Record13.update1 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons13 singletons) -> singletons.a2
+            , update =
+                \updateFn (Singletons13 singletons) ->
+                    Singletons13 (Record13.update2 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons13 singletons) -> singletons.a3
+            , update =
+                \updateFn (Singletons13 singletons) ->
+                    Singletons13 (Record13.update3 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons13 singletons) -> singletons.a4
+            , update =
+                \updateFn (Singletons13 singletons) ->
+                    Singletons13 (Record13.update4 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons13 singletons) -> singletons.a5
+            , update =
+                \updateFn (Singletons13 singletons) ->
+                    Singletons13 (Record13.update5 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons13 singletons) -> singletons.a6
+            , update =
+                \updateFn (Singletons13 singletons) ->
+                    Singletons13 (Record13.update6 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons13 singletons) -> singletons.a7
+            , update =
+                \updateFn (Singletons13 singletons) ->
+                    Singletons13 (Record13.update7 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons13 singletons) -> singletons.a8
+            , update =
+                \updateFn (Singletons13 singletons) ->
+                    Singletons13 (Record13.update8 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons13 singletons) -> singletons.a9
+            , update =
+                \updateFn (Singletons13 singletons) ->
+                    Singletons13 (Record13.update9 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons13 singletons) -> singletons.a10
+            , update =
+                \updateFn (Singletons13 singletons) ->
+                    Singletons13 (Record13.update10 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons13 singletons) -> singletons.a11
+            , update =
+                \updateFn (Singletons13 singletons) ->
+                    Singletons13 (Record13.update11 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons13 singletons) -> singletons.a12
+            , update =
+                \updateFn (Singletons13 singletons) ->
+                    Singletons13 (Record13.update12 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons13 singletons) -> singletons.a13
+            , update =
+                \updateFn (Singletons13 singletons) ->
+                    Singletons13 (Record13.update13 updateFn singletons)
+            }
+        )
+
+
+{-| A singletons type for 14 singletons.
+-}
+type Singletons14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14
+    = Singletons14 (Record14.Record a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14)
+
+
+{-| Initialize a singleton type for 14 singletons.
+-}
+init14 : a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> a8 -> a9 -> a10 -> a11 -> a12 -> a13 -> a14 -> Singletons14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14
+init14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 =
+    Singletons14
+        { a1 = a1
+        , a2 = a2
+        , a3 = a3
+        , a4 = a4
+        , a5 = a5
+        , a6 = a6
+        , a7 = a7
+        , a8 = a8
+        , a9 = a9
+        , a10 = a10
+        , a11 = a11
+        , a12 = a12
+        , a13 = a13
+        , a14 = a14
+        }
+
+
+{-| Create all singleton specifications for 14 singleton types.
+-}
+specs14 :
+    (SingletonSpec (Singletons14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a1
+     -> SingletonSpec (Singletons14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a2
+     -> SingletonSpec (Singletons14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a3
+     -> SingletonSpec (Singletons14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a4
+     -> SingletonSpec (Singletons14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a5
+     -> SingletonSpec (Singletons14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a6
+     -> SingletonSpec (Singletons14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a7
+     -> SingletonSpec (Singletons14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a8
+     -> SingletonSpec (Singletons14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a9
+     -> SingletonSpec (Singletons14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a10
+     -> SingletonSpec (Singletons14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a11
+     -> SingletonSpec (Singletons14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a12
+     -> SingletonSpec (Singletons14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a13
+     -> SingletonSpec (Singletons14 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14) a14
+     -> specs
+    )
+    -> specs
+specs14 fn =
+    fn
+        (Internal.SingletonSpec
+            { get = \(Singletons14 singletons) -> singletons.a1
+            , update =
+                \updateFn (Singletons14 singletons) ->
+                    Singletons14 (Record14.update1 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons14 singletons) -> singletons.a2
+            , update =
+                \updateFn (Singletons14 singletons) ->
+                    Singletons14 (Record14.update2 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons14 singletons) -> singletons.a3
+            , update =
+                \updateFn (Singletons14 singletons) ->
+                    Singletons14 (Record14.update3 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons14 singletons) -> singletons.a4
+            , update =
+                \updateFn (Singletons14 singletons) ->
+                    Singletons14 (Record14.update4 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons14 singletons) -> singletons.a5
+            , update =
+                \updateFn (Singletons14 singletons) ->
+                    Singletons14 (Record14.update5 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons14 singletons) -> singletons.a6
+            , update =
+                \updateFn (Singletons14 singletons) ->
+                    Singletons14 (Record14.update6 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons14 singletons) -> singletons.a7
+            , update =
+                \updateFn (Singletons14 singletons) ->
+                    Singletons14 (Record14.update7 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons14 singletons) -> singletons.a8
+            , update =
+                \updateFn (Singletons14 singletons) ->
+                    Singletons14 (Record14.update8 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons14 singletons) -> singletons.a9
+            , update =
+                \updateFn (Singletons14 singletons) ->
+                    Singletons14 (Record14.update9 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons14 singletons) -> singletons.a10
+            , update =
+                \updateFn (Singletons14 singletons) ->
+                    Singletons14 (Record14.update10 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons14 singletons) -> singletons.a11
+            , update =
+                \updateFn (Singletons14 singletons) ->
+                    Singletons14 (Record14.update11 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons14 singletons) -> singletons.a12
+            , update =
+                \updateFn (Singletons14 singletons) ->
+                    Singletons14 (Record14.update12 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons14 singletons) -> singletons.a13
+            , update =
+                \updateFn (Singletons14 singletons) ->
+                    Singletons14 (Record14.update13 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons14 singletons) -> singletons.a14
+            , update =
+                \updateFn (Singletons14 singletons) ->
+                    Singletons14 (Record14.update14 updateFn singletons)
+            }
+        )
+
+
+{-| A singletons type for 15 singletons.
+-}
+type Singletons15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15
+    = Singletons15 (Record15.Record a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15)
+
+
+{-| Initialize a singleton type for 15 singletons.
+-}
+init15 : a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> a8 -> a9 -> a10 -> a11 -> a12 -> a13 -> a14 -> a15 -> Singletons15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15
+init15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 =
+    Singletons15
+        { a1 = a1
+        , a2 = a2
+        , a3 = a3
+        , a4 = a4
+        , a5 = a5
+        , a6 = a6
+        , a7 = a7
+        , a8 = a8
+        , a9 = a9
+        , a10 = a10
+        , a11 = a11
+        , a12 = a12
+        , a13 = a13
+        , a14 = a14
+        , a15 = a15
+        }
+
+
+{-| Create all singleton specifications for 15 singleton types.
+-}
+specs15 :
+    (SingletonSpec (Singletons15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a1
+     -> SingletonSpec (Singletons15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a2
+     -> SingletonSpec (Singletons15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a3
+     -> SingletonSpec (Singletons15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a4
+     -> SingletonSpec (Singletons15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a5
+     -> SingletonSpec (Singletons15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a6
+     -> SingletonSpec (Singletons15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a7
+     -> SingletonSpec (Singletons15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a8
+     -> SingletonSpec (Singletons15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a9
+     -> SingletonSpec (Singletons15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a10
+     -> SingletonSpec (Singletons15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a11
+     -> SingletonSpec (Singletons15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a12
+     -> SingletonSpec (Singletons15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a13
+     -> SingletonSpec (Singletons15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a14
+     -> SingletonSpec (Singletons15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15) a15
+     -> specs
+    )
+    -> specs
+specs15 fn =
+    fn
+        (Internal.SingletonSpec
+            { get = \(Singletons15 singletons) -> singletons.a1
+            , update =
+                \updateFn (Singletons15 singletons) ->
+                    Singletons15 (Record15.update1 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons15 singletons) -> singletons.a2
+            , update =
+                \updateFn (Singletons15 singletons) ->
+                    Singletons15 (Record15.update2 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons15 singletons) -> singletons.a3
+            , update =
+                \updateFn (Singletons15 singletons) ->
+                    Singletons15 (Record15.update3 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons15 singletons) -> singletons.a4
+            , update =
+                \updateFn (Singletons15 singletons) ->
+                    Singletons15 (Record15.update4 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons15 singletons) -> singletons.a5
+            , update =
+                \updateFn (Singletons15 singletons) ->
+                    Singletons15 (Record15.update5 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons15 singletons) -> singletons.a6
+            , update =
+                \updateFn (Singletons15 singletons) ->
+                    Singletons15 (Record15.update6 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons15 singletons) -> singletons.a7
+            , update =
+                \updateFn (Singletons15 singletons) ->
+                    Singletons15 (Record15.update7 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons15 singletons) -> singletons.a8
+            , update =
+                \updateFn (Singletons15 singletons) ->
+                    Singletons15 (Record15.update8 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons15 singletons) -> singletons.a9
+            , update =
+                \updateFn (Singletons15 singletons) ->
+                    Singletons15 (Record15.update9 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons15 singletons) -> singletons.a10
+            , update =
+                \updateFn (Singletons15 singletons) ->
+                    Singletons15 (Record15.update10 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons15 singletons) -> singletons.a11
+            , update =
+                \updateFn (Singletons15 singletons) ->
+                    Singletons15 (Record15.update11 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons15 singletons) -> singletons.a12
+            , update =
+                \updateFn (Singletons15 singletons) ->
+                    Singletons15 (Record15.update12 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons15 singletons) -> singletons.a13
+            , update =
+                \updateFn (Singletons15 singletons) ->
+                    Singletons15 (Record15.update13 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons15 singletons) -> singletons.a14
+            , update =
+                \updateFn (Singletons15 singletons) ->
+                    Singletons15 (Record15.update14 updateFn singletons)
+            }
+        )
+        (Internal.SingletonSpec
+            { get = \(Singletons15 singletons) -> singletons.a15
+            , update =
+                \updateFn (Singletons15 singletons) ->
+                    Singletons15 (Record15.update15 updateFn singletons)
             }
         )

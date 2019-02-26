@@ -1,53 +1,63 @@
-module Systems.MotionControl exposing (MotionControl, applyControls, update)
+module Systems.ShipDynamics exposing (update)
 
-import Components exposing (Motion, Position, Velocity)
-import Components.Controls as Controls exposing (Controls)
+import Components.Position exposing (Position)
+import Components.ShipControls as ShipControls exposing (ShipControls)
+import Components.Velocity exposing (Velocity)
+import Core.Dynamics.Ship.Limits exposing (Limits)
 import Ecs
 import Ecs.Select
-import Global exposing (Global)
-import World exposing (EntityId, Selector, World, specs)
+import Timing.Timer as Timer
+import World exposing (World)
 
 
 type alias MotionControl =
-    { controls : Controls
+    { controls : ShipControls
     , motion : Motion
     , position : Position
     , velocity : Velocity
     }
 
 
-motionControlSelector : Selector MotionControl
+motionControlSelector : World.Selector MotionControl
 motionControlSelector =
     Ecs.Select.select4 MotionControl
-        specs.controls
-        specs.motion
-        specs.position
-        specs.velocity
+        World.componentSpecs.shipControls
+        World.componentSpecs.motion
+        World.componentSpecs.position
+        World.componentSpecs.velocity
 
 
-update : ( World, Global ) -> ( World, Global )
-update =
-    Ecs.processAllWithState motionControlSelector updateEntity
+update : World -> World
+update world =
+    let
+        timer =
+            Ecs.getSingleton World.singletonSpecs.timer world
+    in
+    case Timer.lastDelta timer of
+        Just deltaTime ->
+            Ecs.processAll motionControlSelector (updateEntity deltaTime) world
+
+        Nothing ->
+            world
 
 
 updateEntity :
-    ( EntityId, MotionControl )
-    -> ( World, Global )
-    -> ( World, Global )
-updateEntity ( entityId, motionControl ) ( world, global ) =
-    ( Ecs.insert specs.velocity
+    Float
+    -> ( Ecs.EntityId, MotionControl )
+    -> World
+    -> World
+updateEntity deltaTime ( entityId, motionControl ) world =
+    Ecs.insertComponent World.componentSpecs.velocity
         entityId
-        (applyControls motionControl (Global.getDeltaTime global))
+        (applyControls motionControl deltaTime)
         world
-    , global
-    )
 
 
 applyControls : MotionControl -> Float -> Velocity
 applyControls { controls, motion, position, velocity } deltaTime =
     let
         accelerationControls =
-            Controls.getAcceleration controls
+            ShipControls.getAcceleration controls
 
         maxAcceleration =
             if accelerationControls > 0 then
@@ -60,7 +70,7 @@ applyControls { controls, motion, position, velocity } deltaTime =
             accelerationControls * maxAcceleration
 
         rotationControls =
-            Controls.getRotation controls
+            ShipControls.getRotation controls
 
         targetAngularVelocity =
             rotationControls * motion.maxAngularVelocity

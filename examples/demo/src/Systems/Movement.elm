@@ -1,10 +1,11 @@
 module Systems.Movement exposing (update, updatePosition)
 
-import Components exposing (Position, Velocity)
+import Components.Position exposing (Position)
+import Components.Velocity exposing (Velocity)
 import Ecs
 import Ecs.Select
-import Global exposing (Global)
-import World exposing (EntityId, Selector, World, specs)
+import Timing.Timer as Timer
+import World exposing (World)
 
 
 type alias Movement =
@@ -13,33 +14,37 @@ type alias Movement =
     }
 
 
-movementSelector : Selector Movement
+movementSelector : World.Selector Movement
 movementSelector =
     Ecs.Select.select2 Movement
-        specs.position
-        specs.velocity
+        World.componentSpecs.position
+        World.componentSpecs.velocity
 
 
-update : ( World, Global ) -> ( World, Global )
-update =
-    Ecs.processAllWithState movementSelector updateEntity
+update : World -> World
+update world =
+    let
+        timer =
+            Ecs.getSingleton World.singletonSpecs.timer world
+    in
+    case Timer.lastDelta timer of
+        Just deltaTime ->
+            Ecs.processAll movementSelector (updateEntity deltaTime) world
+
+        Nothing ->
+            world
 
 
 updateEntity :
-    ( EntityId, Movement )
-    -> ( World, Global )
-    -> ( World, Global )
-updateEntity ( entityId, { position, velocity } ) ( world, global ) =
-    let
-        deltaTime =
-            Global.getDeltaTime global
-    in
-    ( Ecs.insert specs.position
+    Float
+    -> ( Ecs.EntityId, Movement )
+    -> World
+    -> World
+updateEntity deltaTime ( entityId, { position, velocity } ) world =
+    Ecs.insertComponent World.componentSpecs.position
         entityId
         (updatePosition deltaTime velocity position)
         world
-    , global
-    )
 
 
 updatePosition : Float -> Velocity -> Position -> Position

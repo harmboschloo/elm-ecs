@@ -1,42 +1,39 @@
 module Systems.Animation exposing (update)
 
-import Animation.Sequence as Animation exposing (Animation)
-import Components exposing (ScaleAnimation)
+import Core.Animation.Sequence as Animation exposing (Animation)
 import Ecs
 import Ecs.Select
-import Global exposing (Global)
-import World exposing (EntityId, Selector, World, specs)
+import Timing.Timer as Timer
+import World exposing (World)
 
 
-scaleAnimationSelector : Selector ScaleAnimation
+scaleAnimationSelector : World.Selector World.ScaleAnimation
 scaleAnimationSelector =
-    Ecs.Select.component specs.scaleAnimation
-        |> Ecs.Select.andHas specs.scale
+    Ecs.Select.component World.componentSpecs.scaleAnimation
+        |> Ecs.Select.andHas World.componentSpecs.scale
 
 
-update : ( World, Global ) -> ( World, Global )
+update : World -> World
 update =
-    Ecs.processAllWithState scaleAnimationSelector updateEntity
+    Ecs.processAll scaleAnimationSelector updateEntity
 
 
-updateEntity :
-    ( EntityId, ScaleAnimation )
-    -> ( World, Global )
-    -> ( World, Global )
-updateEntity ( entityId, scaleAnimation ) ( world, global ) =
+updateEntity : ( Ecs.EntityId, World.ScaleAnimation ) -> World -> World
+updateEntity ( entityId, scaleAnimation ) world =
     let
-        time =
-            Global.getTime global
+        timer =
+            Ecs.getSingleton World.singletonSpecs.timer world
+
+        elapsedTime =
+            Timer.elapsedTime timer
     in
-    ( world
-        |> Ecs.insert specs.scale
+    world
+        |> Ecs.insertComponent World.componentSpecs.scale
             entityId
-            (Animation.animate time scaleAnimation)
-        |> (if Animation.hasEnded time scaleAnimation then
-                Ecs.remove specs.scaleAnimation entityId
+            (Animation.animate elapsedTime scaleAnimation)
+        |> (if Animation.hasEnded elapsedTime scaleAnimation then
+                Ecs.removeComponent World.componentSpecs.scaleAnimation entityId
 
             else
                 identity
            )
-    , global
-    )

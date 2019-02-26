@@ -1,68 +1,89 @@
 module Systems.Collision exposing (update)
 
-import Animation.Sequence as Animation
-import Components exposing (Position, Velocity)
-import Components.CollisionShape as CollisionShape exposing (CollisionShape)
-import Components.DelayedOperations as DelayedOperations
+import Core.Animation.Sequence as Animation
+import Core.Collidable as Collidable exposing (Collidable)
+import Core.Collision.Grid as CollisionGrid
+import Core.Dynamics.Position exposing (Position)
+import Core.Dynamics.Velocity exposing (Velocity)
 import Ecs
 import Ecs.Select
-import Global exposing (Global)
-import Systems.Collision.Grid as Grid exposing (CollisionGrid)
-import World exposing (EntityId, Selector, World, specs)
+import Timing.Timer as Timer
+import World exposing (World)
+import World.DelayedOperations as DelayedOperations
 
 
-type alias Collidable =
-    { collisionShape : CollisionShape
+type alias CollisionGrid =
+    CollisionGrid.CollisionGrid Collidable.Category Ecs.EntityId
+
+
+type alias CollisionItem =
+    CollisionGrid.Item Ecs.EntityId
+
+
+type alias CollidableEntity =
+    { collidable : Collidable
     , position : Position
     }
 
 
-collidableSelector : Selector Collidable
+gridCellSize : Float
+gridCellSize =
+    60
+
+
+emptyCollisionGrid : CollisionGrid
+emptyCollisionGrid =
+    CollisionGrid.empty gridCellSize gridCellSize
+
+
+collidableSelector : World.Selector CollidableEntity
 collidableSelector =
-    Ecs.Select.select2 Collidable
-        specs.collisionShape
-        specs.position
+    Ecs.Select.select2 CollidableEntity
+        World.componentSpecs.collidable
+        World.componentSpecs.position
 
 
-update : ( World, Global ) -> ( World, Global )
-update ( world, global ) =
+update : World -> World
+update world =
     Ecs.selectAll collidableSelector world
-        |> List.foldl insertEntity Grid.empty
-        |> Grid.collisions Grid.starCenter Grid.shipScoop
-        |> List.foldl handleStarShipCollisions ( world, global )
+        |> List.foldl insertEntity emptyCollisionGrid
+        |> CollisionGrid.collisions
+            Collidable.starCenter
+            Collidable.shipScoop
+        |> List.foldl handleStarShipCollisions world
 
 
-insertEntity : ( EntityId, Collidable ) -> CollisionGrid -> CollisionGrid
-insertEntity ( entityId, { collisionShape, position } ) grid =
-    Grid.insert
+insertEntity : ( Ecs.EntityId, CollidableEntity ) -> CollisionGrid -> CollisionGrid
+insertEntity ( entityId, { collidable, position } ) grid =
+    CollisionGrid.insert
         position
-        collisionShape.shape
+        collidable.shape
         entityId
-        collisionShape.category
+        collidable.category
         grid
 
 
-handleStarShipCollisions :
-    ( Grid.Item, Grid.Item )
-    -> ( World, Global )
-    -> ( World, Global )
-handleStarShipCollisions ( starItem, _ ) ( world, global ) =
+handleStarShipCollisions : ( CollisionItem, CollisionItem ) -> World -> World
+handleStarShipCollisions ( starItem, _ ) world =
     let
-        time =
-            Global.getTime global
+        timer =
+            Ecs.getSingleton World.singletonSpecs.timer world
+
+        elapsedTime =
+            Timer.elapsedTime timer
 
         starEntityId =
             starItem.data
     in
-    ( world
-        |> Ecs.remove specs.collisionShape starEntityId
-        |> Ecs.insert specs.velocity
+    world
+        |> Ecs.removeComponent World.componentSpecs.collidable starEntityId
+        |> Ecs.insertComponent World.componentSpecs.velocity
             starEntityId
             (Velocity 0 0 (2 * pi))
-        |> Ecs.insert specs.scaleAnimation
+        |> Ecs.insertComponent World.componentSpecs.scaleAnimation
             starEntityId
             (Animation.animation
-                { startTime = time
+                { startTime = elapsedTime
                 , duration = 0.5
                 , from = 1
                 , to = 1.5
@@ -74,11 +95,9 @@ handleStarShipCollisions ( starItem, _ ) ( world, global ) =
                         }
                     )
             )
-        |> Ecs.update specs.delayedOperations
+        |> Ecs.updateComponent World.componentSpecs.delayedOperations
             starEntityId
             (DelayedOperations.add
-                (time + 1)
+                (elapsedTime + 1)
                 DelayedOperations.RemoveEntity
             )
-    , global
-    )

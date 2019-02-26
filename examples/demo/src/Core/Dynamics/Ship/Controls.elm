@@ -1,8 +1,8 @@
-module Components.Controls exposing
+module Core.Dynamics.Ship.Controls exposing
     ( Controls
-    , controls
     , getAcceleration
     , getRotation
+    , init
     , setAcceleration
     , setRotation
     )
@@ -15,8 +15,8 @@ type Controls
         }
 
 
-controls : Float -> Float -> Controls
-controls acceleration rotation =
+init : Float -> Float -> Controls
+init acceleration rotation =
     Controls
         { acceleration = clamp -1 1 acceleration
         , rotation = clamp -1 1 rotation

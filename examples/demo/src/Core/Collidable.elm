@@ -1,14 +1,14 @@
-module Components.CollisionShape exposing
+module Core.Collidable exposing
     ( Category
-    , CollisionShape
+    , Collidable
     , shipScoop
     , starCenter
     )
 
-import Collision.Shape exposing (Shape)
+import Core.Collision.Shape exposing (Shape)
 
 
-type alias CollisionShape =
+type alias Collidable =
     { shape : Shape
     , category : Category
     }

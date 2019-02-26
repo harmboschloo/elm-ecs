@@ -7,7 +7,7 @@ module Ecs exposing
     , componentCount
     , andInsertComponent, andUpdateComponent
     , getSingleton, setSingleton, updateSingleton
-    , select, selectAll, processAll, processAllWithState
+    , select, selectAll, processAll
     )
 
 {-|
@@ -43,7 +43,7 @@ module Ecs exposing
 
 # Apply Selectors
 
-@docs select, selectAll, processAll, processAllWithState
+@docs select, selectAll, processAll
 
 -}
 
@@ -80,8 +80,7 @@ emptyWorld (AllComponentsSpec componentsSpec) singletons =
     World
         { singletons = singletons
         , entities =
-            { -- TODO start at -...? or wrap o max int
-              nextId = 0
+            { nextId = 0
             , activeIds = Set.empty
             }
         , components = componentsSpec.empty
@@ -109,7 +108,6 @@ worldComponentCount :
     -> World components singletons
     -> Int
 worldComponentCount (AllComponentsSpec spec) (World world) =
-    -- TODO track number of components in world?
     spec.size world.components
 
 
@@ -132,9 +130,10 @@ type alias EntityId =
 
 createEntity :
     World components singletons
-    -> ( World components singletons, EntityId )
+    -> ( EntityId, World components singletons )
 createEntity (World { entities, components, singletons }) =
-    ( World
+    ( Internal.EntityId entities.nextId
+    , World
         { entities =
             { nextId = entities.nextId + 1
             , activeIds = Set.insert entities.nextId entities.activeIds
@@ -142,7 +141,6 @@ createEntity (World { entities, components, singletons }) =
         , components = components
         , singletons = singletons
         }
-    , Internal.EntityId entities.nextId
     )
 
 
@@ -290,10 +288,10 @@ componentCount (ComponentSpec spec) (World { components }) =
 andInsertComponent :
     ComponentSpec components a
     -> a
-    -> ( World components singletons, EntityId )
-    -> ( World components singletons, EntityId )
-andInsertComponent spec a ( world, entityId ) =
-    ( insertComponent spec entityId a world, entityId )
+    -> ( EntityId, World components singletons )
+    -> ( EntityId, World components singletons )
+andInsertComponent spec a ( entityId, world ) =
+    ( entityId, insertComponent spec entityId a world )
 
 
 {-| Update a specific component in an entity.
@@ -301,10 +299,10 @@ andInsertComponent spec a ( world, entityId ) =
 andUpdateComponent :
     ComponentSpec components a
     -> (Maybe a -> Maybe a)
-    -> ( World components singletons, EntityId )
-    -> ( World components singletons, EntityId )
-andUpdateComponent spec fn ( world, entityId ) =
-    ( updateComponent spec entityId fn world, entityId )
+    -> ( EntityId, World components singletons )
+    -> ( EntityId, World components singletons )
+andUpdateComponent spec fn ( entityId, world ) =
+    ( entityId, updateComponent spec entityId fn world )
 
 
 
@@ -363,6 +361,8 @@ selectAll (Selector selector) (World { components }) =
     selector.selectAll components
 
 
+{-| Process all entities with a specific set of components.
+-}
 processAll :
     Selector components a
     ->
@@ -374,16 +374,3 @@ processAll :
     -> World components singletons
 processAll selector fn world =
     List.foldl fn world (selectAll selector world)
-
-
-processAllWithState :
-    Selector components a
-    ->
-        (( EntityId, a )
-         -> ( World components singletons, state )
-         -> ( World components singletons, state )
-        )
-    -> ( World components singletons, state )
-    -> ( World components singletons, state )
-processAllWithState selector fn ( world, state ) =
-    List.foldl fn ( world, state ) (selectAll selector world)

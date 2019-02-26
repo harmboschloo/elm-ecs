@@ -1,4 +1,4 @@
-module Collision.Position exposing (Position)
+module Core.Collision.Position exposing (Position)
 
 {-|
 
