@@ -11,7 +11,8 @@
             "elm/html": "1.0.0",
             "elm/random": "1.0.0",
             "elm-community/random-extra": "3.0.0",
-            "elm-explorations/benchmark": "1.0.0"
+            "elm-explorations/benchmark": "1.0.0",
+            "harmboschloo/elm-dict-intersect": "1.0.0"
         },
         "indirect": {
             "BrianHicks/elm-trend": "2.1.2",
