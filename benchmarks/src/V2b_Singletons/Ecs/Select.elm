@@ -1,4 +1,4 @@
-module V2Old.Ecs.Select exposing
+module V2b_Singletons.Ecs.Select exposing
     ( Selector, component, select1, select2, select3, select4, select5
     , andGet, andHas, andNot, andThen, andFilter
     )
@@ -18,12 +18,7 @@ module V2Old.Ecs.Select exposing
 -}
 
 import Dict
-import V2Old.Ecs.Internal as Internal
-    exposing
-        ( ComponentSpec(..)
-        , EntityId(..)
-        , Spec(..)
-        )
+import V2b_Singletons.Ecs.Internal as Internal exposing (ComponentSpec(..), EntityId(..))
 
 
 {-| A selector of a specific set of components.
@@ -39,7 +34,7 @@ component (ComponentSpec spec) =
     Internal.Selector
         { select =
             \entityId components -> Dict.get entityId (spec.get components)
-        , selectList =
+        , selectAll =
             \components ->
                 Dict.foldr
                     (\entityId data list -> ( EntityId entityId, data ) :: list)
@@ -135,11 +130,11 @@ map fn (Internal.Selector selector) =
                     (Internal.Selector selector)
                     entityId
                     components
-        , selectList =
+        , selectAll =
             \components ->
                 List.map
                     (\( entityId, a ) -> ( entityId, fn a ))
-                    (selector.selectList components)
+                    (selector.selectAll components)
         }
 
 
@@ -157,7 +152,7 @@ map2 fn (Internal.Selector aSelector) bSelector =
                     bSelector
                     entityId
                     components
-        , selectList =
+        , selectAll =
             \components ->
                 List.filterMap
                     (\( EntityId entityId, a ) ->
@@ -174,7 +169,7 @@ map2 fn (Internal.Selector aSelector) bSelector =
                             Just c ->
                                 Just ( EntityId entityId, c )
                     )
-                    (aSelector.selectList components)
+                    (aSelector.selectAll components)
         }
 
 
@@ -194,7 +189,7 @@ map3 fn (Internal.Selector aSelector) bSelector cSelector =
                     cSelector
                     entityId
                     components
-        , selectList =
+        , selectAll =
             \components ->
                 List.filterMap
                     (\( EntityId entityId, a ) ->
@@ -211,7 +206,7 @@ map3 fn (Internal.Selector aSelector) bSelector cSelector =
                             Just d ->
                                 Just ( EntityId entityId, d )
                     )
-                    (aSelector.selectList components)
+                    (aSelector.selectAll components)
         }
 
 
@@ -233,7 +228,7 @@ map4 fn (Internal.Selector aSelector) bSelector cSelector dSelector =
                     dSelector
                     entityId
                     components
-        , selectList =
+        , selectAll =
             \components ->
                 List.filterMap
                     (\( EntityId entityId, a ) ->
@@ -251,7 +246,7 @@ map4 fn (Internal.Selector aSelector) bSelector cSelector dSelector =
                             Just e ->
                                 Just ( EntityId entityId, e )
                     )
-                    (aSelector.selectList components)
+                    (aSelector.selectAll components)
         }
 
 
@@ -275,7 +270,7 @@ map5 fn (Internal.Selector aSelector) bSelector cSelector dSelector eSelector =
                     eSelector
                     entityId
                     components
-        , selectList =
+        , selectAll =
             \components ->
                 List.filterMap
                     (\( EntityId entityId, a ) ->
@@ -294,7 +289,7 @@ map5 fn (Internal.Selector aSelector) bSelector cSelector dSelector eSelector =
                             Just f ->
                                 Just ( EntityId entityId, f )
                     )
-                    (aSelector.selectList components)
+                    (aSelector.selectAll components)
         }
 
 
@@ -318,9 +313,9 @@ andGet (ComponentSpec spec) (Internal.Selector selector) =
 
                     Just fn ->
                         Just (fn (Dict.get entityId (spec.get components)))
-        , selectList =
+        , selectAll =
             \components ->
-                selector.selectList components
+                selector.selectAll components
                     |> List.map
                         (\( EntityId entityId, fn ) ->
                             ( EntityId entityId
@@ -346,9 +341,9 @@ andThen fn (Internal.Selector selector) =
 
                     Just a ->
                         fn a
-        , selectList =
+        , selectAll =
             \components ->
-                selector.selectList components
+                selector.selectAll components
                     |> List.filterMap
                         (\( entityId, a ) ->
                             case fn a of
@@ -381,9 +376,9 @@ andHas (ComponentSpec spec) (Internal.Selector selector) =
 
                         else
                             Nothing
-        , selectList =
+        , selectAll =
             \components ->
-                selector.selectList components
+                selector.selectAll components
                     |> List.filter
                         (\( EntityId entityId, _ ) ->
                             Dict.member entityId (spec.get components)
@@ -411,9 +406,9 @@ andNot (ComponentSpec spec) (Internal.Selector selector) =
 
                         else
                             Just a
-        , selectList =
+        , selectAll =
             \components ->
-                selector.selectList components
+                selector.selectAll components
                     |> List.filter
                         (\( EntityId entityId, _ ) ->
                             not (Dict.member entityId (spec.get components))
@@ -441,9 +436,9 @@ andFilter fn (Internal.Selector selector) =
 
                         else
                             Nothing
-        , selectList =
+        , selectAll =
             \components ->
-                selector.selectList components
+                selector.selectAll components
                     |> List.filter (\( EntityId entityId, a ) -> fn a)
         }
 

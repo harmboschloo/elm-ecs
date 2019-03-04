@@ -1,4 +1,4 @@
-module V2W.Ecs.Select exposing
+module Vx_Wrapped.Ecs.Select exposing
     ( Selector, component, select1, select2, select3, select4, select5
     , andGet, andHas, andNot, andThen, andFilter
     )
@@ -19,8 +19,8 @@ module V2W.Ecs.Select exposing
 
 import Array
 import Dict exposing (Dict)
-import V2W.Ecs as Ecs
-import V2W.Ecs.Internal as Internal
+import Vx_Wrapped.Ecs as Ecs
+import Vx_Wrapped.Ecs.Internal as Internal
     exposing
         ( ComponentSpec(..)
         , ComponentSpecModel

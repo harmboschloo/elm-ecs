@@ -1,4 +1,4 @@
-module V2Old.Ecs.Internal.Record2 exposing
+module V2a_Entities.Ecs.Internal.Record2 exposing
     ( Record
     , update1
     , update2

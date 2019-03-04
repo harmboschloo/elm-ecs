@@ -1,4 +1,4 @@
-module Ecs2W exposing
+module EcsVx_Wrapped exposing
     ( builder
     , insertA
     , insertB
@@ -14,13 +14,13 @@ module Ecs2W exposing
     )
 
 import Data exposing (A, B, C)
-import V2W.Ecs as Ecs exposing (EntityId)
-import V2W.Ecs.Select as Select
+import Vx_Wrapped.Ecs as Ecs exposing (EntityId)
+import Vx_Wrapped.Ecs.Select as Select
 
 
 label : String
 label =
-    "Ecs v2 wrapped"
+    "Ecs vx wrapped"
 
 
 type Component

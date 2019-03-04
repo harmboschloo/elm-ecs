@@ -1,4 +1,4 @@
-module V2W.Ecs.Internal exposing
+module Vx_Wrapped.Ecs.Internal exposing
     ( ComponentEntry(..)
     , ComponentSpec(..)
     , ComponentSpecModel

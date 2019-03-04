@@ -1,4 +1,4 @@
-module V2W.Ecs exposing
+module Vx_Wrapped.Ecs exposing
     ( ComponentConfig, ComponentSpec
     , componentSpecsStart, componentSpec, componentSpecsEnd
     , Ecs, empty
@@ -27,7 +27,7 @@ module V2W.Ecs exposing
 import Array exposing (Array)
 import Dict exposing (Dict)
 import Set
-import V2W.Ecs.Internal as Internal exposing (Model, Operation(..), Selector(..))
+import Vx_Wrapped.Ecs.Internal as Internal exposing (Model, Operation(..), Selector(..))
 
 
 

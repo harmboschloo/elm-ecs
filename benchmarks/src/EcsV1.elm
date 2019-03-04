@@ -1,4 +1,4 @@
-module Ecs1 exposing
+module Ecs1V1 exposing
     ( builder
     , insertA
     , insertB

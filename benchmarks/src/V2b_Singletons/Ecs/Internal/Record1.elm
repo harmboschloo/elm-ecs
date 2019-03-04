@@ -1,4 +1,4 @@
-module V2Old.Ecs.Internal.Record1 exposing
+module V2b_Singletons.Ecs.Internal.Record1 exposing
     ( Record
     , update1
     )

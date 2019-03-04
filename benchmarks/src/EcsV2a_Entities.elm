@@ -1,4 +1,4 @@
-module Ecs2 exposing
+module EcsV2a_Entities exposing
     ( builder
     , insertA
     , insertB
@@ -14,14 +14,14 @@ module Ecs2 exposing
     )
 
 import Data exposing (A, B, C)
-import Ecs as Ecs exposing (EntityId)
-import Ecs.Select as Select
-import Ecs.Spec as Spec
+import V2a_Entities.Ecs as Ecs exposing (EntityId)
+import V2a_Entities.Ecs.Select as Select
+import V2a_Entities.Ecs.Spec as Spec
 
 
 label : String
 label =
-    "Ecs v2 new"
+    "Ecs v2a Entities"
 
 
 type alias Components =
@@ -87,7 +87,7 @@ aSelector =
 
 selectA : World -> List ( EntityId, A )
 selectA world =
-    Ecs.selectAll aSelector world
+    Ecs.selectList aSelector world
 
 
 bSelector : Selector B
@@ -97,7 +97,7 @@ bSelector =
 
 selectB : World -> List ( EntityId, B )
 selectB world =
-    Ecs.selectAll bSelector world
+    Ecs.selectList bSelector world
 
 
 cSelector : Selector C
@@ -107,7 +107,7 @@ cSelector =
 
 selectC : World -> List ( EntityId, C )
 selectC world =
-    Ecs.selectAll cSelector world
+    Ecs.selectList cSelector world
 
 
 type alias AB =
@@ -125,7 +125,7 @@ abSelector =
 
 selectAB : World -> List ( EntityId, AB )
 selectAB world =
-    Ecs.selectAll abSelector world
+    Ecs.selectList abSelector world
 
 
 type alias BA =
@@ -143,7 +143,7 @@ baSelector =
 
 selectBA : World -> List ( EntityId, BA )
 selectBA world =
-    Ecs.selectAll baSelector world
+    Ecs.selectList baSelector world
 
 
 type alias ABC =
@@ -163,7 +163,7 @@ abcSelector =
 
 selectABC : World -> List ( EntityId, ABC )
 selectABC world =
-    Ecs.selectAll abcSelector world
+    Ecs.selectList abcSelector world
 
 
 type alias CBA =
@@ -183,4 +183,4 @@ cbaSelector =
 
 selectCBA : World -> List ( EntityId, CBA )
 selectCBA world =
-    Ecs.selectAll cbaSelector world
+    Ecs.selectList cbaSelector world

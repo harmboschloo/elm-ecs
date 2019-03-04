@@ -1,4 +1,4 @@
-module V2Old.Ecs exposing
+module V2a_Entities.Ecs exposing
     ( empty, isEmpty, entityCount, componentCount, ids
     , member, clear
     , has, get, insert, update, remove, size
@@ -31,13 +31,13 @@ module V2Old.Ecs exposing
 -}
 
 import Dict exposing (Dict)
-import V2Old.Ecs.Internal as Internal
+import Set exposing (Set)
+import V2a_Entities.Ecs.Internal as Internal
     exposing
         ( ComponentSpec(..)
         , Selector(..)
         , Spec(..)
         )
-import Set exposing (Set)
 
 
 

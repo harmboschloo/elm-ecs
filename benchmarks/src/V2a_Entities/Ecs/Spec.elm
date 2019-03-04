@@ -1,4 +1,4 @@
-module V2Old.Ecs.Spec exposing
+module V2a_Entities.Ecs.Spec exposing
     ( Spec, ComponentSpec
     , Components1, specs1
     , Components2, specs2
@@ -15,11 +15,11 @@ module V2Old.Ecs.Spec exposing
 -}
 
 import Dict exposing (Dict)
-import V2Old.Ecs.Internal as Internal
-import V2Old.Ecs.Internal.Record1 as Record1
-import V2Old.Ecs.Internal.Record2 as Record2
-import V2Old.Ecs.Internal.Record3 as Record3
 import Set exposing (Set)
+import V2a_Entities.Ecs.Internal as Internal
+import V2a_Entities.Ecs.Internal.Record1 as Record1
+import V2a_Entities.Ecs.Internal.Record2 as Record2
+import V2a_Entities.Ecs.Internal.Record3 as Record3
 
 
 {-| The specification type for all components.

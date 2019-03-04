@@ -1,4 +1,4 @@
-module V2W.Ecs.Operation exposing
+module Vx_Wrapped.Ecs.Operation exposing
     ( create, destroy
     , insertAll, insertEntry, insert, remove
     )
@@ -10,8 +10,8 @@ module V2W.Ecs.Operation exposing
 
 -}
 
-import V2W.Ecs as Ecs
-import V2W.Ecs.Internal as Internal
+import Vx_Wrapped.Ecs as Ecs
+import Vx_Wrapped.Ecs.Internal as Internal
     exposing
         ( ComponentEntry(..)
         , ComponentSpec(..)
