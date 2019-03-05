@@ -3,8 +3,8 @@ module Benchmarks.Basic exposing (main)
 import Benchmark exposing (Benchmark)
 import Benchmark.Runner as Runner
 import Data
-import EcsV2b_Singletons as Ecs1
-import EcsV2c_DictIntersect as Ecs2
+import EcsV2c_DictIntersect as Ecs1
+import EcsV2d_Comparable as Ecs2
 
 
 main : Runner.BenchmarkProgram
