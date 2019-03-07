@@ -2,102 +2,91 @@
 const { range } = require("./utils");
 
 exports.generate = function(n) {
-  const specs = range(n);
+  const components = range(n);
 
-  return `module Ecs.Components exposing
-    ( AllComponentsSpec, ComponentSpec
-    , ${specs.map(i => `Components${i}, specs${i}`).join(`
-    , `)}
-    )
+  const componentsType = `Components${n} comparable ${components
+    .map(i => `a${i}`)
+    .join(" ")}`;
+
+  return `module Ecs.Components${n} exposing (Components${n}, specs)
 
 {-|
 
-@docs AllComponentsSpec, ComponentSpec
-${specs.map(i => `@docs Components${i}, specs${i}`).join(`
-`)}
+@docs Components${n}, specs
 
 -}
 
 import Dict exposing (Dict)
-import Ecs.Internal as Internal
-${specs.map(i => `import Ecs.Internal.Record${i} as Record${i}`).join(`
-`)}
+import Ecs.Internal
+    exposing
+        ( ComponentSpec(..)
+        , MultiComponentSpec(..)
+        )
 
 
-{-| The specification type for all components.
--}
-type alias AllComponentsSpec components =
-    Internal.AllComponentsSpec components
-
-
-{-| A specification type for a component.
--}
-type alias ComponentSpec components a =
-    Internal.ComponentSpec components a
-${specs.map(generateComponentSpecs).join(`
-`)}
-`;
-};
-
-const generateComponentSpecs = iSpec => {
-  const components = range(iSpec);
-
-  const componentsType = `Components${iSpec} ${components
-    .map(i => `a${i}`)
-    .join(" ")}`;
-  const recordType = `Record${iSpec}.Record ${components
-    .map(i => `(Dict Int a${i})`)
-    .join(" ")}`;
-
-  return `
-
-{-| A components type for ${iSpec} component${iSpec > 1 ? "s" : ""}.
+{-| A components type for ${n} component${n > 1 ? "s" : ""}.
 -}
 type ${componentsType}
-    = Components${iSpec} (${recordType})
+    = Components${n}
+        { ${components.map(i => `dict${i} : Dict comparable a${i}`).join(`
+        , `)}
+        }
 
 
-{-| Create all component specifications for ${iSpec} component type${
-    iSpec > 1 ? "s" : ""
+{-| Create all component specifications for ${n} component type${
+    n > 1 ? "s" : ""
   }.
 -}
-specs${iSpec} :
-    (AllComponentsSpec (${componentsType})
-     -> ${components.map(i => `ComponentSpec (${componentsType}) a${i}`).join(`
+specs :
+    (MultiComponentSpec comparable (${componentsType})
+     -> ${components.map(
+       i => `ComponentSpec comparable a${i} (${componentsType})`
+     ).join(`
      -> `)}
      -> specs
     )
     -> specs
-specs${iSpec} fn =
+specs fn =
     fn
-        (Internal.AllComponentsSpec
+        (MultiComponentSpec
             { empty =
-                Components${iSpec}
-                    { ${components.map(i => `a${i} = Dict.empty`).join(`
+                Components${n}
+                    { ${components.map(i => `dict${i} = Dict.empty`).join(`
                     , `)}
                     }
             , clear =
-                \\entityId (Components${iSpec} components) ->
-                    Components${iSpec}
+                \\entityId (Components${n} components) ->
+                    Components${n}
                         { ${components.map(
-                          i => `a${i} = Dict.remove entityId components.a${i}`
+                          i =>
+                            `dict${i} = Dict.remove entityId components.dict${i}`
                         ).join(`
                         , `)}
                         }
             , size =
-                \\(Components${iSpec} components) ->
-                    ${components.map(i => `Dict.size components.a${i}`).join(`
+                \\(Components${n} components) ->
+                    ${components.map(i => `Dict.size components.dict${i}`)
+                      .join(`
                         + `)}
             }
         )
         ${components.map(
-          iComponent => `(Internal.ComponentSpec
-            { get = \\(Components${iSpec} components) -> components.a${iComponent}
-            , update =
-                \\updateFn (Components${iSpec} components) ->
-                    Components${iSpec} (Record${iSpec}.update${iComponent} updateFn components)
+          i => `(ComponentSpec
+            { get = \\(Components${n} components) -> components.dict${i}
+            , set =
+                \\dict (Components${n} components) ->
+                    Components${n}
+                        { ${components.map(
+                          f =>
+                            `dict${f} = ${
+                              f === i ? `dict` : `components.dict${f}`
+                            }`
+                        ).join(`
+                        , `)}
+                        }
             }
         )`
         ).join(`
-        `)}`;
+        `)}
+`;
 };

@@ -1,42 +1,29 @@
 module Ecs.Internal exposing
-    ( AllComponentsSpec(..)
-    , ComponentSpec(..)
-    , EntityId(..)
-    , Selector(..)
+    ( ComponentSpec(..)
+    , MultiComponentSpec(..)
     , SingletonSpec(..)
     )
 
 import Dict exposing (Dict)
 
 
-type EntityId
-    = EntityId Int
-
-
-type AllComponentsSpec components
-    = AllComponentsSpec
+type MultiComponentSpec comparable components
+    = MultiComponentSpec
         { empty : components
-        , clear : Int -> components -> components
+        , clear : comparable -> components -> components
         , size : components -> Int
         }
 
 
-type ComponentSpec components a
+type ComponentSpec comparable a components
     = ComponentSpec
-        { get : components -> Dict Int a
-        , update : (Dict Int a -> Dict Int a) -> components -> components
+        { get : components -> Dict comparable a
+        , set : Dict comparable a -> components -> components
         }
 
 
-type SingletonSpec singletons a
+type SingletonSpec a singletons
     = SingletonSpec
         { get : singletons -> a
-        , update : (a -> a) -> singletons -> singletons
-        }
-
-
-type Selector components a
-    = Selector
-        { select : Int -> components -> Maybe a
-        , selectAll : components -> List ( EntityId, a )
+        , set : a -> singletons -> singletons
         }

@@ -2,89 +2,70 @@
 const { range } = require("./utils");
 
 exports.generate = function(n) {
-  const specs = range(n);
+  const singletons = range(n);
 
-  return `module Ecs.Singletons exposing
-    ( SingletonSpec
-    , ${specs.map(i => `Singletons${i}, init${i}, specs${i}`).join(`
-    , `)}
-    )
+  const singletonsType = `Singletons${n} ${singletons
+    .map(i => `a${i}`)
+    .join(" ")}`;
+
+  return `module Ecs.Singletons${n} exposing (Singletons${n}, init, specs)
 
 {-|
 
-@docs SingletonSpec
-${specs.map(i => `@docs Singletons${i}, init${i}, specs${i}`).join(`
-`)}
+@docs Singletons${n}, init, specs
 
 -}
 
-import Dict exposing (Dict)
-import Ecs.Internal as Internal
-${specs.map(i => `import Ecs.Internal.Record${i} as Record${i}`).join(`
-`)}
+import Ecs.Internal exposing (SingletonSpec(..))
 
 
-{-| A specification type for a singleton.
--}
-type alias SingletonSpec singletons a =
-    Internal.SingletonSpec singletons a
-${specs.map(generateSingletonSpecs).join(`
-`)}
-`;
-};
-
-const generateSingletonSpecs = iSpec => {
-  const singletons = range(iSpec);
-
-  const singletonsType = `Singletons${iSpec} ${singletons
-    .map(i => `a${i}`)
-    .join(" ")}`;
-  const recordType = `Record${iSpec}.Record ${singletons
-    .map(i => `a${i}`)
-    .join(" ")}`;
-
-  return `
-
-{-| A singletons type for ${iSpec} singleton${iSpec > 1 ? "s" : ""}.
+{-| A singletons type for ${n} singleton${n > 1 ? "s" : ""}.
 -}
 type ${singletonsType}
-    = Singletons${iSpec} (${recordType})
+    = Singletons${n}
+        { ${singletons.map(i => `a${i} : a${i}`).join(`
+        , `)}
+        }
 
 
-{-| Initialize a singleton type for ${iSpec} singleton${iSpec > 1 ? "s" : ""}.
+{-| Initialize a singleton type for ${n} singleton${n > 1 ? "s" : ""}.
 -}
-init${iSpec} : ${singletons
+init : ${singletons
     .map(i => `a${i}`)
-    .join(" -> ")} -> Singletons${iSpec} ${singletons
-    .map(i => `a${i}`)
-    .join(" ")}
-init${iSpec} ${singletons.map(i => `a${i}`).join(" ")} =
-    Singletons${iSpec}
+    .join(" -> ")} -> Singletons${n} ${singletons.map(i => `a${i}`).join(" ")}
+init ${singletons.map(i => `a${i}`).join(" ")} =
+    Singletons${n}
         { ${singletons.map(i => `a${i} = a${i}`).join(`
         , `)}
         }
 
 
-{-| Create all singleton specifications for ${iSpec} singleton type${
-    iSpec > 1 ? "s" : ""
+{-| Create all singleton specifications for ${n} singleton type${
+    n > 1 ? "s" : ""
   }.
 -}
-specs${iSpec} :
-    (${singletons.map(i => `SingletonSpec (${singletonsType}) a${i}`).join(`
+specs :
+    (${singletons.map(i => `SingletonSpec a${i} (${singletonsType})`).join(`
      -> `)}
      -> specs
     )
     -> specs
-specs${iSpec} fn =
+specs fn =
     fn
         ${singletons.map(
-          iSingleton => `(Internal.SingletonSpec
-            { get = \\(Singletons${iSpec} singletons) -> singletons.a${iSingleton}
-            , update =
-                \\updateFn (Singletons${iSpec} singletons) ->
-                    Singletons${iSpec} (Record${iSpec}.update${iSingleton} updateFn singletons)
+          i => `(SingletonSpec
+            { get = \\(Singletons${n} singletons) -> singletons.a${i}
+            , set =
+                \\a (Singletons${n} singletons) ->
+                    Singletons${n}
+                        { ${singletons.map(
+                          f => `a${f} = ${f === i ? `a` : `singletons.a${f}`}`
+                        ).join(`
+                        , `)}
+                        }
             }
         )`
         ).join(`
-        `)}`;
+        `)}
+`;
 };
