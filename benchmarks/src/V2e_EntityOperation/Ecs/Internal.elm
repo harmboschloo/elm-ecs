@@ -1,4 +1,4 @@
-module Ecs.Internal exposing
+module V2e_EntityOperation.Ecs.Internal exposing
     ( ComponentSpec(..)
     , EntityOperation(..)
     , InternalWorld
