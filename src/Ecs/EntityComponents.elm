@@ -32,6 +32,7 @@ import Ecs.Internal as Internal
         )
 
 
+{-| -}
 foldl :
     ComponentSpec comparable a components
     -> (comparable -> a -> acc -> acc)
@@ -45,6 +46,7 @@ foldl (ComponentSpec spec) fn acc (World world) =
         (spec.get world.components)
 
 
+{-| -}
 foldr :
     ComponentSpec comparable a components
     -> (comparable -> a -> acc -> acc)
@@ -58,6 +60,7 @@ foldr (ComponentSpec spec) fn acc (World world) =
         (spec.get world.components)
 
 
+{-| -}
 foldl2 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -73,6 +76,7 @@ foldl2 (ComponentSpec spec1) (ComponentSpec spec2) fn acc (World world) =
         (spec2.get world.components)
 
 
+{-| -}
 foldr2 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -88,6 +92,7 @@ foldr2 (ComponentSpec spec1) (ComponentSpec spec2) fn acc (World world) =
         (spec2.get world.components)
 
 
+{-| -}
 foldl3 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -105,6 +110,7 @@ foldl3 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) fn acc 
         (spec3.get world.components)
 
 
+{-| -}
 foldr3 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -122,6 +128,7 @@ foldr3 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) fn acc 
         (spec3.get world.components)
 
 
+{-| -}
 foldl4 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -141,6 +148,7 @@ foldl4 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (Compon
         (spec4.get world.components)
 
 
+{-| -}
 foldr4 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -160,6 +168,7 @@ foldr4 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (Compon
         (spec4.get world.components)
 
 
+{-| -}
 foldl5 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -181,6 +190,7 @@ foldl5 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (Compon
         (spec5.get world.components)
 
 
+{-| -}
 foldr5 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -202,6 +212,7 @@ foldr5 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (Compon
         (spec5.get world.components)
 
 
+{-| -}
 foldl6 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -225,6 +236,7 @@ foldl6 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (Compon
         (spec6.get world.components)
 
 
+{-| -}
 foldr6 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -248,6 +260,7 @@ foldr6 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (Compon
         (spec6.get world.components)
 
 
+{-| -}
 foldl7 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -273,6 +286,7 @@ foldl7 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (Compon
         (spec7.get world.components)
 
 
+{-| -}
 foldr7 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -298,6 +312,7 @@ foldr7 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (Compon
         (spec7.get world.components)
 
 
+{-| -}
 foldl8 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -325,6 +340,7 @@ foldl8 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (Compon
         (spec8.get world.components)
 
 
+{-| -}
 foldr8 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components

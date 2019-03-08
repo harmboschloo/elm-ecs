@@ -60,14 +60,17 @@ import Set exposing (Set)
 -- SPECS --
 
 
+{-| -}
 type alias MultiComponentSpec comparable components =
     Internal.MultiComponentSpec comparable components
 
 
+{-| -}
 type alias ComponentSpec comparable a components =
     Internal.ComponentSpec comparable a components
 
 
+{-| -}
 type alias SingletonSpec a singletons =
     Internal.SingletonSpec a singletons
 
@@ -76,6 +79,7 @@ type alias SingletonSpec a singletons =
 -- WORLD --
 
 
+{-| -}
 type alias World comparable components singletons =
     Internal.World comparable components singletons
 
@@ -129,6 +133,7 @@ worldEntityIds (World world) =
 -- ENTITY --
 
 
+{-| -}
 insertEntity :
     comparable
     -> World comparable components singletons
@@ -141,6 +146,7 @@ insertEntity entityId (World { entities, components, singletons }) =
         }
 
 
+{-| -}
 removeEntity :
     MultiComponentSpec comparable components
     -> comparable
@@ -315,6 +321,7 @@ andUpdateComponent spec fn ( world, entityId ) =
 -- SINGLETON COMPONENTS --
 
 
+{-| -}
 getSingleton :
     SingletonSpec a singletons
     -> World comparable components singletons
@@ -323,6 +330,7 @@ getSingleton (SingletonSpec spec) (World { singletons }) =
     spec.get singletons
 
 
+{-| -}
 setSingleton :
     SingletonSpec a singletons
     -> a
@@ -332,6 +340,7 @@ setSingleton spec a =
     updateSingleton spec (always a)
 
 
+{-| -}
 updateSingleton :
     SingletonSpec a singletons
     -> (a -> a)
@@ -345,6 +354,7 @@ updateSingleton (SingletonSpec spec) fn (World world) =
         }
 
 
+{-| -}
 updateSingletonAndReturn :
     SingletonSpec a singletons
     -> (a -> a)
