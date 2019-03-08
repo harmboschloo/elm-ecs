@@ -1,14 +1,21 @@
 module Main exposing (main)
 
-import Array exposing (Array)
 import Browser
 import Browser.Events
 import Ecs
-import Ecs.Components
-import Ecs.Select
-import Ecs.Singletons
+import Ecs.Components4
+import Ecs.EntityComponents
+import Ecs.Singletons4
 import Html
 import Html.Attributes
+
+
+
+-- ENTITY ID --
+
+
+type alias EntityId =
+    Int
 
 
 
@@ -38,19 +45,19 @@ type Display
 
 
 type alias Components =
-    Ecs.Components.Components4 Position Velocity OutOfBoundsResolution Display
+    Ecs.Components4.Components4 EntityId Position Velocity OutOfBoundsResolution Display
 
 
-type alias AllComponentsSpec =
-    Ecs.Components.AllComponentsSpec Components
+type alias MultiComponentSpec =
+    Ecs.MultiComponentSpec EntityId Components
 
 
 type alias ComponentSpec a =
-    Ecs.Components.ComponentSpec Components a
+    Ecs.ComponentSpec EntityId a Components
 
 
 type alias ComponentSpecs =
-    { all : AllComponentsSpec
+    { all : MultiComponentSpec
     , position : ComponentSpec Position
     , velocity : ComponentSpec Velocity
     , outOfBoundsResolution : ComponentSpec OutOfBoundsResolution
@@ -60,7 +67,7 @@ type alias ComponentSpecs =
 
 componentSpecs : ComponentSpecs
 componentSpecs =
-    Ecs.Components.specs4 ComponentSpecs
+    Ecs.Components4.specs ComponentSpecs
 
 
 
@@ -87,15 +94,16 @@ type alias FpsStats =
 
 
 type alias Singletons =
-    Ecs.Singletons.Singletons3 Config Frame FpsStats
+    Ecs.Singletons4.Singletons4 Config EntityId Frame FpsStats
 
 
 type alias SingletonSpec a =
-    Ecs.Singletons.SingletonSpec Singletons a
+    Ecs.SingletonSpec a Singletons
 
 
 type alias SingletonSpecs =
     { config : SingletonSpec Config
+    , lastEntityId : SingletonSpec EntityId
     , frame : SingletonSpec Frame
     , fpsStats : SingletonSpec FpsStats
     }
@@ -103,15 +111,16 @@ type alias SingletonSpecs =
 
 singletonSpecs : SingletonSpecs
 singletonSpecs =
-    Ecs.Singletons.specs3 SingletonSpecs
+    Ecs.Singletons4.specs SingletonSpecs
 
 
 initSingletons : Singletons
 initSingletons =
-    Ecs.Singletons.init3
+    Ecs.Singletons4.init
         { worldWidth = 600
         , worldHeight = 600
         }
+        -1
         { deltaTime = 0
         , count = 0
         }
@@ -121,12 +130,20 @@ initSingletons =
         }
 
 
+newEntityId : World -> ( World, EntityId )
+newEntityId world =
+    Ecs.updateSingletonAndReturn
+        singletonSpecs.lastEntityId
+        (\id -> id + 1)
+        world
+
+
 
 -- WORLD --
 
 
 type alias World =
-    Ecs.World Components Singletons
+    Ecs.World EntityId Components Singletons
 
 
 createWorld : World
@@ -168,10 +185,11 @@ spawnEntities world =
     in
     if remainderBy 10 frame.count == 0 then
         world
-            |> Ecs.createEntity
+            |> newEntityId
+            |> Ecs.andInsertEntity
             |> Ecs.andInsertComponent componentSpecs.position position
             |> Ecs.andInsertComponent componentSpecs.display display
-            |> Tuple.second
+            |> Tuple.first
 
     else
         let
@@ -188,14 +206,15 @@ spawnEntities world =
                     Teleport
         in
         world
-            |> Ecs.createEntity
+            |> newEntityId
+            |> Ecs.andInsertEntity
             |> Ecs.andInsertComponent componentSpecs.position position
             |> Ecs.andInsertComponent componentSpecs.velocity velocity
             |> Ecs.andInsertComponent
                 componentSpecs.outOfBoundsResolution
                 outOfBoundsResolution
             |> Ecs.andInsertComponent componentSpecs.display display
-            |> Tuple.second
+            |> Tuple.first
 
 
 getColor : Int -> String
@@ -224,32 +243,24 @@ colors =
 -- MOVEMENT SYSTEM --
 
 
-type alias Move =
-    { position : Position
-    , velocity : Velocity
-    }
-
-
-moveSelector : Ecs.Select.Selector Components Move
-moveSelector =
-    Ecs.Select.select2 Move
-        componentSpecs.position
-        componentSpecs.velocity
-
-
 moveEntities : World -> World
 moveEntities world =
     let
         frame =
             Ecs.getSingleton singletonSpecs.frame world
     in
-    Ecs.processAll moveSelector (moveEntity frame.deltaTime) world
+    Ecs.EntityComponents.foldFromFront2
+        componentSpecs.position
+        componentSpecs.velocity
+        (moveEntity frame.deltaTime)
+        world
+        world
 
 
-moveEntity : Float -> ( Ecs.EntityId, Move ) -> World -> World
-moveEntity deltaTime ( id, { position, velocity } ) world =
+moveEntity : Float -> EntityId -> Position -> Velocity -> World -> World
+moveEntity deltaTime entityId position velocity world =
     Ecs.insertComponent componentSpecs.position
-        id
+        entityId
         { x = position.x + velocity.x * deltaTime
         , y = position.y + velocity.y * deltaTime
         }
@@ -260,41 +271,32 @@ moveEntity deltaTime ( id, { position, velocity } ) world =
 -- BOUNDS CHECK SYSTEM --
 
 
-type alias BoundsCheck =
-    { position : Position
-    , resolution : OutOfBoundsResolution
-    }
-
-
-boundsCheckSelector : Ecs.Select.Selector Components BoundsCheck
-boundsCheckSelector =
-    Ecs.Select.select2 BoundsCheck
-        componentSpecs.position
-        componentSpecs.outOfBoundsResolution
-
-
 boundsCheckEntities : World -> World
 boundsCheckEntities world =
     let
         config =
             Ecs.getSingleton singletonSpecs.config world
     in
-    Ecs.processAll
-        boundsCheckSelector
+    Ecs.EntityComponents.foldFromFront2
+        componentSpecs.position
+        componentSpecs.outOfBoundsResolution
         (boundsCheckEntity
             (toFloat config.worldWidth)
             (toFloat config.worldHeight)
         )
+        world
         world
 
 
 boundsCheckEntity :
     Float
     -> Float
-    -> ( Ecs.EntityId, BoundsCheck )
+    -> EntityId
+    -> Position
+    -> OutOfBoundsResolution
     -> World
     -> World
-boundsCheckEntity worldWidth worldHeight ( id, { position, resolution } ) world =
+boundsCheckEntity worldWidth worldHeight entityId position resolution world =
     if
         (position.x < 0 || (position.x > worldWidth))
             || (position.y < 0 || (position.y > worldHeight))
@@ -324,12 +326,12 @@ boundsCheckEntity worldWidth worldHeight ( id, { position, resolution } ) world 
                 in
                 Ecs.insertComponent
                     componentSpecs.position
-                    id
+                    entityId
                     { x = x, y = y }
                     world
 
             Destroy ->
-                Ecs.destroyEntity componentSpecs.all id world
+                Ecs.removeEntity componentSpecs.all entityId world
 
     else
         world
@@ -337,19 +339,6 @@ boundsCheckEntity worldWidth worldHeight ( id, { position, resolution } ) world 
 
 
 -- RENDER SYSTEM --
-
-
-type alias Render =
-    { position : Position
-    , display : Display
-    }
-
-
-renderSelector : Ecs.Select.Selector Components Render
-renderSelector =
-    Ecs.Select.select2 Render
-        componentSpecs.position
-        componentSpecs.display
 
 
 render : World -> List (Html.Html msg)
@@ -370,9 +359,12 @@ render world =
             (String.fromInt config.worldHeight ++ "px")
         , Html.Attributes.style "background-color" "#aaa"
         ]
-        (world
-            |> Ecs.selectAll renderSelector
-            |> List.map renderEntity
+        (Ecs.EntityComponents.foldFromBack2
+            componentSpecs.position
+            componentSpecs.display
+            (\_ position display list -> renderEntity position display :: list)
+            []
+            world
         )
     , Html.div []
         [ Html.text
@@ -392,8 +384,8 @@ render world =
     ]
 
 
-renderEntity : ( Ecs.EntityId, Render ) -> Html.Html msg
-renderEntity ( _, { position, display } ) =
+renderEntity : Position -> Display -> Html.Html msg
+renderEntity position display =
     case display of
         Circle { radius, color } ->
             Html.div

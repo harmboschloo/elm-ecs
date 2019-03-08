@@ -1,21 +1,20 @@
 module Ecs exposing
-    ( World, emptyWorld, isEmptyWorld, worldEntityIds
+    ( MultiComponentSpec, ComponentSpec, SingletonSpec
+    , World, emptyWorld, isEmptyWorld, worldEntityIds
     , worldEntityCount, worldComponentCount
     , insertEntity, removeEntity, clearEntity, hasEntity
     , insertComponent, updateComponent, removeComponent
     , hasComponent, getComponent, componentCount
-    , foldEntityComponentsFromFront, foldEntityComponentsFromBack
-    , foldEntityComponentsFromFront2, foldEntityComponentsFromBack2
-    , foldEntityComponentsFromFront3, foldEntityComponentsFromBack3
-    , foldEntityComponentsFromFront4, foldEntityComponentsFromBack4
-    , foldEntityComponentsFromFront5, foldEntityComponentsFromBack5
-    , foldEntityComponentsFromFront6, foldEntityComponentsFromBack6
-    , foldEntityComponentsFromFront7, foldEntityComponentsFromBack7
-    , foldEntityComponentsFromFront8, foldEntityComponentsFromBack8
-    , setSingleton, updateSingleton, getSingleton
+    , andInsertEntity, andInsertComponent, andUpdateComponent
+    , setSingleton, updateSingleton, updateSingletonAndReturn, getSingleton
     )
 
 {-|
+
+
+# Specs
+
+@docs MultiComponentSpec, ComponentSpec, SingletonSpec
 
 
 # World
@@ -35,31 +34,24 @@ module Ecs exposing
 @docs hasComponent, getComponent, componentCount
 
 
-# Entity Component Intersections
+# Pipelines
 
-@docs foldEntityComponentsFromFront, foldEntityComponentsFromBack
-@docs foldEntityComponentsFromFront2, foldEntityComponentsFromBack2
-@docs foldEntityComponentsFromFront3, foldEntityComponentsFromBack3
-@docs foldEntityComponentsFromFront4, foldEntityComponentsFromBack4
-@docs foldEntityComponentsFromFront5, foldEntityComponentsFromBack5
-@docs foldEntityComponentsFromFront6, foldEntityComponentsFromBack6
-@docs foldEntityComponentsFromFront7, foldEntityComponentsFromBack7
-@docs foldEntityComponentsFromFront8, foldEntityComponentsFromBack8
+@docs andInsertEntity, andInsertComponent, andUpdateComponent
 
 
 # Singletons
 
-@docs setSingleton, updateSingleton, getSingleton
+@docs setSingleton, updateSingleton, updateSingletonAndReturn, getSingleton
 
 -}
 
 import Dict
-import Dict.Intersect
 import Ecs.Internal as Internal
     exposing
         ( ComponentSpec(..)
         , MultiComponentSpec(..)
         , SingletonSpec(..)
+        , World(..)
         )
 import Set exposing (Set)
 
@@ -84,12 +76,8 @@ type alias SingletonSpec a singletons =
 -- WORLD --
 
 
-type World comparable components singletons
-    = World
-        { entities : Set comparable
-        , components : components
-        , singletons : singletons
-        }
+type alias World comparable components singletons =
+    Internal.World comparable components singletons
 
 
 {-| Create an empty world without entities or components.
@@ -289,327 +277,38 @@ componentCount (ComponentSpec spec) (World { components }) =
 
 
 
--- ENTITY COMPONENTS INTERSECTIONS --
+-- COMPONENTS PIPELINE --
 
 
-foldEntityComponentsFromFront :
+{-| Insert a specific component in an entity.
+-}
+andInsertEntity :
+    ( World comparable components singletons, comparable )
+    -> ( World comparable components singletons, comparable )
+andInsertEntity ( world, entityId ) =
+    ( insertEntity entityId world, entityId )
+
+
+{-| Insert a specific component in an entity.
+-}
+andInsertComponent :
     ComponentSpec comparable a components
-    -> (comparable -> a -> acc -> acc)
-    -> acc
-    -> World comparable components singletons
-    -> acc
-foldEntityComponentsFromFront (ComponentSpec spec) fn acc (World world) =
-    Dict.foldl
-        fn
-        acc
-        (spec.get world.components)
+    -> a
+    -> ( World comparable components singletons, comparable )
+    -> ( World comparable components singletons, comparable )
+andInsertComponent spec a ( world, entityId ) =
+    ( insertComponent spec entityId a world, entityId )
 
 
-foldEntityComponentsFromBack :
+{-| Update a specific component in an entity.
+-}
+andUpdateComponent :
     ComponentSpec comparable a components
-    -> (comparable -> a -> acc -> acc)
-    -> acc
-    -> World comparable components singletons
-    -> acc
-foldEntityComponentsFromBack (ComponentSpec spec) fn acc (World world) =
-    Dict.foldr
-        fn
-        acc
-        (spec.get world.components)
-
-
-foldEntityComponentsFromFront2 :
-    ComponentSpec comparable a1 components
-    -> ComponentSpec comparable a2 components
-    -> (comparable -> a1 -> a2 -> acc -> acc)
-    -> acc
-    -> World comparable components singletons
-    -> acc
-foldEntityComponentsFromFront2 (ComponentSpec spec1) (ComponentSpec spec2) fn acc (World world) =
-    Dict.Intersect.foldl2
-        fn
-        acc
-        (spec1.get world.components)
-        (spec2.get world.components)
-
-
-foldEntityComponentsFromBack2 :
-    ComponentSpec comparable a1 components
-    -> ComponentSpec comparable a2 components
-    -> (comparable -> a1 -> a2 -> acc -> acc)
-    -> acc
-    -> World comparable components singletons
-    -> acc
-foldEntityComponentsFromBack2 (ComponentSpec spec1) (ComponentSpec spec2) fn acc (World world) =
-    Dict.Intersect.foldr2
-        fn
-        acc
-        (spec1.get world.components)
-        (spec2.get world.components)
-
-
-foldEntityComponentsFromFront3 :
-    ComponentSpec comparable a1 components
-    -> ComponentSpec comparable a2 components
-    -> ComponentSpec comparable a3 components
-    -> (comparable -> a1 -> a2 -> a3 -> acc -> acc)
-    -> acc
-    -> World comparable components singletons
-    -> acc
-foldEntityComponentsFromFront3 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) fn acc (World world) =
-    Dict.Intersect.foldl3
-        fn
-        acc
-        (spec1.get world.components)
-        (spec2.get world.components)
-        (spec3.get world.components)
-
-
-foldEntityComponentsFromBack3 :
-    ComponentSpec comparable a1 components
-    -> ComponentSpec comparable a2 components
-    -> ComponentSpec comparable a3 components
-    -> (comparable -> a1 -> a2 -> a3 -> acc -> acc)
-    -> acc
-    -> World comparable components singletons
-    -> acc
-foldEntityComponentsFromBack3 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) fn acc (World world) =
-    Dict.Intersect.foldr3
-        fn
-        acc
-        (spec1.get world.components)
-        (spec2.get world.components)
-        (spec3.get world.components)
-
-
-foldEntityComponentsFromFront4 :
-    ComponentSpec comparable a1 components
-    -> ComponentSpec comparable a2 components
-    -> ComponentSpec comparable a3 components
-    -> ComponentSpec comparable a4 components
-    -> (comparable -> a1 -> a2 -> a3 -> a4 -> acc -> acc)
-    -> acc
-    -> World comparable components singletons
-    -> acc
-foldEntityComponentsFromFront4 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) fn acc (World world) =
-    Dict.Intersect.foldl4
-        fn
-        acc
-        (spec1.get world.components)
-        (spec2.get world.components)
-        (spec3.get world.components)
-        (spec4.get world.components)
-
-
-foldEntityComponentsFromBack4 :
-    ComponentSpec comparable a1 components
-    -> ComponentSpec comparable a2 components
-    -> ComponentSpec comparable a3 components
-    -> ComponentSpec comparable a4 components
-    -> (comparable -> a1 -> a2 -> a3 -> a4 -> acc -> acc)
-    -> acc
-    -> World comparable components singletons
-    -> acc
-foldEntityComponentsFromBack4 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) fn acc (World world) =
-    Dict.Intersect.foldr4
-        fn
-        acc
-        (spec1.get world.components)
-        (spec2.get world.components)
-        (spec3.get world.components)
-        (spec4.get world.components)
-
-
-foldEntityComponentsFromFront5 :
-    ComponentSpec comparable a1 components
-    -> ComponentSpec comparable a2 components
-    -> ComponentSpec comparable a3 components
-    -> ComponentSpec comparable a4 components
-    -> ComponentSpec comparable a5 components
-    -> (comparable -> a1 -> a2 -> a3 -> a4 -> a5 -> acc -> acc)
-    -> acc
-    -> World comparable components singletons
-    -> acc
-foldEntityComponentsFromFront5 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) fn acc (World world) =
-    Dict.Intersect.foldl5
-        fn
-        acc
-        (spec1.get world.components)
-        (spec2.get world.components)
-        (spec3.get world.components)
-        (spec4.get world.components)
-        (spec5.get world.components)
-
-
-foldEntityComponentsFromBack5 :
-    ComponentSpec comparable a1 components
-    -> ComponentSpec comparable a2 components
-    -> ComponentSpec comparable a3 components
-    -> ComponentSpec comparable a4 components
-    -> ComponentSpec comparable a5 components
-    -> (comparable -> a1 -> a2 -> a3 -> a4 -> a5 -> acc -> acc)
-    -> acc
-    -> World comparable components singletons
-    -> acc
-foldEntityComponentsFromBack5 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) fn acc (World world) =
-    Dict.Intersect.foldr5
-        fn
-        acc
-        (spec1.get world.components)
-        (spec2.get world.components)
-        (spec3.get world.components)
-        (spec4.get world.components)
-        (spec5.get world.components)
-
-
-foldEntityComponentsFromFront6 :
-    ComponentSpec comparable a1 components
-    -> ComponentSpec comparable a2 components
-    -> ComponentSpec comparable a3 components
-    -> ComponentSpec comparable a4 components
-    -> ComponentSpec comparable a5 components
-    -> ComponentSpec comparable a6 components
-    -> (comparable -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> acc -> acc)
-    -> acc
-    -> World comparable components singletons
-    -> acc
-foldEntityComponentsFromFront6 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) (ComponentSpec spec6) fn acc (World world) =
-    Dict.Intersect.foldl6
-        fn
-        acc
-        (spec1.get world.components)
-        (spec2.get world.components)
-        (spec3.get world.components)
-        (spec4.get world.components)
-        (spec5.get world.components)
-        (spec6.get world.components)
-
-
-foldEntityComponentsFromBack6 :
-    ComponentSpec comparable a1 components
-    -> ComponentSpec comparable a2 components
-    -> ComponentSpec comparable a3 components
-    -> ComponentSpec comparable a4 components
-    -> ComponentSpec comparable a5 components
-    -> ComponentSpec comparable a6 components
-    -> (comparable -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> acc -> acc)
-    -> acc
-    -> World comparable components singletons
-    -> acc
-foldEntityComponentsFromBack6 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) (ComponentSpec spec6) fn acc (World world) =
-    Dict.Intersect.foldr6
-        fn
-        acc
-        (spec1.get world.components)
-        (spec2.get world.components)
-        (spec3.get world.components)
-        (spec4.get world.components)
-        (spec5.get world.components)
-        (spec6.get world.components)
-
-
-foldEntityComponentsFromFront7 :
-    ComponentSpec comparable a1 components
-    -> ComponentSpec comparable a2 components
-    -> ComponentSpec comparable a3 components
-    -> ComponentSpec comparable a4 components
-    -> ComponentSpec comparable a5 components
-    -> ComponentSpec comparable a6 components
-    -> ComponentSpec comparable a7 components
-    -> (comparable -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> acc -> acc)
-    -> acc
-    -> World comparable components singletons
-    -> acc
-foldEntityComponentsFromFront7 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) (ComponentSpec spec6) (ComponentSpec spec7) fn acc (World world) =
-    Dict.Intersect.foldl7
-        fn
-        acc
-        (spec1.get world.components)
-        (spec2.get world.components)
-        (spec3.get world.components)
-        (spec4.get world.components)
-        (spec5.get world.components)
-        (spec6.get world.components)
-        (spec7.get world.components)
-
-
-foldEntityComponentsFromBack7 :
-    ComponentSpec comparable a1 components
-    -> ComponentSpec comparable a2 components
-    -> ComponentSpec comparable a3 components
-    -> ComponentSpec comparable a4 components
-    -> ComponentSpec comparable a5 components
-    -> ComponentSpec comparable a6 components
-    -> ComponentSpec comparable a7 components
-    -> (comparable -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> acc -> acc)
-    -> acc
-    -> World comparable components singletons
-    -> acc
-foldEntityComponentsFromBack7 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) (ComponentSpec spec6) (ComponentSpec spec7) fn acc (World world) =
-    Dict.Intersect.foldr7
-        fn
-        acc
-        (spec1.get world.components)
-        (spec2.get world.components)
-        (spec3.get world.components)
-        (spec4.get world.components)
-        (spec5.get world.components)
-        (spec6.get world.components)
-        (spec7.get world.components)
-
-
-foldEntityComponentsFromFront8 :
-    ComponentSpec comparable a1 components
-    -> ComponentSpec comparable a2 components
-    -> ComponentSpec comparable a3 components
-    -> ComponentSpec comparable a4 components
-    -> ComponentSpec comparable a5 components
-    -> ComponentSpec comparable a6 components
-    -> ComponentSpec comparable a7 components
-    -> ComponentSpec comparable a8 components
-    -> (comparable -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> a8 -> acc -> acc)
-    -> acc
-    -> World comparable components singletons
-    -> acc
-foldEntityComponentsFromFront8 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) (ComponentSpec spec6) (ComponentSpec spec7) (ComponentSpec spec8) fn acc (World world) =
-    Dict.Intersect.foldl8
-        fn
-        acc
-        (spec1.get world.components)
-        (spec2.get world.components)
-        (spec3.get world.components)
-        (spec4.get world.components)
-        (spec5.get world.components)
-        (spec6.get world.components)
-        (spec7.get world.components)
-        (spec8.get world.components)
-
-
-foldEntityComponentsFromBack8 :
-    ComponentSpec comparable a1 components
-    -> ComponentSpec comparable a2 components
-    -> ComponentSpec comparable a3 components
-    -> ComponentSpec comparable a4 components
-    -> ComponentSpec comparable a5 components
-    -> ComponentSpec comparable a6 components
-    -> ComponentSpec comparable a7 components
-    -> ComponentSpec comparable a8 components
-    -> (comparable -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> a8 -> acc -> acc)
-    -> acc
-    -> World comparable components singletons
-    -> acc
-foldEntityComponentsFromBack8 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) (ComponentSpec spec6) (ComponentSpec spec7) (ComponentSpec spec8) fn acc (World world) =
-    Dict.Intersect.foldr8
-        fn
-        acc
-        (spec1.get world.components)
-        (spec2.get world.components)
-        (spec3.get world.components)
-        (spec4.get world.components)
-        (spec5.get world.components)
-        (spec6.get world.components)
-        (spec7.get world.components)
-        (spec8.get world.components)
+    -> (Maybe a -> Maybe a)
+    -> ( World comparable components singletons, comparable )
+    -> ( World comparable components singletons, comparable )
+andUpdateComponent spec fn ( world, entityId ) =
+    ( updateComponent spec entityId fn world, entityId )
 
 
 
@@ -644,3 +343,22 @@ updateSingleton (SingletonSpec spec) fn (World world) =
         , components = world.components
         , singletons = spec.set (fn (spec.get world.singletons)) world.singletons
         }
+
+
+updateSingletonAndReturn :
+    SingletonSpec a singletons
+    -> (a -> a)
+    -> World comparable components singletons
+    -> ( World comparable components singletons, a )
+updateSingletonAndReturn (SingletonSpec spec) fn (World world) =
+    let
+        aNew =
+            fn (spec.get world.singletons)
+    in
+    ( World
+        { entities = world.entities
+        , components = world.components
+        , singletons = spec.set aNew world.singletons
+        }
+    , aNew
+    )

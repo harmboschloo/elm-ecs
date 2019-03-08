@@ -6,6 +6,7 @@
   "version": "1.0.0",
   "exposed-modules": [
     "Ecs",
+    "Ecs.EntityComponents",
     "Ecs.Components1",
     "Ecs.Components2",
     "Ecs.Components3",
