@@ -249,7 +249,7 @@ moveEntities world =
         frame =
             Ecs.getSingleton singletonSpecs.frame world
     in
-    Ecs.EntityComponents.foldFromFront2
+    Ecs.EntityComponents.foldl2
         componentSpecs.position
         componentSpecs.velocity
         (moveEntity frame.deltaTime)
@@ -277,7 +277,7 @@ boundsCheckEntities world =
         config =
             Ecs.getSingleton singletonSpecs.config world
     in
-    Ecs.EntityComponents.foldFromFront2
+    Ecs.EntityComponents.foldl2
         componentSpecs.position
         componentSpecs.outOfBoundsResolution
         (boundsCheckEntity
@@ -359,7 +359,7 @@ render world =
             (String.fromInt config.worldHeight ++ "px")
         , Html.Attributes.style "background-color" "#aaa"
         ]
-        (Ecs.EntityComponents.foldFromBack2
+        (Ecs.EntityComponents.foldr2
             componentSpecs.position
             componentSpecs.display
             (\_ position display list -> renderEntity position display :: list)

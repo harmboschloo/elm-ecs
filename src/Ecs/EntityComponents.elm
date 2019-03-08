@@ -1,24 +1,24 @@
 module Ecs.EntityComponents exposing
-    ( foldFromFront, foldFromBack
-    , foldFromFront2, foldFromBack2
-    , foldFromFront3, foldFromBack3
-    , foldFromFront4, foldFromBack4
-    , foldFromFront5, foldFromBack5
-    , foldFromFront6, foldFromBack6
-    , foldFromFront7, foldFromBack7
-    , foldFromFront8, foldFromBack8
+    ( foldl, foldr
+    , foldl2, foldr2
+    , foldl3, foldr3
+    , foldl4, foldr4
+    , foldl5, foldr5
+    , foldl6, foldr6
+    , foldl7, foldr7
+    , foldl8, foldr8
     )
 
 {-|
 
-@docs foldFromFront, foldFromBack
-@docs foldFromFront2, foldFromBack2
-@docs foldFromFront3, foldFromBack3
-@docs foldFromFront4, foldFromBack4
-@docs foldFromFront5, foldFromBack5
-@docs foldFromFront6, foldFromBack6
-@docs foldFromFront7, foldFromBack7
-@docs foldFromFront8, foldFromBack8
+@docs foldl, foldr
+@docs foldl2, foldr2
+@docs foldl3, foldr3
+@docs foldl4, foldr4
+@docs foldl5, foldr5
+@docs foldl6, foldr6
+@docs foldl7, foldr7
+@docs foldl8, foldr8
 
 -}
 
@@ -32,40 +32,40 @@ import Ecs.Internal as Internal
         )
 
 
-foldFromFront :
+foldl :
     ComponentSpec comparable a components
     -> (comparable -> a -> acc -> acc)
     -> acc
     -> World comparable components singletons
     -> acc
-foldFromFront (ComponentSpec spec) fn acc (World world) =
+foldl (ComponentSpec spec) fn acc (World world) =
     Dict.foldl
         fn
         acc
         (spec.get world.components)
 
 
-foldFromBack :
+foldr :
     ComponentSpec comparable a components
     -> (comparable -> a -> acc -> acc)
     -> acc
     -> World comparable components singletons
     -> acc
-foldFromBack (ComponentSpec spec) fn acc (World world) =
+foldr (ComponentSpec spec) fn acc (World world) =
     Dict.foldr
         fn
         acc
         (spec.get world.components)
 
 
-foldFromFront2 :
+foldl2 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
     -> (comparable -> a1 -> a2 -> acc -> acc)
     -> acc
     -> World comparable components singletons
     -> acc
-foldFromFront2 (ComponentSpec spec1) (ComponentSpec spec2) fn acc (World world) =
+foldl2 (ComponentSpec spec1) (ComponentSpec spec2) fn acc (World world) =
     Dict.Intersect.foldl2
         fn
         acc
@@ -73,14 +73,14 @@ foldFromFront2 (ComponentSpec spec1) (ComponentSpec spec2) fn acc (World world) 
         (spec2.get world.components)
 
 
-foldFromBack2 :
+foldr2 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
     -> (comparable -> a1 -> a2 -> acc -> acc)
     -> acc
     -> World comparable components singletons
     -> acc
-foldFromBack2 (ComponentSpec spec1) (ComponentSpec spec2) fn acc (World world) =
+foldr2 (ComponentSpec spec1) (ComponentSpec spec2) fn acc (World world) =
     Dict.Intersect.foldr2
         fn
         acc
@@ -88,7 +88,7 @@ foldFromBack2 (ComponentSpec spec1) (ComponentSpec spec2) fn acc (World world) =
         (spec2.get world.components)
 
 
-foldFromFront3 :
+foldl3 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
     -> ComponentSpec comparable a3 components
@@ -96,7 +96,7 @@ foldFromFront3 :
     -> acc
     -> World comparable components singletons
     -> acc
-foldFromFront3 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) fn acc (World world) =
+foldl3 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) fn acc (World world) =
     Dict.Intersect.foldl3
         fn
         acc
@@ -105,7 +105,7 @@ foldFromFront3 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3)
         (spec3.get world.components)
 
 
-foldFromBack3 :
+foldr3 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
     -> ComponentSpec comparable a3 components
@@ -113,7 +113,7 @@ foldFromBack3 :
     -> acc
     -> World comparable components singletons
     -> acc
-foldFromBack3 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) fn acc (World world) =
+foldr3 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) fn acc (World world) =
     Dict.Intersect.foldr3
         fn
         acc
@@ -122,7 +122,7 @@ foldFromBack3 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) 
         (spec3.get world.components)
 
 
-foldFromFront4 :
+foldl4 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
     -> ComponentSpec comparable a3 components
@@ -131,7 +131,7 @@ foldFromFront4 :
     -> acc
     -> World comparable components singletons
     -> acc
-foldFromFront4 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) fn acc (World world) =
+foldl4 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) fn acc (World world) =
     Dict.Intersect.foldl4
         fn
         acc
@@ -141,7 +141,7 @@ foldFromFront4 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3)
         (spec4.get world.components)
 
 
-foldFromBack4 :
+foldr4 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
     -> ComponentSpec comparable a3 components
@@ -150,7 +150,7 @@ foldFromBack4 :
     -> acc
     -> World comparable components singletons
     -> acc
-foldFromBack4 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) fn acc (World world) =
+foldr4 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) fn acc (World world) =
     Dict.Intersect.foldr4
         fn
         acc
@@ -160,7 +160,7 @@ foldFromBack4 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) 
         (spec4.get world.components)
 
 
-foldFromFront5 :
+foldl5 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
     -> ComponentSpec comparable a3 components
@@ -170,7 +170,7 @@ foldFromFront5 :
     -> acc
     -> World comparable components singletons
     -> acc
-foldFromFront5 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) fn acc (World world) =
+foldl5 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) fn acc (World world) =
     Dict.Intersect.foldl5
         fn
         acc
@@ -181,7 +181,7 @@ foldFromFront5 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3)
         (spec5.get world.components)
 
 
-foldFromBack5 :
+foldr5 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
     -> ComponentSpec comparable a3 components
@@ -191,7 +191,7 @@ foldFromBack5 :
     -> acc
     -> World comparable components singletons
     -> acc
-foldFromBack5 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) fn acc (World world) =
+foldr5 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) fn acc (World world) =
     Dict.Intersect.foldr5
         fn
         acc
@@ -202,7 +202,7 @@ foldFromBack5 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) 
         (spec5.get world.components)
 
 
-foldFromFront6 :
+foldl6 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
     -> ComponentSpec comparable a3 components
@@ -213,7 +213,7 @@ foldFromFront6 :
     -> acc
     -> World comparable components singletons
     -> acc
-foldFromFront6 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) (ComponentSpec spec6) fn acc (World world) =
+foldl6 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) (ComponentSpec spec6) fn acc (World world) =
     Dict.Intersect.foldl6
         fn
         acc
@@ -225,7 +225,7 @@ foldFromFront6 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3)
         (spec6.get world.components)
 
 
-foldFromBack6 :
+foldr6 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
     -> ComponentSpec comparable a3 components
@@ -236,7 +236,7 @@ foldFromBack6 :
     -> acc
     -> World comparable components singletons
     -> acc
-foldFromBack6 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) (ComponentSpec spec6) fn acc (World world) =
+foldr6 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) (ComponentSpec spec6) fn acc (World world) =
     Dict.Intersect.foldr6
         fn
         acc
@@ -248,7 +248,7 @@ foldFromBack6 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) 
         (spec6.get world.components)
 
 
-foldFromFront7 :
+foldl7 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
     -> ComponentSpec comparable a3 components
@@ -260,7 +260,7 @@ foldFromFront7 :
     -> acc
     -> World comparable components singletons
     -> acc
-foldFromFront7 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) (ComponentSpec spec6) (ComponentSpec spec7) fn acc (World world) =
+foldl7 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) (ComponentSpec spec6) (ComponentSpec spec7) fn acc (World world) =
     Dict.Intersect.foldl7
         fn
         acc
@@ -273,7 +273,7 @@ foldFromFront7 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3)
         (spec7.get world.components)
 
 
-foldFromBack7 :
+foldr7 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
     -> ComponentSpec comparable a3 components
@@ -285,7 +285,7 @@ foldFromBack7 :
     -> acc
     -> World comparable components singletons
     -> acc
-foldFromBack7 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) (ComponentSpec spec6) (ComponentSpec spec7) fn acc (World world) =
+foldr7 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) (ComponentSpec spec6) (ComponentSpec spec7) fn acc (World world) =
     Dict.Intersect.foldr7
         fn
         acc
@@ -298,7 +298,7 @@ foldFromBack7 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) 
         (spec7.get world.components)
 
 
-foldFromFront8 :
+foldl8 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
     -> ComponentSpec comparable a3 components
@@ -311,7 +311,7 @@ foldFromFront8 :
     -> acc
     -> World comparable components singletons
     -> acc
-foldFromFront8 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) (ComponentSpec spec6) (ComponentSpec spec7) (ComponentSpec spec8) fn acc (World world) =
+foldl8 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) (ComponentSpec spec6) (ComponentSpec spec7) (ComponentSpec spec8) fn acc (World world) =
     Dict.Intersect.foldl8
         fn
         acc
@@ -325,7 +325,7 @@ foldFromFront8 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3)
         (spec8.get world.components)
 
 
-foldFromBack8 :
+foldr8 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
     -> ComponentSpec comparable a3 components
@@ -338,7 +338,7 @@ foldFromBack8 :
     -> acc
     -> World comparable components singletons
     -> acc
-foldFromBack8 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) (ComponentSpec spec6) (ComponentSpec spec7) (ComponentSpec spec8) fn acc (World world) =
+foldr8 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) (ComponentSpec spec4) (ComponentSpec spec5) (ComponentSpec spec6) (ComponentSpec spec7) (ComponentSpec spec8) fn acc (World world) =
     Dict.Intersect.foldr8
         fn
         acc
