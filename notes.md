@@ -36,6 +36,7 @@ ecs
 - https://github.com/sebas77/Svelto.ECS
 - [Overwatch Gameplay Architecture and Netcode](https://www.youtube.com/watch?v=W3aieHjyNvw
 - https://hackage.haskell.org/package/apecs
+- https://www.chris-granger.com/2012/12/11/anatomy-of-a-knockout/
 
 webgl
 
