@@ -1,8 +1,5 @@
-module EcsV2e_EntityOperation exposing
+module EcsV2f_CachedEntity exposing
     ( builder
-    , entityOperationFoldA
-    , entityOperationFoldABC
-    , entityOperationInsertA
     , foldA
     , foldABC
     , insertA
@@ -21,16 +18,15 @@ module EcsV2e_EntityOperation exposing
     )
 
 import Data exposing (A, B, C)
-import V2e_EntityOperation.Ecs as Ecs
-import V2e_EntityOperation.Ecs.Components3 as Components
-import V2e_EntityOperation.Ecs.EntityComponents as EntityComponents
-import V2e_EntityOperation.Ecs.EntityOperation as EntityOperation
-import V2e_EntityOperation.Ecs.Singletons1 as Singletons
+import V2f_CachedEntity.Ecs as Ecs
+import V2f_CachedEntity.Ecs.Components3 as Components
+import V2f_CachedEntity.Ecs.EntityComponents as EntityComponents
+import V2f_CachedEntity.Ecs.Singletons1 as Singletons
 
 
 label : String
 label =
-    "Ecs v2e EntityOperation"
+    "Ecs v2f CachedEntity"
 
 
 type alias Components =
@@ -95,19 +91,6 @@ insertC entityId c world =
     Ecs.insertComponent specs.c entityId c world
 
 
-insertAB : Int -> A -> B -> World -> World
-insertAB entityId a b world =
-    case EntityOperation.start entityId world of
-        Just op ->
-            op
-                |> EntityOperation.insertComponent specs.a a
-                |> EntityOperation.insertComponent specs.b b
-                |> EntityOperation.end
-
-        Nothing ->
-            world
-
-
 selectA : World -> List ( Int, A )
 selectA world =
     EntityComponents.foldr specs.a (\id a list -> ( id, a ) :: list) [] world
@@ -121,6 +104,13 @@ selectB world =
 selectC : World -> List ( Int, C )
 selectC world =
     EntityComponents.foldr specs.c (\id c list -> ( id, c ) :: list) [] world
+
+
+insertAB : Int -> A -> B -> World -> World
+insertAB entityId a b world =
+    world
+        |> Ecs.insertComponent specs.a entityId a
+        |> Ecs.insertComponent specs.b entityId b
 
 
 type alias AB =
@@ -157,11 +147,6 @@ selectABC world =
     EntityComponents.foldr3 specs.a specs.b specs.c (\id a b c list -> ( id, ABC a b c ) :: list) [] world
 
 
-selectAInsertA : A -> World -> World
-selectAInsertA a world =
-    entityOperationFoldA (\_ -> entityOperationInsertA a) world
-
-
 type alias CBA =
     { c : C
     , b : B
@@ -174,6 +159,11 @@ selectCBA world =
     EntityComponents.foldr3 specs.c specs.b specs.a (\id c b a list -> ( id, CBA c b a ) :: list) [] world
 
 
+selectAInsertA : A -> World -> World
+selectAInsertA a world =
+    EntityComponents.foldWorldl specs.a (\id _ w -> Ecs.insertComponent specs.a id a w) world
+
+
 foldA : (Int -> A -> World -> World) -> World -> World
 foldA fn world =
     EntityComponents.foldl specs.a fn world world
@@ -182,22 +172,3 @@ foldA fn world =
 foldABC : (Int -> A -> B -> C -> World -> World) -> World -> World
 foldABC fn world =
     EntityComponents.foldl3 specs.a specs.b specs.c fn world world
-
-
-type alias EntityOperation =
-    EntityOperation.EntityOperation Int Components Singletons
-
-
-entityOperationFoldA : (A -> EntityOperation -> EntityOperation) -> World -> World
-entityOperationFoldA fn world =
-    EntityOperation.foldl specs.a fn world
-
-
-entityOperationFoldABC : (A -> B -> C -> EntityOperation -> EntityOperation) -> World -> World
-entityOperationFoldABC fn world =
-    EntityOperation.foldl3 specs.a specs.b specs.c fn world
-
-
-entityOperationInsertA : A -> EntityOperation -> EntityOperation
-entityOperationInsertA a entityOperation =
-    EntityOperation.insertComponent specs.a a entityOperation

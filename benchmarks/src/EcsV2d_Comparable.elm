@@ -1,12 +1,14 @@
 module EcsV2d_Comparable exposing
     ( builder
     , insertA
+    , insertAB
     , insertB
     , insertC
     , label
     , selectA
     , selectAB
     , selectABC
+    , selectAInsertA
     , selectB
     , selectBA
     , selectC
@@ -83,6 +85,13 @@ insertC entityId c world =
     Ecs.insertComponent specs.c entityId c world
 
 
+insertAB : Int -> A -> B -> World -> World
+insertAB entityId a b world =
+    world
+        |> Ecs.insertComponent specs.a entityId a
+        |> Ecs.insertComponent specs.b entityId b
+
+
 selectA : World -> List ( Int, A )
 selectA world =
     Ecs.foldComponentsFromBack specs.a (\id a list -> ( id, a ) :: list) [] world
@@ -142,3 +151,8 @@ type alias CBA =
 selectCBA : World -> List ( Int, CBA )
 selectCBA world =
     Ecs.foldComponents3FromBack specs.c specs.b specs.a (\id c b a list -> ( id, CBA c b a ) :: list) [] world
+
+
+selectAInsertA : A -> World -> World
+selectAInsertA a world =
+    Ecs.foldComponentsFromBack specs.a (\id _ w -> Ecs.insertComponent specs.a id a w) world world

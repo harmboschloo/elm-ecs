@@ -4,7 +4,7 @@ import Benchmark exposing (Benchmark)
 import Benchmark.Runner as Runner
 import Data
 import EcsV2d_Comparable as Ecs1
-import EcsV2e_EntityOperation as Ecs2
+import EcsV2f_CachedEntity as Ecs2
 
 
 main : Runner.BenchmarkProgram
@@ -46,6 +46,11 @@ benchmark n =
             (\_ -> Ecs1.insertC insertEntityId1 Data.C insertWorld1)
             Ecs2.label
             (\_ -> Ecs2.insertC insertEntityId2 Data.C insertWorld2)
+        , Benchmark.compare "insert AB"
+            Ecs1.label
+            (\_ -> Ecs1.insertAB insertEntityId1 Data.A Data.B insertWorld1)
+            Ecs2.label
+            (\_ -> Ecs2.insertAB insertEntityId2 Data.A Data.B insertWorld2)
         , Benchmark.compare "selectA"
             Ecs1.label
             (\_ -> Ecs1.selectA world1)
@@ -81,4 +86,9 @@ benchmark n =
             (\_ -> Ecs1.selectCBA world1)
             Ecs2.label
             (\_ -> Ecs2.selectCBA world2)
+        , Benchmark.compare "selectA & insertA"
+            Ecs1.label
+            (\_ -> Ecs1.selectAInsertA Data.A world1)
+            Ecs2.label
+            (\_ -> Ecs2.selectAInsertA Data.A world2)
         ]

@@ -14,6 +14,7 @@
 - check insert multiple components (https://package.elm-lang.org/packages/seurimas/slime/latest/Slime#spawnEntities2)
 - add ops: startEntityOperation, createEntityAndStartOperation, andInsertComponent, and..., andEndEntityOpration, andEndEntityOprationWithId
 - add link to package in readme
+- add component entity ids query
 
 # Resources
 

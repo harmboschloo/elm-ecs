@@ -1,5 +1,5 @@
 module V2e_EntityOperation.Ecs.EntityOperation exposing
-    ( EntityOperation
+    ( EntityOperation, start, end
     , insertComponent, updateComponent, removeComponent
     , hasComponent, getComponent
     , foldl, foldr
