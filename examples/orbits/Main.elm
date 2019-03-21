@@ -18,19 +18,15 @@ import Time
 
 
 
--- ENTITY ID --
-
-
-type alias EntityId =
-    Int
-
-
-
 -- COMPONENTS --
 
 
 type alias Components =
     Ecs.Components7.Components7 EntityId Position Velocity GravityWell GravityTagA GravityTagB EndOfLife Display
+
+
+type alias EntityId =
+    Int
 
 
 type alias Position =
