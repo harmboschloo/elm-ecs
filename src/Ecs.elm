@@ -1,5 +1,5 @@
 module Ecs exposing
-    ( MultiComponentSpec, ComponentSpec, SingletonSpec
+    ( AllComponentSpec, ComponentSpec, SingletonSpec
     , World, emptyWorld, isEmptyWorld, worldEntityIds
     , worldEntityCount, worldComponentCount
     , insertEntity, removeEntity, clearEntity, hasEntity
@@ -14,7 +14,7 @@ module Ecs exposing
 
 # Specs
 
-@docs MultiComponentSpec, ComponentSpec, SingletonSpec
+@docs AllComponentSpec, ComponentSpec, SingletonSpec
 
 
 # World
@@ -48,8 +48,8 @@ module Ecs exposing
 import Dict
 import Ecs.Internal as Internal
     exposing
-        ( ComponentSpec(..)
-        , MultiComponentSpec(..)
+        ( AllComponentSpec(..)
+        , ComponentSpec(..)
         , SingletonSpec(..)
         , World(..)
         )
@@ -61,8 +61,8 @@ import Set exposing (Set)
 
 
 {-| -}
-type alias MultiComponentSpec comparable components =
-    Internal.MultiComponentSpec comparable components
+type alias AllComponentSpec comparable components =
+    Internal.AllComponentSpec comparable components
 
 
 {-| -}
@@ -87,10 +87,10 @@ type alias World comparable components singletons =
 {-| Create an empty world without entities or components.
 -}
 emptyWorld :
-    MultiComponentSpec comparable components
+    AllComponentSpec comparable components
     -> singletons
     -> World comparable components singletons
-emptyWorld (MultiComponentSpec componentsSpec) singletons =
+emptyWorld (AllComponentSpec componentsSpec) singletons =
     World
         { singletons = singletons
         , entities = Set.empty
@@ -115,10 +115,10 @@ worldEntityCount (World world) =
 {-| Determine the total number of components in the world.
 -}
 worldComponentCount :
-    MultiComponentSpec comparable components
+    AllComponentSpec comparable components
     -> World comparable components singletons
     -> Int
-worldComponentCount (MultiComponentSpec spec) (World world) =
+worldComponentCount (AllComponentSpec spec) (World world) =
     spec.size world.components
 
 
@@ -148,11 +148,11 @@ insertEntity entityId (World { entities, components, singletons }) =
 
 {-| -}
 removeEntity :
-    MultiComponentSpec comparable components
+    AllComponentSpec comparable components
     -> comparable
     -> World comparable components singletons
     -> World comparable components singletons
-removeEntity (MultiComponentSpec spec) entityId (World { entities, components, singletons }) =
+removeEntity (AllComponentSpec spec) entityId (World { entities, components, singletons }) =
     World
         { entities = Set.remove entityId entities
         , components = spec.clear entityId components
@@ -170,11 +170,11 @@ hasEntity entityId (World { entities }) =
 {-| Remove all components of an entity.
 -}
 clearEntity :
-    MultiComponentSpec comparable components
+    AllComponentSpec comparable components
     -> comparable
     -> World comparable components singletons
     -> World comparable components singletons
-clearEntity (MultiComponentSpec spec) entityId (World world) =
+clearEntity (AllComponentSpec spec) entityId (World world) =
     World
         { entities = world.entities
         , components = spec.clear entityId world.components

@@ -9,8 +9,8 @@ module Ecs.Components3 exposing (Components3, specs)
 import Dict exposing (Dict)
 import Ecs.Internal
     exposing
-        ( ComponentSpec(..)
-        , MultiComponentSpec(..)
+        ( AllComponentSpec(..)
+        , ComponentSpec(..)
         )
 
 
@@ -27,7 +27,7 @@ type Components3 comparable a1 a2 a3
 {-| Create all component specifications for 3 component types.
 -}
 specs :
-    (MultiComponentSpec comparable (Components3 comparable a1 a2 a3)
+    (AllComponentSpec comparable (Components3 comparable a1 a2 a3)
      -> ComponentSpec comparable a1 (Components3 comparable a1 a2 a3)
      -> ComponentSpec comparable a2 (Components3 comparable a1 a2 a3)
      -> ComponentSpec comparable a3 (Components3 comparable a1 a2 a3)
@@ -36,7 +36,7 @@ specs :
     -> specs
 specs fn =
     fn
-        (MultiComponentSpec
+        (AllComponentSpec
             { empty =
                 Components3
                     { dict1 = Dict.empty

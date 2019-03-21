@@ -1,8 +1,8 @@
 module Ecs.Internal exposing
-    ( ComponentSpec(..)
+    ( AllComponentSpec(..)
+    , ComponentSpec(..)
     , EntityOperation(..)
     , InternalWorld
-    , MultiComponentSpec(..)
     , SingletonSpec(..)
     , World(..)
     )
@@ -11,8 +11,8 @@ import Dict exposing (Dict)
 import Set exposing (Set)
 
 
-type MultiComponentSpec comparable components
-    = MultiComponentSpec
+type AllComponentSpec comparable components
+    = AllComponentSpec
         { empty : components
         , clear : comparable -> components -> components
         , size : components -> Int

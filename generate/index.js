@@ -28,7 +28,6 @@ function updateElmJson() {
     json["exposed-modules"] = [
       "Ecs",
       "Ecs.EntityComponents",
-      "Ecs.EntityOperation",
       ...range(n).map(i => `Ecs.Components${i}`),
       ...range(n).map(i => `Ecs.Singletons${i}`)
     ];
