@@ -103,7 +103,7 @@ type alias Specs =
     , gravityTagB : ComponentSpec GravityTagB
     , endOfLife : ComponentSpec EndOfLife
     , display : ComponentSpec Display
-    , lastEntityId : SingletonSpec EntityId
+    , nextEntityId : SingletonSpec EntityId
     , screen : SingletonSpec Screen
     , pointer : SingletonSpec Pointer
     , frame : SingletonSpec Frame
@@ -162,7 +162,7 @@ type alias SatelliteInitData =
 
 
 type alias GravityTagInitData =
-    { init : ( World, EntityId ) -> ( World, EntityId )
+    { init : World -> World
     , color : Color.Color
     }
 
@@ -188,7 +188,7 @@ initWorld initData =
 initSingletons : InitData -> Singletons
 initSingletons { time, viewport } =
     Ecs.Singletons5.init
-        -1
+        0
         { width = viewport.viewport.width
         , height = viewport.viewport.height
         }
@@ -213,18 +213,15 @@ initGravityWell world1 =
     in
     world2
         |> newEntity
-        |> Ecs.andInsertComponent specs.gravityWell
-            { mass = generated.radius ^ 1.4
-            }
+        |> Ecs.insertComponent specs.gravityWell { mass = generated.radius ^ 1.4 }
         |> generated.tag.init
-        |> Ecs.andInsertComponent specs.position generated.position
-        |> Ecs.andInsertComponent specs.display
+        |> Ecs.insertComponent specs.position generated.position
+        |> Ecs.insertComponent specs.display
             (Circle
                 { radius = generated.radius
                 , color = generated.tag.color
                 }
             )
-        |> Tuple.first
 
 
 initSatellites : List Position -> World -> World
@@ -258,16 +255,15 @@ initSatellite position world1 =
     world2
         |> newEntity
         |> generated.tag.init
-        |> Ecs.andInsertComponent specs.position position
-        |> Ecs.andInsertComponent specs.velocity generated.velocity
-        |> Ecs.andInsertComponent specs.display
+        |> Ecs.insertComponent specs.position position
+        |> Ecs.insertComponent specs.velocity generated.velocity
+        |> Ecs.insertComponent specs.display
             (Circle
                 { radius = generated.radius
                 , color = generated.tag.color
                 }
             )
-        |> Ecs.andInsertComponent specs.endOfLife (EndOfLife (frame.totalTime + generated.lifeTime))
-        |> Tuple.first
+        |> Ecs.insertComponent specs.endOfLife (EndOfLife (frame.totalTime + generated.lifeTime))
 
 
 gravityWellPositionGenerator : Random.Generator Position
@@ -285,8 +281,8 @@ gravityWellRadiusGenerator =
 gravityWellTagGenerator : Random.Generator GravityTagInitData
 gravityWellTagGenerator =
     Random.uniform
-        (GravityTagInitData andInsertGravityTagA Color.lightRed)
-        [ GravityTagInitData andInsertGravityTagB Color.lightGreen
+        (GravityTagInitData insertGravityTagA Color.lightRed)
+        [ GravityTagInitData insertGravityTagB Color.lightGreen
         ]
 
 
@@ -305,20 +301,20 @@ satelliteRadiusGenerator =
 satelliteTagGenerator : Random.Generator GravityTagInitData
 satelliteTagGenerator =
     Random.uniform
-        (GravityTagInitData andInsertGravityTagA Color.red)
-        [ GravityTagInitData andInsertGravityTagB Color.green
-        , GravityTagInitData (andInsertGravityTagA >> andInsertGravityTagB) Color.yellow
+        (GravityTagInitData insertGravityTagA Color.red)
+        [ GravityTagInitData insertGravityTagB Color.green
+        , GravityTagInitData (insertGravityTagA >> insertGravityTagB) Color.yellow
         ]
 
 
-andInsertGravityTagA : ( World, EntityId ) -> ( World, EntityId )
-andInsertGravityTagA =
-    Ecs.andInsertComponent specs.gravityTagA GravityTagA
+insertGravityTagA : World -> World
+insertGravityTagA =
+    Ecs.insertComponent specs.gravityTagA GravityTagA
 
 
-andInsertGravityTagB : ( World, EntityId ) -> ( World, EntityId )
-andInsertGravityTagB =
-    Ecs.andInsertComponent specs.gravityTagB GravityTagB
+insertGravityTagB : World -> World
+insertGravityTagB =
+    Ecs.insertComponent specs.gravityTagB GravityTagB
 
 
 satelliteLifeTimeGenerator : Random.Generator Float
@@ -441,28 +437,26 @@ updateFrame deltaTime world =
 
 applyGravity : ComponentSpec a -> World -> World
 applyGravity tagSpec world =
-    Ecs.EntityComponents.foldl3
+    Ecs.EntityComponents.processFromLeft3
         specs.gravityWell
         tagSpec
         specs.position
         (processGravityWell tagSpec)
         world
-        world
 
 
 processGravityWell : ComponentSpec a -> EntityId -> GravityWell -> a -> Position -> World -> World
 processGravityWell tagSpec _ gravityWell _ position world =
-    Ecs.EntityComponents.foldl3
+    Ecs.EntityComponents.processFromLeft3
         tagSpec
         specs.velocity
         specs.position
         (applyGravityToEntity gravityWell position)
         world
-        world
 
 
 applyGravityToEntity : GravityWell -> Position -> EntityId -> a -> Velocity -> Position -> World -> World
-applyGravityToEntity well wellPosition entityId _ velocity position world =
+applyGravityToEntity well wellPosition _ _ velocity position world =
     let
         positionDiffX =
             wellPosition.x - position.x
@@ -495,7 +489,7 @@ applyGravityToEntity well wellPosition entityId _ velocity position world =
                 , velocityY = velocity.velocityY + accelerationY * frame.deltaTime
                 }
         in
-        Ecs.insertComponent specs.velocity entityId newVelocity world
+        Ecs.insertComponent specs.velocity newVelocity world
 
     else
         world
@@ -503,17 +497,16 @@ applyGravityToEntity well wellPosition entityId _ velocity position world =
 
 updatePositions : World -> World
 updatePositions world =
-    Ecs.EntityComponents.foldl2 specs.velocity specs.position updatePosition world world
+    Ecs.EntityComponents.processFromLeft2 specs.velocity specs.position updatePosition world
 
 
 updatePosition : EntityId -> Velocity -> Position -> World -> World
-updatePosition entityId velocity position world =
+updatePosition _ velocity position world =
     let
         frame =
             Ecs.getSingleton specs.frame world
     in
     Ecs.insertComponent specs.position
-        entityId
         { x = position.x + velocity.velocityX * frame.deltaTime
         , y = position.y + velocity.velocityY * frame.deltaTime
         }
@@ -522,27 +515,27 @@ updatePosition entityId velocity position world =
 
 checkEndOfLife : World -> World
 checkEndOfLife world =
-    Ecs.EntityComponents.foldl specs.endOfLife checkEntityEndOfLife world world
+    Ecs.EntityComponents.processFromLeft specs.endOfLife checkEntityEndOfLife world
 
 
 checkEntityEndOfLife : EntityId -> EndOfLife -> World -> World
-checkEntityEndOfLife entityId (EndOfLife endOfLifeTime) world =
+checkEntityEndOfLife _ (EndOfLife endOfLifeTime) world =
     let
         frame =
             Ecs.getSingleton specs.frame world
     in
     if frame.totalTime >= endOfLifeTime then
-        Ecs.removeEntity specs.components entityId world
+        Ecs.removeEntity specs.components world
 
     else
         world
 
 
-newEntity : World -> ( World, EntityId )
+newEntity : World -> World
 newEntity world =
     world
-        |> Ecs.updateSingletonAndReturn specs.lastEntityId (\id -> id + 1)
-        |> Ecs.andInsertEntity
+        |> Ecs.insertEntity (Ecs.getSingleton specs.nextEntityId world)
+        |> Ecs.updateSingleton specs.nextEntityId (\id -> id + 1)
 
 
 
@@ -599,14 +592,14 @@ render world =
          ]
             |> withPointerEvents world
         )
-        (Ecs.EntityComponents.foldr2
+        (Ecs.EntityComponents.foldFromRight2
             specs.display
             specs.position
             (\entityId display position list ->
                 renderEntity
                     (worldToScreenPosition worldToScreen position)
                     (worldToScreenDisplay worldToScreen display)
-                    (Ecs.getComponent specs.endOfLife entityId world |> endOfLifeOpacity frame)
+                    (world |> Ecs.onEntity entityId |> Ecs.getComponent specs.endOfLife |> endOfLifeOpacity frame)
                     :: list
             )
             []

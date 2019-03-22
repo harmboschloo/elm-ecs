@@ -1,7 +1,6 @@
 module Ecs.Internal exposing
     ( AllComponentSpec(..)
     , ComponentSpec(..)
-    , EntityOperation(..)
     , InternalWorld
     , SingletonSpec(..)
     , World(..)
@@ -39,10 +38,7 @@ type World comparable components singletons
 
 type alias InternalWorld comparable components singletons =
     { entities : Set comparable
+    , activeEntity : Maybe comparable
     , components : components
     , singletons : singletons
     }
-
-
-type EntityOperation comparable components singletons
-    = EntityOperation comparable (InternalWorld comparable components singletons)

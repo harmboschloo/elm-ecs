@@ -92,18 +92,18 @@ initEntities world =
     world
         -- static red shape, entity id 0
         |> Ecs.insertEntity 0
-        |> Ecs.insertComponent specs.position 0 { x = 20, y = 20 }
-        |> Ecs.insertComponent specs.shape 0 { width = 20, height = 15, color = "red" }
+        |> Ecs.insertComponent specs.position { x = 20, y = 20 }
+        |> Ecs.insertComponent specs.shape { width = 20, height = 15, color = "red" }
         -- moving green shape, entity id 1
         |> Ecs.insertEntity 1
-        |> Ecs.insertComponent specs.position 1 { x = 30, y = 75 }
-        |> Ecs.insertComponent specs.velocity 1 { velocityX = 4, velocityY = -1 }
-        |> Ecs.insertComponent specs.shape 1 { width = 15, height = 20, color = "green" }
+        |> Ecs.insertComponent specs.position { x = 30, y = 75 }
+        |> Ecs.insertComponent specs.velocity { velocityX = 4, velocityY = -1 }
+        |> Ecs.insertComponent specs.shape { width = 15, height = 20, color = "green" }
         -- moving blue shape, entity id 2
         |> Ecs.insertEntity 2
-        |> Ecs.insertComponent specs.position 2 { x = 70, y = 30 }
-        |> Ecs.insertComponent specs.velocity 2 { velocityX = -5, velocityY = -5 }
-        |> Ecs.insertComponent specs.shape 2 { width = 15, height = 15, color = "blue" }
+        |> Ecs.insertComponent specs.position { x = 70, y = 30 }
+        |> Ecs.insertComponent specs.velocity { velocityX = -5, velocityY = -5 }
+        |> Ecs.insertComponent specs.shape { width = 15, height = 15, color = "blue" }
 
 
 
@@ -127,37 +127,34 @@ update msg world =
 
 updatePositions : Float -> World -> World
 updatePositions deltaSeconds world =
-    Ecs.EntityComponents.foldl2
+    Ecs.EntityComponents.processFromLeft2
         specs.velocity
         specs.position
-        (\entityId velocity position currentWorld ->
+        (\_ velocity position currentWorld ->
             Ecs.insertComponent specs.position
-                entityId
                 { x = position.x + velocity.velocityX * deltaSeconds
                 , y = position.y + velocity.velocityY * deltaSeconds
                 }
                 currentWorld
         )
         world
-        world
 
 
 checkBounds : World -> World
 checkBounds world =
-    Ecs.EntityComponents.foldl2
+    Ecs.EntityComponents.processFromLeft2
         specs.position
         specs.shape
-        (\entityId position shape currentWorld ->
+        (\_ position shape currentWorld ->
             if
                 (position.x < 0 || (position.x + shape.width) > 100)
                     || (position.y < 0 || (position.y + shape.height) > 100)
             then
-                Ecs.removeEntity specs.all entityId currentWorld
+                Ecs.removeEntity specs.all currentWorld
 
             else
                 currentWorld
         )
-        world
         world
 
 
@@ -192,7 +189,7 @@ view world =
 
 renderEntities : World -> List (Html.Html Msg)
 renderEntities world =
-    Ecs.EntityComponents.foldr2
+    Ecs.EntityComponents.foldFromRight2
         specs.shape
         specs.position
         (\entityId shape position elements ->
