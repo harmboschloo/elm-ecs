@@ -4,7 +4,7 @@ module Ecs exposing
     , worldEntityCount, worldComponentCount
     , insertEntity, onEntity, removeEntity, clearEntity, hasEntity, getEntity
     , insertComponent, updateComponent, removeComponent
-    , hasComponent, getComponent, componentCount
+    , hasComponent, getComponent, componentEntities, componentCount
     , fromDict, toDict
     , setSingleton, updateSingleton, getSingleton
     )
@@ -31,7 +31,7 @@ module Ecs exposing
 # Component
 
 @docs insertComponent, updateComponent, removeComponent
-@docs hasComponent, getComponent, componentCount
+@docs hasComponent, getComponent, componentEntities, componentCount
 @docs fromDict, toDict
 
 
@@ -319,6 +319,18 @@ removeComponent (ComponentSpec spec) (World world) =
             World world
 
 
+{-| -}
+componentEntities :
+    ComponentSpec comparable a components
+    -> World comparable components singletons
+    -> Set comparable
+componentEntities (ComponentSpec spec) (World { components }) =
+    Dict.foldl
+        (\entityId _ -> Set.insert entityId)
+        Set.empty
+        (spec.get components)
+
+
 {-| Determine the total number of components of a specific type.
 -}
 componentCount :
@@ -335,15 +347,15 @@ fromDict :
     -> Dict comparable a
     -> World comparable components singletons
     -> World comparable components singletons
-fromDict (ComponentSpec spec) componentDict (World world) =
+fromDict (ComponentSpec spec) dict (World world) =
     World
         { entities =
             Dict.foldl
-                (\entityId _ entities -> Set.insert entityId entities)
+                (\entityId _ -> Set.insert entityId)
                 world.entities
-                componentDict
+                dict
         , activeEntity = world.activeEntity
-        , components = spec.set componentDict world.components
+        , components = spec.set dict world.components
         , singletons = world.singletons
         }
 
@@ -391,5 +403,8 @@ updateSingleton (SingletonSpec spec) fn (World world) =
         { entities = world.entities
         , activeEntity = world.activeEntity
         , components = world.components
-        , singletons = spec.set (fn (spec.get world.singletons)) world.singletons
+        , singletons =
+            spec.set
+                (fn (spec.get world.singletons))
+                world.singletons
         }

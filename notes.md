@@ -1,10 +1,8 @@
 # To do
 
-- add tests
-- update benchmarks
-- add link to package in readme
-- add component entity ids query
 - improve docs
+- update benchmarks
+- add tests
 
 # Resources
 
