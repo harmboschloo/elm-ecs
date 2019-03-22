@@ -146,23 +146,23 @@ type alias InitData =
     }
 
 
-type alias GravityWellInitData =
+type alias GravityWellInit =
     { position : Position
     , radius : Float
-    , tag : GravityTagInitData
+    , tag : GravityTagInit
     }
 
 
-type alias SatelliteInitData =
+type alias SatelliteInit =
     { velocity : Velocity
     , radius : Float
-    , tag : GravityTagInitData
+    , tag : GravityTagInit
     , lifeTime : Float
     }
 
 
-type alias GravityTagInitData =
-    { init : World -> World
+type alias GravityTagInit =
+    { insertComponents : World -> World
     , color : Color.Color
     }
 
@@ -181,8 +181,14 @@ init _ =
 initWorld : InitData -> World
 initWorld initData =
     Ecs.emptyWorld specs.components (initSingletons initData)
-        |> pipeTimes 3 initGravityWell
-        |> pipeTimes 5 (initSatellite (Position 0 0))
+        |> initGravityWell
+        |> initGravityWell
+        |> initGravityWell
+        |> initSatellite (Position 0 0)
+        |> initSatellite (Position 0 0)
+        |> initSatellite (Position 0 0)
+        |> initSatellite (Position 0 0)
+        |> initSatellite (Position 0 0)
 
 
 initSingletons : InitData -> Singletons
@@ -204,7 +210,7 @@ initGravityWell world1 =
     let
         ( world2, generated ) =
             randomStep
-                (Random.map3 GravityWellInitData
+                (Random.map3 GravityWellInit
                     gravityWellPositionGenerator
                     gravityWellRadiusGenerator
                     gravityWellTagGenerator
@@ -214,7 +220,7 @@ initGravityWell world1 =
     world2
         |> newEntity
         |> Ecs.insertComponent specs.gravityWell { mass = generated.radius ^ 1.4 }
-        |> generated.tag.init
+        |> generated.tag.insertComponents
         |> Ecs.insertComponent specs.position generated.position
         |> Ecs.insertComponent specs.display
             (Circle
@@ -244,7 +250,7 @@ initSatellite position world1 =
 
         ( world2, generated ) =
             randomStep
-                (Random.map4 SatelliteInitData
+                (Random.map4 SatelliteInit
                     satelliteVelocityGenerator
                     satelliteRadiusGenerator
                     satelliteTagGenerator
@@ -254,7 +260,7 @@ initSatellite position world1 =
     in
     world2
         |> newEntity
-        |> generated.tag.init
+        |> generated.tag.insertComponents
         |> Ecs.insertComponent specs.position position
         |> Ecs.insertComponent specs.velocity generated.velocity
         |> Ecs.insertComponent specs.display
@@ -278,11 +284,11 @@ gravityWellRadiusGenerator =
     Random.float 0.05 0.1
 
 
-gravityWellTagGenerator : Random.Generator GravityTagInitData
+gravityWellTagGenerator : Random.Generator GravityTagInit
 gravityWellTagGenerator =
     Random.uniform
-        (GravityTagInitData insertGravityTagA Color.lightRed)
-        [ GravityTagInitData insertGravityTagB Color.lightGreen
+        (GravityTagInit insertGravityTagA Color.lightRed)
+        [ GravityTagInit insertGravityTagB Color.lightGreen
         ]
 
 
@@ -298,12 +304,12 @@ satelliteRadiusGenerator =
     Random.float 0.01 0.005
 
 
-satelliteTagGenerator : Random.Generator GravityTagInitData
+satelliteTagGenerator : Random.Generator GravityTagInit
 satelliteTagGenerator =
     Random.uniform
-        (GravityTagInitData insertGravityTagA Color.red)
-        [ GravityTagInitData insertGravityTagB Color.green
-        , GravityTagInitData (insertGravityTagA >> insertGravityTagB) Color.yellow
+        (GravityTagInit insertGravityTagA Color.red)
+        [ GravityTagInit insertGravityTagB Color.green
+        , GravityTagInit (insertGravityTagA >> insertGravityTagB) Color.yellow
         ]
 
 
@@ -332,15 +338,6 @@ randomStep generator world =
             Random.step generator seed1
     in
     ( Ecs.setSingleton specs.randomSeed seed2 world, a )
-
-
-pipeTimes : Int -> (a -> a) -> a -> a
-pipeTimes count function value =
-    if count <= 0 then
-        value
-
-    else
-        pipeTimes (count - 1) function (function value)
 
 
 

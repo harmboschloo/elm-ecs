@@ -5,8 +5,6 @@
 - add link to package in readme
 - add component entity ids query
 - improve docs
-- improve orbits randomStep/initGravityWell
-  - updateSingletonAndThen ...?
 
 # Resources
 

@@ -48,11 +48,7 @@ module Ecs.EntityComponents exposing
 import Dict
 import Dict.Intersect
 import Ecs exposing (World)
-import Ecs.Internal as Internal
-    exposing
-        ( ComponentSpec(..)
-        , World(..)
-        )
+import Ecs.Internal exposing (ComponentSpec(..), World(..))
 
 
 
