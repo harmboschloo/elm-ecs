@@ -9,7 +9,7 @@ module Ecs.Components8 exposing (Components8, specs)
 import Dict exposing (Dict)
 import Ecs.Internal
     exposing
-        ( AllComponentSpec(..)
+        ( AllComponentsSpec(..)
         , ComponentSpec(..)
         )
 
@@ -32,7 +32,7 @@ type Components8 comparable a1 a2 a3 a4 a5 a6 a7 a8
 {-| Create all component specifications for 8 component types.
 -}
 specs :
-    (AllComponentSpec comparable (Components8 comparable a1 a2 a3 a4 a5 a6 a7 a8)
+    (AllComponentsSpec comparable (Components8 comparable a1 a2 a3 a4 a5 a6 a7 a8)
      -> ComponentSpec comparable a1 (Components8 comparable a1 a2 a3 a4 a5 a6 a7 a8)
      -> ComponentSpec comparable a2 (Components8 comparable a1 a2 a3 a4 a5 a6 a7 a8)
      -> ComponentSpec comparable a3 (Components8 comparable a1 a2 a3 a4 a5 a6 a7 a8)
@@ -46,7 +46,7 @@ specs :
     -> specs
 specs fn =
     fn
-        (AllComponentSpec
+        (AllComponentsSpec
             { empty =
                 Components8
                     { dict1 = Dict.empty

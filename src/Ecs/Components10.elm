@@ -9,7 +9,7 @@ module Ecs.Components10 exposing (Components10, specs)
 import Dict exposing (Dict)
 import Ecs.Internal
     exposing
-        ( AllComponentSpec(..)
+        ( AllComponentsSpec(..)
         , ComponentSpec(..)
         )
 
@@ -34,7 +34,7 @@ type Components10 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10
 {-| Create all component specifications for 10 component types.
 -}
 specs :
-    (AllComponentSpec comparable (Components10 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10)
+    (AllComponentsSpec comparable (Components10 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10)
      -> ComponentSpec comparable a1 (Components10 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10)
      -> ComponentSpec comparable a2 (Components10 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10)
      -> ComponentSpec comparable a3 (Components10 comparable a1 a2 a3 a4 a5 a6 a7 a8 a9 a10)
@@ -50,7 +50,7 @@ specs :
     -> specs
 specs fn =
     fn
-        (AllComponentSpec
+        (AllComponentsSpec
             { empty =
                 Components10
                     { dict1 = Dict.empty

@@ -95,7 +95,7 @@ type alias Frame =
 
 
 type alias Specs =
-    { components : AllComponentSpec
+    { components : AllComponentsSpec
     , position : ComponentSpec Position
     , velocity : ComponentSpec Velocity
     , gravityWell : ComponentSpec GravityWell
@@ -111,8 +111,8 @@ type alias Specs =
     }
 
 
-type alias AllComponentSpec =
-    Ecs.AllComponentSpec EntityId Components
+type alias AllComponentsSpec =
+    Ecs.AllComponentsSpec EntityId Components
 
 
 type alias ComponentSpec a =

@@ -1,5 +1,5 @@
 module Ecs exposing
-    ( AllComponentSpec, ComponentSpec, SingletonSpec
+    ( AllComponentsSpec, ComponentSpec, SingletonSpec
     , World, emptyWorld, isEmptyWorld, worldEntities
     , worldEntityCount, worldComponentCount
     , insertEntity, onEntity, removeEntity, clearEntity, hasEntity, getEntity
@@ -14,7 +14,7 @@ module Ecs exposing
 
 # Specs
 
-@docs AllComponentSpec, ComponentSpec, SingletonSpec
+@docs AllComponentsSpec, ComponentSpec, SingletonSpec
 
 
 # World
@@ -37,14 +37,14 @@ module Ecs exposing
 
 # Singletons
 
-@docs setSingleton, updateSingleton, updateSingletonAndReturn, getSingleton
+@docs setSingleton, updateSingleton, getSingleton
 
 -}
 
 import Dict exposing (Dict)
 import Ecs.Internal as Internal
     exposing
-        ( AllComponentSpec(..)
+        ( AllComponentsSpec(..)
         , ComponentSpec(..)
         , SingletonSpec(..)
         , World(..)
@@ -57,8 +57,8 @@ import Set exposing (Set)
 
 
 {-| -}
-type alias AllComponentSpec comparable components =
-    Internal.AllComponentSpec comparable components
+type alias AllComponentsSpec comparable components =
+    Internal.AllComponentsSpec comparable components
 
 
 {-| -}
@@ -83,10 +83,10 @@ type alias World comparable components singletons =
 {-| Create an empty world without entities or components.
 -}
 emptyWorld :
-    AllComponentSpec comparable components
+    AllComponentsSpec comparable components
     -> singletons
     -> World comparable components singletons
-emptyWorld (AllComponentSpec componentsSpec) singletons =
+emptyWorld (AllComponentsSpec componentsSpec) singletons =
     World
         { entities = Set.empty
         , activeEntity = Nothing
@@ -112,10 +112,10 @@ worldEntityCount (World world) =
 {-| Determine the total number of components in the world.
 -}
 worldComponentCount :
-    AllComponentSpec comparable components
+    AllComponentsSpec comparable components
     -> World comparable components singletons
     -> Int
-worldComponentCount (AllComponentSpec spec) (World world) =
+worldComponentCount (AllComponentsSpec spec) (World world) =
     spec.size world.components
 
 
@@ -177,10 +177,10 @@ hasEntity (World { activeEntity }) =
 
 {-| -}
 removeEntity :
-    AllComponentSpec comparable components
+    AllComponentsSpec comparable components
     -> World comparable components singletons
     -> World comparable components singletons
-removeEntity (AllComponentSpec spec) (World world) =
+removeEntity (AllComponentsSpec spec) (World world) =
     case world.activeEntity of
         Just entityId ->
             World
@@ -197,10 +197,10 @@ removeEntity (AllComponentSpec spec) (World world) =
 {-| Remove all components of an entity.
 -}
 clearEntity :
-    AllComponentSpec comparable components
+    AllComponentsSpec comparable components
     -> World comparable components singletons
     -> World comparable components singletons
-clearEntity (AllComponentSpec spec) (World world) =
+clearEntity (AllComponentsSpec spec) (World world) =
     case world.activeEntity of
         Just entityId ->
             World

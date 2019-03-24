@@ -19,7 +19,7 @@ exports.generate = function(n) {
 import Dict exposing (Dict)
 import Ecs.Internal
     exposing
-        ( AllComponentSpec(..)
+        ( AllComponentsSpec(..)
         , ComponentSpec(..)
         )
 
@@ -38,7 +38,7 @@ type ${componentsType}
   }.
 -}
 specs :
-    (AllComponentSpec comparable (${componentsType})
+    (AllComponentsSpec comparable (${componentsType})
      -> ${components.map(
        i => `ComponentSpec comparable a${i} (${componentsType})`
      ).join(`
@@ -48,7 +48,7 @@ specs :
     -> specs
 specs fn =
     fn
-        (AllComponentSpec
+        (AllComponentsSpec
             { empty =
                 Components${n}
                     { ${components.map(i => `dict${i} = Dict.empty`).join(`

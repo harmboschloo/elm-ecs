@@ -45,15 +45,15 @@ type alias Shape =
 
 
 type alias Specs =
-    { all : AllComponentSpec
+    { all : AllComponentsSpec
     , position : ComponentSpec Position
     , velocity : ComponentSpec Velocity
     , shape : ComponentSpec Shape
     }
 
 
-type alias AllComponentSpec =
-    Ecs.AllComponentSpec EntityId Components
+type alias AllComponentsSpec =
+    Ecs.AllComponentsSpec EntityId Components
 
 
 type alias ComponentSpec a =
