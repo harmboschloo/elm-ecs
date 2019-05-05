@@ -1,6 +1,5 @@
 # To do
 
-- add clearComponents
 - update benchmarks
 - add tests
 
