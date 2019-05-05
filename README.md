@@ -262,7 +262,7 @@ specs =
 
 ### World
 
-Our world will now look like this. You have to provide an initial value for every singleton where creating the world.
+Our world will now look like this. You have to provide an initial value for every singleton when creating the world.
 
 ```elm
 type alias World =
@@ -274,7 +274,7 @@ emptyWorld =
     Ecs.emptyWorld specs.allComponents (Ecs.Singletons2.init 0 0)
 ```
 
-To create new entities we are going to add a `newEntity` function which is going to insert a new entity using the `nextEntityId` singleton value. And then the function updates the singleton value which then can be used for the next new entity.
+To create new entities we are going to add a `newEntity` function which is going to insert a new entity using the `nextEntityId` singleton value. And then the function updates the singleton value for the next new entity to be created.
 
 ```elm
 newEntity : World -> World
@@ -351,7 +351,7 @@ updateFrameCount world =
 
 ## Spawning entities
 
-Now let's spawn some entities. Every entity with a `SpawnConfig` and `Position` component will effectively be a spawner. First we get the current frame count and check if it matches the frame interval defined in the spawn config. If it matches then we insert a new entity with the position of the spawner and the velocity and shape in the config. If the frame interval does not match the current frame count we do nothing.
+Now let's spawn some entities. Every entity with a `SpawnConfig` and `Position` component will effectively be a spawner. First we get the current frame count and check if it matches the frame interval defined in the spawn config. If it matches we insert a new entity with the position of the spawner and the velocity and shape in the spawn config. If the frame interval does not match the current frame count we do nothing.
 
 ```elm
 spawnEntities : World -> World
@@ -384,7 +384,7 @@ spawnEntity _ config position world =
 
 That covers setting up singletons and spawning entities. Check out the full [source code](https://github.com/harmboschloo/elm-ecs/blob/master/examples/readme2/Main.elm) and the [result](https://harmboschloo.github.io/elm-ecs-2.0/readme2/).
 
-There is also a playful [orbits demo](https://harmboschloo.github.io/elm-ecs-2.0/orbits/) which includes user interaction and randomness. To learn more check out the [source code](https://github.com/harmboschloo/elm-ecs/blob/master/examples/orbits/Main.elm).
+There is also a playful [orbits demo](https://harmboschloo.github.io/elm-ecs-2.0/orbits/) which includes user interaction and randomness ([source code](https://github.com/harmboschloo/elm-ecs/blob/master/examples/orbits/Main.elm)).
 
 ## Misc
 
