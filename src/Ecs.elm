@@ -5,7 +5,7 @@ module Ecs exposing
     , insertEntity, onEntity, removeEntity, clearEntity, hasEntity, getEntity
     , insertComponent, updateComponent, removeComponent
     , hasComponent, getComponent, componentEntities, componentCount
-    , fromDict, toDict
+    , setComponents, clearComponents, getComponents
     , setSingleton, updateSingleton, getSingleton
     )
 
@@ -58,7 +58,7 @@ Every component is associated with an entity.
 
 @docs insertComponent, updateComponent, removeComponent
 @docs hasComponent, getComponent, componentEntities, componentCount
-@docs fromDict, toDict
+@docs setComponents, clearComponents, getComponents
 
 
 # Singletons
@@ -385,15 +385,15 @@ componentCount (ComponentSpec spec) (World { components }) =
     Dict.size (spec.get components)
 
 
-{-| Replaces all components for the specified component type.
-All provided entities will be added to the world.
+{-| Replace all components for the specified component type.
+All provided entities are added to the world.
 -}
-fromDict :
+setComponents :
     ComponentSpec comparable a components
     -> Dict comparable a
     -> World comparable components singletons
     -> World comparable components singletons
-fromDict (ComponentSpec spec) dict (World world) =
+setComponents (ComponentSpec spec) dict (World world) =
     World
         { entities =
             Dict.foldl
@@ -406,13 +406,28 @@ fromDict (ComponentSpec spec) dict (World world) =
         }
 
 
+{-| Clear all components for the specified component type.
+-}
+clearComponents :
+    ComponentSpec comparable a components
+    -> World comparable components singletons
+    -> World comparable components singletons
+clearComponents (ComponentSpec spec) (World world) =
+    World
+        { entities = world.entities
+        , activeEntity = world.activeEntity
+        , components = spec.set Dict.empty world.components
+        , singletons = world.singletons
+        }
+
+
 {-| Get all components for the specified component type.
 -}
-toDict :
+getComponents :
     ComponentSpec comparable a components
     -> World comparable components singletons
     -> Dict comparable a
-toDict (ComponentSpec spec) (World { components }) =
+getComponents (ComponentSpec spec) (World { components }) =
     spec.get components
 
 
