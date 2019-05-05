@@ -14,10 +14,26 @@ module Ecs exposing
 
 # Specs
 
+Specs specify how to retrieve and update components and singletons.
+They are initialized using the **Ecs.ComponentsN** and **Ecs.SingletonsN** modules.
+
+    type alias Specs =
+        { allComponents : AllComponentsSpec EntityId Components
+        , position : ComponentSpec EntityId Position Components
+        , velocity : ComponentSpec EntityId Velocity Components
+        , nextEntityId : SingletonSpec EntityId Singletons
+        }
+
+    specs : Specs
+    specs =
+        Specs |> Ecs.Components2.specs |> Ecs.Singletons1.specs
+
 @docs AllComponentsSpec, ComponentSpec, SingletonSpec
 
 
 # World
+
+The world contains all your entities, components and singletons.
 
 @docs World, emptyWorld, isEmptyWorld, worldEntities
 @docs worldEntityCount, worldComponentCount
@@ -25,10 +41,20 @@ module Ecs exposing
 
 # Entity
 
+Entities are represented by an id.
+An entity id can be any [`comparable` type](https://faq.elm-community.org/#does-elm-have-ad-hoc-polymorphism-or-typeclasses).
+
+Operations on entities usually apply to the active entity in the world.
+You can make an entity active with the [**onEntiy**](#onEntity) function.
+Also when you insert a new entity that entity will be active.
+
 @docs insertEntity, onEntity, removeEntity, clearEntity, hasEntity, getEntity
 
 
 # Component
+
+Components contain all the entity data in the world.
+Every component is associated with an entity.
 
 @docs insertComponent, updateComponent, removeComponent
 @docs hasComponent, getComponent, componentEntities, componentCount
@@ -36,6 +62,11 @@ module Ecs exposing
 
 
 # Singletons
+
+Singletons contain data where there should only be one instance of.
+Singletons are optional. They are added to the package for convenience
+and to create a consistent way to deal with data (singletons and components).
+You can also just keep the singleton data in your model next to the ecs world just like you do in any Elm program.
 
 @docs setSingleton, updateSingleton, getSingleton
 
@@ -56,17 +87,20 @@ import Set exposing (Set)
 -- SPECS --
 
 
-{-| -}
+{-| Used for operations on multiple component types.
+-}
 type alias AllComponentsSpec comparable components =
     Internal.AllComponentsSpec comparable components
 
 
-{-| -}
+{-| Used for operations on a single component type.
+-}
 type alias ComponentSpec comparable a components =
     Internal.ComponentSpec comparable a components
 
 
-{-| -}
+{-| Used for operations on a single singleton type.
+-}
 type alias SingletonSpec a singletons =
     Internal.SingletonSpec a singletons
 
@@ -75,12 +109,14 @@ type alias SingletonSpec a singletons =
 -- WORLD --
 
 
-{-| -}
+{-| The world that contains all you data.
+-}
 type alias World comparable components singletons =
     Internal.World comparable components singletons
 
 
 {-| Create an empty world without entities or components.
+Singletons need an intial value.
 -}
 emptyWorld :
     AllComponentsSpec comparable components
@@ -130,7 +166,8 @@ worldEntities (World world) =
 -- ENTITY --
 
 
-{-| -}
+{-| Add a new entity id to the world and make the entity active.
+-}
 insertEntity :
     comparable
     -> World comparable components singletons
@@ -144,7 +181,8 @@ insertEntity entityId (World { entities, components, singletons }) =
         }
 
 
-{-| -}
+{-| Make an entity active if it is part of the world, otherwise no entity will be active.
+-}
 onEntity :
     comparable
     -> World comparable components singletons
@@ -163,19 +201,23 @@ onEntity entityId (World { entities, components, singletons }) =
         }
 
 
-{-| -}
+{-| Get the active entity id.
+-}
 getEntity : World comparable components singletons -> Maybe comparable
 getEntity (World { activeEntity }) =
     activeEntity
 
 
-{-| -}
+{-| Determine if there is an active entity.
+-}
 hasEntity : World comparable components singletons -> Bool
 hasEntity (World { activeEntity }) =
     activeEntity /= Nothing
 
 
-{-| -}
+{-| Remove the active entity from the world.
+All component associated with the entity will also be removed.
+-}
 removeEntity :
     AllComponentsSpec comparable components
     -> World comparable components singletons
@@ -194,7 +236,8 @@ removeEntity (AllComponentsSpec spec) (World world) =
             World world
 
 
-{-| Remove all components of an entity.
+{-| Remove all components of the active entity.
+The entity will remain part of the world.
 -}
 clearEntity :
     AllComponentsSpec comparable components
@@ -218,7 +261,7 @@ clearEntity (AllComponentsSpec spec) (World world) =
 -- COMPONENTS --
 
 
-{-| Determines if an entity has a specific component.
+{-| Determine if the active entity has the specified component type.
 -}
 hasComponent :
     ComponentSpec comparable a components
@@ -233,7 +276,7 @@ hasComponent (ComponentSpec spec) (World world) =
             False
 
 
-{-| Get a specific component of an entity.
+{-| Get a component with the specified component type of the active entity.
 -}
 getComponent :
     ComponentSpec comparable a components
@@ -248,7 +291,7 @@ getComponent (ComponentSpec spec) (World world) =
             Nothing
 
 
-{-| Insert a specific component in an entity.
+{-| Insert a component with the specified component type in the active entity.
 -}
 insertComponent :
     ComponentSpec comparable a components
@@ -272,7 +315,7 @@ insertComponent (ComponentSpec spec) a (World world) =
             World world
 
 
-{-| Update a specific component in an entity.
+{-| Update a component with the specified component type in the active entity.
 -}
 updateComponent :
     ComponentSpec comparable a components
@@ -296,7 +339,7 @@ updateComponent (ComponentSpec spec) fn (World world) =
             World world
 
 
-{-| Remove a specific component from an entity.
+{-| Remove a component with the specified component type from the active entity.
 -}
 removeComponent :
     ComponentSpec comparable a components
@@ -319,7 +362,8 @@ removeComponent (ComponentSpec spec) (World world) =
             World world
 
 
-{-| -}
+{-| Get all entities that contain the specified component type.
+-}
 componentEntities :
     ComponentSpec comparable a components
     -> World comparable components singletons
@@ -331,7 +375,7 @@ componentEntities (ComponentSpec spec) (World { components }) =
         (spec.get components)
 
 
-{-| Determine the total number of components of a specific type.
+{-| Determine the total number of components of the specified component type.
 -}
 componentCount :
     ComponentSpec comparable a components
@@ -341,7 +385,9 @@ componentCount (ComponentSpec spec) (World { components }) =
     Dict.size (spec.get components)
 
 
-{-| -}
+{-| Replaces all components for the specified component type.
+All provided entities will be added to the world.
+-}
 fromDict :
     ComponentSpec comparable a components
     -> Dict comparable a
@@ -360,7 +406,8 @@ fromDict (ComponentSpec spec) dict (World world) =
         }
 
 
-{-| -}
+{-| Get all components for the specified component type.
+-}
 toDict :
     ComponentSpec comparable a components
     -> World comparable components singletons
@@ -373,7 +420,8 @@ toDict (ComponentSpec spec) (World { components }) =
 -- SINGLETON COMPONENTS --
 
 
-{-| -}
+{-| Get the data for the specified singleton type.
+-}
 getSingleton :
     SingletonSpec a singletons
     -> World comparable components singletons
@@ -382,7 +430,8 @@ getSingleton (SingletonSpec spec) (World { singletons }) =
     spec.get singletons
 
 
-{-| -}
+{-| Set the data for the specified singleton type.
+-}
 setSingleton :
     SingletonSpec a singletons
     -> a
@@ -392,7 +441,8 @@ setSingleton spec a =
     updateSingleton spec (always a)
 
 
-{-| -}
+{-| Update the data for the specified singleton type.
+-}
 updateSingleton :
     SingletonSpec a singletons
     -> (a -> a)

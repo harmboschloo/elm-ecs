@@ -287,8 +287,8 @@ gravityWellRadiusGenerator =
 gravityWellTagGenerator : Random.Generator GravityTagInit
 gravityWellTagGenerator =
     Random.uniform
-        (GravityTagInit insertGravityTagA Color.lightRed)
-        [ GravityTagInit insertGravityTagB Color.lightGreen
+        (GravityTagInit insertGravityTagA (Color.rgb 1 0.35 0.35))
+        [ GravityTagInit insertGravityTagB (Color.rgb 0.35 0.35 1)
         ]
 
 
@@ -307,9 +307,9 @@ satelliteRadiusGenerator =
 satelliteTagGenerator : Random.Generator GravityTagInit
 satelliteTagGenerator =
     Random.uniform
-        (GravityTagInit insertGravityTagA Color.red)
-        [ GravityTagInit insertGravityTagB Color.green
-        , GravityTagInit (insertGravityTagA >> insertGravityTagB) Color.yellow
+        (GravityTagInit insertGravityTagA (Color.rgb 1 0 0))
+        [ GravityTagInit insertGravityTagB (Color.rgb 0 0 1)
+        , GravityTagInit (insertGravityTagA >> insertGravityTagB) (Color.rgb 1 0 1)
         ]
 
 
@@ -558,7 +558,7 @@ subscriptions model =
 
 view : Model -> Browser.Document Msg
 view model =
-    { title = "bounce - elm-ecs"
+    { title = "orbits example - elm-ecs"
     , body =
         case model of
             Just world ->

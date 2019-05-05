@@ -9,7 +9,7 @@ module Ecs.Singletons15 exposing (Singletons15, init, specs)
 import Ecs.Internal exposing (SingletonSpec(..))
 
 
-{-| A singletons type for 15 singletons.
+{-| A container type for 15 singleton types.
 -}
 type Singletons15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15
     = Singletons15
@@ -31,7 +31,7 @@ type Singletons15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15
         }
 
 
-{-| Initialize a singleton type for 15 singletons.
+{-| Initialize a container type for 15 singleton types.
 -}
 init : a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> a8 -> a9 -> a10 -> a11 -> a12 -> a13 -> a14 -> a15 -> Singletons15 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15
 init a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 =

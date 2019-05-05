@@ -14,7 +14,7 @@ import Ecs.Internal
         )
 
 
-{-| A components type for 7 components.
+{-| A container for 7 component types.
 -}
 type Components7 comparable a1 a2 a3 a4 a5 a6 a7
     = Components7

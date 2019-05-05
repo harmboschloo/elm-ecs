@@ -19,7 +19,7 @@ exports.generate = function(n) {
 import Ecs.Internal exposing (SingletonSpec(..))
 
 
-{-| A singletons type for ${n} singleton${n > 1 ? "s" : ""}.
+{-| A container type for ${n} singleton type${n > 1 ? "s" : ""}.
 -}
 type ${singletonsType}
     = Singletons${n}
@@ -28,7 +28,7 @@ type ${singletonsType}
         }
 
 
-{-| Initialize a singleton type for ${n} singleton${n > 1 ? "s" : ""}.
+{-| Initialize a container type for ${n} singleton type${n > 1 ? "s" : ""}.
 -}
 init : ${singletons
     .map(i => `a${i}`)

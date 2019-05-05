@@ -24,7 +24,7 @@ import Ecs.Internal
         )
 
 
-{-| A components type for ${n} component${n > 1 ? "s" : ""}.
+{-| A container for ${n} component type${n > 1 ? "s" : ""}.
 -}
 type ${componentsType}
     = Components${n}

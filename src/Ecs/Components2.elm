@@ -14,7 +14,7 @@ import Ecs.Internal
         )
 
 
-{-| A components type for 2 components.
+{-| A container for 2 component types.
 -}
 type Components2 comparable a1 a2
     = Components2

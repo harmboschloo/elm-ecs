@@ -17,10 +17,31 @@ module Ecs.EntityComponents exposing
     , foldFromLeft8, foldFromRight8
     )
 
-{-|
+{-| Process or fold entities with a specific subset of component types.
+The subset is defined by the provided the component specs.
+
+**Note:** For best performance use the spec with the least amount of components
+as the first argument, and after that use the spec that results in the least
+amount of intersections of component types.
 
 
 # Process
+
+Process every entity with a specific subset of component types.
+The provided callback receives the entity id, the requested components and the world.
+In the callback the entity will be active in the world, so you can directly query or modify it.
+
+    Ecs.EntityComponents.processFromLeft2
+        specs.velocity
+        specs.position
+        (\entityId velocity position currentWorld ->
+            Ecs.insertComponent specs.position
+                { x = position.x + velocity.x * deltaSeconds
+                , y = position.y + velocity.y * deltaSeconds
+                }
+                currentWorld
+        )
+        world
 
 @docs processFromLeft, processFromRight
 @docs processFromLeft2, processFromRight2
@@ -33,6 +54,19 @@ module Ecs.EntityComponents exposing
 
 
 # Fold
+
+Fold every entity with a specific subset of component types.
+The provided callback receives the entity id, the requested components and the provided accumulator.
+If you want to query or modify the entity in the callback then you have to use [**Ecs.onEntity**](./Ecs#onEntity) first to make it active.
+
+    Ecs.EntityComponents.foldFromRight2
+        specs.shape
+        specs.position
+        (\entityId shape position list ->
+            ( entityId, shape, position ) :: list
+        )
+        []
+        world
 
 @docs foldFromLeft, foldFromRight
 @docs foldFromLeft2, foldFromRight2
@@ -55,7 +89,9 @@ import Ecs.Internal exposing (ComponentSpec(..), World(..))
 -- PROCESS --
 
 
-{-| -}
+{-| Process entities that contain at least the specified component type.
+Entities are provided from lowest entity id to highest entity id.
+-}
 processFromLeft :
     ComponentSpec comparable a components
     ->
@@ -73,7 +109,9 @@ processFromLeft (ComponentSpec spec) fn (World world) =
         (spec.get world.components)
 
 
-{-| -}
+{-| Process entities that contain at least the specified component type.
+Entities are provided from highest entity id to lowest entity id.
+-}
 processFromRight :
     ComponentSpec comparable a components
     ->
@@ -114,7 +152,9 @@ entityFn fn entityId a (World world) =
         )
 
 
-{-| -}
+{-| Process entities that contain at least the 2 specified component types.
+Entities are provided from lowest entity id to highest entity id.
+-}
 processFromLeft2 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -135,7 +175,9 @@ processFromLeft2 (ComponentSpec spec1) (ComponentSpec spec2) fn (World world) =
         (spec2.get world.components)
 
 
-{-| -}
+{-| Process entities that contain at least the 2 specified component types.
+Entities are provided from highest entity id to lowest entity id.
+-}
 processFromRight2 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -182,7 +224,9 @@ entityFn2 fn entityId a1 a2 (World world) =
         )
 
 
-{-| -}
+{-| Process entities that contain at least the 3 specified component types.
+Entities are provided from lowest entity id to highest entity id.
+-}
 processFromLeft3 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -206,7 +250,9 @@ processFromLeft3 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec
         (spec3.get world.components)
 
 
-{-| -}
+{-| Process entities that contain at least the 3 specified component types.
+Entities are provided from highest entity id to lowest entity id.
+-}
 processFromRight3 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -259,7 +305,9 @@ entityFn3 fn entityId a1 a2 a3 (World world) =
         )
 
 
-{-| -}
+{-| Process entities that contain at least the 4 specified component types.
+Entities are provided from lowest entity id to highest entity id.
+-}
 processFromLeft4 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -286,7 +334,9 @@ processFromLeft4 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec
         (spec4.get world.components)
 
 
-{-| -}
+{-| Process entities that contain at least the 4 specified component types.
+Entities are provided from highest entity id to lowest entity id.
+-}
 processFromRight4 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -345,7 +395,9 @@ entityFn4 fn entityId a1 a2 a3 a4 (World world) =
         )
 
 
-{-| -}
+{-| Process entities that contain at least the 5 specified component types.
+Entities are provided from lowest entity id to highest entity id.
+-}
 processFromLeft5 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -375,7 +427,9 @@ processFromLeft5 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec
         (spec5.get world.components)
 
 
-{-| -}
+{-| Process entities that contain at least the 5 specified component types.
+Entities are provided from highest entity id to lowest entity id.
+-}
 processFromRight5 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -440,7 +494,9 @@ entityFn5 fn entityId a1 a2 a3 a4 a5 (World world) =
         )
 
 
-{-| -}
+{-| Process entities that contain at least the 6 specified component types.
+Entities are provided from lowest entity id to highest entity id.
+-}
 processFromLeft6 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -473,7 +529,9 @@ processFromLeft6 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec
         (spec6.get world.components)
 
 
-{-| -}
+{-| Process entities that contain at least the 6 specified component types.
+Entities are provided from highest entity id to lowest entity id.
+-}
 processFromRight6 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -544,7 +602,9 @@ entityFn6 fn entityId a1 a2 a3 a4 a5 a6 (World world) =
         )
 
 
-{-| -}
+{-| Process entities that contain at least the 7 specified component types.
+Entities are provided from lowest entity id to highest entity id.
+-}
 processFromLeft7 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -580,7 +640,9 @@ processFromLeft7 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec
         (spec7.get world.components)
 
 
-{-| -}
+{-| Process entities that contain at least the 7 specified component types.
+Entities are provided from highest entity id to lowest entity id.
+-}
 processFromRight7 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -657,7 +719,9 @@ entityFn7 fn entityId a1 a2 a3 a4 a5 a6 a7 (World world) =
         )
 
 
-{-| -}
+{-| Process entities that contain at least the 8 specified component types.
+Entities are provided from lowest entity id to highest entity id.
+-}
 processFromLeft8 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -696,7 +760,9 @@ processFromLeft8 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec
         (spec8.get world.components)
 
 
-{-| -}
+{-| Process entities that contain at least the 8 specified component types.
+Entities are provided from highest entity id to lowest entity id.
+-}
 processFromRight8 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -783,7 +849,9 @@ entityFn8 fn entityId a1 a2 a3 a4 a5 a6 a7 a8 (World world) =
 -- FOLD --
 
 
-{-| -}
+{-| Fold entities that contain at least the specified component type.
+Entities are provided from lowest entity id to highest entity id.
+-}
 foldFromLeft :
     ComponentSpec comparable a components
     -> (comparable -> a -> acc -> acc)
@@ -797,7 +865,9 @@ foldFromLeft (ComponentSpec spec) fn acc (World world) =
         (spec.get world.components)
 
 
-{-| -}
+{-| Fold entities that contain at least the specified component type.
+Entities are provided from highest entity id to lowest entity id.
+-}
 foldFromRight :
     ComponentSpec comparable a components
     -> (comparable -> a -> acc -> acc)
@@ -811,7 +881,9 @@ foldFromRight (ComponentSpec spec) fn acc (World world) =
         (spec.get world.components)
 
 
-{-| -}
+{-| Fold entities that contain at least the 2 specified component types.
+Entities are provided from lowest entity id to highest entity id.
+-}
 foldFromLeft2 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -827,7 +899,9 @@ foldFromLeft2 (ComponentSpec spec1) (ComponentSpec spec2) fn acc (World world) =
         (spec2.get world.components)
 
 
-{-| -}
+{-| Fold entities that contain at least the 2 specified component types.
+Entities are provided from highest entity id to lowest entity id.
+-}
 foldFromRight2 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -843,7 +917,9 @@ foldFromRight2 (ComponentSpec spec1) (ComponentSpec spec2) fn acc (World world) 
         (spec2.get world.components)
 
 
-{-| -}
+{-| Fold entities that contain at least the 3 specified component types.
+Entities are provided from lowest entity id to highest entity id.
+-}
 foldFromLeft3 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -861,7 +937,9 @@ foldFromLeft3 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) 
         (spec3.get world.components)
 
 
-{-| -}
+{-| Fold entities that contain at least the 3 specified component types.
+Entities are provided from highest entity id to lowest entity id.
+-}
 foldFromRight3 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -879,7 +957,9 @@ foldFromRight3 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3)
         (spec3.get world.components)
 
 
-{-| -}
+{-| Fold entities that contain at least the 4 specified component types.
+Entities are provided from lowest entity id to highest entity id.
+-}
 foldFromLeft4 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -899,7 +979,9 @@ foldFromLeft4 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) 
         (spec4.get world.components)
 
 
-{-| -}
+{-| Fold entities that contain at least the 4 specified component types.
+Entities are provided from highest entity id to lowest entity id.
+-}
 foldFromRight4 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -919,7 +1001,9 @@ foldFromRight4 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3)
         (spec4.get world.components)
 
 
-{-| -}
+{-| Fold entities that contain at least the 5 specified component types.
+Entities are provided from lowest entity id to highest entity id.
+-}
 foldFromLeft5 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -941,7 +1025,9 @@ foldFromLeft5 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) 
         (spec5.get world.components)
 
 
-{-| -}
+{-| Fold entities that contain at least the 5 specified component types.
+Entities are provided from highest entity id to lowest entity id.
+-}
 foldFromRight5 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -963,7 +1049,9 @@ foldFromRight5 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3)
         (spec5.get world.components)
 
 
-{-| -}
+{-| Fold entities that contain at least the 6 specified component types.
+Entities are provided from lowest entity id to highest entity id.
+-}
 foldFromLeft6 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -987,7 +1075,9 @@ foldFromLeft6 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) 
         (spec6.get world.components)
 
 
-{-| -}
+{-| Fold entities that contain at least the 6 specified component types.
+Entities are provided from highest entity id to lowest entity id.
+-}
 foldFromRight6 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -1011,7 +1101,9 @@ foldFromRight6 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3)
         (spec6.get world.components)
 
 
-{-| -}
+{-| Fold entities that contain at least the 7 specified component types.
+Entities are provided from lowest entity id to highest entity id.
+-}
 foldFromLeft7 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -1037,7 +1129,9 @@ foldFromLeft7 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) 
         (spec7.get world.components)
 
 
-{-| -}
+{-| Fold entities that contain at least the 7 specified component types.
+Entities are provided from highest entity id to lowest entity id.
+-}
 foldFromRight7 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -1063,7 +1157,9 @@ foldFromRight7 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3)
         (spec7.get world.components)
 
 
-{-| -}
+{-| Fold entities that contain at least the 8 specified component types.
+Entities are provided from lowest entity id to highest entity id.
+-}
 foldFromLeft8 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components
@@ -1091,7 +1187,9 @@ foldFromLeft8 (ComponentSpec spec1) (ComponentSpec spec2) (ComponentSpec spec3) 
         (spec8.get world.components)
 
 
-{-| -}
+{-| Fold entities that contain at least the 8 specified component types.
+Entities are provided from highest entity id to lowest entity id.
+-}
 foldFromRight8 :
     ComponentSpec comparable a1 components
     -> ComponentSpec comparable a2 components

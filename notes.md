@@ -1,6 +1,6 @@
 # To do
 
-- improve docs
+- add clearComponents
 - update benchmarks
 - add tests
 

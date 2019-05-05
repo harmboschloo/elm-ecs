@@ -9,7 +9,7 @@ module Ecs.Singletons9 exposing (Singletons9, init, specs)
 import Ecs.Internal exposing (SingletonSpec(..))
 
 
-{-| A singletons type for 9 singletons.
+{-| A container type for 9 singleton types.
 -}
 type Singletons9 a1 a2 a3 a4 a5 a6 a7 a8 a9
     = Singletons9
@@ -25,7 +25,7 @@ type Singletons9 a1 a2 a3 a4 a5 a6 a7 a8 a9
         }
 
 
-{-| Initialize a singleton type for 9 singletons.
+{-| Initialize a container type for 9 singleton types.
 -}
 init : a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> a8 -> a9 -> Singletons9 a1 a2 a3 a4 a5 a6 a7 a8 a9
 init a1 a2 a3 a4 a5 a6 a7 a8 a9 =
