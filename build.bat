@@ -1,7 +1,5 @@
 cd benchmarks
 call build
-cd ../examples/basic
+cd ../examples
 call build
-cd ../demo
-call build
-cd ../..
+cd ..
