@@ -349,7 +349,7 @@ updateFrameCount world =
     Ecs.updateSingleton specs.frameCount (\frameCount -> frameCount + 1) world
 ```
 
-## Spawning entities
+### Spawning entities
 
 Now let's spawn some entities. Every entity with a `SpawnConfig` and `Position` component will effectively be a spawner. First we get the current frame count and check if it matches the frame interval defined in the spawn config. If it matches we insert a new entity with the position of the spawner and the velocity and shape in the spawn config. If the frame interval does not match the current frame count we do nothing.
 
