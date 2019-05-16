@@ -6,11 +6,15 @@ const components = require("./components");
 const singletons = require("./singletons");
 const { range } = require("./utils");
 
-const n = 50;
+const nComponents = 50;
+const nSingletons = 25;
 const outputPath = path.resolve(__dirname, "../src");
 
-range(n).forEach(i => {
+range(nComponents).forEach(i => {
   writeFile(`Ecs/Components${i}.elm`, components.generate(i));
+});
+
+range(nSingletons).forEach(i => {
   writeFile(`Ecs/Singletons${i}.elm`, singletons.generate(i));
 });
 
@@ -28,8 +32,8 @@ function updateElmJson() {
     json["exposed-modules"] = [
       "Ecs",
       "Ecs.EntityComponents",
-      ...range(n).map(i => `Ecs.Components${i}`),
-      ...range(n).map(i => `Ecs.Singletons${i}`)
+      ...range(nComponents).map(i => `Ecs.Components${i}`),
+      ...range(nSingletons).map(i => `Ecs.Singletons${i}`)
     ];
 
     const newContent = JSON.stringify(json, null, "  ") + "\n";
